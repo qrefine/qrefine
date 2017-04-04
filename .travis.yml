@@ -14,4 +14,5 @@ install:
 script: 
  - mkdir cctbx
  - cd cctbx
- - python install_cctbx.py
+ - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
+ - python bootstrap.py
