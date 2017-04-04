@@ -11,14 +11,14 @@ cd into the modules subdirectory of Phenix or CCTBX (plus a few dependencies), a
  
  sudo git clone --recursive https://github.com/qrefine/qrefine.git
  
- sudo libtbx.configure qr
+ sudo libtbx.configure qrefine
  ```
  
  
  ### Run Tests 
 
 ``` 
- qr.test
+ qrefine.test
  
 ```
 If any of the tests fail, please raise and issue here:
@@ -28,14 +28,14 @@ If any of the tests fail, please raise and issue here:
 If tests run sucessfully, then try and run an example: 
 
 ```
- qr.run 1uso.pdb 1uso.mtz 
+ qrefine.run 1uso.pdb 1uso.mtz 
 ```
 
 ### Help 
 
 If you run into any trouble please ask for help:
 ```
- qr.help
+ qrefine.help
 ```
 
 ### Contact us 
