@@ -3,7 +3,12 @@ sudo: required
 language: python
 python:
     - 2.7
-cache: pip
+cache:  
+   -pip
+   directories:
+     - .autoconf
+     - $HOME/.m2
+     -cctbx
     
 
 before_install:
