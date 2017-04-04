@@ -9,7 +9,7 @@ cd into the modules subdirectory of Phenix or CCTBX (plus a few dependencies), a
 ```
  source ../phenix_env.sh
  
- sudo git clone --recursive https://github.com/qrefine/qr.git
+ sudo git clone --recursive https://github.com/qrefine/qrefine.git
  
  sudo libtbx.configure qr
  ```
