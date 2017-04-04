@@ -1,6 +1,6 @@
 # Quantum Refinement module for Phenix
 
-[![Build Status](https://travis-ci.org/qrefine/qr.svg?branch=master)](https://travis-ci.org/qrefine/qr)
+[![Build Status](https://travis-ci.org/qrefine/qrefine.svg?branch=master)](https://travis-ci.org/qrefine/qrefine)
 
 ### Quickstart
 
