@@ -21,7 +21,7 @@ script:
  - mkdir cctbx
  - cd cctbx
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- - python bootstrap.py
+ - python bootstrap.py --builder=qrefine
  - source build/setpaths.sh
  - iotbx.python -m  pip install -U pip
  - iotbx.python -m  pip install -r requirements.txt
