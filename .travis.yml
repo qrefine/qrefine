@@ -8,18 +8,18 @@ cache:
    directories:
      - .autoconf
      - $HOME/.m2
-     -cctbx
+     -build
+     -modules
+     -base
     
 
 before_install:
    - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
 
-install:
-   - pip install -r requirements.txt
+#install:
+#   - pip install -r requirements.txt
 
 script: 
- - mkdir cctbx
- - cd cctbx
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
  - python bootstrap.py --builder=qrefine
  - source build/setpaths.sh
