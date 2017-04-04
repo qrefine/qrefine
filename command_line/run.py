@@ -9,7 +9,7 @@ import sys
 import time
 import ase
 
-from qrefine.plugins.ase.calculators import terachem_qr as terachem
+from qrefine.plugins.ase import terachem_qr as terachem
 
 print " Quantum Refinement Program"
 
