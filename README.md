@@ -17,7 +17,7 @@ cd into the modules subdirectory of Phenix:
  or cd into the modules subdirectory of CCTBX (plus a few dependencies)
  
 ```
- source build/setpaths.sh
+ source ../build/setpaths.sh
  
  sudo git clone --recursive https://github.com/qrefine/qrefine.git
  
