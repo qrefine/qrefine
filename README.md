@@ -1,13 +1,23 @@
-# Quantum Refinement module for Phenix
+# Quantum Refinement Module
 
 [![Build Status](https://travis-ci.org/qrefine/qrefine.svg?branch=master)](https://travis-ci.org/qrefine/qrefine)
 
 ### Quickstart
 
-cd into the modules subdirectory of Phenix or CCTBX (plus a few dependencies), and then:
+cd into the modules subdirectory of Phenix:
 
 ```
  source ../phenix_env.sh
+ 
+ sudo git clone --recursive https://github.com/qrefine/qrefine.git
+ 
+ sudo libtbx.configure qrefine
+ ```
+ 
+ or cd into the modules subdirectory of CCTBX (plus a few dependencies)
+ 
+```
+ source build/setpaths.sh
  
  sudo git clone --recursive https://github.com/qrefine/qrefine.git
  
@@ -28,7 +38,7 @@ If any of the tests fail, please raise and issue here:
 If tests run sucessfully, then try and run an example: 
 
 ```
- qrefine.run 1uso.pdb 1uso.mtz 
+ qrefine.run 1uso 
 ```
 
 ### Help 
