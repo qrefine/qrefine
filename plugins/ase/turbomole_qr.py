@@ -1,0 +1,256 @@
+from __future__ import print_function
+"""This module defines an ASE interface to Turbomole
+
+http://www.turbomole.com/
+"""
+import os
+import sys
+
+import numpy as np
+from ase.units import mol, kcal
+from ase.units import Hartree, Bohr
+from ase.io import read, write
+from ase.calculators.general import Calculator
+from subprocess import Popen, PIPE, STDOUT
+
+class Turbomole(Calculator):
+    def __init__(self, label='turbomole',
+                 calculate_energy='ridft', 
+		 calculate_forces='rdgrad',
+                 define_str =   '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'+str(0)+'\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* ',
+                 post_HF=False,
+                 point_charges_file = None):
+        self.label = label
+        self.converged = False
+        self.define_str=define_str      
+         # set calculators for energy and forces
+        self.calculate_energy = calculate_energy
+        self.calculate_forces = calculate_forces
+       
+        # turbomole has no stress
+        self.stress = np.empty(6)
+        
+        # storage for energy and forces
+        self.e_total = None
+        self.energy_free = None
+        self.forces = None
+        self.updated = False
+               
+        # atoms must be set
+        self.atoms = None
+        
+        # POST-HF method
+        self.post_HF = post_HF
+        self.point_charges_file = point_charges_file        
+ 
+    def initialize(self, atoms):
+        self.numbers = atoms.get_atomic_numbers().copy()
+        self.species = []
+        for a, Z in enumerate(self.numbers):
+            self.species.append(Z)
+        self.converged = False
+    
+    def run(self):
+        working_dir = os.getcwd()
+        if self.point_charges_file is not None:
+          self.point_charges_file = os.path.abspath(self.point_charges_file)
+        if not  os.path.isdir(self.label):
+          os.mkdir(self.label)
+        turbomole_dir = self.label
+        os.chdir(turbomole_dir)
+        self.set_atoms(self.atoms)  
+        try:
+            if self.point_charges_file is not None:
+              f = open(self.point_charges_file, "r")
+              point_charges = f.readlines()
+              f.close()
+              f = open("control", "r")
+              contents = f.readlines()
+              f.close()
+              contents = contents[:-1] + ['$point_charges\n'] + point_charges +[contents[-1]]
+              f = open("control", "w")
+              f.writelines( contents )
+              f.close()	
+
+	    command = self.calculate_energy + ' > ASE.TM.energy.out'
+            proc = Popen([command], shell=True, stderr=PIPE)
+            error = proc.communicate()[1]
+            if 'abnormally' in error:
+                raise OSError(error) 
+            # check for convergence of dscf cycle
+ 	    if os.path.isfile('dscf_problem'):
+                print('Turbomole scf energy calculation did not converge')
+                raise RuntimeError(
+                'Please run Turbomole define and come thereafter back')
+	    # read energy
+	    self.read_energy()
+            # calculate forces
+            command = self.calculate_forces + ' > ASE.TM.forces.out'
+            proc = Popen([command], shell=True, stderr=PIPE)
+            error = proc.communicate()[1]
+            if 'abnormally' in error:
+                raise OSError(error) 
+            # read forces
+            self.read_forces()  
+        except OSError as e:
+            print('Execution failed:', e, file=sys.stderr)
+            sys.exit(1)
+        os.chdir(working_dir) 
+
+    def execute(self, command):
+       
+        try:
+            if self.point_charges_file is not None:
+              f = open(self.point_charges_file, "r")
+	      point_charges = f.readlines()
+              f.close()
+              f = open("control", "r")
+              contents = f.readlines()
+              f.close()
+              contents = contents[:-1] + ['$point_charges\n'] + point_charges +[contents[-1]]
+              f = open("control", "w")
+              f.writelines( contents )
+              f.close() 
+            # the sub process gets started here
+            proc = Popen([command], shell=True, stderr=PIPE)
+            error = proc.communicate()[1]
+            # check the error output
+            if 'abnormally' in error:
+                raise OSError(error)
+            #print('TM command: ', command, 'successfully executed')
+        except OSError as e:
+            print('Execution failed:', e, file=sys.stderr)
+            sys.exit(1)
+
+    def get_potential_energy(self, atoms):
+        # update atoms
+        self.updated = self.e_total is None
+        self.set_atoms(atoms)
+        # if update of energy is necessary
+        if self.update_energy:
+            # calculate energy
+            self.execute(self.calculate_energy + ' > ASE.TM.energy.out')
+            # check for convergence of dscf cycle
+            if os.path.isfile('dscf_problem'):
+                print('Turbomole scf energy calculation did not converge')
+                raise RuntimeError(
+                    'Please run Turbomole define and come thereafter back')
+            # read energy
+            self.read_energy()
+        self.update_energy = False
+        return self.e_total
+
+
+    def get_forces(self, atoms):
+        # update atoms
+        self.updated = self.forces is None
+        self.set_atoms(atoms)
+        # complete energy calculations
+        if self.update_energy:
+            self.get_potential_energy(atoms)
+        # if update of forces is necessary
+        if self.update_forces:
+            # calculate forces
+            self.execute(self.calculate_forces + ' > ASE.TM.forces.out')
+            # read forces
+            self.read_forces()
+        self.update_forces = False
+        return self.forces.copy()
+ 
+
+   
+    def get_stress(self, atoms):
+        return self.stress
+        
+    def set_atoms(self, atoms):
+        # Delete old  coord control, ... files, if exist
+        for f in ['coord',
+          'basis',
+          'energy',
+          'gradients',
+          'alpha',
+          'beta',
+          'mos',
+          'forceapprox',
+          'statistics',
+          'dscf_problem',
+          'control']:
+                if os.path.exists(f):
+                        os.remove(f) 
+#        if self.atoms == atoms:
+#            if (self.updated and os.path.isfile('coord')):
+#                self.updated = False
+#                a = read('coord').get_positions()
+#                if np.allclose(a, atoms.get_positions(), rtol=0, atol=1e-13):
+#                    return
+#            else:
+#                return
+        # performs an update of the atoms
+        write('coord', atoms)
+        # Run define
+        p = Popen('define', stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        stdout = p.communicate(input=self.define_str)
+        Calculator.set_atoms(self, atoms)
+        # energy and forces must be re-calculated
+        self.update_energy = True
+        self.update_forces = True
+
+        
+    def read_energy(self):
+        """Read Energy from Turbomole energy file."""
+        text = open('energy', 'r').read().lower()
+        lines = iter(text.split('\n'))
+
+        # Energy:
+        for line in lines:
+            if line.startswith('$end'):
+                break
+            elif line.startswith('$'):
+                pass
+            else:
+                energy_tmp = float(line.split()[1])
+                if self.post_HF:
+                    energy_tmp += float(line.split()[4])
+        # update energy units
+        self.e_total = energy_tmp * Hartree/(kcal / mol)
+        self.energy_free = self.e_total  
+
+    def read_forces(self):
+        """Read Forces from Turbomole gradient file."""
+        file = open('gradient', 'r')
+        lines = file.readlines()
+        file.close()
+
+        forces = np.array([[0, 0, 0]])
+        
+        nline = len(lines)
+        iline = -1
+        
+        for i in range(nline):
+            if 'cycle' in lines[i]:
+                iline = i
+        
+        if iline < 0:
+            raise RuntimeError('Please check TURBOMOLE gradients')
+
+        # next line
+        iline += len(self.atoms) + 1
+        # $end line
+        nline -= 1
+        # read gradients
+        for i in range(iline, nline):
+            line = lines[i].replace('D', 'E')
+            tmp = np.array([[float(f) for f in line.split()[0:3]]])
+            forces = np.concatenate((forces, tmp))
+        # Note the '-' sign for turbomole, to get forces
+        self.forces = (-np.delete(forces, np.s_[0:1], axis=0)) * (Hartree / Bohr)/(kcal / mol) 
+
+    def calculation_required(self, atoms, properties):
+        if self.atoms != atoms:
+            return True
+        for prop in properties:
+            if prop == 'energy' and self.e_total is None:
+                return True
+            elif prop == 'forces' and self.forces is None:
+                return True
+        return False
