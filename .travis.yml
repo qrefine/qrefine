@@ -4,13 +4,12 @@ language: python
 python:
     - 2.7
 cache:  
-   -pip
    directories:
      - .autoconf
      - $HOME/.m2
-     -build
-     -modules
-     -base
+     - build
+     - modules
+     - base
     
 
 before_install:
