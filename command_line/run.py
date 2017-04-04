@@ -1,7 +1,7 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.run
 
-from qr.core import qr
+from qrefine.core import qr
 import sys
 import time
 print " Quantum Refinement Program"
