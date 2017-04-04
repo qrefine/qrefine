@@ -1,0 +1,6 @@
+[submodule "qr-core"]
+	path = core
+	url = https://github.com/qrefine/qr-core.git
+[submodule "qr-plugins"]
+	path = plugins
+	url = https://github.com/qrefine/qr-plugins.git
