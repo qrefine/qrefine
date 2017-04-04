@@ -1,0 +1,5 @@
+# Add your requirements here like:
+ase
+numpy
+scipy>=0.9
+JPype1
