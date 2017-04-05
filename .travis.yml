@@ -7,9 +7,9 @@ cache:
    directories:
      - .autoconf
      - $HOME/.m2
-     - build
-     - modules
-     - base
+     - /home/travis/build/qrefine/qrefine/build
+     - /home/travis/build/qrefine/qrefine/modules
+     - /home/travis/build/qrefine/qrefine/base
     
 #before_install:
    #- sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
