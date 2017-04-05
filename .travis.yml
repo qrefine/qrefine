@@ -19,7 +19,7 @@ cache:
 
 script: 
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- - travis_wait 60 python bootstrap.py --builder=qrefine update build
+ - travis_wait 60 python bootstrap.py --builder=qrefine hot update build
  - ls -ltr 
  - pwd
  - source build/setpaths.sh
