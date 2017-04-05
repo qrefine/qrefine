@@ -21,6 +21,7 @@ script:
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
  - travis_wait 60 python bootstrap.py --builder=qrefine update build
  - ls -ltr 
+ - pwd
  - source build/setpaths.sh
  - iotbx.python -m  pip install -U pip
  - iotbx.python -m  pip install -r requirements.txt
