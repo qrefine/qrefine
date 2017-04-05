@@ -11,6 +11,8 @@ cd into the modules subdirectory of Phenix:
  
  sudo git clone --recursive https://github.com/qrefine/qrefine.git
  
+ pip install --target=~/phenix/phenix-1.11.1-2575/base/lib/python2.7/site-packages/ -r qrefine/requirements.txt
+ 
  sudo libtbx.configure qrefine
  ```
  
