@@ -7,9 +7,9 @@ cache:
    directories:
      - .autoconf
      - $HOME/.m2
-     - build
-     - modules
-     - base
+     - /home/travis/build/qrefine/qrefine/build
+     - /home/travis/build/qrefine/qrefine/modules
+     - /home/travis/build/qrefine/qrefine/base
     
 #before_install:
    #- sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
@@ -19,8 +19,9 @@ cache:
 
 script: 
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- - travis_wait 60 python bootstrap.py #--builder=qrefine
+ - travis_wait 60 python bootstrap.py --builder=qrefine  base # hot update build
  - ls -ltr 
+ - pwd
  - source build/setpaths.sh
  - iotbx.python -m  pip install -U pip
  - iotbx.python -m  pip install -r requirements.txt
