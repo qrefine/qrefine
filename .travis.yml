@@ -18,8 +18,11 @@ cache:
 #   - pip install -r requirements.txt
 
 script: 
- - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- - travis_wait 60 python bootstrap.py --builder=qrefine  --nproc=6 base # hot update build
+ #- curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
+ #- travis_wait 60 python bootstrap.py --builder=qrefine  --nproc=6 base # hot update build
+ - curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz
+ - xz -d base_1.11.1-2575.tar.xz
+ - tar -xvf base_1.11.1-2575.tar
  - ls -ltr 
  - pwd
  - source build/setpaths.sh
