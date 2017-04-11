@@ -25,6 +25,7 @@ script:
  - travis_wait 45 python bootstrap.py --builder=cctbx
  - ls -ltr 
  - pwd
+ - ls -ltr 
  - source build/setpaths.sh
  - cctbx.python -m  pip install -U pip
  - cctbx.python -m  pip install -r modules/qrefine/requirements.txt
