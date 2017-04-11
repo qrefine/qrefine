@@ -3,13 +3,13 @@ os:
 
 python:
 - '2.7'
-#cache:  
-   #directories:
+cache:  
+   directories:
      #- .autoconf
      #- $HOME/.m2
-     #- /home/travis/build/qrefine/qrefine/build
-     #- /home/travis/build/qrefine/qrefine/modules
-     #- /home/travis/build/qrefine/qrefine/base
+     - /Users/travis/build/qrefine/qrefine/build
+     - /Users/travis/build/qrefine/qrefine/modules
+     - /Users/travis/build/qrefine/qrefine/base
     
 #before_install:
    #- sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran gtk2.0
