@@ -12,7 +12,7 @@ cache:
      - /home/travis/build/qrefine/qrefine/base
     
 before_install:
-   - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran gtk+2.0
+   - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran gtk2.0
 
 #install:
 #   - pip install -r requirements.txt
