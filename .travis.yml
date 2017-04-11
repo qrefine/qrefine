@@ -19,7 +19,7 @@ before_install:
 
 script: 
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- - python bootstrap.py # hot update build
+ - python bootstrap.py build # hot update build
  #- curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz >  base_1.11.1-2575.tar.xz
  #- xz -d base_1.11.1-2575.tar.xz
 # - tar -xvf base_1.11.1-2575.tar
