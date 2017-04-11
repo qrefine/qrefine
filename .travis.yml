@@ -22,7 +22,7 @@ script:
  #- curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz >  base_1.11.1-2575.tar.xz
  #- xz -d base_1.11.1-2575.tar.xz
  #- tar -xvf base_1.11.1-2575.tar
- - travis_wait 45 python bootstrap.py build
+ - travis_wait 45 python bootstrap.py 
  - ls -ltr 
  - pwd
  - source build/setpaths.sh
