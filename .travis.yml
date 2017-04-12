@@ -24,6 +24,7 @@ script:
  #- tar -xvf base_1.11.1-2575.tar
  #- travis_wait 45 python bootstrap.py --builder=cctbx
  - source build/setpaths.sh
+ - phenix.fetch_pdb 2hr0
  - cd modules 
  - git clone https://github.com/qrefine/qrefine.git
  - cd qrefine
