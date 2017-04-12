@@ -15,21 +15,6 @@ Once you have PHENIX installed, cd into the modules subdirectory of Phenix:
  ```
  you may need to use sudo depending on the permissions of your PHENIX installation.
  
- 
- for developers:
- cd into the modules subdirectory of CCTBX (plus a few dependencies)
- 
-```
- source ../build/setpaths.sh
- 
- sudo git clone --recursive https://github.com/qrefine/qrefine.git
- 
-  pip install --target=~/phenix/phenix-1.11.1-2575/base/lib/python2.7/site-packages/ -r qrefine/requirements.txt
- 
- sudo libtbx.configure qrefine
- ```
- 
- 
  ### Run Tests 
 
 ``` 
@@ -43,7 +28,10 @@ If any of the tests fail, please raise and issue here:
 If tests run successfully, then try and run an example: 
 
 ```
- qr.example 1uso 
+ qr.example refine 
+  
+ qr.example cluster 
+
 ```
 
 ### Help 
