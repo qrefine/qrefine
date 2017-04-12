@@ -26,10 +26,10 @@ script:
  - source build/setpaths.sh
  - phenix.fetch_pdb 2hr0
  - cd modules 
- - git clone https://github.com/qrefine/qrefine.git
+ - git clone  -f https://github.com/qrefine/qrefine.git
  - cd qrefine
- - phenix.python -m pip install -r requirements.txt
- - phenix.python -m pip install -r core/requirements.txt
+ - cctbx.python -m pip install -r requirements.txt
+ - cctbx.python -m pip install -r core/requirements.txt
  - libtbx.configure qrefine
  - cd core/tests
  - qr.test
