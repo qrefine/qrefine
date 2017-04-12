@@ -35,4 +35,4 @@ script:
  #- cctbx.python -m  pip install -U pip
  #- cctbx.python -m  pip install -r modules/qrefine/requirements.txt
  #- cctbx.python modules/qrefine/core/qr.py
-  - rm -rf /Users/travis/build/qrefine/qrefine/modules/qrefine
+ - rm -rf /Users/travis/build/qrefine/qrefine/modules/qrefine
