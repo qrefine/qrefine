@@ -1,27 +1,31 @@
-sudo: required
-  
-language: python
+os:
+  - osx
+
 python:
-    - 2.7
+- '2.7'
 cache:  
    directories:
-     - .autoconf
-     - $HOME/.m2
-     - /home/travis/build/qrefine/qrefine/build
-     - /home/travis/build/qrefine/qrefine/modules
-     - /home/travis/build/qrefine/qrefine/base
+     #- .autoconf
+     #- $HOME/.m2
+     - /Users/travis/build/qrefine/qrefine/build
+     - /Users/travis/build/qrefine/qrefine/modules
+     - /Users/travis/build/qrefine/qrefine/base
     
 #before_install:
-   #- sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
+   #- sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran gtk2.0
 
 #install:
 #   - pip install -r requirements.txt
 
 script: 
  - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- - travis_wait 60 python bootstrap.py --builder=qrefine  base # hot update build
+ #- curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz >  base_1.11.1-2575.tar.xz
+ #- xz -d base_1.11.1-2575.tar.xz
+ #- tar -xvf base_1.11.1-2575.tar
+ - travis_wait 45 python bootstrap.py --builder=cctbx
  - ls -ltr 
  - pwd
  - source build/setpaths.sh
- - iotbx.python -m  pip install -U pip
- - iotbx.python -m  pip install -r requirements.txt
+ - cctbx.python -m  pip install -U pip
+ - cctbx.python -m  pip install -r modules/qrefine/requirements.txt
+ - cctbx.python modules/qrefine/core/qr.py
