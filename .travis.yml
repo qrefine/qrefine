@@ -16,7 +16,7 @@ cache:
 #   - pip install -r requirements.txt
 
 script: 
- - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
+ #- curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
  #- curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz >  base_1.11.1-2575.tar.xz
  #- xz -d base_1.11.1-2575.tar.xz
  #- tar -xvf base_1.11.1-2575.tar
@@ -24,7 +24,7 @@ script:
  - source build/setpaths.sh
  - phenix.fetch_pdb 2hr0
  - cd modules 
- - git clone  -f https://github.com/qrefine/qrefine.git
+ - git clone  https://github.com/qrefine/qrefine.git
  - cd qrefine
  - cctbx.python -m pip install -r requirements.txt
  - cctbx.python -m pip install -r core/requirements.txt
