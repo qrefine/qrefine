@@ -25,7 +25,7 @@ script:
  #- travis_wait 45 python bootstrap.py --builder=cctbx
  - source build/setpaths.sh
  - cd modules 
- - git clone --recursive https://github.com/qrefine/qrefine.git
+ - git clone https://github.com/qrefine/qrefine.git
  - cd qrefine
  - ./patch.sh
  - cd core/tests
