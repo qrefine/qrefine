@@ -10,7 +10,7 @@ Once you have PHENIX installed, cd into the modules subdirectory of Phenix:
 
 Then:
 ``` 
- git clone --recursive https://github.com/qrefine/qrefine.git
+ git clone https://github.com/qrefine/qrefine.git
  cd qrefine
  chmod +x patch.sh
  ./patch.sh
