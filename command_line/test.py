@@ -15,7 +15,7 @@ if __name__ == '__main__':
                                       help='test cluster code only ')
 
   args = parser.parse_args()
-  if (args.unit)      : run_tests.run_unit_tests(args=sys.argv[1:])
+  if (args.unit)      : run_tests.run()
   if (args.regression): run_tests.run_regression_tests(args=sys.argv[1:])
   if (args.pdb)       : run_tests.run_pdb_tests(args=sys.argv[1:])
   if (not args.unit and not args.regression and not args.pdb):
