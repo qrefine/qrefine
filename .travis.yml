@@ -28,6 +28,7 @@ script:
  - git clone --recursive https://github.com/qrefine/qrefine.git
  - cd qrefine
  - ./patch.sh
+ - cd core/tests
  - qr.test
  #- source build/setpaths.sh
  #- cctbx.python -m  pip install -U pip
