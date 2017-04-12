@@ -6,13 +6,13 @@
 
 Please first install PHENIX, see https://www.phenix-online.org/
  
-Once you have PHENIX installed, cd into the modules subdirectory of Phenix:
+Once you have PHENIX installed, go to the phenix installation directory.
 
-Then:
-``` 
+```
+ source phenix_env.sh
+ cd modules 
  git clone https://github.com/qrefine/qrefine.git
  cd qrefine
- chmod +x patch.sh
  ./patch.sh
  ```
  Note: you may need to use sudo depending on the permissions of your PHENIX installation.
