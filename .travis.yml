@@ -5,8 +5,6 @@ python:
 - '2.7'
 cache:  
    directories:
-     #- .autoconf
-     #- $HOME/.m2
      - /Users/travis/build/qrefine/qrefine/build
      - /Users/travis/build/qrefine/qrefine/modules
      - /Users/travis/build/qrefine/qrefine/base
