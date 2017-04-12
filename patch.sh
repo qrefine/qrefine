@@ -1,5 +1,5 @@
 # A simple way to patch qrefine into PHENIX
-git -f clone https://github.com/qrefine/qr-core.git
+git clone https://github.com/qrefine/qr-core.git
 mv qr-core core
 phenix.python -m pip install -r requirements.txt
 phenix.python -m pip install -r core/requirements.txt
