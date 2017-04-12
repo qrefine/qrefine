@@ -1,24 +1,22 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.test
-
+import sys
 import argparse
 from qrefine.core.tests import run_tests
 
-def run_regression():
-  import sys
-  success = test_runner.run_multiple_tests(args=sys.argv[1:])
-  return success
-
 if __name__ == '__main__':
   print " Test Quantum Refinement Program"
-  parser = argparse.ArgumentParser(description='Shaz.IR')
-  parser.add_argument('--unit', action='store_true', default=True, help='run unit tests    ')
-  parser.add_argument('--regression', action='store_true', default=False, help='run regression tests, will take a long time')
-  parser.add_argument('--pdb', action='store_true', default=False, help='test optimizer code only ')
+  parser = argparse.ArgumentParser(description='Test runners for Q|R code')
+  parser.add_argument('--unit',       action='store_true', default=True,
+                                      help='run unit tests ')
+  parser.add_argument('--regression', action='store_true', default=False,
+                                      help='run regression tests, will take a long time')
+  parser.add_argument('--pdb',        action='store_true', default=False,
+                                      help='test cluster code only ')
 
   args = parser.parse_args()
-  if (args.unit): run_tests.unit()
-  if (args.regression): run_tests.regression()
-  if (args.pdb): run_tests.minmizer()
+  if (args.unit)      : run_tests.run_unit_tests(args=sys.argv[1:])
+  if (args.regression): run_tests.run_regression_tests(args=sys.argv[1:])
+  if (args.pdb)       : run_tests.run_pdb_tests(args=sys.argv[1:])
   if (not args.unit and not args.regression and not args.pdb):
-      run_tests.run()
+    success = run_tests.run_all_tests(args=sys.argv[1:])

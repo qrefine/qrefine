@@ -4,19 +4,22 @@ from __future__ import division
 import os
 import sys
 import time
+import libtbx.load_env
+from qrefine.core import qr
 
-def setup():
-  from qrefine.core import qr
-  import libtbx.load_env
-  top_dir = os.path.dirname(libtbx.env.dist_path("qrefine"))
-  qrefine_path = libtbx.env.find_in_repositories("qrefine")
-  qrefine_core_path = os.path.join(qrefine_path, "core")
-  print os.listdir(qrefine_core_path)
+top_dir = os.path.dirname(libtbx.env.dist_path("qrefine"))
+qrefine_path = libtbx.env.find_in_repositories("qrefine")
+qrefine_core_path = os.path.join(qrefine_path, "core")
+print os.listdir(qrefine_core_path)
+
+def stop(args, log):
+  jobid = args[1]
+  print "Are you sure you want to stop job {}".format(jobid)
+  # how do we get a reference to all of the running jobs.
+  # This could be hundreds of qdels, must automate this.
 
 if __name__ == '__main__':
-  id=0
-  print "Are you sure you want to stop job {}".format(id)
   t0 = time.time()
   log = sys.stdout
-  qr.run(args=sys.argv[1:], log=log)
+  stop(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

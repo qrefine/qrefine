@@ -4,12 +4,13 @@ import argparse
 
 def keywords():
   """ Commands in qrefine:
-      - stats
-      - run
+      - start (including restart, check{dry run, and 1SCF, qmready} )
       - pause
-      - restart
-      - kill
-      - dry
+      - stop
+      - show
+      - help
+      - test
+      - example
   """
 
 def commands():
@@ -31,16 +32,22 @@ def settings():
       - ??
   """
 
-def run(args):
+def run():
   """ Help for qrefine:
        please use either --commands, --keywords, or --settings for more info
   """
 
 if (__name__ == "__main__"):
   parser = argparse.ArgumentParser(description='qr.help')
-  parser.add_argument('--commands', action='store_true', default=False, help='display the set of available commands ')
-  parser.add_argument('--keywords', action='store_true', default=False, help='display the set of available keywords ')
-  parser.add_argument('--settings', action='store_true', default=False, help='display the set of default settings   ')
+  parser.add_argument('--commands', action='store_true',
+                                    default=False,
+                                    help='display the set of available commands ')
+  parser.add_argument('--keywords', action='store_true',
+                                    default=False,
+                                    help='display the set of available keywords ')
+  parser.add_argument('--settings', action='store_true',
+                                    default=False,
+                                    help='display the set of default settings   ')
   args = parser.parse_args()
 
   if(args.commands):   print commands.__doc__
