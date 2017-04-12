@@ -29,6 +29,11 @@ If tests run successfully, then try and run an example:
 
 ```
  qr.example refine 
+ 
+ '''
+ or 
+ 
+ '''
   
  qr.example cluster 
 
