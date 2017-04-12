@@ -20,7 +20,7 @@ Once you have PHENIX installed, go to the directory where you installed phenix.
  ### Run Tests 
 
 ``` 
- qr.test
+ qr.run_tests
  
 ```
 If any of the tests fail, please raise and issue here:
