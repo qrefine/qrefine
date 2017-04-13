@@ -3,6 +3,7 @@ from __future__ import division
 import sys
 import argparse
 from qrefine.core.tests import run_tests
+from qrefine.tests import run_tests
 
 if __name__ == '__main__':
   print " Test Quantum Refinement Program"
@@ -15,7 +16,7 @@ if __name__ == '__main__':
                                       help='run regression tests, will take a long time')
   parser.add_argument('--pdb',        action='store_true',
                                       default=False,
-                                      help='test cluster code only ')
+                                      help='run comprehensive tests on entire pdb')
 
   args = parser.parse_args()
   if (args.unit)      : run_tests.run()

@@ -1,3 +1,5 @@
+# LIBTBX_SET_DISPATCHER_NAME qr.finalise
+
 import os, sys, shutil
 from libtbx import easy_run
 from multiprocessing import Pool

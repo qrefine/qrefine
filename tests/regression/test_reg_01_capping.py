@@ -1,19 +1,20 @@
 import os, sys
-from libtbx import easy_run
-from iotbx import pdb
-from StringIO import StringIO
 import time
 import iotbx
+from iotbx import pdb
+from libtbx import easy_mp,env
+from libtbx import easy_run
 from utils import hierarchy_utils
+from StringIO import StringIO
+
 import finalise
 import charges
 import completion
-from libtbx import easy_mp
+
+qr_repo_parent = libtbx.env.find_in_repositories("qrefine")
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
-qr_repo_parent_env = 'QR_REPO_PARENT'
-qr_repo_parent = os.environ.get(qr_repo_parent_env, None)
 
 pdbs = {"PRO_terminal" : """
 CRYST1   42.664   49.718   66.065 109.25  94.96  99.24 P 1           4

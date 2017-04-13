@@ -1,19 +1,25 @@
 from __future__ import division
 
+import os
 import time
-
 from libtbx import easy_run
+
+qrefine = libtbx.env.find_in_repositories("qrefine")
+qr_reg_tests = os.path.join(qrefine, "tests/regression")
 
 def run_regression_tests():
   regression_tests = [
-    "test_reg_00.py", #nigel
-    "test_reg_01.py", #nigel
-    "test_reg_02.py"
+    "test_reg_00_charge.py",
+    "test_reg_01_finalise.py",
+    "test_reg_02_finalise.py",
+    "test_reg_03_finalise.py",
+    "test_reg_04_cluster.py",
   ]
+
   for file_name in regression_tests:
+    file_name = os.path.join(qr_reg_tests,file_name)
     print "Running regression test:", file_name
     easy_run.call("cctbx.python %s"%file_name)
-
 
 if(__name__ == "__main__"):
   t0 = time.time()
