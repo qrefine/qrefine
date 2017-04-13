@@ -30,13 +30,13 @@ If any of the tests fail, please raise and issue here:
 If tests run successfully, then try and run an example: 
 
 ```
- qr.example refine 
+ qr.refine  
 ``` 
 
  or 
  
 ```
- qr.example cluster 
+ qr.cluster 
 
 ```
 
