@@ -1,6 +1,6 @@
 from __future__ import division
 import argparse
-import start
+import refine
 # LIBTBX_SET_DISPATCHER_NAME qr.example
 
 def run_refine():
@@ -19,7 +19,7 @@ def run_refine():
           output_folder_name = refine
           restraints_weight_scale = 32
           > refine.log"""
-  start.run_cmd(cmd)
+  refine.run_cmd(cmd)
 
 def run_cluster():
   cmd = """
@@ -41,7 +41,7 @@ def run_cluster():
           output_folder_name = cluster_glr
           restraints_weight_scale = 32
           > cluster_glr.log"""
-  start.run_cmd(cmd)
+  refine.run_cmd(cmd)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@
 
 Please first install PHENIX, see https://www.phenix-online.org/
  
-Once you have PHENIX installed, go to the directory where you installed phenix.
+Once you have PHENIX installed, go to the directory where you installed PHENIX.
 
 ```
  source phenix_env.sh

@@ -1,5 +1,5 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.test
+# LIBTBX_SET_DISPATCHER_NAME qr.run_tests
 import sys
 import argparse
 from qrefine.core.tests import run_tests
@@ -7,11 +7,14 @@ from qrefine.core.tests import run_tests
 if __name__ == '__main__':
   print " Test Quantum Refinement Program"
   parser = argparse.ArgumentParser(description='Test runners for Q|R code')
-  parser.add_argument('--unit',       action='store_true', default=True,
+  parser.add_argument('--unit',       action='store_true',
+                                      default=True,
                                       help='run unit tests ')
-  parser.add_argument('--regression', action='store_true', default=False,
+  parser.add_argument('--regression', action='store_true',
+                                      default=False,
                                       help='run regression tests, will take a long time')
-  parser.add_argument('--pdb',        action='store_true', default=False,
+  parser.add_argument('--pdb',        action='store_true',
+                                      default=False,
                                       help='test cluster code only ')
 
   args = parser.parse_args()
