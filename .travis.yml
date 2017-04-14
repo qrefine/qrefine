@@ -32,7 +32,7 @@ script:
  - cctbx.python -m pip install -r core/requirements.txt
  - libtbx.configure qrefine
  - cd core/tests
- - qr.test
+ #- qr.test
  #- source build/setpaths.sh
  #- cctbx.python -m  pip install -U pip
  #- cctbx.python -m  pip install -r modules/qrefine/requirements.txt
