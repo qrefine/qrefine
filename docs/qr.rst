@@ -110,3 +110,28 @@ List of all available keywords
    for quantum-based, or CCTBX for standard refinement.”””
 
 “””results.py  stores and handles all of the data needed for logging the results of the refinement”””
+
+We then need to create a set of objects to carry out the computation:
+
+- fmodel (crystallographic information)
+
+- calculator (composite object)
+  - restraints_manager (computes energy and gradients using either qm codes or cctbx (standard))
+  - geometery_restraints_manager (analyses geometry e.g. bond RMSDs)
+  - weights (scale factors needed to scale up or down data versus restraints contributions)
+
+Then we process them by the refinement/optimization engine, driver.py:
+
+```
+ driver.refine(params     = params,
+               fmodel     = fmodel,
+               calculator = calculator_manager,
+               results    = results)
+
+```
+
+- results_manager (store all reportable infomation, and write it out as a log, and also write our final pdb structure.)
+
+```
+ results.finalize()
+ ```
