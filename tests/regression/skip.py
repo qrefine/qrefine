@@ -1,16 +1,16 @@
 pdbs_p1 = [
 #"1il5.pdb",  assert allowable_amino_acid_charges[resname]-1 <= charge <= allowable_amino_acid_charges[resname]+1
-"1va7.pdb",
+#"1va7.pdb",passed
 #"1w3b.pdb",# assert allowable_amino_acid_charges[resname]-1 <= charge <= allowable_amino_acid_charges[resname]+1
-"2bx9.pdb",
-"2dwq.pdb",
-"2ec2.pdb",
-"2gd5.pdb",
-"2ghj.pdb",
-"2oeq.pdb",
-"2oy0.pdb",
-"2pro.pdb",
-"2x10.pdb",
+#"2bx9.pdb",passed
+#"2dwq.pdb",passed
+#"2ec2.pdb",passed
+#"2gd5.pdb",passed
+#"2ghj.pdb",passed
+#"2oeq.pdb",passed
+#"2oy0.pdb",passed
+#"2pro.pdb",passed
+#"2x10.pdb",
 "2yht.pdb",
 "3en7.pdb",
 "3i05.pdb",

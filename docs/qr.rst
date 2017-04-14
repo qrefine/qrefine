@@ -89,3 +89,13 @@ List of all available keywords
 
      pdb =
         You can run tests on the entire PDB, but it takes a very long time
+
+qr.py """takes user input and constructs all of the objects needed to carry out the computation. “””
+
+driver.py “””is used to drive the macro/micro-cycles for either refinement, or optimization. The optimization option is used only for comparison/validation, and is not intended to be useful as a standalone optimizer. This class also takes care of the convergence criteria. It delegates the minimization procedure itself to the L-BFGS implementation in CCTBX. The driver.py requires the target and gradient (energy and force from QM) in order to minimize.”””
+
+calculator.py “””handles the weight factors, scaling, and is used to convert input parameters to which can be used for either quantum or traditional refinement. An adaptive restraints weight factor calculator is implemented, whereby the weight factor is doubled if a sufficiently large bond-RMSD is observed. Conversely, if a sufficiently small bond-RMSD is observed, then the weight factor is halved.””
+
+restraints.py “””contains two classes for either quantum refinement, or for standard refinement. The calculation of the restraints are delegated to either ASE for quantum-based, or CCTBX for standard refinement.”””
+
+results.py “””stores and handles all of the data needed for logging the results of the refinement”””

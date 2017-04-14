@@ -21,12 +21,12 @@ qr_path = os.path.join(qrefine_path, "core")
 
 class Result(object):
     def __init__(self,pdb_code,clusters,chunks,chunk_sizes):
-      self.pdb_code = pdb_code
-      self.clusters = clusters
+      self.pdb_code        = pdb_code
+      self.clusters        = clusters
+      self.chunks          = chunks
+      self.chunk_sizes     = chunk_sizes
       self.num_of_clusters = len(clusters)
-      self.chunks = chunks
       self.num_of_chunks   = len(chunks)
-      self.chunk_sizes=chunk_sizes
 
 def check_assertions(cr):
     result_db = db.old.find_one({"pdb_code": cr.pdb_code})
@@ -46,15 +46,15 @@ def process(fq,pdb_file):
   chunks=[]
   chunk_sizes=[]
   for chunk in fq.fragments.qm_pdb_hierarchies:
-      res_in_chunk=[]
-      atom_tot_per_residue = 0
-      for chain in chunk.only_model().chains():
-        for residue_group in chain.residue_groups():
-           res_in_chunk.append(residue_group.resid())
-           for atom_group in residue_group.atom_groups():
-                atom_tot_per_residue += atom_group.atoms_size()
-      chunk_sizes.append(atom_tot_per_residue)
-      chunks.append(res_in_chunk)
+    res_in_chunk=[]
+    atom_tot_per_residue = 0
+    for chain in chunk.only_model().chains():
+      for residue_group in chain.residue_groups():
+        res_in_chunk.append(residue_group.resid())
+        for atom_group in residue_group.atom_groups():
+          atom_tot_per_residue += atom_group.atoms_size()
+          chunk_sizes.append(atom_tot_per_residue)
+    chunks.append(res_in_chunk)
   return Result(pdb_file,
                 fq.fragments.clusters,
                 chunks,
@@ -88,7 +88,6 @@ if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  for file in pdbs:
-     run(file)
+  run(file)
   print "Total time (all tests): %6.2f"%(time.time()-t0)
 
