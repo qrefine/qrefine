@@ -33,7 +33,7 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
  ### Run Tests 
 
 ``` 
- qr.run_tests
+ qr.test
  
 ```
 If any of the tests fail, please raise and issue here:
@@ -43,13 +43,13 @@ If any of the tests fail, please raise and issue here:
 If tests run successfully, then try and run an example: 
 
 ```
- qr.refine --1uso
+ qr.refine --example
 ``` 
 
  or 
  
 ```
- qr.cluster --2lvr
+ qr.cluster --example
 
 ```
 
