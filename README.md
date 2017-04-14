@@ -1,6 +1,7 @@
 # Quantum Refinement Module
 
 [![Build Status](https://travis-ci.org/qrefine/qrefine.svg?branch=master)](https://travis-ci.org/qrefine/qrefine)
+[![Gitter](https://badges.gitter.im/qrefine/yoink.svg)](https://gitter.im/qrefine/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Quantum Chemistry can improve bio-macromolecular structures, especially when only low-resolution data derived from crystallographic or cryo-electron microscopy experiments are available. Quantum-based refinement utilizes chemical restraints derived from quantum chemical methods instead of the standard parameterized library-based restraints used in experimental refinement packages. The motivation for a quantum refinement is twofold: firstly, the restraints have the potential to be more accurate, and secondly, the restraints can be more easily applied to new molecules such as drugs or novel cofactors.
 
