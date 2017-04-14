@@ -6,6 +6,7 @@ Quantum Chemistry can improve bio-macromolecular structures, especially when onl
 
 However, accurately refining bio-macromolecules using a quantum chemical method is challenging due to issues related to scaling. Quantum chemistry has proven to be very useful for studying bio-macromolecules by employing a divide and conquer type approach. The fragmentation approaches we developed for achieving a quantum-refinement of bio-macromolecule will be presented.
 
+### Citations:
 Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine, Q|R: Quantum-based Refinement , Acta Crystallographica Section D (2017) D73, 45-52. DOI: 10.1107/S2059798316019847
 
 Min Zheng, Mark P. Waller, Toward more efficient density-based adaptive QM/MM methods, Int J. Quant. Chem (2017) e25336
@@ -65,6 +66,7 @@ The best way to get a hold of us is via the  [issue tracker](https://github.com/
 
 
 ### Developers
+
 * [Min Zheng](https://github.com/zhengmin317)
 * [Pavel Afonine](https://github.com/pafonine)
 * [Mark Waller](https://github.com/mpwaller)

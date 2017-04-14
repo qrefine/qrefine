@@ -1,9 +1,9 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.run_tests
+# LIBTBX_SET_DISPATCHER_NAME qr.test
 import sys
 import argparse
+from qrefine.tests      import run_tests
 from qrefine.core.tests import run_tests
-from qrefine.tests import run_tests
 
 if __name__ == '__main__':
   print " Test Quantum Refinement Program"

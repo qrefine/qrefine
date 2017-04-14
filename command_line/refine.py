@@ -1,21 +1,38 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.refine
-
 import os
 import sys
 import time
+import argparse
 import libtbx.load_env
-
 from libtbx.command_line import easy_qsub, easy_run
 from qrefine.core import qr
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
-
-
-top_dir = os.path.dirname(libtbx.env.dist_path("qrefine"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qrefine_core_path = os.path.join(qrefine_path, "core")
-print os.listdir(qrefine_core_path)
+
+def help():
+  """ Commands in qrefine:
+      - start (including restart, check{dry run, and 1SCF, qmready} )
+      - pause
+      - stop
+      - ≈show
+      - help
+      - test
+      - example
+  """
+  """ Options and keywords in qrefine:
+       - qm_calculator
+       - macro_cycles
+       - micro_cycles
+       - max_bond_rmsd
+       - refine_sites
+       - refine_adp
+       - cluster_qm
+       - charge_embedding
+       - cluster
+   """
 
 def stop(args, log):
   jobid = args[1]
@@ -49,6 +66,25 @@ def run_cmd(cmd):
     # we want a reference to the running job.
     result = easy_run.fully_buffered(cmd).raise_if_errors()
 
+def example():
+  cmd = """
+          phenix.python qr.py 1uso.mtz 1uso.pdb
+          max_iterations = 90
+          max_atoms = 10000
+          number_of_micro_cycles = 20
+          qm_calculator = terachem
+          mode = refine
+          stpmax = 0.9
+          restraints = qm
+          gradient_only = true
+          line_search = true
+          shake_sites = false
+          output_folder_name = refine
+          restraints_weight_scale = 32
+          > refine.log"""
+  run_cmd(cmd)
+
+
 def run(args, log):
   cmd = """
       phenix.python qr.py input.mtz input.pdb
@@ -71,6 +107,9 @@ def run(args, log):
       > cluster_glr.log"""
 
 if __name__ == '__main__':
+  print "refine"
+  parser = argparse.ArgumentParser(description='qrefine.example')
+  parser.add_argument('--example', action='store_true', default=False, help='run refinement example.     ')
   t0 = time.time()
   log = sys.stdout
   print "Starting Q|R"
