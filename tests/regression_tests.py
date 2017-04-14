@@ -1,5 +1,4 @@
 from __future__ import division
-
 import os
 import time
 import iotbx.pdb
@@ -35,7 +34,7 @@ def run_batch():
   print "Total:", len(commands)
   submit(commands)
 
-def run_regression_tests():
+def run():
   regression_tests = [
       "test_reg_00_charge.py",
       "test_reg_01_capping.py",
@@ -51,6 +50,6 @@ def run_regression_tests():
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  run_regression_tests()
+  run()
   print "Total time (all tests): %6.2f"%(time.time()-t0)
   print "OK"

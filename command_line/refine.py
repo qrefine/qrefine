@@ -21,8 +21,8 @@ def help():
       - help
       - test
       - example
-  """
-  """ Options and keywords in qrefine:
+ 
+  Options and keywords in qrefine:
        - qm_calculator
        - macro_cycles
        - micro_cycles

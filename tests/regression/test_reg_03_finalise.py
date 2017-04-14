@@ -1,14 +1,11 @@
 from __future__ import division
-
 import os
 import shutil
 import time
-
+import expected
 import libtbx.env
 from libtbx.test_utils import approx_equal
 from libtbx.utils import Sorry
-
-import expected
 from command_line import finalise
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")

@@ -1,14 +1,12 @@
 from __future__ import division
-import os
 import sys
 import time
 import os.path
-import pymongo
 import iotbx.pdb
-from qrefine.core.plugin import pyoink
-from qrefine.core.restraints import from_qm
 from pymongo import MongoClient
 from qrefine.core import completion
+from qrefine.core.plugin import pyoink
+from qrefine.core.restraints import from_qm
 try:
   from jpype import startJVM
 except ImportError, e:
@@ -62,7 +60,7 @@ def process(fq,pdb_file):
 
 def run(pdb_file, maxnum_residues_in_cluster=15):
   """
-  Exercise clustering indices, and chunk indices, number of atoms in each chunk. 
+  Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk. 
   """
 #  completion.run(pdb_file)
 #  pdb_file = os.path.basename(pdb_file)[:-4] + "_complete.pdb"

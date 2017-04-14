@@ -53,7 +53,6 @@ If tests run successfully, then try and run an example:
  
 ```
  qr.refine --example
-
 ```
 
 ### Help 
