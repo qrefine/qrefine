@@ -42,14 +42,17 @@ If any of the tests fail, please raise and issue here:
 
 If tests run successfully, then try and run an example: 
 
+
 ```
- qr.refine --example
+ qr.finalise --example
 ``` 
 
- or 
- 
 ```
  qr.cluster --example
+``` 
+ 
+```
+ qr.refine --example
 
 ```
 
