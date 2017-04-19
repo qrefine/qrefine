@@ -96,7 +96,6 @@ def run(args, log):
   easy_run.call(cmd)
 
 if __name__ == '__main__':
-  print "refine"
   parser = argparse.ArgumentParser(description='qrefine.example')
   parser.add_argument('--example', action='store_true', default=False, help='run refinement example.     ')
   t0 = time.time()
