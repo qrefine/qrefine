@@ -60,24 +60,6 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
   print >> log, "pdb hierarchy for each fragment (cluster+buffer)", fq.fragments.qm_pdb_hierarchies
 
 if (__name__ == "__main__"):
-
-  #parser = argparse.ArgumentParser(description='qr.help')
-  #parser.add_argument('--commands', action='store_true',
-  #                      default=False,
-  #                      help='display the set of available commands ')
-  #parser.add_argument('--keywords', action='store_true',
-  #                      default=False,
-  #                      help='display the set of available keywords ')
-  #parser.add_argument('--settings', action='store_true',
-  #                      default=False,
-  #                     help='display the set of default settings   ')
-  #args = parser.parse_args()
-
-  #if (args.commands):   print commands.__doc__
- # if (args.keywords):   print keywords.__doc__
-  #if (args.settings):   print settings.__doc__
-  #if (not args.commands and not args.keywords and not args.settings):
-   #  print run.__doc__
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
