@@ -6,7 +6,7 @@ import iotbx.pdb
 from libtbx.easy_mp import parallel_map
 from pymongo import MongoClient
 from qrefine.core import completion
-from qrefine.core.plugin import pyoink
+from qrefine.core.plugin.yoink import pyoink
 from qrefine.core.restraints import from_qm
 try:
   from jpype import startJVM
