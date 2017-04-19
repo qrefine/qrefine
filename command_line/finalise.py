@@ -5,6 +5,8 @@ import os, sys, shutil
 from libtbx import easy_run
 from multiprocessing import Pool
 
+log = sys.stdout
+
 pdb_dir='./tmp'
 
 def callback(args):
