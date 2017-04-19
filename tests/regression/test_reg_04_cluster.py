@@ -16,6 +16,8 @@ db = MongoClient('localhost', 27017).pyoink
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
+pdb_path= os.path.join(qrefine_path,"tests/regression/data/p1") 
+
 
 class Result(object):
     def __init__(self,pdb_code,clusters,chunks,chunk_sizes):
@@ -86,6 +88,8 @@ if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  run(file)
+   for file in os.listdir(pdb_path): 
+     print "process:", (os.path.join(pdb_path,file)) 
+     run(os.path.join(pdb_path,file)) 
   print "Total time (all tests): %6.2f"%(time.time()-t0)
 
