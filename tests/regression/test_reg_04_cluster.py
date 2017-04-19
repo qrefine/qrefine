@@ -3,6 +3,7 @@ import sys
 import time
 import os.path
 import iotbx.pdb
+import libtbx
 from libtbx.easy_mp import parallel_map
 from pymongo import MongoClient
 from qrefine.core import completion
