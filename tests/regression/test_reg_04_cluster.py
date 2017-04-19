@@ -18,7 +18,15 @@ db = MongoClient('localhost', 27017).pyoink
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 pdb_path= os.path.join(qrefine_path,"tests/regression/data/p1") 
+utils_path= os.path.join(qr_path,"utils") 
 
+class Cluster_Pdb(object):
+   def __init__(self,pdb,fq):
+      self.pdb = pdb
+      self.fq = fq
+      
+   def __call__(self,pdb):
+    return process(fq,self.pdb):
 
 class Result(object):
     def __init__(self,pdb_code,clusters,chunks,chunk_sizes):
@@ -61,6 +69,8 @@ def process(fq,pdb_file):
                 chunks,
                 chunk_sizes)
 
+
+
 def run(pdb_file, maxnum_residues_in_cluster=15):
   """
   Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk. 
@@ -86,7 +96,8 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
      check_assertions(result)
 
 def qsub():
-  qsub_command = """ -N %s -v arguments=" %s %s %s  %s  %s %s  %s "  ./utils/qsub.pbs"""
+  qsub_file = os.join(utils_path,"/qsub.pbs")
+  qsub_command = """ -N %s -v arguments=" %s  "  """
   qsub_command = qsub_command + "  > /dev/null"
   os.system(qsub_command)      
       
@@ -95,10 +106,10 @@ def parallel_run(run, pdbs,qsub_command):
   test_results = parallel_map(
         func=run,
         iterable=pdbs,
+        qsub_command= qsub_command,
+        processes=len(pdbs),
         method='pbs',
         preserve_exception_message=True,
-        processes=len(pdbs),
-        qsub_command= qsub_command,
         use_manager=True)        
 
 if(__name__ == "__main__"):
