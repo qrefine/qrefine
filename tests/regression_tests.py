@@ -15,6 +15,13 @@ cluster_path = os.path.join(qr_reg_data,"cluster")
 babel_pdbs_path = os.path.join(qr_reg_data,"babel_pdbs")
 charmm_pdbs_path = os.path.join(qr_reg_data,"charmm_pdbs")
 
+def regression_test_data():
+  test_data = [pdb_path,
+              cluster_path,
+              babel_pdbs_path,
+              charmm_pdbs_path]
+  return test_data   
+
 def run_regression_tests():
   regression_tests = [
     "test_reg_00_charge.py",
@@ -25,9 +32,10 @@ def run_regression_tests():
   ]
 
   for file_name in regression_tests:
-    file_name = os.path.join(qr_reg_tests,file_name)
-    print "Running regression test:", file_name
-    easy_run.call("cctbx.python %s"%file_name)
+      for dataset in regression_test_data():
+        file_name = os.path.join(qr_reg_tests,file_name)
+        print "Running regression test: {}  on dataset: {} ".format(file_name,dataset)
+        easy_run.call("cctbx.python %s %s"%file_name,dataset)
 
 if(__name__ == "__main__"):
   t0 = time.time()
