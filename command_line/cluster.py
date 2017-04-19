@@ -20,26 +20,8 @@ qr_yoink_path =os.path.join(qr_path, "plugin/yoink/yoink/")
 log = sys.stdout
 
 def example():
-  cmd = """
-          phenix.python qr.py 3dtj.mtz 3dtj.pdb
-          max_iterations = 90
-          maxnum_residues_in_cluster = 5
-          max_atoms = 10000
-          number_of_micro_cycles = 20
-          qm_calculator = terachem
-          mode = refine
-          stpmax = 0.9
-          restraints = qm
-          gradient_only = true
-          line_search = true
-          shake_sites = false
-          use_cluster_qm = true
-          qsub_command = "qsub"
-          shared_disk = false
-          output_folder_name = cluster_glr
-          restraints_weight_scale = 32
-          > cluster_glr.log"""
-  run_cmd(cmd)
+  pdb_file = os.path.join(qrefine_path,"examples/2lvr.pdb")
+  run(pdb_file)
 
 
 def run(pdb_file, maxnum_residues_in_cluster=15):
