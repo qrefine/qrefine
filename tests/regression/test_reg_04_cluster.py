@@ -69,18 +69,16 @@ def process(fq,pdb_file):
                 chunks,
                 chunk_sizes)
 
-
-
 def run(pdb_file, maxnum_residues_in_cluster=15):
   """
   Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk. 
   """
 #  completion.run(pdb_file)
-#  pdb_file = os.path.basename(pdb_file)[:-4] + "_complete.pdb"
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
   sites_cart = ph.atoms().extract_xyz()
+  #
   fq = from_qm(
     pdb_hierarchy       = ph,
     crystal_symmetry    = cs,
@@ -110,16 +108,19 @@ def parallel_run(pdbs):
         processes=len(pdbs),
         method='pbs',
         preserve_exception_message=True,
-        use_manager=True)        
-
+        use_manager=True)   
+  
+def pdbs():
+  pdbs=[]
+  for file in os.listdir(pdb_path): 
+     print "process:", (os.path.join(pdb_path,file)) 
+     pdbs.append((os.path.join(pdb_path,file)))
+  return pdbs 
+  
 if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  pdbs=[]
-  for file in os.listdir(pdb_path): 
-     print "process:", (os.path.join(pdb_path,file)) 
-     pdbs.append((os.path.join(pdb_path,file))) 
-  parallel_run(pdbs)  
+  parallel_run(pdbs())  
   print "Total time (all tests): %6.2f"%(time.time()-t0)
 
