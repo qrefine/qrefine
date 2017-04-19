@@ -17,14 +17,17 @@ db = MongoClient('localhost', 27017).pyoink
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
-pdb_path= os.path.join(qrefine_path,"tests/regression/data/p1") 
 utils_path= os.path.join(qr_path,"utils") 
+pdb_path= os.path.join(qrefine_path,"tests/regression/data/p1") 
 
 class Cluster_Pdb(object):
    def __init__(self,pdb,fq):
       self.pdb = pdb
       self.fq = fq
-      
+  
+  # move process to here
+  
+  
    def __call__(self,pdb):
     return process(fq,self.pdb):
 
