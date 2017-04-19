@@ -29,11 +29,11 @@ def run_regression_tests():
     "test_reg_04_cluster.py",
   ]
 
-  for file_name in regression_tests:
+  for regression_test in regression_tests:
       for dataset in regression_test_data():
-        file_name = os.path.join(qr_reg_tests,file_name)
-        print "Running regression test: {}  on dataset: {} ".format(file_name,dataset)
-        easy_run.call("cctbx.python %s %s"%file_name,dataset)
+        regression_test = os.path.join(qr_reg_tests,regression_test)
+        print "Running regression test: {}  on dataset: {} ".format(regression_test,dataset)
+        easy_run.call("cctbx.python %s %s"%regression_test,dataset)
 
 if(__name__ == "__main__"):
   t0 = time.time()
