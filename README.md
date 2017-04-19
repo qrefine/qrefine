@@ -5,7 +5,7 @@
 
 Quantum Chemistry can improve bio-macromolecular structures, especially when only low-resolution data derived from crystallographic or cryo-electron microscopy experiments are available. Quantum-based refinement utilizes chemical restraints derived from quantum chemical methods instead of the standard parameterized library-based restraints used in experimental refinement packages. The motivation for a quantum refinement is twofold: firstly, the restraints have the potential to be more accurate, and secondly, the restraints can be more easily applied to new molecules such as drugs or novel cofactors.
 
-However, accurately refining bio-macromolecules using a quantum chemical method is challenging due to issues related to scaling. Quantum chemistry has proven to be very useful for studying bio-macromolecules by employing a divide and conquer type approach. The fragmentation approaches we developed for achieving a quantum-refinement of bio-macromolecule will be presented.
+However, accurately refining bio-macromolecules using a quantum chemical method is challenging due to issues related to scaling. Quantum chemistry has proven to be very useful for studying bio-macromolecules by employing a divide and conquer type approach. We have developed a new fragmentation approach for achieving a quantum-refinement of bio-macromolecules.
 
 ### Citations:
 Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine, Q|R: Quantum-based Refinement , Acta Crystallographica Section D (2017) D73, 45-52. DOI: 10.1107/S2059798316019847
