@@ -6,10 +6,14 @@ from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_reg_tests = os.path.join(qrefine, "tests/regression")
+qr_reg_data = os.path.join(qrefine, "tests/regression/data")
 
 pdb_mirror = "/home/pdb/mirror/pub/pdb/data/structures/divided/pdb"
-pdb_path= os.path.join(qrefine_path,"tests/regression/data/p1")
-cluster_path = os.path.join(qrefine_path,"tests/regression/data/cluster")
+
+pdb_path= os.path.join(qr_reg_data,"p1")
+cluster_path = os.path.join(qr_reg_data,"cluster")
+babel_pdbs_path = os.path.join(qr_reg_data,"babel_pdbs")
+charmm_pdbs_path = os.path.join(qr_reg_data,"charmm_pdbs")
 
 def run_regression_tests():
   regression_tests = [
