@@ -37,6 +37,7 @@ def run_regression_tests():
 
 if(__name__ == "__main__"):
   t0 = time.time()
+  #tests can be run on an external dataset, pass in arg for filepath.
   run_regression_tests()
   print "Total time (all tests): %6.2f"%(time.time()-t0)
   print "OK"
