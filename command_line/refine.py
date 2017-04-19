@@ -75,8 +75,11 @@ def run_cmd(cmd):
 
 def example():
   cmd = """
-          phenix.python qr.py a87_99_h.pdb data.mtz
-          max_iterations = 90
+          phenix.python """+  \
+      os.path.join(qrefine_core_path,"qr.py ") +  \
+      os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
+      os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
+       """max_iterations = 90
           max_atoms = 10000
           number_of_micro_cycles = 20
           qm_calculator = terachem
