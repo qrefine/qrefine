@@ -84,24 +84,31 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
      insert(result)
   else:
      check_assertions(result)
+
+def qsub():
+  qsub_command = """ -N %s -v arguments=" %s %s %s  %s  %s %s  %s "  ./utils/qsub.pbs"""
+  qsub_command = qsub_command + "  > /dev/null"
+  os.system(qsub_command)      
       
-def parallel_run():      
+def parallel_run(run, pdbs,qsub_command):      
   """ first attempt to run in parallel on cluster"""
   test_results = parallel_map(
         func=run,
-        iterable=xrange(qm_job_num),
+        iterable=pdbs,
         method='pbs',
         preserve_exception_message=True,
-        processes=qm_job_num,
-        qsub_command=self.qsub_command,
+        processes=len(pdbs),
+        qsub_command= qsub_command,
         use_manager=True)        
 
 if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
+  pdbs=[]
   for file in os.listdir(pdb_path): 
      print "process:", (os.path.join(pdb_path,file)) 
-     run(os.path.join(pdb_path,file)) 
+     pdbs.append((os.path.join(pdb_path,file))) 
+  parallel_run(pdbs)  
   print "Total time (all tests): %6.2f"%(time.time()-t0)
 
