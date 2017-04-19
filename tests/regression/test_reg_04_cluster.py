@@ -83,12 +83,23 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
      insert(result)
   else:
      check_assertions(result)
+      
+def parallel_run():      
+  """ first attempt to run in parallel on cluster"""
+  test_results = parallel_map(
+        func=run,
+        iterable=xrange(qm_job_num),
+        method='pbs',
+        preserve_exception_message=True,
+        processes=qm_job_num,
+        qsub_command=self.qsub_command,
+        use_manager=True)        
 
 if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-   for file in os.listdir(pdb_path): 
+  for file in os.listdir(pdb_path): 
      print "process:", (os.path.join(pdb_path,file)) 
      run(os.path.join(pdb_path,file)) 
   print "Total time (all tests): %6.2f"%(time.time()-t0)
