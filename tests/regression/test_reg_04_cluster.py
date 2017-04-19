@@ -73,8 +73,8 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
     crystal_symmetry    = cs,
     use_cluster_qm    = True,
     maxnum_residues_in_cluster = int(maxnum_residues_in_cluster),
-    yoink_jar_path    = qr_path + "/./core/plugin/yoink/Yoink-0.0.1.jar",
-    yoink_dat_path    = qr_path + "/./core/plugin/yoink/dat")
+    yoink_jar_path    = qr_path + "/plugin/yoink/Yoink-0.0.1.jar",
+    yoink_dat_path    = qr_path + "/plugin/yoink/dat")
 
   result = process(fq,pdb_file)
   if db.old.find_one({"pdb_code": result.pdb_code}) is None:
