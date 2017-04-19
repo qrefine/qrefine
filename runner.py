@@ -22,12 +22,12 @@ def get_latest_qrefine():
 def run():
   get_latest_qrefine()
   tests = [
-    "test_clustering.py"
-    "test_finalise.py",]
+    "qr.test --unit"
+    "qr.test --regression",]
 
   for test in tests:
     print "Running test:", test
-    easy_run.call("cctbx.python %s"%test)
+    easy_run.call(test)
 
 if(__name__ == "__main__"):
   t0 = time.time()

@@ -1,5 +1,7 @@
 #This is the qr-core repo, don't change this indirectly here.
 core/
+modules/
+.idea/
 
 
 # Byte-compiled / optimized / DLL files

@@ -2,8 +2,7 @@ from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.test
 import sys
 import argparse
-from qrefine.tests.regression import test_reg_04_cluster
-#from qrefine.tests      import regression_tests
+from qrefine.tests      import regression_tests
 from qrefine.core.tests import run_tests as unit_tests
 
 if __name__ == '__main__':
@@ -23,6 +22,5 @@ if __name__ == '__main__':
   args = parser.parse_args()
   if (args.unit)      :  unit_tests.run()
   if (args.regression):
-    test_reg_04_cluster.run("/home/xuyanting/phenix/phenix-1.11.1-2575/modules/qrefine/core/tests/data_files/2lvr.pdb")
-   #regression_tests.run(args=sys.argv[1:])
+    regression_tests.run(args=sys.argv[1:])
   if (args.pdb)       : regression_tests.run(args=sys.argv[1:])

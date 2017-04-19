@@ -11,17 +11,16 @@ qr_reg_data = os.path.join(qrefine, "tests/regression/data")
 
 pdb_path= os.path.join(qr_reg_data,"p1")
 cluster_path = os.path.join(qr_reg_data,"cluster")
-babel_pdbs_path = os.path.join(qr_reg_data,"babel_pdbs")
-charmm_pdbs_path = os.path.join(qr_reg_data,"charmm_pdbs")
+babel_path = os.path.join(qr_reg_data,"babel")
+charmm_path = os.path.join(qr_reg_data,"charmm")
 
-def regression_test_data():
-  test_data = [pdb_path,
-              cluster_path,
-              babel_pdbs_path,
-              charmm_pdbs_path]
-  return test_data
+def datasets():
+  return [pdb_path,
+          cluster_path,
+          babel_path,
+          charmm_path]
 
-def run_regression_tests():
+def run():
   regression_tests = [
     "test_reg_00_charge.py",
     "test_reg_01_finalise.py",
@@ -31,14 +30,14 @@ def run_regression_tests():
   ]
 
   for regression_test in regression_tests:
-      for dataset in regression_test_data():
+      for dataset in datasets():
         regression_test = os.path.join(qr_reg_tests,regression_test)
         print "Running regression test: {}  on dataset: {} ".format(regression_test,dataset)
         easy_run.call("cctbx.python %s %s"%(regression_test,dataset))
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  #tests can be run on an external dataset, pass in arg for filepath.
-  run_regression_tests()
+  # TODO: tests can be run on an external dataset, pass in arg for filepath.
+  run()
   print "Total time (all tests): %6.2f"%(time.time()-t0)
   print "OK"
