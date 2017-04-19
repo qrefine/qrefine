@@ -3,16 +3,19 @@ from __future__ import division
 import sys
 import time
 import os.path
+import libtbx
 import iotbx.pdb
 import argparse
 try:
   from jpype import startJVM
 except ImportError, e:
   raise Sorry(str(e))
-from restraints import from_qm
-import completion
+from qrefine.core.restraints import from_qm
+import qrefine.core.completion
 
-qr_path = os.environ["QR_REPO_PARENT"]
+qrefine_path = libtbx.env.find_in_repositories("qrefine")
+qr_path = os.path.join(qrefine_path, "core")
+qr_yoink_path =os.path.join(qr_path, "plugin/yoink/yoink/")
 
 log = sys.stdout
 
@@ -51,34 +54,33 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
     crystal_symmetry=cs,
     use_cluster_qm=True,
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
-    yoink_jar_path=qr_path + "/./qr-core/plugin/yoink/Yoink-0.0.1.jar",
-    yoink_dat_path=qr_path + "/./qr-core/plugin/yoink/dat")
+    yoink_jar_path = qr_yoink_path + "Yoink-0.0.1.jar" ,
+    yoink_dat_path = qr_yoink_path +"dat")
   print >> log, "molecular indices in clusters:(the molecular index starts from 1)", fq.fragments.clusters
   print >> log, "pdb hierarchy for each fragment (cluster+buffer)", fq.fragments.qm_pdb_hierarchies
 
 if (__name__ == "__main__"):
 
-  if (__name__ == "__main__"):
-    parser = argparse.ArgumentParser(description='qr.help')
-    parser.add_argument('--commands', action='store_true',
-                        default=False,
-                        help='display the set of available commands ')
-    parser.add_argument('--keywords', action='store_true',
-                        default=False,
-                        help='display the set of available keywords ')
-    parser.add_argument('--settings', action='store_true',
-                        default=False,
-                        help='display the set of default settings   ')
-    args = parser.parse_args()
+  #parser = argparse.ArgumentParser(description='qr.help')
+  #parser.add_argument('--commands', action='store_true',
+  #                      default=False,
+  #                      help='display the set of available commands ')
+  #parser.add_argument('--keywords', action='store_true',
+  #                      default=False,
+  #                      help='display the set of available keywords ')
+  #parser.add_argument('--settings', action='store_true',
+  #                      default=False,
+  #                     help='display the set of default settings   ')
+  #args = parser.parse_args()
 
-    if (args.commands):   print commands.__doc__
-    if (args.keywords):   print keywords.__doc__
-    if (args.settings):   print settings.__doc__
-    if (not args.commands and not args.keywords and not args.settings):
-      print run.__doc__
+  #if (args.commands):   print commands.__doc__
+ # if (args.keywords):   print keywords.__doc__
+  #if (args.settings):   print settings.__doc__
+  #if (not args.commands and not args.keywords and not args.settings):
+   #  print run.__doc__
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  run(*tuple(args))
+  run(args[0])
   print >> log, "Time: %6.4f" % (time.time() - t0)
 
