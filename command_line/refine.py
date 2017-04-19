@@ -17,7 +17,7 @@ qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qrefine_core_path = os.path.join(qrefine_path, "core")
 example_path = os.path.join(qrefine_path,"examples")
 
-
+log = sys.stdout
 
 def help():
   """ Commands in qrefine:
@@ -93,7 +93,6 @@ def example():
 
 
 def run(args, log):
-  print qrefine_path
   cmd = " phenix.python " +  \
       os.path.join(qrefine_core_path,"qr.py ") +  \
       os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
