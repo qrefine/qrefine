@@ -2,6 +2,7 @@ from __future__ import division
 
 import os
 import time
+import libtbx
 from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
@@ -18,7 +19,7 @@ def regression_test_data():
               cluster_path,
               babel_pdbs_path,
               charmm_pdbs_path]
-  return test_data   
+  return test_data
 
 def run_regression_tests():
   regression_tests = [
@@ -33,7 +34,7 @@ def run_regression_tests():
       for dataset in regression_test_data():
         regression_test = os.path.join(qr_reg_tests,regression_test)
         print "Running regression test: {}  on dataset: {} ".format(regression_test,dataset)
-        easy_run.call("cctbx.python %s %s"%regression_test,dataset)
+        easy_run.call("cctbx.python %s %s"%(regression_test,dataset))
 
 if(__name__ == "__main__"):
   t0 = time.time()
