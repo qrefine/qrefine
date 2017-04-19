@@ -66,7 +66,6 @@ class Clusterer(object):
    def __call__(self):
        return self.process()
 
-
 class Pbs_Cluster():
     def __init__(self):
       self.qsub = None
