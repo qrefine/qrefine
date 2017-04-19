@@ -35,7 +35,6 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
 
 ``` 
  qr.test
- 
 ```
 If any of the tests fail, please raise and issue here:
 
