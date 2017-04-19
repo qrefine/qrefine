@@ -5,6 +5,8 @@ import sys
 import time
 import argparse
 import libtbx.load_env
+import libtbx
+from libtbx import easy_run
 from libtbx import command_line
 from libtbx import  easy_run
 from libtbx.command_line import easy_qsub
@@ -13,6 +15,9 @@ from qrefine.core import qr
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qrefine_core_path = os.path.join(qrefine_path, "core")
+example_path = os.path.join(qrefine_path,"examples")
+
+
 
 def help():
   """ Commands in qrefine:
@@ -70,7 +75,7 @@ def run_cmd(cmd):
 
 def example():
   cmd = """
-          phenix.python qr.py 1uso.mtz 1uso.pdb
+          phenix.python qr.py a87_99_h.pdb data.mtz
           max_iterations = 90
           max_atoms = 10000
           number_of_micro_cycles = 20
@@ -88,9 +93,12 @@ def example():
 
 
 def run(args, log):
-  cmd = """
-      phenix.python qr.py input.mtz input.pdb
-      max_iterations = 90
+  print qrefine_path
+  cmd = " phenix.python " +  \
+      os.path.join(qrefine_core_path,"qr.py ") +  \
+      os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
+      os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
+      """max_iterations = 90
       maxnum_residues_in_cluster = 5
       max_atoms = 10000
       number_of_micro_cycles = 20
@@ -107,6 +115,8 @@ def run(args, log):
       output_folder_name = cluster_glr
       restraints_weight_scale = 32
       > cluster_glr.log"""
+  print cmd
+  easy_run.call(cmd)
 
 if __name__ == '__main__':
   print "refine"
