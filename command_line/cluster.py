@@ -20,9 +20,9 @@ qr_yoink_path =os.path.join(qr_path, "plugin/yoink/yoink/")
 log = sys.stdout
 
 def example():
-  example_pdb = os.path.join(qrefine_path,"examples/3dtj/3dtj.pdb")
+  example_pdb = os.path.join(qrefine_path,"examples/3dtj/3dtj_complete.pdb")
   run(example_pdb)
-  
+
 def run(pdb_file, maxnum_residues_in_cluster=15):
   #  completion.run(pdb_file)
   #  pdb_file = os.path.basename(pdb_file)[:-4] + "_complete.pdb"
@@ -44,9 +44,8 @@ if (__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  if args[0]:
+  if len(args) == 1:
     run(args[0])
   else:
     example()
   print >> log, "Time: %6.4f" % (time.time() - t0)
-
