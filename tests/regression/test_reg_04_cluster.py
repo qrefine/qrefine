@@ -101,12 +101,12 @@ def qsub():
   qsub_command = qsub_command + "  > /dev/null"
   os.system(qsub_command)      
       
-def parallel_run(run, pdbs,qsub_command):      
+def parallel_run(pdbs):      
   """ first attempt to run in parallel on cluster"""
   test_results = parallel_map(
-        func=run,
+        func=Cluster_Pdb(),
         iterable=pdbs,
-        qsub_command= qsub_command,
+        qsub_command= self.qsub_command,
         processes=len(pdbs),
         method='pbs',
         preserve_exception_message=True,
