@@ -7,7 +7,7 @@ from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_reg_tests = os.path.join(qrefine, "tests/regression")
-qr_reg_data = os.path.join(qrefine, "tests/regression/data")
+qr_reg_data = os.path.join(qrefine, "tests/regression/datasets")
 
 pdb_path= os.path.join(qr_reg_data,"p1")
 cluster_path = os.path.join(qr_reg_data,"cluster")

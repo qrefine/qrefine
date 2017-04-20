@@ -325,7 +325,7 @@ def test_GLY_terminal_and_alt_loc():
 
 def test_1yjp_charge():
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  tf='%s/qr-core/tests/data/1yjp.pdb' % qr_repo_parent
+  tf='%s/qr-core/tests/datasets/1yjp.pdb' % qr_repo_parent
   try: os.symlink(tf, os.path.basename(tf))
   except: pass
   tf = os.path.basename(tf)

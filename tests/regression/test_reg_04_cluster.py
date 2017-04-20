@@ -21,7 +21,7 @@ db = MongoClient('localhost', 27017).pyoink
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 utils_path= os.path.join(qr_path,"utils") 
-pdb_path= os.path.join(qrefine_path,"tests/regression/data/p1")
+pdb_path= os.path.join(qrefine_path,"tests/regression/datasets/p1")
 
 class Result(object):
     def __init__(self, pdb_code, clusters, chunks, chunk_sizes):

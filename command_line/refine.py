@@ -59,7 +59,7 @@ def run_cmd(cmd):
 def example():
   cmd = """phenix.python """+  \
       os.path.join(qrefine_core_path,"qr.py ") +  \
-      os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
+      os.path.join(qrefine_path,"examples/1us0/datasets.mtz ") + \
       os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
        """output_folder_name = refine
           > refine.log"""
@@ -68,7 +68,7 @@ def example():
 def run(args, log):
   cmd = " phenix.python " +  \
       os.path.join(qrefine_core_path,"qr.py ") +  \
-      os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
+      os.path.join(qrefine_path,"examples/1us0/datasets.mtz ") + \
       os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
       """max_iterations = 90
       maxnum_residues_in_cluster = 5
