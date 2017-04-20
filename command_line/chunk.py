@@ -1,5 +1,5 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.cluster
+# LIBTBX_SET_DISPATCHER_NAME qr.chunk
 import sys
 import time
 import os.path
@@ -37,8 +37,20 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
     yoink_jar_path = qr_yoink_path + "Yoink-0.0.1.jar" ,
     yoink_dat_path = qr_yoink_path +"dat")
+  chunks = []
+  chunk_sizes = []
+  for chunk in fq.fragments.qm_pdb_hierarchies:
+    res_in_chunk = []
+    atom_tot_per_residue = 0
+    for chain in chunk.only_model().chains():
+      for residue_group in chain.residue_groups():
+        res_in_chunk.append(residue_group.resid())
+        for atom_group in residue_group.atom_groups():
+          atom_tot_per_residue += atom_group.atoms_size()
+          chunk_sizes.append(atom_tot_per_residue)
+    chunks.append(res_in_chunk)
   print >> log, "molecular indices in clusters:(the molecular index starts from 1)", fq.fragments.clusters
-  print >> log, "pdb hierarchy for each fragment (cluster+buffer)", fq.fragments.qm_pdb_hierarchies
+  print >> log, "pdb hierarchy for each fragment (cluster+buffer)", chunks
 
 if (__name__ == "__main__"):
   t0 = time.time()
