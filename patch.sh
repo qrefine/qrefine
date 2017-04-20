@@ -8,5 +8,6 @@ git clone https://github.com/qrefine/qr-plugin-yoink.git
 mv qr-plugin-yoink yoink
 git clone https://github.com/qrefine/qr-plugin-ase.git
 mv qr-plugin-ase ase
+git clone https://github.com/qrefine/community
 cd ../../
 libtbx.configure qrefine
