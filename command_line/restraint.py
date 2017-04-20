@@ -28,11 +28,11 @@ def run(pdb_file,maxnum_residues_in_cluster=15):
     pdb_hierarchy=ph,
     crystal_symmetry=cs,
     use_cluster_qm=False)
-  e,g = fq.target_and_gradients(sites_cart)
-  print >> log, "Energy: ", e
+  energy,gradients = fq.target_and_gradients(sites_cart)
+  print >> log,"Energy: ", energy
   print >> log,"Gradients: "
-  for g in list(g):
-    print >> log, g
+  for gradient in list(gradients):
+    print >> log, gradient
 
 if (__name__ == "__main__"):
   t0 = time.time()

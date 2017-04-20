@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/refine.py" afterPath="$PROJECT_DIR$/command_line/refine.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/restraint.py" afterPath="$PROJECT_DIR$/command_line/restraint.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/test.py" afterPath="$PROJECT_DIR$/command_line/test.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -45,11 +42,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="restraint.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="restraint.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="982">
-              <caret line="38" column="21" lean-forward="true" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
+            <state relative-caret-position="512">
+              <caret line="34" column="20" lean-forward="true" selection-start-line="34" selection-start-column="20" selection-end-line="34" selection-end-column="20" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -103,7 +100,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/command_line/test.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="528">
@@ -219,8 +216,8 @@
         <option value="$PROJECT_DIR$/core/restraints.py" />
         <option value="$PROJECT_DIR$/core/utils/fragment_utils.py" />
         <option value="$PROJECT_DIR$/command_line/refine.py" />
-        <option value="$PROJECT_DIR$/command_line/restraint.py" />
         <option value="$PROJECT_DIR$/command_line/test.py" />
+        <option value="$PROJECT_DIR$/command_line/restraint.py" />
       </list>
     </option>
   </component>
@@ -729,11 +726,6 @@
           <line>133</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/command_line/restraint.py</url>
-          <line>38</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
       </breakpoints>
       <option name="time" value="8" />
     </breakpoint-manager>
@@ -1093,20 +1085,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
+    <entry file="file://$PROJECT_DIR$/command_line/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="982">
-          <caret line="38" column="21" lean-forward="true" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
+        <state relative-caret-position="528">
+          <caret line="23" column="22" lean-forward="false" selection-start-line="23" selection-start-column="22" selection-end-line="23" selection-end-column="22" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/test.py">
+    <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="23" column="22" lean-forward="false" selection-start-line="23" selection-start-column="22" selection-end-line="23" selection-end-column="22" />
+        <state relative-caret-position="512">
+          <caret line="34" column="20" lean-forward="true" selection-start-line="34" selection-start-column="20" selection-end-line="34" selection-end-column="20" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
