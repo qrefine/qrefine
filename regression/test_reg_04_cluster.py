@@ -21,8 +21,6 @@ db = MongoClient('localhost', 27017).pyoink
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 utils_path= os.path.join(qr_path,"utils") 
-pdb_path= os.path.join(qrefine_path,"regression/regression/datasets/p1")
-qr_reg_data = os.path.join(qrefine_path, "regression/datasets")
 
 class Result(object):
     def __init__(self, pdb_code, clusters, chunks, chunk_sizes):
@@ -108,11 +106,9 @@ def insert(result):
 def serial_run(pdb_path):
   maxnum_residues_in_cluster = 15
   test_results = []
-  print "pdbs are ",pdb_path
   for pdb_file in os.listdir(pdb_path):
-    pdb_file =  os.path.join(pdb_path, pdb_file)
-    print "testing ", pdb_file
-    clusterer = Clusterer(pdb_file, maxnum_residues_in_cluster)
+    print "Testing ", pdb_file
+    clusterer = Clusterer(os.path.join(pdb_path, pdb_file), maxnum_residues_in_cluster)
     test_results.append(clusterer.process())
   check_all(test_results)
 

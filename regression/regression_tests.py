@@ -33,10 +33,9 @@ def run():
 
   for regression_test in regression_tests:
       for dataset in datasets():
-        regression_test = os.path.join(qr_reg_tests,regression_test)
-        print "Regression test: {} ".format(regression_test)
+        print "Running: {} ".format(regression_test)
         print "Dataset: {} ".format(dataset)
-        easy_run.call("cctbx.python %s %s"%(regression_test,dataset))
+        easy_run.call("cctbx.python %s %s"%(os.path.join(qr_reg_tests,regression_test),dataset))
 
 if(__name__ == "__main__"):
   t0 = time.time()
