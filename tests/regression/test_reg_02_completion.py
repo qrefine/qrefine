@@ -1,13 +1,14 @@
 import os, sys
-from libtbx import easy_run
-from iotbx import pdb
-from StringIO import StringIO
 import time
 import iotbx
-from utils import hierarchy_utils
-import finalise
 import charges
+import finalise
 import completion
+from iotbx import pdb
+import libtbx.load_env
+from libtbx import easy_run
+from StringIO import StringIO
+from utils import hierarchy_utils
 from libtbx import easy_mp
 
 ### TODO: after this test works, split it into charge|completion|finalise

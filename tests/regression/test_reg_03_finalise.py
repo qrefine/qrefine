@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 import expected
-import libtbx.env
+import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx.utils import Sorry
 from command_line import finalise

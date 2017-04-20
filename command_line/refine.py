@@ -5,12 +5,8 @@ import sys
 import time
 import argparse
 import libtbx.load_env
-import libtbx
-from libtbx import easy_run
-from libtbx import command_line
 from libtbx import  easy_run
 from libtbx.command_line import easy_qsub
-from qrefine.core import qr
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")

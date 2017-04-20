@@ -22,10 +22,10 @@ def datasets():
 
 def run():
   regression_tests = [
-    "test_reg_00_charge.py",
-    "test_reg_01_finalise.py",
-    "test_reg_02_finalise.py",
-    "test_reg_03_finalise.py",
+    #"test_reg_00_charge.py",
+    #"test_reg_01_finalise.py",
+    #"test_reg_02_finalise.py",
+    #"test_reg_03_finalise.py",
     "test_reg_04_cluster.py",
   ]
 

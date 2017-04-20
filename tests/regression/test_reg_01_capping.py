@@ -2,6 +2,7 @@ import os, sys
 import time
 import iotbx
 from iotbx import pdb
+import libtbx.load_env
 from libtbx import easy_mp,env
 from libtbx import easy_run
 from utils import hierarchy_utils

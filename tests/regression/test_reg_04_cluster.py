@@ -3,12 +3,14 @@ import sys
 import time
 import os.path
 import iotbx.pdb
-import libtbx
+import libtbx.load_env
+from libtbx.utils import Sorry
 from libtbx.easy_mp import parallel_map
-from pymongo import MongoClient
-from qrefine.core import completion
-from qrefine.core.plugin.yoink import pyoink
 from qrefine.core.restraints import from_qm
+from qrefine.core.plugin.yoink import pyoink
+
+from pymongo import MongoClient
+
 try:
   from jpype import startJVM
 except ImportError, e:
@@ -76,7 +78,6 @@ class Pbs_Cluster():
         qsub_command = qsub_command + "  > /dev/null"
         os.system(qsub_command)
 
-
 def check_all(results):
   for result in results():
     if db.old.find_one({"pdb_code": result.pdb_code}) is None:
@@ -111,6 +112,7 @@ def serial_run(pdbs):
     test_results.append(clusterer.process())
   check_all(test_results)
 
+#TODO
 def parallel_run(pdbs):      
   """ first attempt to run in parallel on cluster"""
   q = Pbs_Cluster()
@@ -135,8 +137,9 @@ if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  if(1):
-    parallel_run(pdbs())
+
   if(1):
     serial_run(pdbs())
+  if (0):
+    parallel_run(pdbs())
   print "Total time (all tests): %6.2f"%(time.time()-t0)

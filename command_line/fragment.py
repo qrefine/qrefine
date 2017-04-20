@@ -1,17 +1,15 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.chunk
+# LIBTBX_SET_DISPATCHER_NAME qr.fragment
 import sys
 import time
 import os.path
 import libtbx
 import iotbx.pdb
-import argparse
 try:
   from jpype import startJVM
 except ImportError, e:
   raise Sorry(str(e))
 from qrefine.core.restraints import from_qm
-import qrefine.core.completion
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
@@ -24,8 +22,6 @@ def example():
   run(example_pdb)
 
 def run(pdb_file, maxnum_residues_in_cluster=15):
-  #  completion.run(pdb_file)
-  #  pdb_file = os.path.basename(pdb_file)[:-4] + "_complete.pdb"
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()

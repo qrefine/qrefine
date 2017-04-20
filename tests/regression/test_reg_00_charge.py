@@ -3,6 +3,7 @@ import time
 from StringIO import StringIO
 import iotbx
 from iotbx import pdb
+import libtbx.load_env
 from libtbx import easy_run
 from libtbx import easy_mp,env
 

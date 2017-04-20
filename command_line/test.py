@@ -2,6 +2,7 @@ from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.test
 import sys
 import argparse
+import libtbx.load_env
 from qrefine.tests      import regression_tests
 from qrefine.core.tests import run_tests as unit_tests
 
@@ -23,6 +24,6 @@ if __name__ == '__main__':
   if (args.unit)      :
       unit_tests.run()
   if (args.regression):
-    regression_tests.run(args=sys.argv[1:])
+    regression_tests.run()
   if (args.pdb)       :
       regression_tests.run(args=sys.argv[1:])
