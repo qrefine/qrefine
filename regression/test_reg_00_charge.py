@@ -1,19 +1,21 @@
 import os, sys
 import time
+from StringIO import StringIO
 import iotbx
-import charges
-import finalise
-import completion
 from iotbx import pdb
 import libtbx.load_env
 from libtbx import easy_run
-from StringIO import StringIO
+from libtbx import easy_mp,env
+
+import finalise
+import charges
+import completion
 from utils import hierarchy_utils
-from libtbx import easy_mp
+
+qr_repo_parent = libtbx.env.find_in_repositories("qrefine")
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
-qr_repo_parent = libtbx.env.find_in_repositories("qrefine")
 
 pdbs = {"PRO_terminal" : """
 CRYST1   42.664   49.718   66.065 109.25  94.96  99.24 P 1           4
@@ -325,7 +327,7 @@ def test_GLY_terminal_and_alt_loc():
 
 def test_1yjp_charge():
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  tf='%s/qr-core/tests/datasets/1yjp.pdb' % qr_repo_parent
+  tf='%s/qr-core/regression/datasets/1yjp.pdb' % qr_repo_parent
   try: os.symlink(tf, os.path.basename(tf))
   except: pass
   tf = os.path.basename(tf)
@@ -490,7 +492,7 @@ def test_charge_for_charmm_pdbs(only_i=None):
 		 '3pzz': 0,
 		 '2y3k': 0}
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  pdb_dir = '%s/qr-core/tests/charmm' % qr_repo_parent
+  pdb_dir = '%s/qr-core/regression/charmm' % qr_repo_parent
   pdb_files = os.listdir(pdb_dir)
   for i, pdb_file in enumerate(pdb_files):
     if only_i is not None and i!=only_i: continue
@@ -513,13 +515,13 @@ def test_charge_for_charmm_pdbs(only_i=None):
 def test_charge_of_neutral_terminal():
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
   charge = 0
-  tf = "%s/qr-core/tests/babel/clusters/neutral_nterminal.pdb" % qr_repo_parent
+  tf = "%s/qr-core/regression/babel/clusters/neutral_nterminal.pdb" % qr_repo_parent
   charge_neutral_nterminal = charges.get_total_charge_from_pdb(tf)
   assert charge == charge_neutral_nterminal, 'no match %s %s' % (
     charge,
     charge_neutral_nterminal,
     )
-  tf = "%s/qr-core/tests/babel/clusters/neutral_cterminal.pdb" % qr_repo_parent
+  tf = "%s/qr-core/regression/babel/clusters/neutral_cterminal.pdb" % qr_repo_parent
   charge_neutral_cterminal = charges.get_total_charge_from_pdb(tf)
   assert charge == charge_neutral_cterminal, 'no match %s %s' % (
     charge,
@@ -528,7 +530,7 @@ def test_charge_of_neutral_terminal():
 
 def test_capping_of_cluster_complete(only_i=None):
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  pdb_dir = '%s/qr-core/tests/babel' % qr_repo_parent
+  pdb_dir = '%s/qr-core/regression/babel' % qr_repo_parent
   babel_dir = os.path.join(pdb_dir, 'capping')
   cluster_dir = os.path.join(pdb_dir, 'clusters')
   cluster_files = os.listdir(cluster_dir)
@@ -583,7 +585,7 @@ def run(prefix = "tst_reg_01"):
     else:
       for p in range(j):
         argss.append((i,p))
-  # for testing the tests
+  # for testing the regression
   if 0:
     argss = [
       [9, 60],

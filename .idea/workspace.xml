@@ -2,270 +2,275 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/0_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/0_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/10_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/10_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/11_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/11_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/12_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/12_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/13_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/13_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/14_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/14_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/15_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/15_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/16_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/16_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/17_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/17_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/18_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/18_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/19_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/19_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/1_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/1_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/20_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/20_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/21_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/21_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/22_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/22_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/23_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/23_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/24_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/24_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/25_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/25_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/26_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/26_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/27_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/27_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/28_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/28_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/29_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/29_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/2_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/2_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/30_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/30_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/31_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/31_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/32_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/32_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/33_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/33_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/34_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/34_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/35_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/35_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/36_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/36_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/37_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/37_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/38_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/38_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/39_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/39_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/3_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/3_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/40_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/40_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/41_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/41_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/42_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/42_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/43_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/43_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/44_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/44_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/45_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/45_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/46_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/46_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/47_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/47_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/48_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/48_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/49_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/49_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/4_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/4_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/50_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/50_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/51_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/51_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/52_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/52_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/5_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/5_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/6_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/6_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/7_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/7_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/8_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/8_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/9_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/9_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/cterminal2_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/cterminal2_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/cterminal_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/cterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/cys_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/cys_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/neutral_cterminal_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/neutral_cterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/neutral_nterminal_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/neutral_nterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/nterminal2_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/nterminal2_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/nterminal_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/nterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/capping/pro_babel.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/pro_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/0.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/0.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/1.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/1.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/10.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/10.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/11.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/11.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/12.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/12.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/13.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/13.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/14.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/14.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/15.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/15.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/16.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/16.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/17.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/17.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/18.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/18.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/19.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/19.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/2.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/20.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/20.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/21.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/21.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/22.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/22.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/23.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/23.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/24.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/24.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/25.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/25.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/26.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/26.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/27.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/27.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/28.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/28.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/29.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/29.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/3.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/3.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/30.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/30.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/31.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/31.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/32.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/32.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/33.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/33.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/34.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/34.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/35.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/35.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/36.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/36.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/37.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/37.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/38.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/38.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/39.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/39.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/4.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/4.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/40.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/40.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/41.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/41.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/42.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/42.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/43.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/43.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/44.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/44.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/45.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/45.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/46.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/46.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/47.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/47.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/48.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/48.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/49.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/49.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/5.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/5.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/50.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/50.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/51.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/51.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/52.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/52.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/6.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/6.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/7.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/8.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/8.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/cterminal.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/cterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/cterminal2.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/cterminal2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/cys.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/cys.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/neutral_cterminal.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/neutral_cterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/neutral_nterminal.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/neutral_nterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/nterminal.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/nterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/nterminal2.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/nterminal2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/babel/clusters/pro.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/pro.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1a7y.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1a7y.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1i07.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1i07.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1il5.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1il5.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1ly2.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1ly2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1lzt.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1lzt.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1ok9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1ok9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1opd.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1opd.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1rfs.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1rfs.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1v7s.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1v7s.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1va7.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1va7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1vbw.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1vbw.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1vfy.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1vfy.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/1y1l.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/1y1l.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2akf.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2akf.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2f2n.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2f2n.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2f30.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2f30.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2ghj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2ghj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2i1u.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2i1u.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2i1u.psf" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2i1u.psf" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2jee.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2jee.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2oeq.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2oeq.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2ol9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2ol9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2omq.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2omq.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2ona.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2ona.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2oy0.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2oy0.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2w9r.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2w9r.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2x10.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2x10.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2xmt.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2xmt.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2xmu.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2xmu.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2y3j.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2y3j.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/2y3k.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/2y3k.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3dtj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3dtj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3kyi.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3kyi.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3o2h.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3o2h.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3oe9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3oe9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3osm.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3osm.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3ovj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3ovj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3pzz.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3pzz.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3t4f.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3t4f.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3tz9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3tz9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3u29.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3u29.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3uds.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3uds.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/3uj4.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/3uj4.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4ctd.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4ctd.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4drw.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4drw.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4drw.psf" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4drw.psf" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4fsx.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4fsx.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4itk.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4itk.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4k2r.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4k2r.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4kdw.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4kdw.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4lzl.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4lzl.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4lzt.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4lzt.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4onk.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4onk.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4p7h.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4p7h.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4rnf.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4rnf.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4rp6.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4rp6.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4uby.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uby.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4uit.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uit.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4uiu.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uiu.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4uiv.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uiv.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4uiw.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uiw.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4w5y.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4w5y.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4w67.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4w67.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4w71.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4w71.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4wxt.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4wxt.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4xa1.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4xa1.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/4xfo.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/4xfo.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/5cgo.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/5cgo.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/5d12.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/5d12.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/5diz.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/5diz.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/5e5v.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/5e5v.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/charmm/5e61.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/charmm/5e61.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/1il5_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/1il5_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/1ok9_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/1ok9_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/1va7_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/1va7_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/1y1l_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/1y1l_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/2ghj_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/2ghj_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/2oeq_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/2oeq_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/2oy0_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/2oy0_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/2pro_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/2pro_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/2x10_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/2x10_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/3dtj_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/3dtj_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/3tz9_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/3tz9_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/3uds_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/3uds_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/3uj4_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/3uj4_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/4ctd_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/4ctd_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/4drw_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/4drw_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/4fsx_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/4fsx_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/4k2r_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/4k2r_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/4rnf_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/4rnf_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/4xa1_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/4xa1_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/5d12_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/5d12_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/cluster/5diz_complete_refined.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/cluster/5diz_complete_refined.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/1il5.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/1il5.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/1va7.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/1va7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/1w3b.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/1w3b.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2bx9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2bx9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2dwq.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2dwq.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2ec2.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2ec2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2gd5.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2gd5.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2ghj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2ghj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2oeq.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2oeq.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2oy0.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2oy0.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2pro.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2pro.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2x10.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2x10.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/2yht.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/2yht.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3en7.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3en7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3i05.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3i05.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3i3u.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3i3u.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3kyi.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3kyi.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3lrj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3lrj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3tz7.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3tz7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/3tz9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/3tz9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4c0m.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4c0m.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4cc1.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4cc1.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4ctd.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4ctd.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4drw.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4drw.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4i21.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4i21.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4k2r.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4k2r.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4lgh.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4lgh.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4rnf.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4rnf.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4xa1.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4xa1.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4xg9.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4xg9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4ynv.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4ynv.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/4ynw.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/4ynw.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5arj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5arj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5d12.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5d12.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5eta.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5eta.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5fv7.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5fv7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5ghv.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5ghv.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5ldj.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5ldj.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5lwe.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5lwe.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/data/p1/5t68.pdb" afterPath="$PROJECT_DIR$/tests/regression/datasets/p1/5t68.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/__init__.py" afterPath="$PROJECT_DIR$/regression/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/__init__.py" afterPath="$PROJECT_DIR$/regression/results/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/0_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/0_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/10_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/10_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/11_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/11_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/12_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/12_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/13_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/13_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/14_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/14_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/15_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/15_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/16_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/16_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/17_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/17_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/18_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/18_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/19_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/19_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/1_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/1_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/20_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/20_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/21_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/21_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/22_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/22_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/23_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/23_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/24_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/24_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/25_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/25_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/26_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/26_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/27_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/27_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/28_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/28_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/29_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/29_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/2_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/2_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/30_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/30_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/31_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/31_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/32_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/32_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/33_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/33_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/34_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/34_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/35_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/35_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/36_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/36_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/37_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/37_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/38_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/38_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/39_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/39_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/3_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/3_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/40_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/40_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/41_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/41_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/42_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/42_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/43_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/43_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/44_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/44_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/45_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/45_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/46_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/46_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/47_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/47_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/48_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/48_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/49_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/49_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/4_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/4_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/50_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/50_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/51_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/51_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/52_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/52_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/5_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/5_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/6_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/6_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/7_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/7_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/8_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/8_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/9_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/9_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/cterminal2_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/cterminal2_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/cterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/cterminal_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/cys_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/cys_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/neutral_cterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/neutral_cterminal_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/neutral_nterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/neutral_nterminal_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/nterminal2_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/nterminal2_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/nterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/nterminal_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/capping/pro_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/capping/pro_babel.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/0.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/0.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/1.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/1.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/10.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/10.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/11.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/11.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/12.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/12.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/13.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/13.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/14.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/14.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/15.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/15.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/16.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/16.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/17.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/17.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/18.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/18.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/19.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/19.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/2.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/20.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/20.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/21.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/21.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/22.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/22.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/23.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/23.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/24.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/24.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/25.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/25.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/26.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/26.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/27.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/27.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/28.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/28.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/29.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/29.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/3.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/3.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/30.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/30.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/31.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/31.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/32.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/32.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/33.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/33.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/34.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/34.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/35.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/35.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/36.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/36.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/37.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/37.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/38.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/38.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/39.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/39.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/4.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/4.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/40.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/40.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/41.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/41.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/42.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/42.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/43.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/43.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/44.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/44.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/45.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/45.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/46.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/46.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/47.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/47.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/48.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/48.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/49.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/49.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/5.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/5.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/50.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/50.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/51.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/51.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/52.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/52.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/6.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/6.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/7.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/8.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/8.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/cterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/cterminal.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/cterminal2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/cterminal2.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/cys.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/cys.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/neutral_cterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/neutral_cterminal.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/neutral_nterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/neutral_nterminal.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/nterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/nterminal.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/nterminal2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/nterminal2.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/babel/clusters/pro.pdb" afterPath="$PROJECT_DIR$/regression/datasets/clusters/pro.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1a7y.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1a7y.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1i07.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1i07.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1il5.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1il5.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1ly2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1ly2.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1lzt.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1lzt.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1ok9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1ok9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1opd.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1opd.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1rfs.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1rfs.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1v7s.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1v7s.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1va7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1va7.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1vbw.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1vbw.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1vfy.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1vfy.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/1y1l.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/1y1l.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2akf.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2akf.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2f2n.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2f2n.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2f30.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2f30.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2ghj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2ghj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2i1u.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2i1u.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2i1u.psf" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2i1u.psf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2jee.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2jee.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2oeq.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2oeq.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2ol9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2ol9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2omq.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2omq.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2ona.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2ona.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2oy0.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2oy0.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2w9r.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2w9r.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2x10.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2x10.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2xmt.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2xmt.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2xmu.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2xmu.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2y3j.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2y3j.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/2y3k.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/2y3k.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3dtj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3dtj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3kyi.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3kyi.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3o2h.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3o2h.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3oe9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3oe9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3osm.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3osm.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3ovj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3ovj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3pzz.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3pzz.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3t4f.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3t4f.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3tz9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3tz9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3u29.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3u29.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3uds.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3uds.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/3uj4.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/3uj4.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4ctd.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4ctd.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4drw.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4drw.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4drw.psf" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4drw.psf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4fsx.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4fsx.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4itk.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4itk.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4k2r.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4k2r.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4kdw.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4kdw.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4lzl.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4lzl.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4lzt.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4lzt.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4onk.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4onk.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4p7h.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4p7h.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4rnf.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4rnf.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4rp6.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4rp6.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uby.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4uby.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uit.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4uit.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uiu.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4uiu.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uiv.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4uiv.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4uiw.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4uiw.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4w5y.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4w5y.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4w67.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4w67.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4w71.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4w71.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4wxt.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4wxt.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4xa1.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4xa1.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/4xfo.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/4xfo.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/5cgo.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/5cgo.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/5d12.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/5d12.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/5diz.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/5diz.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/5e5v.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/5e5v.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/charmm/5e61.pdb" afterPath="$PROJECT_DIR$/regression/datasets/charmm/5e61.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/1il5_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/1il5_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/1ok9_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/1ok9_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/1va7_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/1va7_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/1y1l_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/1y1l_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/2ghj_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/2ghj_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/2oeq_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/2oeq_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/2oy0_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/2oy0_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/2pro_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/2pro_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/2x10_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/2x10_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/3dtj_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/3dtj_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/3tz9_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/3tz9_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/3uds_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/3uds_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/3uj4_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/3uj4_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/4ctd_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/4ctd_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/4drw_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/4drw_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/4fsx_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/4fsx_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/4k2r_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/4k2r_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/4rnf_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/4rnf_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/4xa1_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/4xa1_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/5d12_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/5d12_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/cluster/5diz_complete_refined.pdb" afterPath="$PROJECT_DIR$/regression/datasets/cluster/5diz_complete_refined.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/1il5.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/1il5.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/1va7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/1va7.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/1w3b.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/1w3b.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2bx9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2bx9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2dwq.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2dwq.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2ec2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2ec2.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2gd5.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2gd5.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2ghj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2ghj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2oeq.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2oeq.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2oy0.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2oy0.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2pro.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2pro.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2x10.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2x10.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/2yht.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/2yht.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3en7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3en7.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3i05.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3i05.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3i3u.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3i3u.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3kyi.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3kyi.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3lrj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3lrj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3tz7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3tz7.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/3tz9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/3tz9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4c0m.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4c0m.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4cc1.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4cc1.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4ctd.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4ctd.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4drw.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4drw.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4i21.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4i21.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4k2r.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4k2r.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4lgh.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4lgh.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4rnf.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4rnf.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4xa1.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4xa1.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4xg9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4xg9.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4ynv.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4ynv.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/4ynw.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/4ynw.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5arj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5arj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5d12.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5d12.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5eta.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5eta.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5fv7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5fv7.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5ghv.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5ghv.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5ldj.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5ldj.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5lwe.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5lwe.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/datasets/p1/5t68.pdb" afterPath="$PROJECT_DIR$/regression/datasets/p1/5t68.pdb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/expected.py" afterPath="$PROJECT_DIR$/regression/results/expected.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/skip.py" afterPath="$PROJECT_DIR$/regression/skip.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/test_reg_00_charge.py" afterPath="$PROJECT_DIR$/regression/test_reg_00_charge.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/test_reg_01_capping.py" afterPath="$PROJECT_DIR$/regression/test_reg_01_capping.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/test_reg_02_completion.py" afterPath="$PROJECT_DIR$/regression/test_reg_02_completion.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/test_reg_03_finalise.py" afterPath="$PROJECT_DIR$/regression/test_reg_03_finalise.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression/test_reg_04_cluster.py" afterPath="$PROJECT_DIR$/regression/test_reg_04_cluster.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/regression_tests.py" afterPath="$PROJECT_DIR$/regression/regression_tests.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/refine.py" afterPath="$PROJECT_DIR$/command_line/refine.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.travis.yml" afterPath="$PROJECT_DIR$/.travis.yml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/test.py" afterPath="$PROJECT_DIR$/command_line/test.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression/test_reg_00_charge.py" afterPath="$PROJECT_DIR$/tests/regression/test_reg_00_charge.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression/test_reg_01_capping.py" afterPath="$PROJECT_DIR$/tests/regression/test_reg_01_capping.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression/test_reg_02_completion.py" afterPath="$PROJECT_DIR$/tests/regression/test_reg_02_completion.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression/test_reg_03_finalise.py" afterPath="$PROJECT_DIR$/tests/regression/test_reg_03_finalise.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression/test_reg_04_cluster.py" afterPath="$PROJECT_DIR$/tests/regression/test_reg_04_cluster.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression_tests.py" afterPath="$PROJECT_DIR$/tests/regression_tests.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/runner.py" afterPath="$PROJECT_DIR$/runner.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -294,31 +299,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="calculator.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/calculator.py">
+      <file leaf-file-name="test_reg_04_cluster.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_04_cluster.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1320">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="charges.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/charges.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5157">
-              <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="clustering.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/clustering.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1812">
-              <caret line="8" column="1" lean-forward="false" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
+            <state relative-caret-position="-519">
+              <caret line="109" column="19" lean-forward="true" selection-start-line="109" selection-start-column="19" selection-end-line="109" selection-end-column="19" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -326,25 +311,45 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="fragment.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/fragment.py">
+      <file leaf-file-name="test_reg_03_finalise.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_03_finalise.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="regression_tests.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="183">
+              <caret line="16" column="0" lean-forward="true" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
               <folding>
-                <element signature="e#0#13#0" expanded="true" />
+                <element signature="e#0#31#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="runner.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/runner.py">
+      <file leaf-file-name="skip.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/skip.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test_reg_00_charge.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_00_charge.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="324">
+              <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#0#14#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -353,8 +358,8 @@
       <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/command_line/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="597">
-              <caret line="26" column="3" lean-forward="false" selection-start-line="26" selection-start-column="3" selection-end-line="26" selection-end-column="3" />
+            <state relative-caret-position="446">
+              <caret line="35" column="43" lean-forward="true" selection-start-line="35" selection-start-column="43" selection-end-line="35" selection-end-column="43" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -362,8 +367,18 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="expected.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/results/expected.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/command_line/__init__.py">
+        <entry file="file://$PROJECT_DIR$/regression/results/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -382,22 +397,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="fragment.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="fragment.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/command_line/fragment.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-323">
-              <caret line="2" column="10" lean-forward="true" selection-start-line="2" selection-start-column="10" selection-end-line="2" selection-end-column="10" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="restraint.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="621">
-              <caret line="35" column="0" lean-forward="true" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="217">
+              <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -432,8 +439,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/command_line/kill.py" />
-        <option value="$PROJECT_DIR$/plugins/babel/babel.py" />
         <option value="$PROJECT_DIR$/plugins/cmty/cmty.py" />
         <option value="$PROJECT_DIR$/tests/regression/tst_11.py" />
         <option value="$PROJECT_DIR$/tests/regression/tst_1.py" />
@@ -483,6 +488,8 @@
         <option value="$PROJECT_DIR$/tests/regression/test_reg_00_charge.py" />
         <option value="$PROJECT_DIR$/tests/regression_tests.py" />
         <option value="$PROJECT_DIR$/command_line/test.py" />
+        <option value="$PROJECT_DIR$/regression/regression_tests.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_04_cluster.py" />
       </list>
     </option>
   </component>
@@ -493,8 +500,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="351" />
-    <option name="y" value="356" />
+    <option name="x" value="248" />
+    <option name="y" value="23" />
     <option name="width" value="2517" />
     <option name="height" value="1337" />
   </component>
@@ -521,12 +528,8 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; Python 2.7.8 (~/phenix-dev-2747/base/bin/python) &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+              <option name="myItemId" value="qrefine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -536,6 +539,10 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="qrefine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="regression" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -567,11 +574,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/regression/results" />
+      <recent name="$PROJECT_DIR$/regression/datasets" />
+      <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/core/plugin/ase" />
       <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/command_line" />
-      <recent name="$PROJECT_DIR$/docs" />
-      <recent name="$PROJECT_DIR$/plugins" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/command_line" />
@@ -967,18 +974,18 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="351" y="356" width="2517" height="1337" extended-state="0" />
+    <frame x="248" y="23" width="2517" height="1337" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3446281" sideWeight="0.52790225" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3446281" sideWeight="0.52953154" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3446281" sideWeight="0.48594704" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31810632" sideWeight="0.49834985" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.49857435" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.48961303" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15112016" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32809916" sideWeight="0.47209775" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32809916" sideWeight="0.47046843" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39950576" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
@@ -1006,21 +1013,11 @@
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="8" />
+      <option name="time" value="9" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/tests/tst_04.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-98">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#31#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/tests/tst_05.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-60">
@@ -1163,7 +1160,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/__init__.py">
+    <entry file="file://$PROJECT_DIR$/regression/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1187,15 +1184,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/test_reg_03_finalise.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/test_reg_02_completion.py">
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_02_completion.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-96">
           <caret line="7" column="22" lean-forward="false" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
@@ -1203,7 +1192,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/test_reg_01_capping.py">
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_01_capping.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="66">
           <caret line="4" column="22" lean-forward="false" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
@@ -1211,7 +1200,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/skip.py">
+    <entry file="file://$PROJECT_DIR$/regression/regression/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1219,33 +1208,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/expected.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/test_reg_04_cluster.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="145" column="0" lean-forward="true" selection-start-line="145" selection-start-column="0" selection-end-line="145" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/datasets/babel/capping/0_babel.pdb">
+    <entry file="file://$PROJECT_DIR$/regression/datasets/capping/0_babel.pdb">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-2111">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1253,7 +1216,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/datasets/babel/clusters/0.pdb">
+    <entry file="file://$PROJECT_DIR$/regression/datasets/clusters/0.pdb">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1418">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1261,29 +1224,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/datasets/charmm/1i07.pdb">
+    <entry file="file://$PROJECT_DIR$/regression/datasets/charmm/1i07.pdb">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-999">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression/test_reg_00_charge.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-15976">
-          <caret line="2" column="20" lean-forward="false" selection-start-line="2" selection-start-column="20" selection-end-line="2" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/regression_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="658">
-          <caret line="31" column="42" lean-forward="true" selection-start-line="31" selection-start-column="42" selection-end-line="31" selection-end-column="42" />
-          <folding>
-            <element signature="e#0#31#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1292,7 +1237,7 @@
         <state relative-caret-position="544">
           <caret line="68" column="0" lean-forward="false" selection-start-line="68" selection-start-column="0" selection-end-line="69" selection-end-column="29" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1350,7 +1295,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1360,7 +1305,7 @@
         <state relative-caret-position="-4096">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#9#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1370,7 +1315,7 @@
         <state relative-caret-position="-2408">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1396,7 +1341,7 @@
         <state relative-caret-position="-1812">
           <caret line="8" column="1" lean-forward="false" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1406,7 +1351,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#13#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1416,7 +1361,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1424,18 +1369,8 @@
     <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="621">
-          <caret line="35" column="0" lean-forward="true" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+          <caret line="35" column="0" lean-forward="false" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="597">
-          <caret line="26" column="3" lean-forward="false" selection-start-line="26" selection-start-column="3" selection-end-line="26" selection-end-column="3" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1457,9 +1392,83 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/command_line/fragment.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-323">
-          <caret line="2" column="10" lean-forward="true" selection-start-line="2" selection-start-column="10" selection-end-line="2" selection-end-column="10" />
+        <state relative-caret-position="217">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_00_charge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_03_finalise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/skip.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/results/expected.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/results/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/command_line/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="446">
+          <caret line="35" column="43" lean-forward="true" selection-start-line="35" selection-start-column="43" selection-end-line="35" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="183">
+          <caret line="16" column="0" lean-forward="true" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_04_cluster.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-519">
+          <caret line="109" column="19" lean-forward="true" selection-start-line="109" selection-start-column="19" selection-end-line="109" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

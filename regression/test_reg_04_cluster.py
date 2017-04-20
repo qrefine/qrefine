@@ -21,7 +21,8 @@ db = MongoClient('localhost', 27017).pyoink
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 utils_path= os.path.join(qr_path,"utils") 
-pdb_path= os.path.join(qrefine_path,"tests/regression/datasets/p1")
+pdb_path= os.path.join(qrefine_path,"regression/regression/datasets/p1")
+qr_reg_data = os.path.join(qrefine_path, "regression/datasets")
 
 class Result(object):
     def __init__(self, pdb_code, clusters, chunks, chunk_sizes):
@@ -104,10 +105,13 @@ def insert(result):
                        "num_of_clusters" : result.num_of_clusters,
                        })
 
-def serial_run(pdbs):
+def serial_run(pdb_path):
   maxnum_residues_in_cluster = 15
   test_results = []
-  for pdb_file in pdbs:
+  print "pdbs are ",pdb_path
+  for pdb_file in os.listdir(pdb_path):
+    pdb_file =  os.path.join(pdb_path, pdb_file)
+    print "testing ", pdb_file
     clusterer = Clusterer(pdb_file, maxnum_residues_in_cluster)
     test_results.append(clusterer.process())
   check_all(test_results)
@@ -139,7 +143,7 @@ if(__name__ == "__main__"):
   del sys.argv[1:]
 
   if(1):
-    serial_run(pdbs())
+    serial_run(args[0])
   if (0):
-    parallel_run(pdbs())
-  print "Total time (all tests): %6.2f"%(time.time()-t0)
+    parallel_run(args[0])
+  print "Total time (all regression): %6.2f"%(time.time()-t0)

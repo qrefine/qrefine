@@ -32,7 +32,7 @@ def run():
 if(__name__ == "__main__"):
   t0 = time.time()
   run()
-  print "Total time (all tests): %6.2f"%(time.time()-t0)
+  print "Total time (all regression): %6.2f"%(time.time()-t0)
   print "OK"
 
 
