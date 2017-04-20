@@ -20,7 +20,9 @@ if __name__ == '__main__':
                                               only run on a HPC cluster''')
 
   args = parser.parse_args()
-  if (args.unit)      :  unit_tests.run()
+  if (args.unit)      :
+      unit_tests.run()
   if (args.regression):
     regression_tests.run(args=sys.argv[1:])
-  if (args.pdb)       : regression_tests.run(args=sys.argv[1:])
+  if (args.pdb)       :
+      regression_tests.run(args=sys.argv[1:])

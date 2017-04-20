@@ -6,6 +6,7 @@ import os.path
 import libtbx
 import iotbx.pdb
 from qrefine.core.restraints import from_qm
+from scitbx.array_family import flex
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
@@ -13,6 +14,7 @@ qr_path = os.path.join(qrefine_path, "core")
 log = sys.stdout
 
 def example():
+  print >> log, "No pdb specified, using helix example"
   example_pdb = os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb")
   run(example_pdb)
 
@@ -27,7 +29,10 @@ def run(pdb_file,maxnum_residues_in_cluster=15):
     crystal_symmetry=cs,
     use_cluster_qm=False)
   e,g = fq.target_and_gradients(sites_cart)
-  print e,g
+  print >> log, "Energy: ", e
+  print >> log,"Gradients: "
+  for g in list(g):
+    print >> log, g
 
 if (__name__ == "__main__"):
   t0 = time.time()

@@ -35,7 +35,7 @@ def help():
 
 def stop(args, log):
   """how do we get a reference to all of the running jobs.
-  This could be hundreds of qdels, must automate this."""
+  This could be hundreds of qdels,we must automate this."""
   jobid = args[1]
   print "Are you sure you want to stop job {}".format(jobid)
 
