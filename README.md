@@ -48,9 +48,13 @@ If tests run successfully, then try and run an example:
 ``` 
 
 ```
- qr.cluster --example
+ qr.chunk --example
 ``` 
  
+```
+ qr.restraint --example
+```
+
 ```
  qr.refine --example
 ```

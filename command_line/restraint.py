@@ -18,7 +18,7 @@ def example():
   example_pdb = os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb")
   run(example_pdb)
 
-def run(pdb_file,maxnum_residues_in_cluster=15):
+def run(pdb_file):
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()

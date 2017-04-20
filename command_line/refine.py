@@ -61,8 +61,7 @@ def run_cmd(cmd):
     result = easy_run.fully_buffered(cmd).raise_if_errors()
 
 def example():
-  cmd = """
-          phenix.python """+  \
+  cmd = """phenix.python """+  \
       os.path.join(qrefine_core_path,"qr.py ") +  \
       os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
       os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
