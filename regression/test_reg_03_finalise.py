@@ -1,25 +1,22 @@
 from __future__ import division
-
 import os
 import shutil
 import time
-
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx.utils import Sorry
-
 from command_line import finalise
 from regression.results import expected
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qr_path = os.path.join(qrefine_path, "core")
+pdb_dir_p1 = os.path.join(qrefine_path, "regression/datasets/p1/")
+pdb_dir_cluster = os.path.join(qrefine_path, "regression/datasets/cluster/")
 
-def run(prefix = "tst_reg_00"):
+def run(prefix = "tst_reg_03_finalise"):
   """
   Exercise structure completion by finalise.py
   """
-  pdb_dir_p1 =os.path.join(qrefine_path,"regression/datasets/p1/")
-  pdb_dir_cluster=os.path.join(qrefine_path,"regression/datasets/cluster/")
+
   complete_pdbs(expected.cluster, pdb_dir_cluster)
   complete_pdbs(expected.p1, pdb_dir_p1)
 

@@ -22,6 +22,15 @@ qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 utils_path= os.path.join(qr_path,"utils") 
 
+def check_assertions(result):
+    """
+    Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk. 
+    """
+    result_db = db.old.find_one({"pdb_code": result.pdb_code})
+    assert result_db['clusters']    == result.clusters
+    assert result_db['chunks']      == result.chunks
+    assert result_db['chunk_sizes'] == result.chunk_sizes
+
 class Result(object):
     def __init__(self, pdb_code, clusters, chunks, chunk_sizes):
         self.pdb_code = pdb_code
@@ -85,15 +94,6 @@ def check_all(results):
         check_assertions(result)
     check_assertions(result)
 
-def check_assertions(result):
-    """
-      Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk. 
-    """
-    result_db = db.old.find_one({"pdb_code": result.pdb_code})
-    assert result_db['clusters']    == result.clusters
-    assert result_db['chunks']      == result.chunks
-    assert result_db['chunk_sizes'] == result.chunk_sizes
-
 def insert(result):
     db.old.insert_one({"pdb_code"        : result.pdb_code,
                        "clusters"        : result.clusters,
@@ -137,7 +137,6 @@ if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-
   if(1):
     serial_run(args[0])
   if (0):
