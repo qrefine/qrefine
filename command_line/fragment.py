@@ -5,6 +5,8 @@ import time
 import os.path
 import libtbx
 import iotbx.pdb
+from libtbx.utils import Sorry
+
 try:
   from jpype import startJVM
 except ImportError, e:
