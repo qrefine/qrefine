@@ -1,5 +1,5 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.fragment
+# LIBTBX_SET_DISPATCHER_NAME qr.chunk
 import sys
 import time
 import os.path

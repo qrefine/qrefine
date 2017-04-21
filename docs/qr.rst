@@ -79,68 +79,23 @@ Options and keywords in qrefine:
     citations = 
         prints the citations of the relevant papers
 
-  help
-    keywords = 
-        
-    commands = 
+  fragment
 
-  example
-    refine
 
-    cluster
+  restraint
 
-  run_tests
-     unit = 
+
+  finalise
+
+
+  test
+     unit =
         all unit tests will run
 
-     regression = 
-        all regression tests will run   
+     regression =
+        all regression tests will run
 
      pdb =
         You can run tests on the entire PDB, but it takes a very long time
 
-"""qr.py is the entry point to Q|R that takes user inputs, and then constructs all of the objects
-   needed to carry out the quantum refinement. “””
 
-“””driver.py is used to drive the macro/micro-cycles for either refinement, or optimization.
-   The optimization option is used only for comparison/validation, and is not intended to
-   be useful as a standalone optimizer. This class also takes care of the convergence criteria.
-   It delegates the minimization procedure itself to the L-BFGS implementation in CCTBX.
-   The driver.py requires the target and gradient (energy and force from QM) in order to minimize.”””
-
-“””calculator.py  handles the weight factors, scaling, and is used to convert input parameters
-   to which can be used for either quantum or traditional refinement.
-   An adaptive restraints weight factor calculator is implemented, whereby the weight factor is
-   doubled if a sufficiently large bond-RMSD is observed. Conversely, if a sufficiently small
-   bond-RMSD is observed, then the weight factor is halved.””
-
-“””restraints.py contains two classes for either quantum refinement, or for standard refinement.
-   The calculation of the restraints are delegated to either ASE
-   for quantum-based, or CCTBX for standard refinement.”””
-
-“””results.py  stores and handles all of the data needed for logging the results of the refinement”””
-
-We then need to create a set of objects to carry out the computation:
-
-- fmodel (crystallographic information)
-
-- calculator (composite object)
-  - restraints_manager (computes energy and gradients using either qm codes or cctbx (standard))
-  - geometery_restraints_manager (analyses geometry e.g. bond RMSDs)
-  - weights (scale factors needed to scale up or down data versus restraints contributions)
-
-Then we process them by the refinement/optimization engine, driver.py:
-
-```
- driver.refine(params     = params,
-               fmodel     = fmodel,
-               calculator = calculator_manager,
-               results    = results)
-
-```
-
-- results_manager (store all reportable infomation, and write it out as a log, and also write our final pdb structure.)
-
-```
- results.finalize()
- ```
