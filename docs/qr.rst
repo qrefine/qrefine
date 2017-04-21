@@ -25,9 +25,18 @@ https://journals.iucr.org/d/issues/2017/01/00/lp5021/lp5021.pdf
 
 List of all available keywords
 
+Options and keywords in qrefine:
+       - qm_calculator
+       - macro_cycles
+       - micro_cycles
+       - max_bond_rmsd
+       - refine_sites
+       - refine_adp
+       - cluster_qm
+       - charge_embedding
+       - cluster
+
   refine
-
-
 
 	base_path = None
        base path for files (default is current working directory)

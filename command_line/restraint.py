@@ -3,10 +3,11 @@ from __future__ import division
 import sys
 import time
 import os.path
-import libtbx
+import argparse
 import iotbx.pdb
-from qrefine.core.restraints import from_qm
+import libtbx.load_env
 from scitbx.array_family import flex
+from qrefine.core.restraints import from_qm
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
@@ -35,6 +36,20 @@ def run(pdb_file):
     print >> log, gradient
 
 if (__name__ == "__main__"):
+  print "Restraint for Q|R"
+  parser = argparse.ArgumentParser(description='Calculate restraint for Q|R')
+  parser.add_argument('--qm', action='store_true',
+                      default=False,
+                      help='compute the energy and gradient using a QM calculator ')
+  parser.add_argument('--cluster', action='store_true',
+                      default=False,
+                      help='construct a set of clusters, and then calculate the combined gradient')  # nightly build?
+  parser.add_argument('--cctbx', action='store_true',
+                      default=False,
+                      help='''compute the standard cctbx restraint''')
+  parser.add_argument('--all', action='store_true',
+                      default=False,
+                      help='''run the set of restraints for comparison''')
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]

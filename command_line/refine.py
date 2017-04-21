@@ -15,20 +15,6 @@ example_path = os.path.join(qrefine_path,"examples")
 
 log = sys.stdout
 
-def help():
-  """  
-  Options and keywords in qrefine:
-       - qm_calculator
-       - macro_cycles
-       - micro_cycles
-       - max_bond_rmsd
-       - refine_sites
-       - refine_adp
-       - cluster_qm
-       - charge_embedding
-       - cluster
-   """
-
 def stop(args, log):
   """how do we get a reference to all of the running jobs.
   This could be hundreds of qdels,we must automate this."""
@@ -61,8 +47,7 @@ def example():
       os.path.join(qrefine_core_path,"qr.py ") +  \
       os.path.join(qrefine_path,"examples/1us0/datasets.mtz ") + \
       os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
-       """output_folder_name = refine
-          > refine.log"""
+       """output_folder_name = refine > refine.log"""
   run_cmd(cmd)
 
 def run(args, log):
@@ -92,9 +77,11 @@ def run(args, log):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='qrefine.example')
-  parser.add_argument('--example', action='store_true', default=False, help='run refinement example.     ')
+  parser.add_argument('--example', action='store_true', default=False, help='run refinement example.')
+  args = parser.parse_args()
   t0 = time.time()
-  log = sys.stdout
-  print "Starting Q|R"
-  run(args=sys.argv[1:], log=log)
+  print >> log,"Starting Q|R"
+  if(args.example): example()
+  elif(args.help): help()
+  else:run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

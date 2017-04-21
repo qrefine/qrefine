@@ -18,8 +18,8 @@ def run(prefix = "tst_reg_00"):
   """
   Exercise structure completion by finalise.py
   """
-  pdb_dir_p1 =os.path.join(qrefine_path,"regression/regression/datasets/p1/")
-  pdb_dir_cluster=os.path.join(qrefine_path,"regression/regression/datasets/cluster/")
+  pdb_dir_p1 =os.path.join(qrefine_path,"regression/datasets/p1/")
+  pdb_dir_cluster=os.path.join(qrefine_path,"regression/datasets/cluster/")
   complete_pdbs(expected.cluster, pdb_dir_cluster)
   complete_pdbs(expected.p1, pdb_dir_p1)
 

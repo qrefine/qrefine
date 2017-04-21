@@ -25,8 +25,8 @@ def run():
     "qr.test --unit"
     "qr.test --regression",]
 
+  print "Running tests:", test
   for test in tests:
-    print "Running test:", test
     easy_run.call(test)
 
 if(__name__ == "__main__"):
