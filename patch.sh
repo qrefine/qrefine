@@ -1,4 +1,5 @@
-# A simple way to patch qrefine into PHENIX, can change to python later.
+# A simple way to patch qrefine into PHENIX.
+# Note: we can change this patch.sh file to a python solution later.
 git clone https://github.com/qrefine/qr-core.git
 mv qr-core core
 libtbx.python -m pip install -r requirements.txt

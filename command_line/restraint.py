@@ -49,6 +49,8 @@ if (__name__ == "__main__"):
   parser.add_argument('--all', action='store_true',
                       default=True,
                       help='''run the full set of restraints for comparison''')
+  parser.add_argument('--example', action='store_true', default=False, help='run restraint example.')
+  known, unknown = parser.parse_known_args()
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]

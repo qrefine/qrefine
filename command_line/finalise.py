@@ -1,10 +1,14 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
 import os, sys, shutil
+import libtbx.load_env
 from libtbx import easy_run
 from multiprocessing import Pool
 
 log = sys.stdout
+
+qrefine_path = libtbx.env.find_in_repositories("qrefine")
+qr_path = os.path.join(qrefine_path, "core")
 
 pdb_dir='./tmp'
 
@@ -16,7 +20,7 @@ def _process_pdb_filename(pdb_file):
   os.chdir(pdb_dir)
   complete_file=pdb_file[:-4]+"_complete.pdb"
   if ( pdb_file.endswith("pdb")  and not os.path.exists(complete_file) ):
-    cmd = "phenix.python ../../../qr-core/finalise.py %s" % pdb_file + "> "+ pdb_file[:-4]+".log"
+    cmd = "phenix.python " + os.path.join(qr_path,"finalise.py")+" %s" % pdb_file + "> "+ pdb_file[:-4]+".log"
     print '\n\t~> %s\n' % cmd
     easy_run.call(cmd)
   os.chdir("../")

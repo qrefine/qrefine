@@ -28,44 +28,44 @@ def check_assertions(result):
     assert past_result['r_work']      == result.r_work
 
 def insert(result):
-    db.old.insert_one({"pdb_code"    : result.pdb_code,
-                       "rsmd_inital" : result.rsmd_inital,
-                       "rsmd_final"  : result.rsmd_final,
-                       "r_start"     : result.r_start,
-                       "r_work"      : result.r_work})
+  db.old.insert_one({"pdb_code"    : result.pdb_code,
+                     "rsmd_inital" : result.rsmd_inital,
+                     "rsmd_final"  : result.rsmd_final,
+                     "r_start"     : result.r_start,
+                     "r_work"      : result.r_work})
 
 class Result(object):
-    def __init__(self,
+  def __init__(self,
                  pdb_code,
                  rsmd_inital,
                  rsmd_final,
                  r_start,
                  r_work):
-        self.pdb_code    = pdb_code
-        self.rsmd_inital = rsmd_inital
-        self.rsmd_final  = rsmd_final
-        self.r_start     = r_start
-        self.r_work      = r_work
+    self.pdb_code    = pdb_code
+    self.rsmd_inital = rsmd_inital
+    self.rsmd_final  = rsmd_final
+    self.r_start     = r_start
+    self.r_work      = r_work
 
 class Driver(object):
-    def __init__(self, pdb, driver):
-        self.pdb = pdb
-        self.pdb_inp = iotbx.pdb.input(self.pdb)
-        self.ph = self.pdb_inp.construct_hierarchy()
-        self.cs = self.pdb_inp.crystal_symmetry()
-        self.sites_cart = self.ph.atoms().extract_xyz()
-        self.driver = driver
+  def __init__(self, pdb, driver):
+      self.pdb = pdb
+      self.pdb_inp = iotbx.pdb.input(self.pdb)
+      self.ph = self.pdb_inp.construct_hierarchy()
+      self.cs = self.pdb_inp.crystal_symmetry()
+      self.sites_cart = self.ph.atoms().extract_xyz()
+      self.driver = driver
 
-    def refine(self):
-        self.driver(self.sites_cart)
-        return Result(self.pdb_code,
-                      self.rsmd_inital,
-                      self.rsmd_final,
-                      self.r_start,
-                      self.r_work)
+  def refine(self):
+    self.driver(self.sites_cart)
+    return Result(self.pdb_code,
+                  self.rsmd_inital,
+                  self.rsmd_final,
+                  self.r_start,
+                  self.r_work)
 
-    def __call__(self):
-        return self.refine()
+  def __call__(self):
+    return self.refine()
 
 def run(pdb_path,parallel=False):
   pdbs=[]

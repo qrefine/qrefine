@@ -28,44 +28,30 @@ def run_cmd(cmd):
     result = easy_run.fully_buffered(cmd).raise_if_errors()
 
 def example():
-  cmd = """phenix.python """+  \
+  cmd = "phenix.python " +  \
       os.path.join(qrefine_core_path,"qr.py ") +  \
-      os.path.join(qrefine_path,"examples/1us0/datasets.mtz ") + \
+      os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
       os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
-       """output_folder_name = refine > refine.log"""
+      "output_folder_name = 1us0 > 1us0.log"
+  cmd = cmd.replace("\n", "")
+  print "Running example:", cmd
   run_cmd(cmd)
 
 def run(args, log):
   cmd = " phenix.python " +  \
-      os.path.join(qrefine_core_path,"qr.py ") +  \
-      os.path.join(qrefine_path,"examples/1us0/datasets.mtz ") + \
-      os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
-      """max_iterations = 90
-      maxnum_residues_in_cluster = 5
-      max_atoms = 10000
-      number_of_micro_cycles = 20
-      qm_calculator = terachem
-      mode = refine
-      stpmax = 0.9
-      restraints = qm
-      gradient_only = true
-      line_search = true
-      shake_sites = false
-      use_cluster_qm = true
-      qsub_command = "qsub"
-      shared_disk = false
-      output_folder_name = cluster_glr
-      restraints_weight_scale = 32
-      > cluster_glr.log"""
-  print cmd
+        os.path.join(qrefine_core_path,"qr.py ") + \
+        " ".join(args).replace("\n", "")
+  print "Running example:", cmd
   easy_run.call(cmd)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Refine a model using restraints from Quantum Chemistry')
   parser.add_argument('--example', action='store_true', default=False, help='run refinement example.')
-  args = parser.parse_args()
+  known, unknown = parser.parse_known_args()
   t0 = time.time()
   print >> log,"Starting Q|R"
-  if(args.example): example()
-  else:run(args=sys.argv[1:], log=log)
+  if(known.example):
+    example()
+  else:
+    run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)
