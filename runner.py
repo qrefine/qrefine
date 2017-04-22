@@ -1,9 +1,8 @@
 from __future__ import division
-
 import os
 import time
 import requests
-#from libtbx import easy_run
+from libtbx import easy_run
 
 def build_qrefine():
   print "Building qrefine"
@@ -25,7 +24,7 @@ def run():
     "qr.test --unit"
     "qr.test --regression",]
 
-  print "Running tests:", test
+  print "Running tests:"
   for test in tests:
     easy_run.call(test)
 

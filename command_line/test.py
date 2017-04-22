@@ -6,6 +6,8 @@ import libtbx.load_env
 from qrefine.core.tests import run_tests as unit_tests
 from qrefine.regression      import regression_tests
 
+log = sys.stdout
+
 if __name__ == '__main__':
   print "Testing Q|R"
   parser = argparse.ArgumentParser(description='Test runners for Q|R code')
@@ -26,18 +28,18 @@ if __name__ == '__main__':
 
   args = parser.parse_args()
   if (args.unit)      :
-    print "Running unit tests"
+    print >>log,"Running unit tests"
     unit_tests.run()
   if (args.regression):
-    print "Running regression tests"
+    print >>log,"Running regression tests"
     regression_tests.run()
   if (args.pdb)       :
-    print "Running all pdb tests"
+    print >>log,"Running pdb tests"
     regression_tests.run(args=sys.argv[1:])
   if(args.all):
-      print "Running all regression"
-      unit_tests.run()
-      regression_tests.run()
-      regression_tests.run(args=sys.argv[1:])
+    print >>log,"Running all regression tests"
+    unit_tests.run()
+    regression_tests.run()
+    regression_tests.run(args=sys.argv[1:])
   if(not args.all and  not args.unit and not args.regression and not args.pdb ):
-      unit_tests.run()
+    unit_tests.run()

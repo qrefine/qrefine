@@ -9,33 +9,22 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_reg_tests = os.path.join(qrefine, "regression")
 qr_reg_data = os.path.join(qrefine, "regression/datasets")
 
-pdb_path= os.path.join(qr_reg_data,"p1")
-cluster_path = os.path.join(qr_reg_data,"cluster")
-clusters_path = os.path.join(qr_reg_data,"clusters")
-capping_path = os.path.join(qr_reg_data,"capping")
-charmm_path = os.path.join(qr_reg_data,"charmm")
-
-def datasets():
-  return [pdb_path,
-          cluster_path,
-          clusters_path,
-          capping_path,
-          charmm_path]
-
 def run():
   regression_tests = [
-    #"test_reg_00_charge.py",
     #"test_reg_01_finalise.py",
-    #"test_reg_02_finalise.py",
-    #"test_reg_03_finalise.py",
-    "test_reg_04_cluster.py",
+    "test_reg_02_chunk.py",
+    #"test_reg_03_restraint.py",
+    #"test_reg_04_refine.py",
   ]
 
   for regression_test in regression_tests:
-      for dataset in datasets():
+    for dirName, subdirList, fileList in os.walk(qr_reg_data):
+      for dataset in subdirList:
         print "Running: {} ".format(regression_test)
         print "Dataset: {} ".format(dataset)
-        easy_run.call("cctbx.python %s %s"%(os.path.join(qr_reg_tests,regression_test),dataset))
+        easy_run.call("cctbx.python %s %s"%(
+           os.path.join(qr_reg_tests,regression_test),
+           os.path.join(qr_reg_data,dataset)))
 
 if(__name__ == "__main__"):
   t0 = time.time()
