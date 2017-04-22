@@ -39,7 +39,7 @@ def test_GLY_terminal_and_alt_loc():
 
 def run(prefix = "tst_reg_01_altloc"):
   """
-  Exercise structure preparation including charge, capping, completion
+  Exercise structure preparation including charge, finalise, completion
   """
   tests = [
     [test_GLY_terminal_and_alt_loc, 1],

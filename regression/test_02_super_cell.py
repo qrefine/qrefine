@@ -18,7 +18,7 @@ qr_repo_parent = libtbx.env.find_in_repositories("qrefine")
 
 def run(prefix = "tst_reg_02_super_cell"):
   """
-  Exercise structure preparation including charge, capping, completion
+  Exercise structure preparation including charge, finalise, completion
   """
   tests = [
 

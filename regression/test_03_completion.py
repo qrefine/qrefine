@@ -14,14 +14,14 @@ from qrefine.core.utils import hierarchy_utils
 
 qr_repo_parent = libtbx.env.find_in_repositories("qrefine")
 pdb_dir = '%s/qr-core/regression/babel' % qr_repo_parent
-babel_dir = os.path.join(pdb_dir, 'capping')
-cluster_dir = os.path.join(pdb_dir, 'clusters')
+babel_dir = os.path.join(pdb_dir, 'finalise')
+cluster_dir = os.path.join(pdb_dir, 'chunk')
 cluster_files = os.listdir(cluster_dir)
 
 def test_capping_of_cluster_complete(only_i=None):
   for i, cluster_file in enumerate(cluster_files):
     if only_i is not None and i!=only_i: continue
-    if cluster_file.find('capping')>-1: continue
+    if cluster_file.find('finalise')>-1: continue
     if cluster_file.endswith(".pdb") and ("temp" not in cluster_file):
       cluster_file_path = os.path.join(cluster_dir, cluster_file)
       if not os.path.exists(cluster_file):
@@ -38,11 +38,11 @@ def test_capping_of_cluster_complete(only_i=None):
       result_size = len(pdb.input(result_file).atoms())    
       babel_size =  len(pdb.input(babel_file).atoms())
       assert result_size ==  babel_size,\
-        '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
+        '%s atom size after babel finalise: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
 def run(prefix = "tst_reg_03_completion"):
   """
-  Exercise structure preparation including charge, capping, completion
+  Exercise structure preparation including charge, finalise, completion
   """
   tests = [
 

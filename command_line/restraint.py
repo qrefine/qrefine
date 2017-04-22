@@ -14,9 +14,9 @@ qr_path = os.path.join(qrefine_path, "core")
 log = sys.stdout
 
 def example():
-  print >> log, "No pdb specified, using helix example"
+  print >> log, "Running helix example "
   example_pdb = os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb")
-  run(example_pdb)
+  run(example_pdb,"mopac")
 
 def run(pdb_file,name):
   pdb_inp = iotbx.pdb.input(pdb_file)
@@ -28,7 +28,8 @@ def run(pdb_file,name):
             pdb_hierarchy=ph,
             crystal_symmetry=cs,
             use_cluster_qm=False),
-  energy,gradients = restraint_manager.target_and_gradients(sites_cart)
+  print type(restraint_manager)
+  energy,gradients = restraint_manager.target_and_gradients()
   print >> log,"Energy: ", energy
   print >> log,"Gradients: "
   for gradient in list(gradients):
@@ -37,25 +38,33 @@ def run(pdb_file,name):
 if (__name__ == "__main__"):
   print "Restraint for Q|R"
   parser = argparse.ArgumentParser(description='Calculate restraint for Q|R')
-  parser.add_argument('--cctbx', action='store_true',
+  parser.add_argument('--cctbx',
+                      action='store_true',
                       default=False,
                       help='''compute the standard cctbx restraint''')
-  parser.add_argument('--qm', action='store_true',
+  parser.add_argument('--qm',
+                      action='store_true',
                       default=False,
                       help='compute the energy and gradient using a QM calculator ')
-  parser.add_argument('--cluster', action='store_true',
+  parser.add_argument('--cluster',
+                      action='store_true',
                       default=False,
-                      help='construct a set of clusters, and then calculate the combined gradient')  # nightly build?
-  parser.add_argument('--all', action='store_true',
+                      help='''construct a set of chunk,
+                              and then calculate the combined gradient''')
+  parser.add_argument('--all',
+                      action='store_true',
                       default=True,
                       help='''run the full set of restraints for comparison''')
-  parser.add_argument('--example', action='store_true', default=False, help='run restraint example.')
+  parser.add_argument('--example',
+                      action='store_true',
+                      default=False,
+                      help='run restraint example.')
   known, unknown = parser.parse_known_args()
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  if len(args) == 1:
-    run(args[0])
-  else:
+  if (known.example):
     example()
+  else:
+    run(args[0])
   print >> log, "Time: %6.4f" % (time.time() - t0)

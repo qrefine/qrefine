@@ -45,8 +45,34 @@ def run(args, log):
   easy_run.call(cmd)
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='Refine a model using restraints from Quantum Chemistry')
-  parser.add_argument('--example', action='store_true', default=False, help='run refinement example.')
+  parser = argparse.ArgumentParser(
+      description='Refine a model using restraints from Quantum Chemistry'
+  )
+  parser.add_argument('--example',
+                      action='store_true',
+                      default=False,
+                      help='run refinement example.')
+  parser.add_argument('--iter',
+                      action='store_true',
+                      default=50,
+                      help='run refinement example.')
+  parser.add_argument('--macro',
+                      action='store_true',
+                      default=50,
+                      help='number of macro cycles to perform.')
+  parser.add_argument('--micro',
+                      action='store_true',
+                      default=50,
+                      help='number of micro cycles to perform.')
+  parser.add_argument('--conv',
+                      action='store_true',
+                      default=True,
+                      help='use convergence test during refinement.')
+  parser.add_argument('--grad',
+                      action='store_true',
+                      default=False,
+                      help='use only the gradient, not the target.')
+
   known, unknown = parser.parse_known_args()
   t0 = time.time()
   print >> log,"Starting Q|R"

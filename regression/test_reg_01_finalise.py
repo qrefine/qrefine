@@ -24,7 +24,7 @@ def check_assertions(result):
   assert result_db['charge']     == result.charge
   assert result_db['super_cell'] == result.super_cell
   assert result_db['completion'] == result.completion
-  assert result_db['capping']    == result.capping
+  assert result_db['finalise']   == result.capping
   assert result_db['failing']    == result.failing
 
 def run(prefix = "tst_reg_01_finalise"):

@@ -240,13 +240,13 @@ def test_charge_for_charmm_pdbs(only_i=None):
 
 def test_charge_of_neutral_terminal():
   charge = 0
-  tf = "%s/qr-core/regression/babel/clusters/neutral_nterminal.pdb" % qr_repo_parent
+  tf = "%s/qr-core/regression/babel/chunk/neutral_nterminal.pdb" % qr_repo_parent
   charge_neutral_nterminal = charges.get_total_charge_from_pdb(tf)
   assert charge == charge_neutral_nterminal, 'no match %s %s' % (
     charge,
     charge_neutral_nterminal,
     )
-  tf = "%s/qr-core/regression/babel/clusters/neutral_cterminal.pdb" % qr_repo_parent
+  tf = "%s/qr-core/regression/babel/chunk/neutral_cterminal.pdb" % qr_repo_parent
   charge_neutral_cterminal = charges.get_total_charge_from_pdb(tf)
   assert charge == charge_neutral_cterminal, 'no match %s %s' % (
     charge,
@@ -256,7 +256,7 @@ def test_charge_of_neutral_terminal():
 
 def run(prefix = "tst_reg_01_charge"):
   """
-  Exercise structure preparation including charge, capping, completion
+  Exercise structure preparation including charge, finalise, completion
   """
   tests = [
     [test_charge_of_neutral_terminal, 1],

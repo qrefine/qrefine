@@ -41,7 +41,7 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
           atom_tot_per_residue += atom_group.atoms_size()
           chunk_sizes.append(atom_tot_per_residue)
     chunks.append(res_in_chunk)
-  print >> log, "molecular indices in clusters:(the molecular index starts from 1)", fq.fragments.clusters
+  print >> log, "Residue indices in each chunk:", fq.fragments.clusters
   print >> log, "pdb hierarchy for each fragment (cluster+buffer)", chunks
 
 if (__name__ == "__main__"):

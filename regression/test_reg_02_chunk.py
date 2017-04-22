@@ -22,13 +22,13 @@ def check_assertions(result):
     insert(result)
   else:
     result_db = db.old.find_one({"pdb_code": result.pdb_code})
-    assert result_db['clusters']    == result.clusters
+    assert result_db['chunk']    == result.clusters
     assert result_db['chunks']      == result.chunks
     assert result_db['chunk_sizes'] == result.chunk_sizes
 
 def insert(result):
   db.old.insert_one({"pdb_code"        : result.pdb_code,
-                     "clusters"        : result.clusters,
+                     "chunk"        : result.clusters,
                      "chunks"          : result.chunks,
                      "chunk_sizes"     : result.chunk_sizes,
                      "num_of_chunks"   : result.num_of_chunks,

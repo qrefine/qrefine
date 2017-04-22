@@ -1,80 +1,45 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
-import os, sys, shutil
+import os, sys, shutil, time
+import argparse
 import libtbx.load_env
 from libtbx import easy_run
-from multiprocessing import Pool
 
 log = sys.stdout
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 
-pdb_dir='./tmp'
+def example():
+  cmd = "phenix.python " +  \
+        os.path.join(qr_path,"finalise.py ") +  \
+        os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
+        "model_completion=False > 1us0.log"
+  cmd = cmd.replace("\n", "")
+  print "Running example:", cmd
+  easy_run.fully_buffered(command=cmd)
 
-def callback(args):
-  print "call back"
-  return args
-  
-def _process_pdb_filename(pdb_file):
-  os.chdir(pdb_dir)
-  complete_file=pdb_file[:-4]+"_complete.pdb"
-  if ( pdb_file.endswith("pdb")  and not os.path.exists(complete_file) ):
-    cmd = "phenix.python " + os.path.join(qr_path,"finalise.py")+" %s" % pdb_file + "> "+ pdb_file[:-4]+".log"
-    print '\n\t~> %s\n' % cmd
-    easy_run.call(cmd)
-  os.chdir("../")
-  return None
+def run(args):
+  cmd = "phenix.python " +  \
+        os.path.join(qr_path,"finalise.py ") + \
+        " ".join(args).replace("\n", "")
+  cmd = cmd.replace("\n", "")
+  print "Running example:", cmd
+  easy_run.fully_buffered(command=cmd)
 
-def run(folder,
-    nproc=8,
-    only_code=None, 
-    ):
-  pdb_dir = './tmp/' 
-  filenames = os.listdir(pdb_dir)
-  assert not filenames, 'script must be run in a empty directory'
-  cmd = "cp "+ folder + "/./*.pdb "+ pdb_dir
-  os.system(cmd)
-  try: nproc=int(nproc)
-  except: nproc=1  
-  pool = None
-  if nproc>1:
-    pool = Pool(processes=nproc)
-  os.chdir(pdb_dir)
-  pdb_dir="./"
-  pdb_files = os.listdir(pdb_dir)
-  for pdb_file in pdb_files:
-    cmd='mv  '+ pdb_file +'  ' + pdb_file[:4]+'.pdb'
-    os.system(cmd)
-  pdb_files = os.listdir(pdb_dir)
-  print "pdbs need to be completed:"
-  print pdb_files
-  for pdb_file in pdb_files:
-    if not pdb_file.endswith(".pdb"): continue
-    if len(pdb_file.split('.'))!=2: continue
-    if len(pdb_file.split('.')[0])!=4: continue
-    if only_code is not None and only_code!=pdb_file.split('.')[0]: continue
-    if nproc==1:
-      _process_pdb_filename(pdb_file)
-    else:
-      rc = pool.apply_async(
-        _process_pdb_filename,
-        [pdb_file],
-        callback=callback,
-        )
-  if pool:
-    pool.close()
-    pool.join()
-  pdb_files = os.listdir(pdb_dir)
-  ok_pdbs = []
-  for pdb_file in pdb_files:
-    if "complete.pdb" in pdb_file:
-      ok_pdbs.append(pdb_file[:4]) 
-  print ok_pdbs
-  os.chdir("../")
-  return ok_pdbs
-  
-if __name__=="__main__":
-  args = sys.argv[1:]
-  del sys.argv[1:]
-  run(*tuple(args))
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(
+      description='Finalise a model before quantum refinement '
+  )
+  parser.add_argument('--example',
+                      action='store_true',
+                      default=False,
+                      help='run finalise example.')
+  known, unknown = parser.parse_known_args()
+  t0 = time.time()
+  print >> log,"Starting Q|R"
+  if(known.example):
+    example()
+  else:
+    run(args=sys.argv[1:], log=log)
+  print >> log, "Time: %6.4f" % (time.time() - t0)
