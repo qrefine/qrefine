@@ -5,12 +5,6 @@ import time
 import os.path
 import libtbx
 import iotbx.pdb
-from libtbx.utils import Sorry
-
-try:
-  from jpype import startJVM
-except ImportError, e:
-  raise Sorry(str(e))
 from qrefine.core.restraints import from_qm
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -28,15 +22,15 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
   sites_cart = ph.atoms().extract_xyz()
+  #this should be a chunk.
   fq = from_qm(
     pdb_hierarchy=ph,
     crystal_symmetry=cs,
     use_cluster_qm=True,
-    maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
-    yoink_jar_path = qr_yoink_path + "Yoink-0.0.1.jar" ,
-    yoink_dat_path = qr_yoink_path +"dat")
+    maxnum_residues_in_cluster=int(maxnum_residues_in_cluster))
   chunks = []
   chunk_sizes = []
+  #This should be in chunk
   for chunk in fq.fragments.qm_pdb_hierarchies:
     res_in_chunk = []
     atom_tot_per_residue = 0

@@ -51,21 +51,13 @@ class Restraints(object):
   def __call__(self):
     return self.process()
 
-
-def calculators():
-  return{
-    "cctbx":from_cctbx(
-      restraints.from_cctbx(
-      cif_objects=cmdline.cif_objects,
-      pdb_file_name=cmdline.pdb_file_names[0]).geometry_restraints_manager
-      cctbx_rm_bonds_rmsd = calculator.get_bonds_angles_rmsd(
-      restraints_manager=geometry_rmsd_manager.geometry,
-      xrs=fmodel.xray_structure)),
-    "terachem": from_qm(
-
-      ),
-
-    }
+def calculators(pdb_file):
+   return[
+       "moapc",
+       "pyscf",
+       "terachem",
+       "turbomole"
+   ]
 
 def run(pdb_path, manager, parallel):
   pdbs=[]
@@ -83,9 +75,10 @@ def run(pdb_path, manager, parallel):
     for test_result in test_results:
       check_assertions(test_result)
   else:
-   for pdb_file in pdbs:
-    restraint = Restraints(os.path.join(pdb_path, pdb_file), manager)
-    check_assertions(restraint.process())
+   for calculator in calculators(pdb_file):
+     for pdb_file in pdbs:
+      restraint = Restraints(os.path.join(pdb_path, pdb_file), calculator)
+      check_assertions(restraint.process())
 
 if(__name__ == "__main__"):
   t0 = time.time()

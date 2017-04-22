@@ -15,29 +15,14 @@ example_path = os.path.join(qrefine_path,"examples")
 
 log = sys.stdout
 
-def stop(args, log):
-  """how do we get a reference to all of the running jobs.
-  This could be hundreds of qdels,we must automate this."""
-  jobid = args[1]
-  print "Are you sure you want to stop job {}".format(jobid)
-
-def pause():
-  id = 0
-  print "Are you sure you want to pause job {}".format(id)
-  # example job ids, just for getting the code to work
-  sub_job_ids =['305.mu01','306.mu01']
-  cmds= []
-  for sub_job_id in sub_job_ids:
-    cmds.append(" qhold" +  sub_job_id)
-  easy_run.call(cmds)
-
 def run_cmd(cmd):
   # we want a reference to the running job.
   if cmd.find("qsub_command") is not -1:
     easy_qsub.run(
       phenix_source=phenix_source,
       where="working_dir",
-      commands=cmd)
+      commands=cmd
+    )
   else:
     # we want a reference to the running job.
     result = easy_run.fully_buffered(cmd).raise_if_errors()
@@ -76,12 +61,11 @@ def run(args, log):
   easy_run.call(cmd)
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='qrefine.example')
+  parser = argparse.ArgumentParser(description='Refine a model using restraints from Quantum Chemistry')
   parser.add_argument('--example', action='store_true', default=False, help='run refinement example.')
   args = parser.parse_args()
   t0 = time.time()
   print >> log,"Starting Q|R"
   if(args.example): example()
-  elif(args.help): help()
   else:run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)
