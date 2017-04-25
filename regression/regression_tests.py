@@ -7,7 +7,6 @@ from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_reg_tests = os.path.join(qrefine, "regression")
-qr_reg_data = os.path.join(qrefine, "regression/datasets")
 
 def run():
   regression_tests = [
