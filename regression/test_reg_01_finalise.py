@@ -5,8 +5,7 @@ import time
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx.utils import Sorry
-from command_line import finalise
-from regression.results import expected
+from qrefine.core import finalise
 
 from pymongo import MongoClient
 
@@ -15,6 +14,9 @@ db = MongoClient('localhost', 27017).pyoink
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 pdb_dir_p1 = os.path.join(qrefine_path, "regression/datasets/p1/")
 pdb_dir_cluster = os.path.join(qrefine_path, "regression/datasets/cluster/")
+
+cluster = []
+p1 = []
 
 def check_assertions(result):
   """
@@ -28,8 +30,8 @@ def check_assertions(result):
   assert result_db['failing']    == result.failing
 
 def run(prefix = "tst_reg_01_finalise"):
-  complete_pdbs(expected.cluster, pdb_dir_cluster)
-  complete_pdbs(expected.p1, pdb_dir_p1)
+  complete_pdbs(cluster, pdb_dir_cluster)
+  complete_pdbs(p1, pdb_dir_p1)
 
 def complete_pdbs(expected_list, pdb_dir):
   shutil.rmtree("./tmp",ignore_errors=True)

@@ -6,12 +6,15 @@ import iotbx.pdb
 import libtbx.load_env
 from libtbx.easy_mp import parallel_map
 from qrefine.core.restraints import from_qm,from_cctbx
+import restraint_wrapper
 from pymongo import MongoClient
 
 db = MongoClient('localhost', 27017).pyoink
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
+utils_path= os.path.join(qr_path,"utils")
+qr_reg_data = os.path.join(qrefine_path, "regression/datasets/cluster")
 
 def check_assertions(result):
   """
@@ -35,22 +38,6 @@ class Result(object):
     self.energy = energy
     self.gradients = gradients
 
-class Restraints(object):
-  def __init__(self,pdb,manager):
-    self.pdb = pdb
-    self.pdb_inp = iotbx.pdb.input(self.pdb)
-    self.ph = self.pdb_inp.construct_hierarchy()
-    self.cs = self.pdb_inp.crystal_symmetry()
-    self.sites_cart = self.ph.atoms().extract_xyz()
-    self.manager = manager
-
-  def process(self):
-    energy, gradients = self.manager.target_and_gradients(self.sites_cart)
-    return Result(self.pdb_code,energy, gradients)
-
-  def __call__(self):
-    return self.process()
-
 def calculators(pdb_file):
    return[
        "moapc",
@@ -59,13 +46,14 @@ def calculators(pdb_file):
        "turbomole"
    ]
 
-def run(pdb_path, manager, parallel):
+def run():
   pdbs=[]
-  for pdb_file in os.listdir(pdb_path):
-    pdbs.append(pdb_file)
-  if(parallel):
+  for pdb_file in os.listdir(qr_reg_data):
+    pdbs.append(os.path.join(qr_reg_data,pdb_file))
+  if(1):
+    print "running parallel test"
     test_results = parallel_map(
-          func=Restraints(),
+          func=restraint_wrapper(manager),
           iterable=pdbs,
           qsub_command=qsub_command,
           processes=len(pdbs),
@@ -75,17 +63,15 @@ def run(pdb_path, manager, parallel):
     for test_result in test_results:
       check_assertions(test_result)
   else:
+   print "running serial"
    for calculator in calculators(pdb_file):
      for pdb_file in pdbs:
-      restraint = Restraints(os.path.join(pdb_path, pdb_file), calculator)
+      restraint = Restraints(os.path.join(qr_reg_data, pdb_file), calculator)
       check_assertions(restraint.process())
 
 if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  if(1):
-    run(args[0],parallel=False)
-  if (0):
-    run(args[0],parallel=True)
+  run()
   print "Total time (all regression): %6.2f"%(time.time()-t0)
