@@ -24,7 +24,6 @@ def run():
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  # TODO: regression can be run on an external dataset, pass in arg for filepath.
   run()
   print "Total time (all regression): %6.2f"%(time.time()-t0)
   print "OK"
