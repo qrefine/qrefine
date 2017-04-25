@@ -14,7 +14,7 @@ if __name__ == '__main__':
                       action='store_true',
                       default=False,
                       help='run unit regression ')
-  parser.add_argument('--regression',
+  parser.add_argument('--reg',
                       action='store_true',
                       default=False,
                       help='run regression regression, will take a long time')
@@ -31,7 +31,7 @@ if __name__ == '__main__':
   if (args.unit)      :
     print >> log,"Running unit tests"
     unit_tests.run()
-  if (args.regression):
+  if (args.reg):
     print >> log,"Running regression tests"
     regression_tests.run()
   if (args.pdb)       :
@@ -42,6 +42,6 @@ if __name__ == '__main__':
     unit_tests.run()
     regression_tests.run()
     regression_tests.run(args=sys.argv[1:])
-  if(not args.all and not args.unit and not args.regression and not args.pdb):
+  if(not args.all and not args.unit and not args.reg and not args.pdb):
     print >> log,"Running unit tests"
     unit_tests.run()

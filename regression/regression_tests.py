@@ -18,13 +18,9 @@ def run():
   ]
 
   for regression_test in regression_tests:
-    for dirName, subdirList, fileList in os.walk(qr_reg_data):
-      for dataset in subdirList:
         print "Running: {} ".format(regression_test)
-        print "Dataset: {} ".format(dataset)
-        easy_run.call("cctbx.python %s %s"%(
-           os.path.join(qr_reg_tests,regression_test),
-           os.path.join(qr_reg_data,dataset)))
+        easy_run.call("cctbx.python {} ".format(  
+           os.path.join(qr_reg_tests,regression_test)))
 
 if(__name__ == "__main__"):
   t0 = time.time()
