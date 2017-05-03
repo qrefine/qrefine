@@ -1,8 +1,5 @@
 from __future__ import division
-import sys
-import time
 import os.path
-import iotbx.pdb
 import libtbx.load_env
 from qrefine.core.restraints import from_qm,from_cctbx
 from restraint_wrapper import Restraints, Result
@@ -36,7 +33,6 @@ class test_restraint(test_base):
                      "energy"    : result.energy,
                      "gradients" : result.gradients})
 
-
   def calculators(pdb_file):
      return[
          "moapc",
@@ -44,4 +40,3 @@ class test_restraint(test_base):
          "terachem",
          "turbomole"
      ]
-

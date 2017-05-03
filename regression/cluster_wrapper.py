@@ -1,10 +1,5 @@
 from __future__ import division
-import os
-import sys
-import time
-import os.path
 import iotbx.pdb
-
 from qrefine.core.restraints import from_qm
 
 class Clusterer(object):
@@ -36,7 +31,6 @@ class Clusterer(object):
             atom_tot_per_residue += atom_group.atoms_size()
             chunk_sizes.append(atom_tot_per_residue)
       chunks.append(res_in_chunk)
-    print chunks
     return Result(self.pdb_file,
                      self.fq.fragments.clusters,
                      chunks,

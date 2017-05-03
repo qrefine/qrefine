@@ -1,12 +1,8 @@
 from __future__ import division
-import sys
-import time
 import os.path
-import iotbx.pdb
 import libtbx.load_env
 from libtbx.easy_mp import parallel_map
 from test_reg_00_base import test_base
-from pymongo import MongoClient
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")

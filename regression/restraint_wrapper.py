@@ -1,8 +1,4 @@
 from __future__ import division
-import os
-import sys
-import time
-import os.path
 import iotbx.pdb
 from qrefine.core.restraints import from_qm
 

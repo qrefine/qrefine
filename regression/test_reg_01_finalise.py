@@ -13,7 +13,7 @@ class test_finalise(test_base):
    """
    Exercise structure completion by finalise.py
    """
-   result_db = db.old.find_one({"pdb_code": result.pdb_code})
+   result_db = self.db.old.find_one({"pdb_code": result.pdb_code})
    assert result_db['charge']     == result.charge
    assert result_db['super_cell'] == result.super_cell
    assert result_db['completion'] == result.completion
@@ -21,7 +21,7 @@ class test_finalise(test_base):
    assert result_db['failing']    == result.failing
   
   def insert(result):
-    db.old.insert_one({"pdb_code"      : result.pdb_code,
+     self.db.old.insert_one({"pdb_code"      : result.pdb_code,
                      "chunk"           : result.clusters,
                      "chunks"          : result.chunks,
                      "chunk_sizes"     : result.chunk_sizes,

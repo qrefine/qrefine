@@ -1,18 +1,13 @@
 from __future__ import division
 import os
-import sys
-import time
 import os.path
-import iotbx.pdb
 import libtbx.load_env
 from libtbx.easy_mp import parallel_map
-from qrefine.core.restraints import from_qm
 from pymongo import MongoClient
 from abc import ABCMeta, abstractmethod
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
-
 
 qsub_command = 'qsub  -N reg_test_cluster -m ae -q fat  -l nodes=1:ppn=32'
 
@@ -21,7 +16,6 @@ class test_base:
   
   def __init__(self):
     self.db = MongoClient('localhost', 27017).pyoink
-
 
   @abstractmethod
   def check_assertions(self):
@@ -42,10 +36,11 @@ class test_base:
       func=self.func,
       iterable=self.pdbs,
       method='pbs',
+#      method='multiprocessing',
       preserve_exception_message=True,
+#      processes=4,
       processes=len(self.pdbs),
       qsub_command=qsub_command,
       use_manager=True)
     for test_result in test_results:
       check_assertions(test_results)
-

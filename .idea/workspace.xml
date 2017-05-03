@@ -2,141 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/0_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/0_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/10_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/10_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/11_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/11_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/12_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/12_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/13_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/13_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/14_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/14_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/15_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/15_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/16_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/16_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/17_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/17_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/18_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/18_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/19_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/19_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/1_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/1_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/20_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/20_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/21_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/21_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/22_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/22_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/23_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/23_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/24_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/24_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/25_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/25_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/26_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/26_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/27_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/27_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/28_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/28_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/29_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/29_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/2_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/2_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/30_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/30_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/31_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/31_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/32_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/32_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/33_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/33_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/34_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/34_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/35_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/35_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/36_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/36_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/37_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/37_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/38_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/38_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/39_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/39_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/3_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/3_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/40_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/40_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/41_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/41_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/42_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/42_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/43_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/43_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/44_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/44_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/45_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/45_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/46_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/46_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/47_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/47_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/48_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/48_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/49_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/49_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/4_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/4_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/50_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/50_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/51_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/51_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/52_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/52_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/5_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/5_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/6_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/6_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/7_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/7_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/8_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/8_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/9_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/9_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/cterminal2_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/cterminal2_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/cterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/cterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/cys_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/cys_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/neutral_cterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/neutral_cterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/neutral_nterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/neutral_nterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/nterminal2_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/nterminal2_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/nterminal_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/nterminal_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/capping/pro_babel.pdb" afterPath="$PROJECT_DIR$/regression/datasets/finalise/pro_babel.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/0.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/0.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/1.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/1.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/10.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/10.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/11.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/11.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/12.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/12.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/13.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/13.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/14.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/14.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/15.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/15.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/16.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/16.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/17.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/17.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/18.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/18.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/19.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/19.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/20.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/20.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/21.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/21.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/22.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/22.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/23.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/23.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/24.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/24.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/25.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/25.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/26.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/26.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/27.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/27.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/28.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/28.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/29.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/29.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/3.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/3.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/30.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/30.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/31.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/31.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/32.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/32.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/33.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/33.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/34.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/34.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/35.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/35.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/36.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/36.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/37.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/37.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/38.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/38.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/39.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/39.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/4.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/4.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/40.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/40.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/41.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/41.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/42.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/42.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/43.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/43.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/44.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/44.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/45.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/45.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/46.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/46.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/47.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/47.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/48.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/48.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/49.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/49.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/5.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/5.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/50.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/50.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/51.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/51.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/52.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/52.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/6.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/6.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/7.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/7.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/8.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/8.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/9.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/9.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/cterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/cterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/cterminal2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/cterminal2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/cys.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/cys.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/neutral_cterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/neutral_cterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/neutral_nterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/neutral_nterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/nterminal.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/nterminal.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/nterminal2.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/nterminal2.pdb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/regression/datasets/clusters/pro.pdb" afterPath="$PROJECT_DIR$/regression/datasets/chunk/pro.pdb" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/regression/test_reg_03_" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/regression/test_reg_03_finalise.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/chunk.py" afterPath="$PROJECT_DIR$/command_line/chunk.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/finalise.py" afterPath="$PROJECT_DIR$/command_line/finalise.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/refine.py" afterPath="$PROJECT_DIR$/command_line/refine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/restraint.py" afterPath="$PROJECT_DIR$/command_line/restraint.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/test.py" afterPath="$PROJECT_DIR$/command_line/test.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_00_charge.py" afterPath="$PROJECT_DIR$/regression/test_00_charge.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_01_altloc.py" afterPath="$PROJECT_DIR$/regression/test_01_altloc.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_02_super_cell.py" afterPath="$PROJECT_DIR$/regression/test_02_super_cell.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_03_completion.py" afterPath="$PROJECT_DIR$/regression/test_03_completion.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_04_capping.py" afterPath="$PROJECT_DIR$/regression/test_04_capping.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/cluster_wrapper.py" afterPath="$PROJECT_DIR$/regression/cluster_wrapper.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/refine_wrapper.py" afterPath="$PROJECT_DIR$/regression/refine_wrapper.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/regression_tests.py" afterPath="$PROJECT_DIR$/regression/regression_tests.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/restraint_wrapper.py" afterPath="$PROJECT_DIR$/regression/restraint_wrapper.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_00_base.py" afterPath="$PROJECT_DIR$/regression/test_reg_00_base.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_01_finalise.py" afterPath="$PROJECT_DIR$/regression/test_reg_01_finalise.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_02_chunk.py" afterPath="$PROJECT_DIR$/regression/test_reg_02_chunk.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_03_restraint.py" afterPath="$PROJECT_DIR$/regression/test_reg_03_restraint.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_04_refine.py" afterPath="$PROJECT_DIR$/regression/test_reg_04_refine.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/runner.py" afterPath="$PROJECT_DIR$/runner.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -165,102 +42,21 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="restraint.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="800">
-              <caret line="52" column="22" lean-forward="false" selection-start-line="52" selection-start-column="22" selection-end-line="52" selection-end-column="22" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test_reg_03_restraint.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/regression/test_reg_03_restraint.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
-              <caret line="63" column="6" lean-forward="false" selection-start-line="63" selection-start-column="6" selection-end-line="63" selection-end-column="6" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test_reg_04_refine.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/regression/test_reg_04_refine.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="995">
-              <caret line="84" column="55" lean-forward="true" selection-start-line="84" selection-start-column="55" selection-end-line="84" selection-end-column="55" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test_reg_01_finalise.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/regression/test_reg_01_finalise.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="27" column="33" lean-forward="false" selection-start-line="27" selection-start-column="33" selection-end-line="27" selection-end-column="33" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test_reg_02_chunk.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/regression/test_reg_02_chunk.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="831">
-              <caret line="81" column="9" lean-forward="false" selection-start-line="81" selection-start-column="9" selection-end-line="81" selection-end-column="9" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="chunk.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/command_line/chunk.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="426">
-              <caret line="38" column="50" lean-forward="true" selection-start-line="38" selection-start-column="50" selection-end-line="38" selection-end-column="50" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="refine.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/command_line/refine.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1039">
-              <caret line="48" column="12" lean-forward="true" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/command_line/test.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1016">
-              <caret line="43" column="43" lean-forward="true" selection-start-line="43" selection-start-column="43" selection-end-line="43" selection-end-column="43" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="0">
+                <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                <folding />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="requirements.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/requirements.txt">
+        <entry file="file://$PROJECT_DIR$/requirements.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -269,12 +65,92 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="restraints.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/restraints.py">
+      <file leaf-file-name="runner.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/runner.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-932">
-              <caret line="53" column="55" lean-forward="false" selection-start-line="53" selection-start-column="55" selection-end-line="53" selection-end-column="55" />
+            <state relative-caret-position="586">
+              <caret line="24" column="21" lean-forward="true" selection-start-line="24" selection-start-column="21" selection-end-line="24" selection-end-column="21" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="restraint_wrapper.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/restraint_wrapper.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="regression_tests.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="refine_wrapper.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/refine_wrapper.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="603">
+              <caret line="27" column="13" lean-forward="true" selection-start-line="27" selection-start-column="13" selection-end-line="27" selection-end-column="13" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cluster_wrapper.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/cluster_wrapper.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="891">
+              <caret line="33" column="0" lean-forward="false" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/results/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test_reg_00_base.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_00_base.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="785">
+              <caret line="40" column="1" lean-forward="false" selection-start-line="40" selection-start-column="1" selection-end-line="40" selection-end-column="1" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -328,10 +204,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/command_line/help.py" />
-        <option value="$PROJECT_DIR$/command_line/cluster.py" />
-        <option value="$PROJECT_DIR$/tests/regression/expected.py" />
-        <option value="$PROJECT_DIR$/core/utils/fragment_utils.py" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/core/tests/tst_08.py" />
@@ -364,21 +236,25 @@
         <option value="$PROJECT_DIR$/regression/test_reg_02_super_cell.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_04_capping.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_05_finalise.py" />
-        <option value="$PROJECT_DIR$/regression/regression_tests.py" />
         <option value="$PROJECT_DIR$/core/fragment.py" />
         <option value="$PROJECT_DIR$/core/restraints.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_02_chunk.py" />
-        <option value="$PROJECT_DIR$/runner.py" />
-        <option value="$PROJECT_DIR$/regression/test_reg_03_restraint.py" />
-        <option value="$PROJECT_DIR$/regression/test_reg_04_refine.py" />
         <option value="$PROJECT_DIR$/patch.sh" />
         <option value="$PROJECT_DIR$/command_line/test.py" />
         <option value="$PROJECT_DIR$/command_line/chunk.py" />
-        <option value="$PROJECT_DIR$/regression/test_reg_01_finalise.py" />
         <option value="$PROJECT_DIR$/command_line/finalise.py" />
         <option value="$PROJECT_DIR$/command_line/refine.py" />
         <option value="$PROJECT_DIR$/core/qr.py" />
         <option value="$PROJECT_DIR$/command_line/restraint.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_01_finalise.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_03_restraint.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_04_refine.py" />
+        <option value="$PROJECT_DIR$/runner.py" />
+        <option value="$PROJECT_DIR$/regression/restraint_wrapper.py" />
+        <option value="$PROJECT_DIR$/regression/regression_tests.py" />
+        <option value="$PROJECT_DIR$/regression/refine_wrapper.py" />
+        <option value="$PROJECT_DIR$/regression/cluster_wrapper.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_00_base.py" />
       </list>
     </option>
   </component>
@@ -389,8 +265,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="263" />
-    <option name="y" value="28" />
+    <option name="x" value="652" />
+    <option name="y" value="42" />
     <option name="width" value="2517" />
     <option name="height" value="1337" />
   </component>
@@ -409,6 +285,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -431,13 +308,40 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="regression" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="qrefine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="qrefine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="docs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="qrefine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="qrefine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="command_line" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
     </panes>
   </component>
@@ -850,19 +754,18 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="263" y="28" width="2517" height="1337" extended-state="1" />
+    <frame x="652" y="42" width="2517" height="1337" extended-state="0" />
     <editor active="true" />
     <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15600814" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.10909091" sideWeight="0.5360489" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3446281" sideWeight="0.48594704" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31810632" sideWeight="0.49834985" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.49857435" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.48961303" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15437882" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.10909091" sideWeight="0.4639511" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.48961303" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39950576" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -871,6 +774,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.10909091" sideWeight="0.4639511" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -885,76 +789,20 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/core/restraints.py</url>
-          <line>126</line>
+          <line>136</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="10" />
+      <option name="time" value="11" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/skip.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/calculator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3836">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/tests/tst_13.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2002">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/tests/tst_11.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/tests/tst_10.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="37" column="19" lean-forward="false" selection-start-line="37" selection-start-column="4" selection-end-line="37" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_10_driver.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="20" column="27" lean-forward="false" selection-start-line="20" selection-start-column="27" selection-end-line="20" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_07_chunk.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="993">
-          <caret line="111" column="25" lean-forward="false" selection-start-line="111" selection-start-column="25" selection-end-line="111" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_07_chunk.py" />
     <entry file="file://$PROJECT_DIR$/core/tests/tst_00.log">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -974,27 +822,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/regression/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/examples/1us0/1us0.pdb">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/qrefine.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-774">
-          <caret line="41" column="12" lean-forward="true" selection-start-line="41" selection-start-column="12" selection-end-line="41" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1002,79 +833,26 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="393">
           <caret line="406" column="78" lean-forward="true" selection-start-line="406" selection-start-column="78" selection-end-line="406" selection-end-column="78" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_03_completion.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="42" column="39" lean-forward="false" selection-start-line="42" selection-start-column="39" selection-end-line="42" selection-end-column="39" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-866">
-          <caret line="155" column="3" lean-forward="false" selection-start-line="155" selection-start-column="3" selection-end-line="155" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_03_completion.py" />
+    <entry file="file://$PROJECT_DIR$/regression/test_data.py" />
     <entry file="file://$PROJECT_DIR$/core/driver.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-9148">
           <caret line="12" column="26" lean-forward="true" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_04_capping.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="15" column="10" lean-forward="false" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_02_super_cell.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="20" column="10" lean-forward="false" selection-start-line="20" selection-start-column="10" selection-end-line="20" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_01_altloc.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
-          <caret line="18" column="19" lean-forward="false" selection-start-line="18" selection-start-column="19" selection-end-line="18" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_00_charge.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
-          <caret line="16" column="21" lean-forward="false" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_04_capping.py" />
+    <entry file="file://$PROJECT_DIR$/regression/test_02_super_cell.py" />
+    <entry file="file://$PROJECT_DIR$/regression/test_01_altloc.py" />
+    <entry file="file://$PROJECT_DIR$/regression/test_00_charge.py" />
     <entry file="file://$PROJECT_DIR$/regression/skip.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
-          <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1082,7 +860,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-101">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1090,7 +867,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1098,21 +874,162 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1525">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/tests/batch_run_finalise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="251">
+          <caret line="39" column="46" lean-forward="false" selection-start-line="39" selection-start-column="19" selection-end-line="39" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/tests/tst_12.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="309">
+          <caret line="404" column="67" lean-forward="true" selection-start-line="404" selection-start-column="45" selection-end-line="404" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/finalise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2037">
+          <caret line="134" column="42" lean-forward="true" selection-start-line="134" selection-start-column="42" selection-end-line="134" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="0">
+            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/qr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="725">
+          <caret line="275" column="18" lean-forward="true" selection-start-line="275" selection-start-column="18" selection-end-line="275" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/results.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/runner.py">
+    <entry file="file://$PROJECT_DIR$/core/restraints.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="792">
-          <caret line="35" column="0" lean-forward="true" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+        <state relative-caret-position="1566">
+          <caret line="58" column="52" lean-forward="false" selection-start-line="58" selection-start-column="52" selection-end-line="58" selection-end-column="52" />
+          <folding>
+            <marker date="1493815369000" expanded="true" signature="3407:4638" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="3781:3935" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="4036:4638" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="4684:6269" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="4927:5143" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="5153:6125" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="5613:5798" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="5649:5798" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="6361:6775" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="6698:6775" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="6890:7132" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="7215:7935" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="7337:7699" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="7517:7699" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="7709:7935" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="7991:8076" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="8170:8983" ph="..." />
+            <marker date="1493815369000" expanded="true" signature="8295:8983" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_02_chunk.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="945">
+          <caret line="40" column="0" lean-forward="false" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/requirements.txt">
+    <entry file="file://$PROJECT_DIR$/command_line/chunk.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="387">
+          <caret line="38" column="50" lean-forward="false" selection-start-line="38" selection-start-column="50" selection-end-line="38" selection-end-column="50" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/command_line/finalise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="364">
+          <caret line="22" column="26" lean-forward="false" selection-start-line="22" selection-start-column="26" selection-end-line="22" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/command_line/refine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-454">
+          <caret line="33" column="12" lean-forward="false" selection-start-line="33" selection-start-column="12" selection-end-line="33" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1458">
+          <caret line="62" column="18" lean-forward="false" selection-start-line="62" selection-start-column="18" selection-end-line="62" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/command_line/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="886">
+          <caret line="47" column="0" lean-forward="false" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docs/qrefine.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1881">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_01_finalise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="23" column="9" lean-forward="false" selection-start-line="23" selection-start-column="9" selection-end-line="23" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_03_finalise.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1120,34 +1037,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="-1341">
-            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/patch.sh">
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_03_restraint.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="2" column="43" lean-forward="false" selection-start-line="2" selection-start-column="43" selection-end-line="2" selection-end-column="43" />
+        <state relative-caret-position="135">
+          <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/LICENSE.txt">
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_04_refine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="270">
+          <caret line="10" column="4" lean-forward="false" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/__init__.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1163,7 +1071,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1171,33 +1079,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/tests/batch_run_finalise.py">
+    <entry file="file://$PROJECT_DIR$/LICENSE.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="39" column="46" lean-forward="false" selection-start-line="39" selection-start-column="19" selection-end-line="39" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/tests/tst_12.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="404" column="67" lean-forward="true" selection-start-line="404" selection-start-column="45" selection-end-line="404" selection-end-column="67" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/finalise.py">
+    <entry file="file://$PROJECT_DIR$/patch.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2037">
-          <caret line="134" column="42" lean-forward="true" selection-start-line="134" selection-start-column="42" selection-end-line="134" selection-end-column="42" />
+        <state relative-caret-position="54">
+          <caret line="2" column="43" lean-forward="false" selection-start-line="2" selection-start-column="43" selection-end-line="2" selection-end-column="43" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/README.md">
+    <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="0">
@@ -1208,15 +1106,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/qr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="725">
-          <caret line="275" column="18" lean-forward="true" selection-start-line="275" selection-start-column="18" selection-end-line="275" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/results.py">
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1224,17 +1114,55 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/finalise.py">
+    <entry file="file://$PROJECT_DIR$/runner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="22" column="26" lean-forward="false" selection-start-line="22" selection-start-column="26" selection-end-line="22" selection-end-column="26" />
+        <state relative-caret-position="586">
+          <caret line="24" column="21" lean-forward="true" selection-start-line="24" selection-start-column="21" selection-end-line="24" selection-end-column="21" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/requirements.txt">
+    <entry file="file://$PROJECT_DIR$/regression/restraint_wrapper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/refine_wrapper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="603">
+          <caret line="27" column="13" lean-forward="true" selection-start-line="27" selection-start-column="13" selection-end-line="27" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/cluster_wrapper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="891">
+          <caret line="33" column="0" lean-forward="false" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1242,86 +1170,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/restraints.py">
+    <entry file="file://$PROJECT_DIR$/regression/results/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-932">
-          <caret line="53" column="55" lean-forward="false" selection-start-line="53" selection-start-column="55" selection-end-line="53" selection-end-column="55" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_03_restraint.py">
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_00_base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="63" column="6" lean-forward="false" selection-start-line="63" selection-start-column="6" selection-end-line="63" selection-end-column="6" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_04_refine.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="995">
-          <caret line="84" column="55" lean-forward="true" selection-start-line="84" selection-start-column="55" selection-end-line="84" selection-end-column="55" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_01_finalise.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="27" column="33" lean-forward="false" selection-start-line="27" selection-start-column="33" selection-end-line="27" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_02_chunk.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="831">
-          <caret line="81" column="9" lean-forward="false" selection-start-line="81" selection-start-column="9" selection-end-line="81" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1016">
-          <caret line="43" column="43" lean-forward="true" selection-start-line="43" selection-start-column="43" selection-end-line="43" selection-end-column="43" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/restraint.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="800">
-          <caret line="52" column="22" lean-forward="false" selection-start-line="52" selection-start-column="22" selection-end-line="52" selection-end-column="22" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/refine.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1039">
-          <caret line="48" column="12" lean-forward="true" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/command_line/chunk.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="426">
-          <caret line="38" column="50" lean-forward="true" selection-start-line="38" selection-start-column="50" selection-end-line="38" selection-end-column="50" />
+        <state relative-caret-position="785">
+          <caret line="40" column="1" lean-forward="false" selection-start-line="40" selection-start-column="1" selection-end-line="40" selection-end-column="1" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>

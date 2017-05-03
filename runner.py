@@ -22,7 +22,7 @@ def run():
   get_latest_qrefine()
   tests = [
     "qr.test --unit"
-    "qr.test --regression",]
+    "qr.test --reg",]
 
   print "Running tests:"
   for test in tests:

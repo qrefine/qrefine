@@ -1,22 +1,14 @@
 from __future__ import division
-import sys
-import time
-import os.path
 import iotbx.pdb
-import libtbx.load_env
-from libtbx.easy_mp import parallel_map
-from pymongo import MongoClient
-
 
 class Driver(object):
   
-  def create(pdb):
+  def create(self,pdb):
       self.pdb = pdb
       self.pdb_inp = iotbx.pdb.input(self.pdb)
       self.ph = self.pdb_inp.construct_hierarchy()
       self.cs = self.pdb_inp.crystal_symmetry()
       self.sites_cart = self.ph.atoms().extract_xyz()
-      self.driver = driver
 
   def refine(self,pdb):
     self.driver(self.sites_cart)
