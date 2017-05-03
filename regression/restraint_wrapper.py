@@ -4,7 +4,7 @@ from qrefine.core.restraints import from_qm
 
 class Restraints(object):
 
-  def create():
+  def create(self):
     print " creating "
     self.pdb_inp = iotbx.pdb.input(self.pdb)
     self.ph = self.pdb_inp.construct_hierarchy()

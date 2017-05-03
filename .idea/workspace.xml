@@ -2,18 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/regression/test_reg_03_" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/regression/test_reg_03_finalise.py" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/cluster_wrapper.py" afterPath="$PROJECT_DIR$/regression/cluster_wrapper.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/refine_wrapper.py" afterPath="$PROJECT_DIR$/regression/refine_wrapper.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/regression_tests.py" afterPath="$PROJECT_DIR$/regression/regression_tests.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/restraint_wrapper.py" afterPath="$PROJECT_DIR$/regression/restraint_wrapper.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_00_base.py" afterPath="$PROJECT_DIR$/regression/test_reg_00_base.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_01_finalise.py" afterPath="$PROJECT_DIR$/regression/test_reg_01_finalise.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_03_restraint.py" afterPath="$PROJECT_DIR$/regression/test_reg_03_restraint.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regression/test_reg_04_refine.py" afterPath="$PROJECT_DIR$/regression/test_reg_04_refine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/runner.py" afterPath="$PROJECT_DIR$/runner.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -42,34 +35,35 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="0">
-                <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-                <folding />
-              </first_editor>
-              <second_editor />
+      <file leaf-file-name="test_reg_01_finalise.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_01_finalise.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="81">
+              <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="requirements.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <file leaf-file-name="test_reg_04_refine.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_04_refine.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="189">
+              <caret line="7" column="11" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="11" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="runner.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/runner.py">
+      <file leaf-file-name="test_reg_03_restraint.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/regression/test_reg_03_restraint.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="586">
-              <caret line="24" column="21" lean-forward="true" selection-start-line="24" selection-start-column="21" selection-end-line="24" selection-end-column="21" />
+            <state relative-caret-position="-70">
+              <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -80,8 +74,8 @@
       <file leaf-file-name="restraint_wrapper.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/regression/restraint_wrapper.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+            <state relative-caret-position="756">
+              <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -92,9 +86,11 @@
       <file leaf-file-name="regression_tests.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
-              <folding />
+            <state relative-caret-position="378">
+              <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -146,8 +142,8 @@
       <file leaf-file-name="test_reg_00_base.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/regression/test_reg_00_base.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="785">
-              <caret line="40" column="1" lean-forward="false" selection-start-line="40" selection-start-column="1" selection-end-line="40" selection-end-column="1" />
+            <state relative-caret-position="1215">
+              <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="13" selection-end-line="45" selection-end-column="13" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -173,7 +169,6 @@
       <find>Optimal</find>
       <find>cmty</find>
       <find>qrefine_path</find>
-      <find>qr_reg_data</find>
       <find>get_fragment</find>
       <find>get_cluster_qm</find>
       <find>qm_pd</find>
@@ -196,6 +191,7 @@
       <find>completion</find>
       <find>final</find>
       <find>temp3</find>
+      <find>qr_reg_data</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -246,14 +242,14 @@
         <option value="$PROJECT_DIR$/command_line/refine.py" />
         <option value="$PROJECT_DIR$/core/qr.py" />
         <option value="$PROJECT_DIR$/command_line/restraint.py" />
-        <option value="$PROJECT_DIR$/regression/test_reg_01_finalise.py" />
-        <option value="$PROJECT_DIR$/regression/test_reg_03_restraint.py" />
-        <option value="$PROJECT_DIR$/regression/test_reg_04_refine.py" />
         <option value="$PROJECT_DIR$/runner.py" />
-        <option value="$PROJECT_DIR$/regression/restraint_wrapper.py" />
         <option value="$PROJECT_DIR$/regression/regression_tests.py" />
         <option value="$PROJECT_DIR$/regression/refine_wrapper.py" />
         <option value="$PROJECT_DIR$/regression/cluster_wrapper.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_04_refine.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_03_restraint.py" />
+        <option value="$PROJECT_DIR$/regression/restraint_wrapper.py" />
+        <option value="$PROJECT_DIR$/regression/test_reg_01_finalise.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_00_base.py" />
       </list>
     </option>
@@ -1021,37 +1017,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_01_finalise.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="23" column="9" lean-forward="false" selection-start-line="23" selection-start-column="9" selection-end-line="23" selection-end-column="9" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/regression/test_reg_03_finalise.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_03_restraint.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/test_reg_04_refine.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="10" column="4" lean-forward="false" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1124,24 +1094,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/regression/restraint_wrapper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/regression/refine_wrapper.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="603">
@@ -1178,10 +1130,60 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_03_restraint.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-70">
+          <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_04_refine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="11" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="11" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/restraint_wrapper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="756">
+          <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/regression_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/regression/test_reg_01_finalise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="81">
+          <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/regression/test_reg_00_base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="785">
-          <caret line="40" column="1" lean-forward="false" selection-start-line="40" selection-start-column="1" selection-end-line="40" selection-end-column="1" />
+        <state relative-caret-position="1215">
+          <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="13" selection-end-line="45" selection-end-column="13" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>

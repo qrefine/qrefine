@@ -43,4 +43,4 @@ class test_base:
       qsub_command=qsub_command,
       use_manager=True)
     for test_result in test_results:
-      check_assertions(test_results)
+      self.check_assertions(test_results)
