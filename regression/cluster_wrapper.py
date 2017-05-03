@@ -7,8 +7,6 @@ import iotbx.pdb
 
 from qrefine.core.restraints import from_qm
 
-
-
 class Clusterer(object):
 
   def create(self,pdb):
@@ -48,3 +46,11 @@ class Clusterer(object):
     self.create(pdb)
     return self.process()
 
+class Result(object):
+  def __init__(self, pdb_code, clusters, chunks, chunk_sizes):
+    self.pdb_code        = pdb_code
+    self.clusters        = clusters
+    self.chunks          = chunks
+    self.chunk_sizes     = chunk_sizes
+    self.num_of_clusters = len(clusters)
+    self.num_of_chunks   = len(chunks)
