@@ -36,6 +36,7 @@ if __name__ == '__main__':
     regression_tests.run()
   if (args.pdb)       :
     print >> log,"Running pdb tests"
+    # swith to acceptance_tests.py
     regression_tests.run(args=sys.argv[1:])
   if(args.all):
     print >> log,"Running all regression tests"
