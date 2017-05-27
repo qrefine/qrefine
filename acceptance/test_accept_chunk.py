@@ -23,7 +23,7 @@ commands =[]
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
       for name , command in acceptance_tests().items():
-        cmd = "%s  %s >> %s.log" % (os.path.join(command,subdir, file),file)
+        cmd = "%s  %s > %s.log" % (os.path.join(command,subdir, file),file)
       #easy_run.call(cmd)
         commands.append(cmd)
         
