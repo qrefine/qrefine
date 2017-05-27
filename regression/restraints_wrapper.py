@@ -1,6 +1,7 @@
 import os
 import time
 
+#get pure terachem gradients for comparison
 pdbdir = "/home/xuyanting/qr-tests-p1/01_finalised"
 coords="/home/xuyanting/qr-tests-p1/01_finalised/"
 work_dir ="/home/xuyanting/sp/" 
