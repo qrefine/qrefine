@@ -12,18 +12,21 @@ phenix_source="/home/xuyanting/phenix/phenix-1.11.1-2575/build/setpaths_all.sh"
 
 def acceptance_tests():
   return  {
-    " finalise"      : test_finalise() ,
-    " chunk"         : test_chunk(),
-    " restraints"    : test_restraint(),
-    " refinement"    : test_refine(),
+    "hierarchy"      ："phenix.pdb.hierarchy"
+    " finalise"      : "qr.final" ,
+    " chunk"         : "qr.chunk",
+    " restraints"    : "qr.restrain",
+    " refinement"    : "qr.refine",
     }
 
 commands =[]
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
-      cmd = " phenix.pdb.hierarchy %s >> %s.log" % (os.path.join(subdir, file),file)
+      for name , command in acceptance_tests().items():
+        cmd = "%s  %s >> %s.log" % (os.path.join(command,subdir, file),file)
       #easy_run.call(cmd)
-      commands.append(cmd)
+        commands.append(cmd)
+        
 
 #TODO compare with  /home/xuyanting/test_prime/elbow.py
 easy_qsub.run(
