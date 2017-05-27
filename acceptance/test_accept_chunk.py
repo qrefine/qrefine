@@ -9,6 +9,15 @@ qsub_str= "qsub  -N test_clusters -M xuyanting@i.shu.edu.cn -m ae -q qr  -l node
 work_dir="/home/xuyanting/work"
 phenix_source="/home/xuyanting/phenix/phenix-1.11.1-2575/build/setpaths_all.sh"
 
+
+def acceptance_tests():
+  return  {
+    " finalise"      : test_finalise() ,
+    " chunk"         : test_chunk(),
+    " restraints"    : test_restraint(),
+    " refinement"    : test_refine(),
+    }
+
 commands =[]
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
