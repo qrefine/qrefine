@@ -31,6 +31,7 @@ class test_base:
       pdbs.append(os.path.join(qr_reg_data,pdb_file))
     return pdbs
 
+  #TODO compare with  /home/xuyanting/test_prime/elbow.py
   def run(self):
     test_results =parallel_map(
       func=self.func,
