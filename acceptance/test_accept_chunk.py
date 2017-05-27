@@ -16,6 +16,7 @@ for subdir, dirs, files in os.walk(rootdir):
       #easy_run.call(cmd)
       commands.append(cmd)
 
+#TODO compare with  /home/xuyanting/test_prime/elbow.py
 easy_qsub.run(
     phenix_source=phenix_source,
     where=work_dir,
