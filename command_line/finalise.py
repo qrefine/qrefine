@@ -1,6 +1,6 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
-import os, sys, shutil, time
+import os, sys, time
 import argparse
 import libtbx.load_env
 from libtbx import easy_run
