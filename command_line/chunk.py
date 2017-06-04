@@ -21,7 +21,7 @@ def run(pdb_file, maxnum_residues_in_cluster=15):
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
-  sites_cart = ph.atoms().extract_xyz()
+  #sites_cart = ph.atoms().extract_xyz()
   #this should be a chunk.
   fq = from_qm(
     pdb_hierarchy=ph,
