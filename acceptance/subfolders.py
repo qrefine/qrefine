@@ -7,9 +7,9 @@ new_dir="/home/xuyanting/results_new"
 files_per_folder=1000
 
 file_names=[]
-for file in listdir(root_dir):
+for c in listdir(root_dir):
     #make a new sub dir for every 1000 files 
-    file_names.append(file)
+    file_names.append(input_file)
 print len(file_names)
 
 folders = []
