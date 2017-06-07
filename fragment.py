@@ -14,12 +14,7 @@ except ImportError, e:
   print str(e)
   pass
 
-if (os.getenv("QR_REPO_PARENT") is not None):
-  qr_yoink_path = os.getenv("QR_REPO_PARENT")+"/./qr-core/plugin/yoink/"
-else:
-  qrefine_path = libtbx.env.find_in_repositories("qrefine")
-  qr_path = os.path.join(qrefine_path, "core")
-  qr_yoink_path =os.path.join(qr_path, "plugin/yoink/")
+qr_yoink_path =os.path.join(qrefine_path, "plugin/yoink/")
 
 class fragments(object):
 
@@ -198,7 +193,6 @@ def write_mm_charge_file(fragment_extracts, index):
         charge_scaling_positions=charge_scaling_positions)
     file_name = os.path.abspath(file_name)
   return file_name
-
 
 def fragment_extracts(fragments):
   return group_args(

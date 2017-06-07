@@ -4,19 +4,19 @@ Authors(s)
  -Min Zheng, Pavel Afonine, Mark Waller, Nigel Moriarty
 
 Purpose
-qr is a command line tool for refining bio-macromolecules using restraints from Quantum Chemistry. 
+qr is a command line tool for refining bio-macromolecules using restraints from Quantum Chemistry.
 
 Usage
 How qr works:
-qr is a new open-source module that carries out refinement of bio-macromolecules. 
+qr is a new open-source module that carries out refinement of bio-macromolecules.
 To maintain a small and agile code-base, qr is built on top of cctbx and Terachem.
 The cctbx library provides most of the routines needed for x-ray refinement.
 The key feature of the qr code is that it interfaces to Terachem to obtain
 chemical restraints using ab initio methods.
- 
-In principle, qr only needs a data file (e.g. mtz) and a model(e.g. pdb).
 
-qr.start input.pdb input.mtz 
+In principle, qr only needs a data file (e.g. mtz) and a model (e.g. pdb).
+
+qr.refine input.pdb input.mtz
 
 Sensible default options are selected.
 
@@ -44,7 +44,7 @@ Options and keywords in qrefine:
     temp_dir = None
       temporary directory (it must exist)
 
-    clean_up = None 
+    clean_up = None
        At the end of the entire run the TEMP directories will be removed if clean_up is True.
        Files listed in keep_files will not be deleted.
 
@@ -71,12 +71,12 @@ Options and keywords in qrefine:
 
 
 	run_command = "sh "
-      When you specify nproc=nn, you can run the subprocesses as jobs in background with sh (default)
+      When you specify nproc=n, you can run the subprocesses as jobs in background with sh (default)
         If you have a multi-processor machine, use sh.
         If nproc is greater than 1 and you use run_command='sh '(or similar, sh is default) then normally you will use background=True so that all the jobs run simultaneously.
 
 
-    citations = 
+    citations =
         prints the citations of the relevant papers
 
   fragment
@@ -97,5 +97,3 @@ Options and keywords in qrefine:
 
      pdb =
         You can run tests on the entire PDB, but it takes a very long time
-
-
