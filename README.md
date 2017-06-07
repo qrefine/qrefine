@@ -32,7 +32,7 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
 ``` 
  qr.test
 ```
-If any of the tests fail, please raise and issue here:
+If any of the tests fail, please raise and issue here: [issue tracker](https://github.com/qrefine/qr-core/issues)
 
 ### Run Example 
 
