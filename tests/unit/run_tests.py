@@ -72,7 +72,8 @@ def run():
     "tst_10.py",
     "tst_11.py",
     "tst_12.py",
-    "tst_13.py"
+    "tst_13.py",
+    "tst_14.py"
   ]
   for file_name in tests:
     print "Running test:", file_name

@@ -79,7 +79,9 @@ class expand(object):
       file_name=file_name, crystal_symmetry = self.cs_p1)
 
   def write_super_cell(self, file_name="super.pdb"):
-    self.ph_chains.write_pdb_file(file_name=file_name)
+    self.ph_chains.write_pdb_file(
+      file_name        = file_name,
+      crystal_symmetry = self.cs_p1)
 
   def write_p1(self, file_name="p1.pdb"):
     self.ph_p1.write_pdb_file(file_name=file_name,
