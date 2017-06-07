@@ -24,10 +24,7 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
 
 ```
  source phenix_env.sh
- cd modules 
- git clone https://github.com/qrefine/qrefine.git
- cd qrefine
- ./patch.sh
+ phenix.python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine
  ```
  Note: you may need to use sudo depending on the permissions of your PHENIX installation.
  
