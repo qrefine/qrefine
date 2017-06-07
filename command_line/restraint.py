@@ -6,12 +6,29 @@ import os.path
 import argparse
 import iotbx.pdb
 import libtbx.load_env
-from qrefine.core.restraints import from_qm, from_cctbx
+from qrefine.restraints import from_qm, from_cctbx
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 
 log = sys.stdout
+
+legend = """\
+Compute energy and gradient for a system
+"""
+
+master_params_str ="""
+restraints{
+restraints = cctbx *qm
+.type = choice(multi=False)
+qm_engine_name = mopac terachem turbomole *pyscf
+.type = choice(multi=False)
+charge= None
+.type = int
+basis = "sto-3g"
+.type = str
+}
+"""
 
 def example():
   print >> log, "Running helix example "

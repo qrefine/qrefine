@@ -9,7 +9,6 @@ qsub_str= "qsub  -N test_clusters -M xuyanting@i.shu.edu.cn -m ae -q qr  -l node
 work_dir="/home/xuyanting/work"
 phenix_source="/home/xuyanting/phenix/phenix-1.11.1-2575/build/setpaths_all.sh"
 
-
 def acceptance_tests():
   return  {
     "hierarchy"      ："phenix.pdb.hierarchy"
@@ -26,7 +25,7 @@ for subdir, dirs, files in os.walk(rootdir):
         cmd = "%s  %s > %s.log" % (os.path.join(command,subdir, file),file)
       #easy_run.call(cmd)
         commands.append(cmd)
-        
+
 
 #TODO compare with  /home/xuyanting/test_prime/elbow.py
 easy_qsub.run(

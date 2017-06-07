@@ -7,13 +7,78 @@ import argparse
 import libtbx.load_env
 from libtbx import  easy_run
 from libtbx.command_line import easy_qsub
+import mmtbx.command_line
+from qrefine import qr
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qrefine_core_path = os.path.join(qrefine_path, "core")
 example_path = os.path.join(qrefine_path,"examples")
 
 log = sys.stdout
+
+legend = """
+Refine a model using restraints from Quantum Chemistry
+"""
+
+master_params_str ="""
+refine{
+sf_algorithm = *direct fft
+.type = choice(multi=False)
+refinement_target_name = *ml ls_wunit_k1
+.type = choice
+mode = opt *refine
+.type = choice(multi=False)
+number_of_macro_cycles=1
+.type = int
+number_of_weight_search_cycles=50
+.type = int
+number_of_micro_cycles=50
+.type = int
+data_weight=None
+.type = float
+max_iterations = 50
+.type = int
+line_search = True
+.type = bool
+stpmax = 1.e9
+.type = float
+gradient_only = False
+.type = bool
+update_all_scales = True
+.type = bool
+refine_sites = True
+.type = bool
+refine_adp = False
+.type = bool
+restraints_weight_scale = 1.0
+.type = float
+shake_sites = False
+.type = bool
+use_convergence_test = True
+.type = bool
+max_bond_rmsd = 0.03
+.type = float
+max_r_work_r_free_gap = 5.0
+.type = float
+r_tolerance = 0.001
+.type = float
+rmsd_tolerance = 0.01
+.type = float
+}
+
+"""
+
+def get_master_phil():
+  return mmtbx.command_line.generate_master_phil_with_inputs(
+    phil_string=master_params_str)
+
+def print_legend_and_usage(log):
+  print >> log, "-"*79
+  print >> log, "                               phenix.polder"
+  print >> log, "-"*79
+  print >> log, legend
+  print >> log, "-"*79
+  print >> log, get_master_phil().show()
 
 def run_cmd(cmd):
   # we want a reference to the running job.
@@ -38,46 +103,18 @@ def example():
   run_cmd(cmd)
 
 def run(args, log):
-  cmd = " phenix.python " +  \
-        os.path.join(qrefine_core_path,"qr.py ") + \
-        " ".join(args).replace("\n", "")
-  print "Running example:", cmd
-  easy_run.call(cmd)
+  print "running refine "
+  print_legend_and_usage(log)
+  cmdline = mmtbx.command_line.load_model_and_data(
+       args          = args,
+       master_phil   = get_master_phil(),
+       create_fmodel = False,
+       out           = log)
+  params = cmdline.params
+  qr.run(params.refine,log)
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(
-      description='Refine a model using restraints from Quantum Chemistry'
-  )
-  parser.add_argument('--example',
-                      action='store_true',
-                      default=False,
-                      help='run refinement example.')
-  parser.add_argument('--iter',
-                      action='store_true',
-                      default=50,
-                      help='run refinement example.')
-  parser.add_argument('--macro',
-                      action='store_true',
-                      default=50,
-                      help='number of macro cycles to perform.')
-  parser.add_argument('--micro',
-                      action='store_true',
-                      default=50,
-                      help='number of micro cycles to perform.')
-  parser.add_argument('--conv',
-                      action='store_true',
-                      default=True,
-                      help='use convergence test during refinement.')
-  parser.add_argument('--grad',
-                      action='store_true',
-                      default=False,
-                      help='use only the gradient, not the target.')
-
-  known, unknown = parser.parse_known_args()
   t0 = time.time()
   print >> log,"Starting Q|R"
-  if(known.example):
-    example()
-  else:
-    run(args=sys.argv[1:], log=log)
+  run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="" />
+    <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plugin/ase" afterPath="$PROJECT_DIR$/plugin/ase" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plugin/yoink" afterPath="$PROJECT_DIR$/plugin/yoink" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,22 +36,17 @@
         <entry file="file://$PROJECT_DIR$/command_line/chunk.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="513">
-              <caret line="26" column="21" lean-forward="false" selection-start-line="26" selection-start-column="21" selection-end-line="26" selection-end-column="21" />
+              <caret line="25" column="21" lean-forward="false" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="qr.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/qr.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="956">
-              <caret line="263" column="18" lean-forward="false" selection-start-line="263" selection-start-column="18" selection-end-line="263" selection-end-column="18" />
-              <folding>
-                <marker date="1496796767000" expanded="true" signature="0:148" ph="&quot;&quot;&quot;...&quot;&quot;&quot;" />
-                <marker date="1496796767000" expanded="true" signature="12439:12496" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="340:436" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="487:1466" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="599:664" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="924:1319" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="1021:1287" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="1072:1287" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="1178:1287" ph="..." />
+                <marker date="1496803384000" expanded="true" signature="1496:1667" ph="..." />
               </folding>
             </state>
           </provider>
@@ -58,7 +56,7 @@
         <entry file="file://$PROJECT_DIR$/runner.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="243">
-              <caret line="13" column="34" lean-forward="true" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
+              <caret line="13" column="34" lean-forward="false" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -194,7 +192,6 @@
         <option value="$PROJECT_DIR$/regression/test_reg_05_finalise.py" />
         <option value="$PROJECT_DIR$/core/fragment.py" />
         <option value="$PROJECT_DIR$/core/restraints.py" />
-        <option value="$PROJECT_DIR$/patch.sh" />
         <option value="$PROJECT_DIR$/command_line/test.py" />
         <option value="$PROJECT_DIR$/command_line/chunk.py" />
         <option value="$PROJECT_DIR$/command_line/finalise.py" />
@@ -211,6 +208,7 @@
         <option value="$PROJECT_DIR$/regression/test_reg_00_base.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_02_chunk.py" />
         <option value="$PROJECT_DIR$/core/qr.py" />
+        <option value="$PROJECT_DIR$/patch.sh" />
       </list>
     </option>
   </component>
@@ -221,8 +219,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1260" />
-    <option name="y" value="420" />
+    <option name="x" value="786" />
+    <option name="y" value="74" />
     <option name="width" value="2517" />
     <option name="height" value="1337" />
   </component>
@@ -682,7 +680,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1260" y="420" width="2517" height="1337" extended-state="1" />
+    <frame x="786" y="74" width="2517" height="1337" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15763748" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -820,10 +818,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="956">
           <caret line="263" column="18" lean-forward="false" selection-start-line="263" selection-start-column="18" selection-end-line="263" selection-end-column="18" />
-          <folding>
-            <marker date="1496796767000" expanded="true" signature="0:148" ph="&quot;&quot;&quot;...&quot;&quot;&quot;" />
-            <marker date="1496796767000" expanded="true" signature="12439:12496" ph="..." />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -852,9 +847,17 @@
     <entry file="file://$PROJECT_DIR$/command_line/chunk.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="513">
-          <caret line="26" column="21" lean-forward="false" selection-start-line="26" selection-start-column="21" selection-end-line="26" selection-end-column="21" />
+          <caret line="25" column="21" lean-forward="false" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
+            <marker date="1496803384000" expanded="true" signature="340:436" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="487:1466" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="599:664" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="924:1319" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="1021:1287" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="1072:1287" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="1178:1287" ph="..." />
+            <marker date="1496803384000" expanded="true" signature="1496:1667" ph="..." />
           </folding>
         </state>
       </provider>
@@ -934,7 +937,7 @@
         <state relative-caret-position="603">
           <caret line="27" column="13" lean-forward="true" selection-start-line="27" selection-start-column="13" selection-end-line="27" selection-end-column="13" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -979,7 +982,7 @@
         <state relative-caret-position="189">
           <caret line="7" column="11" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="11" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -999,7 +1002,7 @@
         <state relative-caret-position="378">
           <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1009,7 +1012,7 @@
         <state relative-caret-position="81">
           <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1019,7 +1022,7 @@
         <state relative-caret-position="1215">
           <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="13" selection-end-line="45" selection-end-column="13" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1029,7 +1032,7 @@
         <state relative-caret-position="738">
           <caret line="31" column="20" lean-forward="true" selection-start-line="31" selection-start-column="20" selection-end-line="31" selection-end-column="20" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1056,7 +1059,7 @@
     <entry file="file://$PROJECT_DIR$/runner.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="243">
-          <caret line="13" column="34" lean-forward="true" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
+          <caret line="13" column="34" lean-forward="false" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
