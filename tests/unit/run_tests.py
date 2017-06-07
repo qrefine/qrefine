@@ -73,6 +73,7 @@ def run():
     #"tst_11.py", Nigel will delete this
     #"tst_12.py", Nigel will fix this
     "tst_13.py"
+    "tst_14.py"
   ]
   for file_name in tests:
     print "Running test:", file_name

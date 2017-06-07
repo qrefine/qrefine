@@ -16,21 +16,16 @@ cache:
 #   - pip install -r requirements.txt
 
 script: 
- #- curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
- #- curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz >  base_1.11.1-2575.tar.xz
- #- xz -d base_1.11.1-2575.tar.xz
- #- tar -xvf base_1.11.1-2575.tar
- #- travis_wait 45 python bootstrap.py --builder=cctbx
- - source build/setpaths.sh
- - phenix.fetch_pdb 2hr0
- - cd modules 
- - git clone  https://github.com/qrefine/qrefine.git
- - cd qrefine
- - git clone https://github.com/qrefine/qr-core.git
- - mv qr-core core
- - cctbx.python -m pip install -r requirements.txt
- - cctbx.python -m pip install -r core/requirements.txt
- - libtbx.configure qrefine
+ - curl https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py > bootstrap.py
+ - curl http://cci.lbl.gov/~bkpoon/base_1.11.1-2575.tar.xz >  base_1.11.1-2575.tar.xz
+ - xz -d base_1.11.1-2575.tar.xz
+ - tar -xvf base_1.11.1-2575.tar
+ - travis_wait 45 python bootstrap.py --builder=cctbx
+ #- source build/setpaths.sh
+ #- ls -ltr 
+ #- cd  modules
+ #- ls -ltr 
+# - python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine
  #- qr.test
  #- source build/setpaths.sh
  #- cctbx.python -m  pip install -U pip
