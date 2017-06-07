@@ -13,9 +13,8 @@ from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
 
 class from_cctbx(object):
-  def __init__(self, processed_pdb_file, has_hd, fragment_manager=None,
+  def __init__(self, processed_pdb_file, has_hd, fragment_extracts=None,
               file_name="./ase/tmp_ase.pdb"):
-    #self.fragment_manager = fragment_manager
     geometry = processed_pdb_file.geometry_restraints_manager(
       show_energies                = False,
       assume_hydrogens_all_missing = not has_hd,
@@ -23,14 +22,18 @@ class from_cctbx(object):
     self.geometry_restraints_manager = mmtbx.restraints.manager(
        geometry = geometry, normalization = False)
     self.file_name = file_name
+    self.fragment_extracts = fragment_extracts
 
   def __call__(self,selection_and_sites_cart):
     return self.target_and_gradients(sites_cart = selection_and_sites_cart[1],
                                      selection  = selection_and_sites_cart[0])
-  def target_and_gradients(self, sites_cart, selection=None,fragment_extracts=None):
-    if(selection is not None):
-      es = self.geometry_restraints_manager.select(selection).energies_sites(
-        sites_cart=sites_cart.select(selection), compute_gradients=True)
+  def target_and_gradients(self, sites_cart, selection=None, index=None):
+    if(selection is not None): ### clustering
+      super_selection = self.fragment_extracts.fragment_super_selections[index]
+      grm = self.fragment_extracts.super_sphere_geometry_restraints_manager
+      es = grm.select(super_selection).energies_sites(
+        sites_cart=sites_cart.select(super_selection), compute_gradients=True)
+      es.gradients = es.gradients[:selection.count(True)]
     else:
       es = self.geometry_restraints_manager.energies_sites(
         sites_cart=sites_cart, compute_gradients=True)
@@ -38,7 +41,7 @@ class from_cctbx(object):
 
 class from_qm(object):
   def __init__(self,
-      fragment_manager           = None,
+      fragment_extracts           = None,
       pdb_hierarchy              = None,
       charge                     = None,
       qm_engine_name             = None,
@@ -51,7 +54,6 @@ class from_qm(object):
       shared_disk                = True,
       basis                      = "sto-3g"):
     self.basis = basis
-    #self.fragment_manager = fragment_manager
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
     self.file_name = file_name
@@ -119,7 +121,7 @@ class from_qm(object):
     unit_convert = ase_units.mol/ase_units.kcal
     energy = self.qm_engine.energy_free*unit_convert
     ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
-    gradients = ase_gradients[:selection.count(True)]
+    gradients = ase_gradients[:selection.count(True)]#remove capping and neibouring buffer
     gradients =  flex.vec3_double(gradients)
     return energy, gradients
 

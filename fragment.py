@@ -6,12 +6,12 @@ from charges import write_pdb_hierarchy_qxyz_file
 from charges import write_pdb_hierarchy_xyzq_file
 from utils import fragment_utils
 from libtbx import group_args
-import qrefine.completion
 from qrefine.plugin.yoink.pyoink import PYoink
 from qrefine.utils.yoink_utils import write_yoink_infiles
+from qrefine.utils.super_cell import expand
+import qrefine.completion as model_completion
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-
 
 class fragments(object):
 
@@ -35,8 +35,7 @@ class fragments(object):
       os.mkdir(self.working_folder)
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
-    from utils.super_cell import expand
-    self.expand = expand(
+    self.super_cell = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
@@ -47,7 +46,7 @@ class fragments(object):
 
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
-      self.pdb_hierarchy_super = self.expand.update(sites_cart=sites_cart)
+      self.pdb_hierarchy_super = self.super_cell.update(sites_cart=sites_cart)
     ###get clusters and their buffer regions using yoink and graph clustering.
     try:
       pre_clusters = self.clusters
@@ -84,7 +83,7 @@ class fragments(object):
     pyoink = self.pyoink
     clusters = self.clusters##from graph clustring, molecular indices
     sites_cart = self.pdb_hierarchy.atoms().extract_xyz()
-    self.pdb_hierarchy_super = self.expand.update(sites_cart=sites_cart)
+    self.pdb_hierarchy_super = self.super_cell.update(sites_cart=sites_cart)
     ## write yoink input file to get fragment
     write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
                         self.pdb_hierarchy_super, self.yoink_dat_path)
@@ -118,9 +117,9 @@ class fragments(object):
         self.pdb_hierarchy_super.atoms_size(), self.fragment_super_atoms[i])
       qm_pdb_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
       qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
-        crystal_symmetry=self.expand.cs_box)
+        crystal_symmetry=self.super_cell.cs_box)
       raw_records = qm_pdb_hierarchy.as_pdb_string(
-        crystal_symmetry=self.expand.cs_box)
+        crystal_symmetry=self.super_cell.cs_box)
       ## cell size self.expand.cs_p1 from expand, seems not right
       charge = get_total_charge_from_pdb(raw_records=raw_records)
       self.fragment_super_selections.append(fragment_super_selection)
@@ -146,11 +145,11 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   if(0):
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
-      crystal_symmetry=fragment_extracts.expand.cs_box)
+      crystal_symmetry=fragment_extracts.super_cell.cs_box)
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
   # _capping_pdb_filename(qm_pdb_file)
-  ph = completion.run(pdb_hierarchy=fragment_hierarchy,
-                      crystal_symmetry=fragment_extracts.expand.cs_box,
+  ph = model_completion.run(pdb_hierarchy=fragment_hierarchy,
+                      crystal_symmetry=fragment_extracts.super_cell.cs_box,
                       model_completion=False)
   return os.path.abspath(complete_qm_pdb_file),ph
 
@@ -193,16 +192,16 @@ def write_mm_charge_file(fragment_extracts, index):
 
 def fragment_extracts(fragments):
   return group_args(
-    fragment_charges    = fragments.fragment_charges,
-    fragment_selections = fragments.fragment_selections,
+    fragment_charges     = fragments.fragment_charges,
+    fragment_selections  = fragments.fragment_selections,
     fragment_super_selections=fragments.fragment_super_selections,
-    working_folder      = fragments.working_folder,
+    working_folder       = fragments.working_folder,
     fragment_super_atoms      = fragments.fragment_super_atoms,
-    cluster_atoms       = fragments.cluster_atoms,
-    qm_engine_name      = fragments.qm_engine_name,
-    charge_embedding    = fragments.charge_embedding,
-    crystal_symmetry    = fragments.crystal_symmetry,
-    pdb_hierarchy       = fragments.pdb_hierarchy,
-    pdb_hierarchy_super = fragments.pdb_hierarchy_super,
-    expand              = fragments.expand,
-    buffer_selections   = fragments.buffer_selections)
+    cluster_atoms        = fragments.cluster_atoms,
+    qm_engine_name       = fragments.qm_engine_name,
+    charge_embedding     = fragments.charge_embedding,
+    crystal_symmetry     = fragments.crystal_symmetry,
+    pdb_hierarchy        = fragments.pdb_hierarchy,
+    pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
+    super_cell           = fragments.super_cell,
+    buffer_selections    = fragments.buffer_selections)

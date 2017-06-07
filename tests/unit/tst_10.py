@@ -5,6 +5,7 @@ import random
 import time
 from ase.units import Hartree, Bohr, mol, kcal
 import iotbx.pdb
+import mmtbx.command_line
 import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
@@ -21,6 +22,21 @@ qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 # fix random seed in this script
 random.seed(0)
 flex.set_random_seed(0)
+
+
+master_params_str ="""
+method = *multiprocessing pbs sge lsf threading
+.type = choice(multi=False)
+nproc = 1
+.type = int
+qsub_command = None
+.type = str
+"""
+
+def get_master_phil():
+  return mmtbx.command_line.generate_master_phil_with_inputs(
+    phil_string=master_params_str)
+
 
 def run(prefix = "tst_10"):
   """
@@ -54,10 +70,10 @@ def run(prefix = "tst_10"):
   fc = from_cluster(
     restraints_manager = fq,
     fragment_manager = fm,
-    parallel_params = None,
+    parallel_params =get_master_phil().extract(),
     )
 
-  energy, gradients = fq.target_and_gradients(sites_cart=sites_cart)
+  energy, gradients = fc.target_and_gradients(sites_cart=sites_cart)
   energy = energy*(kcal/mol)*(kcal/mol)/Hartree
   gradients = gradients*(kcal/mol)*(kcal/mol)*(Bohr/Hartree)
   gradients = list(gradients.as_double())
