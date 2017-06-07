@@ -29,7 +29,7 @@ def run(prefix = "tst_14"):
   of.close()
   pdb_inp = iotbx.pdb.input(source_info=None, lines=pdb_str)
   ph = pdb_inp.construct_hierarchy()
-  sites_cart_start = ph.atoms().sites_cart()
+  sites_cart_start = ph.atoms().extract_xyz()
   o = super_cell.expand(
     pdb_hierarchy        = ph, 
     crystal_symmetry     = pdb_inp.crystal_symmetry(),
