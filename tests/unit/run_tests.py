@@ -8,8 +8,7 @@ from libtbx import easy_run
 from scitbx.array_family import flex
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit")
 
 def setup_helix_example(pdb_name = "data_files/m00_good.pdb",
                         mtz_name = "data_files/m00_good.mtz"):
@@ -40,7 +39,7 @@ def run_cmd(prefix,args,pdb_name = "data_files/m00_poor.pdb",
             mtz_name = "data_files/m00_good.mtz"):
   test_folder_name = "./%s/"%prefix
   cmd = ["cctbx.python",
-        os.path.join(qr_core,"qr.py"),
+        os.path.join(qrefine,"qr.py"),
         os.path.join(qr_unit_tests,mtz_name),
         os.path.join(qr_unit_tests,pdb_name)]
   for arg in args:

@@ -2,8 +2,8 @@ from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.test
 import sys
 import argparse
-from qrefine.core.tests import run_tests as unit_tests
-from qrefine.regression import regression_tests
+import qrefine.tests.unit.run_tests as unit_tests
+from qrefine.tests.regression import regression_tests
 
 log = sys.stdout
 

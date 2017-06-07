@@ -7,11 +7,10 @@ from libtbx.utils import Sorry
 import os
 import libtbx.load_env
 import batch_run_finalise
-from qrefine.core.skip import skip
+from qrefine.skip import skip
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 def run(prefix = "tst_11"):
   """

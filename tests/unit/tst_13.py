@@ -12,14 +12,13 @@ from ase.io import write
 from ase.io import read as ase_io_read
 from ase.optimize.lbfgs import LBFGS
 from scitbx.array_family import flex
-from qrefine.core.restraints import from_qm
-from qrefine.core.fragment import fragments
-from qrefine.core.cluster_restraints import from_cluster
-from qrefine.core.clustering import betweenness_centrality_clustering
+from qrefine.restraints import from_qm
+from qrefine.fragment import fragments
+from qrefine.cluster_restraints import from_cluster
+from qrefine.clustering import betweenness_centrality_clustering
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 # gradient-only LBFGS without line search
 class lbfgs_gradient(object):

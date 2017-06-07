@@ -10,8 +10,7 @@ from libtbx.test_utils import approx_equal
 from scitbx.array_family import flex
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 def run(prefix = "tst_03"):
   """

@@ -10,8 +10,7 @@ from mmtbx.monomer_library import server
 from mmtbx.monomer_library import pdb_interpretation
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 def get_bond_rmsd(file_name):
   mon_lib_srv = monomer_library.server.server()

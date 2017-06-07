@@ -9,14 +9,13 @@ import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
 from libtbx.test_utils import approx_equal
-from qrefine.core.restraints import from_qm
-from qrefine.core.fragment import fragments
-from qrefine.core.clustering import betweenness_centrality_clustering
-from qrefine.core.plugin.ase.mopac_qr import Mopac
+from qrefine.restraints import from_qm
+from qrefine.fragment import fragments
+from qrefine.clustering import betweenness_centrality_clustering
+from qrefine.plugin.ase.mopac_qr import Mopac
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core/")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 # fix random seed in this script
 random.seed(0)

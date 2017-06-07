@@ -1,6 +1,6 @@
 from __future__ import division
 import iotbx.pdb
-from qrefine.core.restraints import from_qm
+from qrefine.restraints import from_qm
 
 class Clusterer(object):
 

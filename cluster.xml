@@ -634,7 +634,7 @@
    <parameter name="SMOOTHNER" value="ABRUPT"/>  
    <parameter name="DGRID" value="true"/>  
   <parameter name="INTERACTION_WEIGHT" value="false"/> 
-   <parameter name="WFC_PATH" value="/Users/waller/phenix-1.12rc0-2787/modules/qrefine/core/plugin/yoink/dat" /> 
+   <parameter name="WFC_PATH" value="/Users/waller/phenix-1.12rc0-2787/modules/qrefine/plugin/yoink/dat" /> 
    <parameter name="REGION_CUBE" value="SYSTEM"/> 
    <parameter name="PARTITIONER" value="INTERACTION"/>  
   </parameterList> 

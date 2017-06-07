@@ -1,7 +1,7 @@
 from __future__ import division
 import os.path
 import libtbx.load_env
-from qrefine.core.restraints import from_qm,from_cctbx
+from qrefine.restraints import from_qm,from_cctbx
 from restraint_wrapper import Restraints, Result
 from test_reg_00_base import test_base
 
@@ -18,7 +18,7 @@ class test_restraint(test_base):
 
   def check_assertions(self,result):
     """
-    Exercise to test restraints are being calculated consistently. 
+    Exercise to test restraints are being calculated consistently.
     """
     if self.db.old.find_one({"pdb_code": result.pdb_code}) is None:
         self.insert(result)

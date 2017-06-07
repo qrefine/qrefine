@@ -5,10 +5,10 @@ from iotbx import pdb
 from libtbx import easy_run
 from libtbx import easy_mp
 import libtbx.load_env
-import qrefine.core.finalise
-import qrefine.core.charges
-import qrefine.core.completion
-from qrefine.core.utils import hierarchy_utils
+import qrefine.finalise
+import qrefine.charges
+import qrefine.completion
+from qrefine.utils import hierarchy_utils
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
@@ -16,8 +16,7 @@ qr_repo_parent_env = 'QR_REPO_PARENT'
 qr_repo_parent = os.environ.get(qr_repo_parent_env, None)
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_core = os.path.join(qrefine,"core")
-qr_unit_tests = os.path.join(qr_core, "tests/")
+qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 pdbs = {'short_gap' : '''
 CRYST1   51.603   51.675   51.797 109.94 108.48 110.02 P 1

@@ -2,7 +2,7 @@ from __future__ import division
 
 import time
 from libtbx.test_utils import approx_equal
-import qrefine.core.clustering as clustering
+import qrefine.clustering as clustering
 
 def run(prefix = "tst_08"):
   """
