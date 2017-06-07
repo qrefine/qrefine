@@ -7,7 +7,6 @@ Purpose
 qr is a command line tool for refining bio-macromolecules using restraints from Quantum Chemistry.
 
 Usage
-How qr works:
 qr is a new open-source module that carries out refinement of bio-macromolecules.
 To maintain a small and agile code-base, qr is built on top of cctbx and Terachem.
 The cctbx library provides most of the routines needed for x-ray refinement.

@@ -33,10 +33,10 @@ def run(prefix = "tst_09"):
          [3, 5, 6, 9, 10, 11, 12, 13, 22],
          [4, 5, 6, 7, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
          [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
-  copyfile(os.path.join(qr_unit_tests,"data_files/qmmm.xml"), os.path.join(qr_core,"./tmp_qmmm.xml"))
-  pyoink = PYoink(os.path.join(qr_core,"plugin/yoink/Yoink-0.0.1.jar"),
-                               os.path.join(qr_core,"plugin/yoink/dat"),
-                               os.path.join(qr_core,"./tmp_qmmm.xml"))
+  copyfile(os.path.join(qr_unit_tests,"data_files/qmmm.xml"), os.path.join(qrefine,"./tmp_qmmm.xml"))
+  pyoink = PYoink(os.path.join(qrefine,"plugin/yoink/Yoink-0.0.1.jar"),
+                               os.path.join(qrefine,"plugin/yoink/dat"),
+                               os.path.join(qrefine,"./tmp_qmmm.xml"))
   check_buffer(bc_clusters, bc_qms, pyoink)
 
 def check_buffer(clusters, qms, pyoink):

@@ -20,53 +20,6 @@ legend = """
 Refine a model using restraints from Quantum Chemistry
 """
 
-master_params_str ="""
-refine{
-sf_algorithm = *direct fft
-.type = choice(multi=False)
-refinement_target_name = *ml ls_wunit_k1
-.type = choice
-mode = opt *refine
-.type = choice(multi=False)
-number_of_macro_cycles=1
-.type = int
-number_of_weight_search_cycles=50
-.type = int
-number_of_micro_cycles=50
-.type = int
-data_weight=None
-.type = float
-max_iterations = 50
-.type = int
-line_search = True
-.type = bool
-stpmax = 1.e9
-.type = float
-gradient_only = False
-.type = bool
-update_all_scales = True
-.type = bool
-refine_sites = True
-.type = bool
-refine_adp = False
-.type = bool
-restraints_weight_scale = 1.0
-.type = float
-shake_sites = False
-.type = bool
-use_convergence_test = True
-.type = bool
-max_bond_rmsd = 0.03
-.type = float
-max_r_work_r_free_gap = 5.0
-.type = float
-r_tolerance = 0.001
-.type = float
-rmsd_tolerance = 0.01
-.type = float
-}
-
-"""
 
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(

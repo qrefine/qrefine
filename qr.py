@@ -43,8 +43,76 @@ import results
 
 master_params_str ="""
 
-max_atoms = 15000
+finalise{
+
+}
+
+cluster{
+clustering = False
+.type = bool
+charge_embedding = False
+.type = bool
+maxnum_residues_in_cluster = 15
 .type = int
+clustering_method = gnc  *bcc
+.type = choice(multi=False)
+}
+
+restraint{
+restraints = cctbx *qm
+.type = choice(multi=False)
+qm_engine_name = mopac terachem turbomole *pyscf
+.type = choice(multi=False)
+charge= None
+.type = int
+basis = "sto-3g"
+.type = str
+}
+
+refine{
+sf_algorithm = *direct fft
+.type = choice(multi=False)
+refinement_target_name = *ml ls_wunit_k1
+.type = choice
+mode = opt *refine
+.type = choice(multi=False)
+number_of_macro_cycles=1
+.type = int
+number_of_weight_search_cycles=50
+.type = int
+number_of_micro_cycles=50
+.type = int
+data_weight=None
+.type = float
+max_iterations = 50
+.type = int
+line_search = True
+.type = bool
+stpmax = 1.e9
+.type = float
+gradient_only = False
+.type = bool
+update_all_scales = True
+.type = bool
+refine_sites = True
+.type = bool
+refine_adp = False
+.type = bool
+restraints_weight_scale = 1.0
+.type = float
+shake_sites = False
+.type = bool
+use_convergence_test = True
+.type = bool
+max_bond_rmsd = 0.03
+.type = float
+max_r_work_r_free_gap = 5.0
+.type = float
+r_tolerance = 0.001
+.type = float
+rmsd_tolerance = 0.01
+.type = float
+}
 
 parallel {
 method = *multiprocessing pbs sge lsf threading
@@ -64,7 +132,6 @@ shared_disk = True
 rst_file = None
 .type = str
 
-
 """
 
 def get_master_phil():
@@ -76,8 +143,8 @@ def create_fmodel(cmdline, log):
     f_obs          = cmdline.f_obs,
     r_free_flags   = cmdline.r_free_flags,
     xray_structure = cmdline.xray_structure,
-    target_name    = cmdline.params.refinement_target_name)
-  if(cmdline.params.update_all_scales):
+    target_name    = cmdline.params.refine.refinement_target_name)
+  if(cmdline.params.refine.update_all_scales):
     fmodel.update_all_scales(remove_outliers=False)
     fmodel.show(show_header=False, show_approx=False)
   print >> log, "r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free())
@@ -114,36 +181,28 @@ def create_fragment_manager(
       crystal_symmetry,
       params,
       file_name      = "./ase/tmp_ase.pdb"):
-  if(not params.clustering): return None
-  #clustering_method = params.clustering_method
-  #if(params.clustering):
-  #  if(clustering_method == "bcc"):
-  #      try:
- #        from clustering import betweenness_centrality_clustering
-  #      except ImportError, e:
-    #    raise Sorry(str(e))
-#      clustering_method =  betweenness_centrality_clustering
+  if(not params.cluster.clustering): return None
   return fragments(
     working_folder             = os.path.split(file_name)[0]+ "/",
-    clustering_method          = params.clustering_method,
-    maxnum_residues_in_cluster = params.maxnum_residues_in_cluster,
-    charge_embedding           = params.charge_embedding,
+    clustering_method          = params.cluster.clustering_method,
+    maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
+    charge_embedding           = params.cluster.charge_embedding,
     pdb_hierarchy              = pdb_hierarchy,
-    qm_engine_name             = params.qm_engine_name,
+    qm_engine_name             = params.restraints.qm_engine_name,
     crystal_symmetry           = crystal_symmetry)
 
 def create_restraints_manager(
       cmdline,
       model,
       fragment_manager=None):
-  if(cmdline.params.restraints == "cctbx"):
+  if(cmdline.params.restraint.restraints == "cctbx"):
     assert model.processed_pdb_file is not None
     restraints_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd)
       #fragment_manager   = fragment_manager)
   else:
-    assert cmdline.params.restraints == "qm"
+    assert cmdline.params.restraint.restraints == "qm"
     restraints_manager = restraints.from_qm(
       #fragment_manager           = fragment_manager,
       basis                      = cmdline.params.basis,
@@ -161,12 +220,12 @@ def create_restraints_manager(
 def create_calculator(weights, fmodel, params, restraints_manager):
   if(weights is None):
     weights = calculator.weights(
-      shake_sites             = params.shake_sites ,
+      shake_sites             = params.refine.shake_sites ,
       restraints_weight       = 1.0,
-      data_weight             = params.data_weight,
-      restraints_weight_scale = params.restraints_weight_scale)
-  if(params.refine_sites):
-    if(params.mode == "refine"):
+      data_weight             = params.refine.data_weight,
+      restraints_weight_scale = params.refine.restraints_weight_scale)
+  if(params.refine.refine_sites):
+    if(params.refine.mode == "refine"):
       return calculator.sites(
         fmodel             = fmodel,
         restraints_manager = restraints_manager,
@@ -175,7 +234,7 @@ def create_calculator(weights, fmodel, params, restraints_manager):
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
         fmodel             = fmodel)
-  if(params.refine_adp):
+  if(params.refine.refine_adp):
     return calculator.adp(
       fmodel             = fmodel,
       restraints_manager = restraints_manager,
@@ -186,7 +245,7 @@ def run(params, log):
     pdb_file_name    = cmdline.pdb_file_names[0],
     cif_objects      = cmdline.cif_objects,
     crystal_symmetry = cmdline.crystal_symmetry)
-  if(params.clustering):
+  if(params.cluster.clustering):
     params.gradient_only = True
     print >> log, " params.gradient_only", params.gradient_only
   # RESTART
@@ -206,8 +265,6 @@ def run(params, log):
     for chain in cmdline.pdb_hierarchy.chains():
       if (len(chain.conformers()) > 1):
         raise Sorry("Alternative conformations are not supported.")
-    if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
-      raise Sorry("Too many atoms.")
     if (cmdline.crystal_symmetry.space_group().type().number() != 1):
       raise Sorry("Only P1 is supported.")
     cmdline.working_phil.show(out=log, prefix="   ")
@@ -227,12 +284,12 @@ def run(params, log):
       r_free                  = fmodel.r_free(),
       b                       = cctbx_rm_bonds_rmsd,
       xrs                     = fmodel.xray_structure,
-      max_bond_rmsd           = params.max_bond_rmsd,
-      max_r_work_r_free_gap   = params.max_r_work_r_free_gap,
+      max_bond_rmsd           = params.refine.max_bond_rmsd,
+      max_r_work_r_free_gap   = params.refine.max_r_work_r_free_gap,
       pdb_hierarchy           = cmdline.pdb_hierarchy,
-      mode                    = params.mode,
+      mode                    = params.refine.mode,
       log                     = log,
-      restraints_weight_scale = params.restraints_weight_scale)
+      restraints_weight_scale = params.refine.restraints_weight_scale)
     if(params.rst_file is None):
       if(params.output_file_name_prefix is None):
         params.output_file_name_prefix = \
@@ -265,7 +322,7 @@ def run(params, log):
     fmodel             = start_fmodel,
     params             = params,
     restraints_manager = rm)
-  if(params.mode == "refine"):
+  if(params.refine.mode == "refine"):
     driver.refine(
       params                = params,
       fmodel                = fmodel,
@@ -287,6 +344,7 @@ def run(params, log):
 if (__name__ == "__main__"):
   t0 = time.time()
   log = sys.stdout
+  args = sys.argv[1:]
   cmdline = mmtbx.command_line.load_model_and_data(
       args          = args,
       master_phil   = get_master_phil(),

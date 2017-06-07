@@ -14,9 +14,6 @@ legend = """\
 Finalise a model before quantum refinement
 """
 
-master_params_str ="""
-
-"""
 
 def run(args):
   cmd = "phenix.python " +  \

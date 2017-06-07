@@ -13,13 +13,10 @@ class test_finalise(test_base):
     assert result_db['completion'] == result.completion
     assert result_db['finalise']   == result.capping
     assert result_db['failing']    == result.failing
-  
+
   def insert(self,result):
-    self.db.old.insert_one({"pdb_code"        : result.pdb_code,
-                            "chunk"           : result.clusters,
-                            "chunks"          : result.chunks,
-                            "chunk_sizes"     : result.chunk_sizes,
-                            "num_of_chunks"   : result.num_of_chunks,
-                            "num_of_clusters" : result.num_of_clusters})
-
-
+    self.db.old.insert_one({"pdb_code"     : result.pdb_code,
+                            "charge"       : result.clusters,
+                            "completion"   : result.chunks, # cant have boolean
+                            "finalise"     : result.chunk_sizes,
+                            "failing"      : result.num_of_chunks})

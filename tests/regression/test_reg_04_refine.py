@@ -5,13 +5,13 @@ from test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
-qr_reg_data = os.path.join(qrefine_path, "regression/datasets/cluster")
+qr_reg_data = os.path.join(qrefine_path, "test/regression/datasets/cluster")
 
 class test_refine(test_base):
 
   def check_assertions(self,result):
     """
-    Exercise to refinements are carried out successfully. 
+    Exercise to refinements are carried out successfully.
     """
     if self.db.old.find_one({"pdb_code": result.pdb_code}) is None:
       self.insert(result)
@@ -29,5 +29,3 @@ class test_refine(test_base):
                      "rsmd_final"  : result.rsmd_final,
                      "r_start"     : result.r_start,
                      "r_work"      : result.r_work})
-
-

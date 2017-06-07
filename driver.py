@@ -13,10 +13,10 @@ class convergence(object):
   def __init__(self, fmodel, params):
     self.r_start = fmodel.r_work()
     self.sites_cart_start = fmodel.xray_structure.sites_cart()
-    self.r_tolerance=params.r_tolerance
-    self.max_bond_rmsd=params.max_bond_rmsd
-    self.rmsd_tolerance=params.rmsd_tolerance
-    self.use_convergence_test = params.use_convergence_test
+    self.r_tolerance=params.refine.r_tolerance
+    self.max_bond_rmsd=params.refine.max_bond_rmsd
+    self.rmsd_tolerance=params.refine.rmsd_tolerance
+    self.use_convergence_test = params.refine.use_convergence_test
     self.number_of_convergence_occurances=0
     #
     self.rws = flex.double()
@@ -162,13 +162,13 @@ class restart_data(object):
 def run_minimize(calculator, params, results):
   minimized = None
   try:
-    if(params.max_iterations > 0):
+    if(params.refine.max_iterations > 0):
       minimized = minimizer(
         calculator     = calculator,
-        stpmax         = params.stpmax,
-        gradient_only  = params.gradient_only,
-        line_search    = params.line_search,
-        max_iterations = params.max_iterations)
+        stpmax         = params.refine.stpmax,
+        gradient_only  = params.refine.gradient_only,
+        line_search    = params.refine.line_search,
+        max_iterations = params.refine.max_iterations)
   except Exception as e:
     print >> results.log, e
     print >> results.log, "  minimizer failed"
@@ -192,7 +192,7 @@ def refine(fmodel,
            results,
            calculator,
            geometry_rmsd_manager):
-  if(not params.refine_sites): return
+  if(not params.refine.refine_sites): return
   rst_file = params.rst_file
   rst_data = restart_data(fmodel, geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
@@ -221,7 +221,7 @@ def refine(fmodel,
     cluster_qm_update = clustering_update(
       pre_sites_cart = calculator.fmodel.xray_structure.sites_cart(),
       log            = results.log,
-      rmsd_tolerance = params.rmsd_tolerance * 100)
+      rmsd_tolerance = params.refine.rmsd_tolerance * 100)
     print >> results.log, "\ninteracting pairs number:  ", \
       calculator.restraints_manager.fragments.interacting_pairs
   #
@@ -232,7 +232,7 @@ def refine(fmodel,
   print >> results.log, "Optimal weight search:"
   fmodel_copy = fmodel.deep_copy()
   for weight_cycle in xrange(weight_cycle_start,
-                             params.number_of_weight_search_cycles+1):
+                             params.refine.number_of_weight_search_cycles+1):
     if((weight_cycle!=1 and weight_cycle==weight_cycle_start) or
        (refine_cycle_start is not None)):
       fmodel = calculator.fmodel.deep_copy()
@@ -262,7 +262,7 @@ def refine(fmodel,
       results      = results)
     # Run minimization
     n_fev = 0
-    for mc in xrange(params.number_of_macro_cycles):
+    for mc in xrange(params.refine.number_of_macro_cycles):
       minimized = run_minimize(calculator=calculator, params=params,
         results=results)
       calculator.reset_fmodel(fmodel = fmodel)
@@ -286,9 +286,9 @@ def refine(fmodel,
     calculator.weights.adjust_restraints_weight_scale(
       fmodel                = fmodel,
       geometry_rmsd_manager = geometry_rmsd_manager,
-      max_bond_rmsd         = params.max_bond_rmsd)
+      max_bond_rmsd         = params.refine.max_bond_rmsd)
     results.show(prefix="  ")
-    if(params.mode == "refine"):
+    if(params.refine.mode == "refine"):
       calculator.weights.\
         add_restraints_weight_scale_to_restraints_weight_scales()
   print >> results.log, "At end of weight search:"
@@ -330,7 +330,7 @@ def refine(fmodel,
       results      = results)
     #
     n_fev = 0
-    for mc in xrange(params.number_of_macro_cycles):
+    for mc in xrange(params.refine.number_of_macro_cycles):
       minimized = run_minimize(calculator=calculator, params=params,
         results=results)
       calculator.reset_fmodel(fmodel = fmodel)
@@ -356,7 +356,7 @@ def refine(fmodel,
     calculator.weights.adjust_restraints_weight_scale(
         fmodel                = fmodel,
         geometry_rmsd_manager = geometry_rmsd_manager,
-        max_bond_rmsd         = params.max_bond_rmsd)
+        max_bond_rmsd         = params.refine.max_bond_rmsd)
   print >> results.log, "At end of further refinement:"
   results.show(prefix="  ")
 
@@ -387,17 +387,17 @@ def opt(fmodel,
     print >> results.log, "\ninteracting pairs number:  ",\
       calculator.restraints_manager.fragments.interacting_pairs
   results.show(prefix="start")
-  for micro_cycle in xrange(micro_cycle_start, params.number_of_micro_cycles+1):
+  for micro_cycle in xrange(micro_cycle_start, params.refine.number_of_micro_cycles+1):
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
     conv_test = convergence(fmodel=calculator.fmodel, params=params)
     rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle, fmodel=fmodel,
       results=results)
     minimized = minimizer(calculator = calculator,
-                          stpmax = params.stpmax,
-                          gradient_only = params.gradient_only,
-                          line_search = params.line_search,
-                          max_iterations = params.max_iterations)
+                          stpmax = params.refine.stpmax,
+                          gradient_only = params.refine.gradient_only,
+                          line_search = params.refine.line_search,
+                          max_iterations = params.refine.max_iterations)
     calculator.update_fmodel_opt()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_angles_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,

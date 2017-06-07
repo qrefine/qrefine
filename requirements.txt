@@ -1,4 +1,0 @@
-# Add your requirements here like:
-pymongo
-ase
-JPype1

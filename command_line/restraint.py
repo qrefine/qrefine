@@ -17,18 +17,6 @@ legend = """\
 Compute energy and gradient for a system
 """
 
-master_params_str ="""
-restraints{
-restraints = cctbx *qm
-.type = choice(multi=False)
-qm_engine_name = mopac terachem turbomole *pyscf
-.type = choice(multi=False)
-charge= None
-.type = int
-basis = "sto-3g"
-.type = str
-}
-"""
 
 def example():
   print >> log, "Running helix example "

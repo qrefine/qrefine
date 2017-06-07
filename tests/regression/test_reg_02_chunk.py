@@ -4,9 +4,9 @@ import os,sys,time
 import libtbx.load_env
 from cluster_wrapper import Clusterer,Result
 from test_reg_00_base import test_base
-qrefine_path = libtbx.env.find_in_repositories("qrefine")
 
-qr_reg_data = os.path.join(qrefine_path, "regression/datasets/cluster")
+qrefine_path = libtbx.env.find_in_repositories("qrefine")
+qr_reg_data = os.path.join(qrefine_path, "test/regression/datasets/cluster")
 
 class test_chunk(test_base):
 
@@ -16,7 +16,7 @@ class test_chunk(test_base):
 
   def check_assertions(self,result):
     """
-    Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk. 
+    Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk.
     """
     print "checking result",result
     if self.db.old.find_one({"pdb_code": result.pdb_code}) is None:

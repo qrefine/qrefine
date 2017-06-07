@@ -7,14 +7,11 @@ from charges import write_pdb_hierarchy_xyzq_file
 from utils import fragment_utils
 from libtbx import group_args
 import completion
-try:
-  from plugin.yoink.pyoink import PYoink
-  from utils.yoink_utils import write_yoink_infiles
-except ImportError, e:
-  print str(e)
-  pass
+from qrefine.plugin.yoink.pyoink import PYoink
+from qrefine.utils.yoink_utils import write_yoink_infiles
 
-qr_yoink_path =os.path.join(qrefine_path, "plugin/yoink/")
+qrefine = libtbx.env.find_in_repositories("qrefine")
+
 
 class fragments(object):
 
@@ -44,8 +41,8 @@ class fragments(object):
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
     if(clustering):
-      self.yoink_dat_path = os.path.join(qr_path,"plugin/yoink/dat")
-      self.pyoink = PYoink(os.path.join(qr_path,"plugin/yoink/Yoink-0.0.1.jar"))
+      self.yoink_dat_path = os.path.join(qrefine,"plugin/yoink/dat")
+      self.pyoink = PYoink(os.path.join(qrefine,"plugin/yoink/Yoink-0.0.1.jar"))
       self.set_up_cluster_qm()
 
   def set_up_cluster_qm(self, sites_cart=None):
