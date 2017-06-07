@@ -40,7 +40,7 @@ import driver
 import restraints
 import cluster_restraints
 import results
-
+from qrefine.utils.super_cell import expand
 master_params_str ="""
 
 max_atoms = 15000
@@ -173,10 +173,15 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     xray_structure.scattering_type_registry().type_count_dict().keys()
   has_hd = "H" in sctr_keys or "D" in sctr_keys
   pdb_hierarchy = processed_pdb_file.all_chain_proxies.pdb_hierarchy
+  super_cell = expand( # XXX needs to be optional?
+    pdb_hierarchy        = pdb_hierarchy,
+    crystal_symmetry     = crystal_symmetry,
+     select_within_radius = 15) # XXX needs to be a parameter?
   return group_args(
     processed_pdb_file = processed_pdb_file,
     pdb_hierarchy      = pdb_hierarchy,
     xray_structure     = xray_structure,
+    super_cell         = super_cell,
     has_hd             = has_hd)
 
 def create_fragment_manager(

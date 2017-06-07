@@ -46,7 +46,7 @@ def run_cmd(prefix,args,pdb_name = "data_files/m00_poor.pdb",
       cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  #print " ".join(cmd)
+  print " ".join(cmd)
   return easy_run.go(" ".join(cmd))
 
 def clean_up(prefix,mtz_name = "data_files/m00_good.mtz"):
@@ -72,7 +72,7 @@ def run():
     "tst_10.py",
     #"tst_11.py", Nigel will delete this
     #"tst_12.py", Nigel will fix this
-    "tst_13.py"
+    "tst_13.py",
     "tst_14.py"
   ]
   for file_name in tests:

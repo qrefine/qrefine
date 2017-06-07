@@ -3,6 +3,15 @@ from scitbx.array_family import flex
 import string
 from cctbx import uctbx
 from cctbx import crystal
+from libtbx.utils import null_out
+import mmtbx
+import mmtbx.monomer_library.server
+import mmtbx.monomer_library.pdb_interpretation
+import mmtbx.restraints
+
+from mmtbx import monomer_library
+mon_lib_srv = mmtbx.monomer_library.server.server()
+ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
 # This must be a method of iotbx.pdb.hierarchy and used in phenix.models_as_chains
 def models_as_chains(h, model_id_orig, original_chain_ids):
@@ -51,9 +60,11 @@ class expand(object):
     self.pdb_hierarchy = pdb_hierarchy
     self.select_within_radius = select_within_radius
     self.crystal_symmetry = crystal_symmetry
+    self.super_sphere_geometry_restraints_manager = None
     self.cs_p1 = crystal.symmetry(self.crystal_symmetry.unit_cell(), "P1")
     self.ph_p1 = self.pdb_hierarchy.expand_to_p1(
       crystal_symmetry=self.crystal_symmetry)
+    self.selection_keep = None
     # original chain IDs
     self.original_chain_ids = []
     for c in self.pdb_hierarchy.chains():
@@ -73,15 +84,40 @@ class expand(object):
                               crystal_symmetry = self.cs_box)
     #
     self._select_within()
+    self.ph_super_sphere = self.ph_chains.select(self.selection_keep)
+    self.update_super_sphere_geometry_restraints_manager()
+
+  def update_super_sphere_geometry_restraints_manager(self):
+    # XXX Unify with process_model_file of qr.py
+    params = mmtbx.monomer_library.pdb_interpretation.master_params.extract()
+    params.use_neutron_distances = True
+    params.restraints_library.cdl = False
+    params.sort_atoms = False
+    processed_pdb_file = mmtbx.monomer_library.pdb_interpretation.process(
+      mon_lib_srv              = mon_lib_srv,
+      ener_lib                 = ener_lib,
+      params                   = params,
+      pdb_inp                  = self.ph_super_sphere.as_pdb_input(), # XXX Does this loose precision?
+      strict_conflict_handling = False,
+      crystal_symmetry         = self.cs_box, #XXX I hope this is correct
+      force_symmetry           = True,
+      log                      = null_out())
+    xrs = processed_pdb_file.xray_structure()
+    sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
+    has_hd = "H" in sctr_keys or "D" in sctr_keys
+    geometry = processed_pdb_file.geometry_restraints_manager(
+      show_energies                = False,
+      assume_hydrogens_all_missing = not has_hd,
+      plain_pairs_radius           = 5.0)
+    self.super_sphere_geometry_restraints_manager = mmtbx.restraints.manager(
+       geometry = geometry, normalization = False)
 
   def write_super_cell_selected_in_sphere(self, file_name="super_sphere.pdb"):
-    self.ph_chains.select(self.selection_keep).write_pdb_file(
-      file_name=file_name, crystal_symmetry = self.cs_p1)
+    self.ph_super_sphere.write_pdb_file(file_name = file_name,
+      crystal_symmetry = self.cs_p1)
 
   def write_super_cell(self, file_name="super.pdb"):
-    self.ph_chains.write_pdb_file(
-      file_name        = file_name,
-      crystal_symmetry = self.cs_p1)
+    self.ph_chains.write_pdb_file(file_name=file_name)
 
   def write_p1(self, file_name="p1.pdb"):
     self.ph_p1.write_pdb_file(file_name=file_name,

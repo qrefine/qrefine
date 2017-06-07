@@ -23,15 +23,12 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests/unit/")
 
 master_params_str ="""
-
-
 method = *multiprocessing pbs sge lsf threading
 .type = choice(multi=False)
 nproc = 1
 .type = int
 qsub_command = None
 .type = str
-
 """
 
 def get_master_phil():
@@ -75,7 +72,6 @@ def run(prefix = "tst_13"):
   g_entire = qm_gradient(cs, ph, clustering=False)
   g_cluster = qm_gradient(cs, ph, clustering = True)
   assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
-  STOP()
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"
   qm_opt(cs, ph,file_entire_qm,cluster=False)
