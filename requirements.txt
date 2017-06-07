@@ -1,3 +1,5 @@
 # Add your requirements here like:
 argparse
 pymongo
+ase
+JPype1

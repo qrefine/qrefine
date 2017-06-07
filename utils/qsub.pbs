@@ -1,0 +1,43 @@
+#!/bin/bash 
+#PBS -V
+#PBS -l nodes=1:ppn=6,walltime=30:00 
+#PBS -M qrefine@gmail.com
+#PBS -m ae
+#PBS -N job1
+
+#PBS -v arguments
+
+SCP=/usr/bin/scp
+SSH=/usr/bin/ssh
+export SERVER=$PBS_O_HOST
+export SERVER_DIR=$SERVER:$PBS_O_WORKDIR
+#export SUB_DIR=$HOME/$PBS_JOBID
+export SUB_DIR=$PBS_O_WORKDIR
+#mkdir $SUB_DIR
+cd $SUB_DIR
+export PBS_O_WORKDIR=$SUB_DIR
+
+### put your command here:
+
+export HOSTS_FILE=$PBS_NODEFILE
+cat $HOSTS_FILE>hosts_file_$PBS_JOBNAME
+export HOST=$(head -1 $HOSTS_FILE)
+echo $HOST
+
+mkdir $PBS_O_WORKDIR/ase/
+mkdir $PBS_O_WORKDIR/ase/tmp/
+
+if ! [ "$SERVER" == "$HOST" ]; then
+   /usr/bin/scp qr@$SERVER_DIR/ase/tmp/clustering_info_pickle $PBS_O_WORKDIR/ase/tmp/
+   /usr/bin/scp -r  qr@$SERVER_DIR/ase/$PBS_JOBNAME $PBS_O_WORKDIR/ase/
+fi
+
+  phenix.python ./utils/parallel_separate_node.py  $arguments
+
+
+if ! [ "$SERVER" == "$HOST" ]; then
+  /usr/bin/scp  $PBS_O_WORKDIR/ase/tmp/$PBS_JOBNAME.pickle  qr@$SERVER_DIR/ase/tmp/
+  rm  $PBS_O_WORKDIR/ase/tmp/$PBS_JOBNAME.*
+fi
+
+
