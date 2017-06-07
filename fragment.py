@@ -6,7 +6,7 @@ from charges import write_pdb_hierarchy_qxyz_file
 from charges import write_pdb_hierarchy_xyzq_file
 from utils import fragment_utils
 from libtbx import group_args
-import completion
+import qrefine.completion
 from qrefine.plugin.yoink.pyoink import PYoink
 from qrefine.utils.yoink_utils import write_yoink_infiles
 

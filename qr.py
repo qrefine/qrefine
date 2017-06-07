@@ -43,6 +43,9 @@ import results
 
 master_params_str ="""
 
+max_atoms = 15000
+  .type = int
+
 finalise{
 
 }
@@ -114,7 +117,7 @@ rmsd_tolerance = 0.01
 .type = float
 }
 
-parallel {
+parallel_params {
 method = *multiprocessing pbs sge lsf threading
 .type = choice(multi=False)
 nproc = None
@@ -265,6 +268,8 @@ def run(params, log):
     for chain in cmdline.pdb_hierarchy.chains():
       if (len(chain.conformers()) > 1):
         raise Sorry("Alternative conformations are not supported.")
+    if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
+      raise Sorry("Too many atoms.")
     if (cmdline.crystal_symmetry.space_group().type().number() != 1):
       raise Sorry("Only P1 is supported.")
     cmdline.working_phil.show(out=log, prefix="   ")

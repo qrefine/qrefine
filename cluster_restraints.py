@@ -34,6 +34,7 @@ class from_cluster(object):
       processes                  = self.parallel_params.nproc,
       qsub_command               = self.parallel_params.qsub_command,
       use_manager                = True)
+
     system_size = sites_cart.size()
     target=0
     gradients=flex.vec3_double(system_size)

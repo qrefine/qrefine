@@ -9,6 +9,7 @@ import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
 from libtbx.test_utils import approx_equal
+from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering

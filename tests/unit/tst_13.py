@@ -1,10 +1,12 @@
 from __future__ import division
 
 import os
+import sys
 import random
 import time
 import numpy
 import iotbx.pdb
+import mmtbx.command_line
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 
@@ -19,6 +21,22 @@ from qrefine.clustering import betweenness_centrality_clustering
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests/unit/")
+
+master_params_str ="""
+
+
+method = *multiprocessing pbs sge lsf threading
+.type = choice(multi=False)
+nproc = 1
+.type = int
+qsub_command = None
+.type = str
+
+"""
+
+def get_master_phil():
+  return mmtbx.command_line.generate_master_phil_with_inputs(
+    phil_string=master_params_str)
 
 # gradient-only LBFGS without line search
 class lbfgs_gradient(object):
@@ -48,6 +66,7 @@ def run(prefix = "tst_13"):
   """
   compare gradients from entire qm and clustered qm.
   """
+
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
@@ -56,6 +75,7 @@ def run(prefix = "tst_13"):
   g_entire = qm_gradient(cs, ph, clustering=False)
   g_cluster = qm_gradient(cs, ph, clustering = True)
   assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
+  STOP()
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"
   qm_opt(cs, ph,file_entire_qm,cluster=False)
@@ -69,7 +89,6 @@ def run(prefix = "tst_13"):
   assert rmsd_diff<0.02
 
 def qm_gradient(cs, ph, clustering=False):
-
   fq = from_qm(
     charge_embedding=False,
     pdb_hierarchy=ph,
@@ -91,9 +110,10 @@ def qm_gradient(cs, ph, clustering=False):
   cluster = from_cluster(
    restraints_manager = fq,
    fragment_manager =fm,
-   parallel_params = None,)
+   parallel_params = get_master_phil().extract())
+
   sites_cart = ph.atoms().extract_xyz()
-  e,g = fq.target_and_gradients(sites_cart)
+  e,g = cluster.target_and_gradients(sites_cart)
   return g
 
 def qm_opt(cs, ph, file, cluster=False):
@@ -112,6 +132,7 @@ def qm_opt(cs, ph, file, cluster=False):
 
 if(__name__ == "__main__"):
   t0 = time.time()
+  log = sys.stdout
   run()
   print "Time: %6.2f"%(time.time()-t0)
   print "OK"
