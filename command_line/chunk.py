@@ -8,8 +8,7 @@ import iotbx.pdb
 from qrefine.core.restraints import from_qm
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qr_path = os.path.join(qrefine_path, "core")
-qr_yoink_path =os.path.join(qr_path, "plugin/yoink/yoink/")
+qr_yoink_path =os.path.join(qrefine_path, "plugin/yoink/yoink/")
 
 log = sys.stdout
 
