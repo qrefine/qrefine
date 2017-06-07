@@ -22,7 +22,7 @@ script:
  #- tar -xvf base_1.11.1-2575.tar
  #- travis_wait 45 python bootstrap.py --builder=cctbx
  - source build/setpaths.sh
- - phenix.python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine
+ - python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine
  #- qr.test
  #- source build/setpaths.sh
  #- cctbx.python -m  pip install -U pip
