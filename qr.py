@@ -45,23 +45,17 @@ master_params_str ="""
 
 max_atoms = 15000
   .type = int
-
-finalise{
-
-}
-
 cluster{
-clustering = False
-.type = bool
-charge_embedding = False
-.type = bool
-maxnum_residues_in_cluster = 15
-.type = int
-clustering_method = gnc  *bcc
-.type = choice(multi=False)
+  clustering = False
+    .type = bool
+  charge_embedding = False
+    .type = bool
+  maxnum_residues_in_cluster = 15
+    .type = int
+  clustering_method = gnc  *bcc
+    .type = choice(multi=False)
 }
 
-restraint{
 restraints = cctbx *qm
 .type = choice(multi=False)
 qm_engine_name = mopac terachem turbomole *pyscf
@@ -70,9 +64,8 @@ charge= None
 .type = int
 basis = "sto-3g"
 .type = str
-}
 
-refine{
+refine {
 sf_algorithm = *direct fft
 .type = choice(multi=False)
 refinement_target_name = *ml ls_wunit_k1
@@ -232,14 +225,14 @@ def create_fragment_manager(
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
     pdb_hierarchy              = pdb_hierarchy,
-    qm_engine_name             = params.restraints.qm_engine_name,
+    qm_engine_name             = params.qm_engine_name,
     crystal_symmetry           = crystal_symmetry)
 
 def create_restraints_manager(
       cmdline,
       model,
       fragment_manager=None):
-  if(cmdline.params.restraint.restraints == "cctbx"):
+  if(cmdline.params.restraints == "cctbx"):
     assert model.processed_pdb_file is not None
     restraints_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
@@ -284,14 +277,15 @@ def create_calculator(weights, fmodel, params, restraints_manager):
       restraints_manager = restraints_manager,
       weights            = weights)
 
-def run(params, log):
+def run(cmdline, log):
+  params = cmdline.params
   model = process_model_file(
     pdb_file_name    = cmdline.pdb_file_names[0],
     cif_objects      = cmdline.cif_objects,
     crystal_symmetry = cmdline.crystal_symmetry)
   if(params.cluster.clustering):
-    params.gradient_only = True
-    print >> log, " params.gradient_only", params.gradient_only
+    params.refine.gradient_only = True
+    print >> log, " params.gradient_only", params.refine.gradient_only
   # RESTART
   if(os.path.isfile(str(cmdline.params.rst_file))):
     print >> log, "restart info is loaded from %s" % cmdline.params.rst_file
@@ -359,7 +353,7 @@ def run(params, log):
     cluster_restraints_manager = cluster_restraints.from_cluster(
       restraints_manager = restraints_manager,
       fragment_manager   = fragment_manager,
-      parallel_params    = params.parallel)
+      parallel_params    = params.parallel_params)
   rm = restraints_manager
   if(fragment_manager is not None):
     rm = cluster_restraints_manager
@@ -396,6 +390,5 @@ if (__name__ == "__main__"):
       master_phil   = get_master_phil(),
       create_fmodel = False,
       out           = log)
-  params = cmdline.params
-  run(params, log = log)
+  run(cmdline=cmdline, log = log)
   print >> log, "Time: %6.4f"%(time.time()-t0)

@@ -133,8 +133,7 @@ class sites_opt(calculator):
     self.update(x = x)
     f, g = self.restraints_manager.target_and_gradients(
       sites_cart = flex.vec3_double(self.x))
-    from libtbx import easy_pickle
-    #easy_pickle.dump("cluster_false.pickle",g)
+    #from libtbx import easy_pickle
     #easy_pickle.dump("cluster_true.pickle",g)
     #STOP()
     return f, g.as_double()

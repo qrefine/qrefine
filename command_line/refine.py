@@ -3,7 +3,6 @@ from __future__ import division
 import os
 import sys
 import time
-import argparse
 import libtbx.load_env
 from libtbx import  easy_run
 from libtbx.command_line import easy_qsub
@@ -26,11 +25,12 @@ import scope qrefine.qr.master_params_str
 
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
-    phil_string=master_params_str)
+    phil_string=qr.master_params_str)
+
+  #return mmtbx.command_line.generate_master_phil_with_inputs(
+  #  phil_string=master_params_str)
 
 def print_legend_and_usage(log):
-  print >> log, "-"*79
-  print >> log, "                               phenix.polder"
   print >> log, "-"*79
   print >> log, legend
   print >> log, "-"*79
@@ -67,7 +67,7 @@ def run(args, log):
        create_fmodel = False,
        out           = log)
   params = cmdline.params
-  qr.run(params.refine,log)
+  qr.run(cmdline=cmdline, log=log)
 
 if __name__ == '__main__':
   t0 = time.time()

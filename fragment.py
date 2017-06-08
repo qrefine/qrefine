@@ -68,7 +68,9 @@ class fragments(object):
     self.interaction_list, weight = self.pyoink.get_interactions_list()
     self.interacting_pairs = len(self.interaction_list)
     self.interaction_list += self.backbone_connections
-    self.clustering = self.clustering_method(
+
+    import clustering
+    self.clustering = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size=len(self.pyoink.molecules),
       maxnum_residues_in_cluster=self.maxnum_residues_in_cluster)

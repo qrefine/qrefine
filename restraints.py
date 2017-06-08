@@ -25,8 +25,11 @@ class from_cctbx(object):
     self.fragment_extracts = fragment_extracts
 
   def __call__(self,selection_and_sites_cart):
-    return self.target_and_gradients(sites_cart = selection_and_sites_cart[1],
-                                     selection  = selection_and_sites_cart[0])
+    return self.target_and_gradients(
+      sites_cart = selection_and_sites_cart[1],
+      selection  = selection_and_sites_cart[0],
+      index      = selection_and_sites_cart[2])
+
   def target_and_gradients(self, sites_cart, selection=None, index=None):
     if(selection is not None): ### clustering
       super_selection = self.fragment_extracts.fragment_super_selections[index]
