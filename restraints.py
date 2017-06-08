@@ -106,6 +106,7 @@ class from_qm(object):
                                       index=index)
     else:
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
+      self.pdb_hierarchy.write_pdb_file(file_name=self.file_name)
       ph = self.pdb_hierarchy## return pdb_hierarchy
       qm_pdb_file = self.file_name
       qm_charge = self.charge

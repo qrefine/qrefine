@@ -16,7 +16,8 @@ class from_cluster(object):
     system_size = sites_cart.size()
     self.fragment_manager.pdb_hierarchy.atoms().set_xyz(sites_cart)
     # update the selected pdb hierarchy of the super cell
-    self.fragment_manager.pdb_hierarchy_super = self.fragment_manager.super_cell.update(sites_cart=sites_cart)
+    self.fragment_manager.pdb_hierarchy_super =  \
+      self.fragment_manager.super_cell.update(sites_cart=sites_cart)
     # if restraints are cctbx, update the geometry restraints manager and sites_cart of  super_sphere
     if(isinstance(self.restraints_manager, from_cctbx)):
       self.fragment_manager.super_cell.update_super_sphere_geometry_restraints_manager()

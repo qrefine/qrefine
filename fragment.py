@@ -10,7 +10,7 @@ from qrefine.super_cell import expand
 import qrefine.completion as model_completion
 from qrefine.plugin.yoink.pyoink import PYoink
 from qrefine.utils.yoink_utils import write_yoink_infiles
-
+import completion
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
 class fragments(object):
@@ -94,6 +94,8 @@ class fragments(object):
       self.cluster_atoms.append(atoms_in_one_cluster)
       atoms_in_one_fragment, qm_molecules = pyoink.get_qm_indices()
       self.fragment_super_atoms.append(atoms_in_one_fragment)
+      if(0):
+        print i, "atoms in cluster: ", atoms_in_one_cluster
 
   def get_fragment_hierarchies_and_charges(self):
 
@@ -115,8 +117,9 @@ class fragments(object):
       fragment_super_selection = pdb_hierarchy_select(
         self.pdb_hierarchy_super.atoms_size(), self.fragment_super_atoms[i])
       qm_pdb_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
-      qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
-        crystal_symmetry=self.super_cell.cs_box)
+      if(0):
+        qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
+          crystal_symmetry=self.super_cell.cs_box)
       raw_records = qm_pdb_hierarchy.as_pdb_string(
         crystal_symmetry=self.super_cell.cs_box)
       ## cell size self.expand.cs_p1 from expand, seems not right
@@ -140,17 +143,17 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   if (not os.path.isdir(sub_working_folder)):
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
+  complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
+  ph = completion.run(pdb_hierarchy=fragment_hierarchy,
+                      crystal_symmetry=fragment_extracts.super_cell.cs_box,
+                      model_completion=False)
   ##for debugging
-  if(0):
+  if (0):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell.cs_box)
-  complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
-  # _capping_pdb_filename(qm_pdb_file)
-  ph = model_completion.run(pdb_hierarchy=fragment_hierarchy,
-                      crystal_symmetry=fragment_extracts.super_cell.cs_box,
-                      model_completion=False)
-  return os.path.abspath(complete_qm_pdb_file),ph
+    ph.write_pdb_file(file_name=complete_qm_pdb_file)
+  return os.path.abspath(complete_qm_pdb_file), ph
 
 def charge(fragment_extracts, index):
   return fragment_extracts.fragment_charges[index]
@@ -194,6 +197,8 @@ def fragment_extracts(fragments):
     fragment_charges     = fragments.fragment_charges,
     fragment_selections  = fragments.fragment_selections,
     fragment_super_selections=fragments.fragment_super_selections,
+    super_sphere_geometry_restraints_manager= \
+          fragments.super_cell.super_sphere_geometry_restraints_manager,
     working_folder       = fragments.working_folder,
     fragment_super_atoms      = fragments.fragment_super_atoms,
     cluster_atoms        = fragments.cluster_atoms,
