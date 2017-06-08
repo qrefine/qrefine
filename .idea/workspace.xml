@@ -2,23 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/regression/datasets/alt_loc/1jxw.pdb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/utils/yoink_utils.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/utils/parallel_separate_node.py" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/utils/super_cell.py" afterPath="$PROJECT_DIR$/super_cell.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/data_files/p212121.mtz" afterPath="$PROJECT_DIR$/tests/unit/data_files/p212121.mtz" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/qrefine.iml" afterPath="$PROJECT_DIR$/.idea/qrefine.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/command_line/refine.py" afterPath="$PROJECT_DIR$/command_line/refine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/completion.py" afterPath="$PROJECT_DIR$/completion.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fragment.py" afterPath="$PROJECT_DIR$/fragment.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qr.py" afterPath="$PROJECT_DIR$/qr.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/restraints.py" afterPath="$PROJECT_DIR$/restraints.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/regression/test_reg_01_finalise.py" afterPath="$PROJECT_DIR$/tests/regression/test_reg_01_finalise.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/run_tests.py" afterPath="$PROJECT_DIR$/tests/unit/run_tests.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/tst_13.py" afterPath="$PROJECT_DIR$/tests/unit/tst_13.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/tst_14.py" afterPath="$PROJECT_DIR$/tests/unit/tst_14.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/data_files/qmmm.xml" afterPath="$PROJECT_DIR$/tests/unit/data_files/qmmm.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -57,10 +41,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="yoink_utils.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="yoink_utils.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/utils/yoink_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1024">
+            <state relative-caret-position="1782">
               <caret line="66" column="67" lean-forward="false" selection-start-line="66" selection-start-column="67" selection-end-line="66" selection-end-column="67" />
               <folding />
             </state>
@@ -91,48 +75,32 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="super_cell.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="super_cell.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/super_cell.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4887">
-              <caret line="181" column="0" lean-forward="false" selection-start-line="181" selection-start-column="0" selection-end-line="195" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#16#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pyoink.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/plugin/yoink/pyoink.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1079">
-              <caret line="152" column="32" lean-forward="false" selection-start-line="152" selection-start-column="6" selection-end-line="152" selection-end-column="32" />
-              <folding>
-                <element signature="e#0#30#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cluster.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cluster.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="-4541">
+              <caret line="4" column="16" lean-forward="false" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cluster_restraints.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cluster_restraints.py">
+      <file leaf-file-name="qmmm.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/unit/data_files/qmmm.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="351">
-              <caret line="20" column="33" lean-forward="true" selection-start-line="20" selection-start-column="33" selection-end-line="20" selection-end-column="33" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="535">
+              <caret line="636" column="0" lean-forward="false" selection-start-line="636" selection-start-column="0" selection-end-line="636" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="qr.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/qr.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="51">
+              <caret line="20" column="8" lean-forward="false" selection-start-line="20" selection-start-column="8" selection-end-line="20" selection-end-column="8" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -210,8 +178,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/tests/regression_tests.py" />
-        <option value="$PROJECT_DIR$/docs/qr.rst" />
         <option value="$PROJECT_DIR$/regression/test_reg_03_finalise.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_04_cluster.py" />
         <option value="$PROJECT_DIR$/regression/test_reg_02_completion.py" />
@@ -261,6 +227,8 @@
         <option value="$PROJECT_DIR$/utils/yoink_utils.py" />
         <option value="$PROJECT_DIR$/restraints.py" />
         <option value="$PROJECT_DIR$/tests/unit/tst_13.py" />
+        <option value="$PROJECT_DIR$/tests/unit/data_files/qmmm.xml" />
+        <option value="$PROJECT_DIR$/qmmm.xml" />
       </list>
     </option>
   </component>
@@ -271,7 +239,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="120" />
+    <option name="x" value="-4" />
     <option name="y" value="23" />
     <option name="width" value="2560" />
     <option name="height" value="1413" />
@@ -755,18 +723,19 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="120" y="23" width="2560" height="1413" extended-state="0" />
+    <frame x="-4" y="23" width="2560" height="1413" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22377902" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24046692" sideWeight="0.4985938" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31959563" sideWeight="0.5439936" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31959563" sideWeight="0.54563653" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3446281" sideWeight="0.48594704" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31810632" sideWeight="0.49834985" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.49857435" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975206" sideWeight="0.4879837" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22377902" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31959563" sideWeight="0.4543635" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39950576" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -775,7 +744,6 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31984437" sideWeight="0.45600644" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -799,8 +767,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/qr.py" />
-    <entry file="file://$PROJECT_DIR$/core/results.py" />
     <entry file="file://$PROJECT_DIR$/core/requirements.txt" />
     <entry file="file://$PROJECT_DIR$/core/restraints.py" />
     <entry file="file://$PROJECT_DIR$/command_line/chunk.py" />
@@ -1024,14 +990,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="645">
-          <caret line="42" column="13" lean-forward="false" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/unit/run_tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="569">
@@ -1108,14 +1066,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/yoink_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1024">
-          <caret line="66" column="67" lean-forward="false" selection-start-line="66" selection-start-column="67" selection-end-line="66" selection-end-column="67" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/restraints.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2167">
@@ -1138,11 +1088,41 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/super_cell.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4887">
-          <caret line="181" column="0" lean-forward="false" selection-start-line="181" selection-start-column="0" selection-end-line="195" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-4541">
+          <caret line="4" column="16" lean-forward="false" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qmmm.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-16664">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="20" column="8" lean-forward="false" selection-start-line="20" selection-start-column="8" selection-end-line="20" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/unit/data_files/qmmm.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="535">
+          <caret line="636" column="0" lean-forward="false" selection-start-line="636" selection-start-column="0" selection-end-line="636" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/yoink_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1782">
+          <caret line="66" column="67" lean-forward="false" selection-start-line="66" selection-start-column="67" selection-end-line="66" selection-end-column="67" />
+          <folding />
         </state>
       </provider>
     </entry>
