@@ -17,8 +17,8 @@ def run(prefix = "tst_07"):
   """
   pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"./data_files/2lvr.pdb"))
   ph = pdb_inp.construct_hierarchy()
-  yoink_utils.write_yoink_infiles(os.path.join(qrefine,"./cluster.xml"),
-                                  os.path.join(qrefine,"./qmmm.xml"),
+  yoink_utils.write_yoink_infiles(os.path.join(qr_unit_tests,"data_files/cluster.xml"),
+                                  os.path.join(qr_unit_tests,"data_files/qmmm.xml"),
                                   ph,
                                   os.path.join(qrefine,"plugin/yoink/dat"))
   pyoink=PYoink(os.path.join(qrefine,"plugin/yoink/Yoink-0.0.1.jar"),
