@@ -154,7 +154,7 @@ def create_fmodel(cmdline, log):
   log.flush()
   return fmodel
 
-def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
+def orig_process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   params = monomer_library.pdb_interpretation.master_params.extract()
   params.use_neutron_distances = True
   params.restraints_library.cdl = False
@@ -183,6 +183,42 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     xray_structure     = xray_structure,
     super_cell         = super_cell,
     has_hd             = has_hd)
+
+def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
+  import iotbx.pdb
+  import mmtbx
+  import mmtbx.monomer_library.server
+  import mmtbx.monomer_library.pdb_interpretation
+  import mmtbx.restraints
+  from mmtbx import monomer_library
+
+  mon_lib_srv = mmtbx.monomer_library.server.server()
+  ener_lib    = mmtbx.monomer_library.server.ener_lib()
+  params = mmtbx.monomer_library.pdb_interpretation.master_params.extract()
+  params.use_neutron_distances = True
+  params.restraints_library.cdl = False
+  params.sort_atoms = False
+
+  pdb_inp = iotbx.pdb.input(file_name=pdb_file_name)
+  ph = iotbx.pdb.input(file_name=pdb_file_name).construct_hierarchy()
+  processed_pdb_file = mmtbx.monomer_library.pdb_interpretation.process(
+       mon_lib_srv              = mon_lib_srv,
+       ener_lib                 = ener_lib,
+       params                   = params,
+       pdb_inp                  = ph.as_pdb_input(), # XXX Does this loose precision?
+       strict_conflict_handling = False,
+       crystal_symmetry         = pdb_inp.crystal_symmetry(), #XXX I hope this is correct
+       force_symmetry           = True,
+       log                      = null_out())
+  xrs = processed_pdb_file.xray_structure()
+  sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
+  has_hd = "H" in sctr_keys or "D" in sctr_keys
+  return group_args(
+      processed_pdb_file = processed_pdb_file,
+      pdb_hierarchy      = ph,
+       xray_structure     = xrs,
+      # super_cell         = super_cell,
+      has_hd             = has_hd)
 
 def create_fragment_manager(
       pdb_hierarchy,

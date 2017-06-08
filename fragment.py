@@ -76,7 +76,6 @@ class fragments(object):
     self.clusters = sorted(clusters,
       lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
 
-
   def get_fragments(self):
     self.cluster_atoms = []
     self.fragment_super_atoms = []
