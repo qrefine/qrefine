@@ -63,7 +63,6 @@ def run(prefix = "tst_13"):
   """
   compare gradients from entire qm and clustered qm.
   """
-
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
@@ -118,10 +117,12 @@ def qm_opt(cs, ph, file, cluster=False):
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
     crystal_symmetry=cs,
-    use_cluster_qm=cluster,
+    clustering=cluster,
     maxnum_residues_in_cluster=8)
 
-  sys = ase_io_read("./data_files/helix.pdb")
+
+
+  sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   opt = lbfgs_gradient(sys, fq)
   opt.run(5)
   opt.write(file)

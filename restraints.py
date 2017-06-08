@@ -53,6 +53,7 @@ class from_qm(object):
       clustering                 = False,
       shared_disk                = True,
       basis                      = "sto-3g"):
+    self.fragment_extracts  = None
     self.basis = basis
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name

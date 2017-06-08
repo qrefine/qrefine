@@ -20,6 +20,9 @@ legend = """
 Refine a model using restraints from Quantum Chemistry
 """
 
+master_params_str ="""
+import scope qrefine.qr.master_params_str
+"""
 
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(

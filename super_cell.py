@@ -8,8 +8,8 @@ import mmtbx
 import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
-
 from mmtbx import monomer_library
+
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 

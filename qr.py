@@ -40,7 +40,7 @@ import driver
 import restraints
 import cluster_restraints
 import results
-from qrefine.utils.super_cell import expand
+from qrefine.super_cell import expand
 master_params_str ="""
 
 max_atoms = 15000

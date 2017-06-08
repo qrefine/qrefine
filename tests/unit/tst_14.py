@@ -2,7 +2,7 @@ from __future__ import division
 
 import time
 import iotbx.pdb
-from qrefine.utils import super_cell
+from qrefine import super_cell
 
 #pdb_str = """
 #CRYST1   10.000   10.000   10.000  70.00  80.00 120.00 P 1

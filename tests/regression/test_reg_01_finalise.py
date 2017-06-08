@@ -20,3 +20,7 @@ class test_finalise(test_base):
                             "completion"   : result.chunks, # cant have boolean
                             "finalise"     : result.chunk_sizes,
                             "failing"      : result.num_of_chunks})
+
+# charge : get_total_charge
+# wrtie charges
+#completion                            

@@ -6,10 +6,10 @@ from charges import write_pdb_hierarchy_qxyz_file
 from charges import write_pdb_hierarchy_xyzq_file
 from utils import fragment_utils
 from libtbx import group_args
+from qrefine.super_cell import expand
+import qrefine.completion as model_completion
 from qrefine.plugin.yoink.pyoink import PYoink
 from qrefine.utils.yoink_utils import write_yoink_infiles
-from qrefine.utils.super_cell import expand
-import qrefine.completion as model_completion
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 

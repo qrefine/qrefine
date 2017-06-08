@@ -315,6 +315,7 @@ def add_terminal_hydrogens(
     use_capping_hydrogens=use_capping_hydrogens,
   ):
     if verbose: print three
+    if not len(three): continue
     ptr=0
     assert three.are_linked()
     if use_capping_hydrogens:
@@ -476,6 +477,7 @@ def complete_pdb_hierarchy(hierarchy,
     sites_cart = hierarchy.atoms().extract_xyz()
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
 
+
   add_terminal_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
                          ppf.geometry_restraints_manager(),
                          use_capping_hydrogens=use_capping_hydrogens,
@@ -487,41 +489,61 @@ def complete_pdb_hierarchy(hierarchy,
   display_hierarchy_atoms(ppf.all_chain_proxies.pdb_hierarchy)
   return ppf
 
-def run(pdb_hierarchy=fragment_hierarchy,
-        crystal_symmetry=fragment_extracts.super_cell.cs_box,
-        model_completion=False):
- #
- # function as be used in two main modes
- #   1. completing a model with hydrogens in a protein-like manner
- #   2. completing a cluster with hydrogens in a QM-sensible manner
- #
+def run(pdb_filename=None,
+        pdb_hierarchy=None,
+        crystal_symmetry=None,
+        model_completion=True,
+        ):
+  #
+  # function as be used in two main modes
+  #   1. completing a model with hydrogens in a protein-like manner
+  #   2. completing a cluster with hydrogens in a QM-sensible manner
+  #
+  if pdb_hierarchy:
+    assert crystal_symmetry
+    assert pdb_filename is None
+
   if model_completion:
-     use_capping_hydrogens=False
-     fname = 'complete'
+    use_capping_hydrogens=False
+    fname = 'complete'
   else:
-     use_capping_hydrogens=True
-     fname = 'capping'
+    use_capping_hydrogens=True
+    fname = 'capping'
     #assert 0 # model has H
   params=None
   if use_capping_hydrogens:
-     params = hierarchy_utils.get_pdb_interpretation_params()
-     params.link_distance_cutoff=1.8
-  ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
-                                           params=params,
-                                         )
+    params = hierarchy_utils.get_pdb_interpretation_params()
+    params.link_distance_cutoff=1.8
+  if pdb_hierarchy:
+    raw_records = hierarchy_utils.get_raw_records(
+      pdb_inp=None,
+      pdb_hierarchy=pdb_hierarchy,
+      crystal_symmetry=crystal_symmetry,
+    )
+    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
+    sites_cart = pdb_hierarchy.atoms().extract_xyz()
+    ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  else:
+    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
+                                            params=params,
+                                          )
   ppf = complete_pdb_hierarchy(ppf.all_chain_proxies.pdb_hierarchy,
-                                ppf.geometry_restraints_manager(),
-                                use_capping_hydrogens=use_capping_hydrogens,
-                                append_to_end_of_model=True,
-                                pdb_filename=pdb_filename,
-                                pdb_inp=ppf.all_chain_proxies.pdb_inp,
-                                verbose=False,
-                              )
-  output = hierarchy_utils.write_hierarchy(pdb_filename,
-                                            ppf.all_chain_proxies.pdb_inp,
-                                            ppf.all_chain_proxies.pdb_hierarchy,
-                                            fname,
-                                        )
+                               ppf.geometry_restraints_manager(),
+                               use_capping_hydrogens=use_capping_hydrogens,
+                               append_to_end_of_model=True,
+                               pdb_filename=pdb_filename,
+                               pdb_inp=ppf.all_chain_proxies.pdb_inp,
+                               verbose=False,
+                             )
+  if pdb_filename:
+    output = hierarchy_utils.write_hierarchy(
+      pdb_filename,
+      ppf.all_chain_proxies.pdb_inp,
+      ppf.all_chain_proxies.pdb_hierarchy,
+      fname,
+    )
+  return ppf.all_chain_proxies.pdb_hierarchy
+
 
 def display_hierarchy_atoms(hierarchy, n=5):
   #print '-'*80
