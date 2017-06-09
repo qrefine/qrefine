@@ -34,9 +34,25 @@ def run():
       version = line.split('"')[1][:3]
       if float(version)<1.8:
         print '''
-  Need at least Java 1.8. Please update your system Java and try again.
+  Need at least Java 1.8. Please update your system Java using a JDK bundle
+  and try again.
         '''
         sys.exit()
+
+  java_env_vars = {'JAVA_HOME' : 'absolute_path_of_java_home',
+                   'JAVA_LIB_PATH' : 'absolute_path_of_java_lib',
+                   'LD_LIBRARY_PATH' : '$LD_LIBRARY_PATH:$JAVA_LIB_PATH/server',
+                   }
+  for env_var in java_env_vars:
+    if not os.environ.get(env_var, False):
+      print '''
+      The following environment variables need setting.
+      '''
+      for env_var, help in java_env_vars.items():
+        print '%s %s : %s' % (' '*10, env_var, help)
+      break
+  else:
+    assert 0
 
 if __name__=="__main__":
   args = sys.argv[1:]

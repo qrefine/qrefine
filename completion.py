@@ -296,6 +296,7 @@ def add_terminal_hydrogens(
     use_capping_hydrogens=False,  # instead of terminal H
     append_to_end_of_model=False, # useful for Q|R
     #use_capping_only_on_chain_breaks=False,
+    occupancy=1.,
     verbose=False,
     ):
   # add N terminal hydrogens because Reduce only does it to resseq=1
@@ -353,7 +354,6 @@ def add_terminal_hydrogens(
       for atom in group:
         tmp.append(atom)
     _add_atoms_to_end_of_hierarchy(hierarchy, tmp)
-
 
 def _add_atoms_to_end_of_hierarchy(hierarchy, rgs):
   chains = {}

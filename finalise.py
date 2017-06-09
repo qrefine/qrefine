@@ -1,5 +1,4 @@
 # LIBTBX_SET_DISPATCHER_NAME phenix.development.ready_set
-
 import os
 import sys
 
@@ -75,7 +74,6 @@ def run(pdb_filename,
         model_completion=True,
         remove_alt_loc=False,
         ):
-  print "run",pdb_filename
   #
   # do all *.pdb in a directory
   #
@@ -136,7 +134,7 @@ def run(pdb_filename,
   else:
     raw_records = hierarchy_utils.get_raw_records(
       ppf.all_chain_proxies.pdb_inp,
-      hierarchy,
+      ppf.all_chain_proxies.pdb_hierarchy,
     )
     ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
   hetero_charges = charges.get_hetero_charges(
