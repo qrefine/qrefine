@@ -6,11 +6,12 @@ import time
 import run_tests
 from libtbx.test_utils import approx_equal
 
-def run(prefix = "tst_15"):
+def run(prefix = "tst_16"):
   """
   Exercise gradients match:
     - small vs large box:
       -- using clustering vs not using clustering.
+  Non-P1 case (P212121)
   """
   data_file_prefix = "2olx"
   common_args = ["restraints=cctbx", "mode=opt", "nproc=1"]
@@ -20,7 +21,7 @@ def run(prefix = "tst_15"):
     pdb_name = "data_files/%s.pdb"%data_file_prefix,
     mtz_name = "data_files/%s.mtz"%data_file_prefix)
   r = run_tests.run_cmd(prefix,
-    args     = common_args+["clustering=false", 
+    args     = common_args+["clustering=false",
                            "dump_gradients=cluster_false.pkl"],
     pdb_name = "data_files/%s.pdb"%data_file_prefix,
     mtz_name = "data_files/%s.mtz"%data_file_prefix)
@@ -31,7 +32,7 @@ def run(prefix = "tst_15"):
   diff = g1-g2
   for i, diff_i in enumerate(diff):
     print i, diff_i#, g1[i], g2[i]
-  print 
+  print
   assert approx_equal(diff.max(), [0,0,0])
 
 if __name__ == '__main__':
@@ -39,5 +40,3 @@ if __name__ == '__main__':
   run()
   print "Time: %6.2f"%(time.time()-t0)
   print "OK"
-
-
