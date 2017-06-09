@@ -308,8 +308,8 @@ def run(cmdline, log):
         raise Sorry("Alternative conformations are not supported.")
     if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")
-    if (cmdline.crystal_symmetry.space_group().type().number() != 1):
-      raise Sorry("Only P1 is supported.")
+    #if (cmdline.crystal_symmetry.space_group().type().number() != 1):
+    #  raise Sorry("Only P1 is supported.")
     cmdline.working_phil.show(out=log, prefix="   ")
     fmodel = create_fmodel(cmdline=cmdline, log=log)
     fragment_manager = create_fragment_manager(

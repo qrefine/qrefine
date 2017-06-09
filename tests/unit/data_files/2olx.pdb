@@ -1,0 +1,79 @@
+USER  MOD reduce.3.3.160602 H: found=0, std=0, add=30, rem=0, adj=0
+CRYST1   15.479    4.915   30.552  90.00  90.00  90.00 P 21 21 21    0
+SCALE1      0.064604  0.000000  0.000000        0.00000
+SCALE2      0.000000  0.203459  0.000000        0.00000
+SCALE3      0.000000  0.000000  0.032731        0.00000
+USER  MOD -----------------------------------------------------------------
+USER  MOD scores for adjustable sidechains, with "set" totals for H,N and Q
+USER  MOD "o" means original, "f" means flipped, "180deg" is methyl default
+USER  MOD "!" flags a clash with an overlap of 0.40A or greater
+USER  MOD flip categories: "K"=keep, "C"=clashes, "X"=uncertain, "F"=flip
+USER  MOD Single : A   1 ASN N   :NH3+    180:sc=       0   (180deg=0)
+USER  MOD -----------------------------------------------------------------
+ATOM      1  N   ASN A   1       3.411   1.437   1.677  1.00 11.67           N
+ATOM      2  CA  ASN A   1       4.238   1.323   2.910  1.00 10.38           C
+ATOM      3  C   ASN A   1       3.458   1.873   4.113  1.00  5.66           C
+ATOM      4  O   ASN A   1       3.204   3.072   4.184  1.00  8.67           O
+ATOM      5  CB  ASN A   1       5.548   2.119   2.748  1.00 11.65           C
+ATOM      6  CG  ASN A   1       6.605   1.424   1.878  1.00 25.38           C
+ATOM      7  OD1 ASN A   1       6.671   0.207   1.798  1.00 10.94           O
+ATOM      8  ND2 ASN A   1       7.486   2.229   1.270  1.00 15.31           N
+ATOM      0  H1  ASN A   1       3.867   1.117   0.983  1.00 11.67           H   new
+ATOM      0  H2  ASN A   1       2.660   0.970   1.779  1.00 11.67           H   new
+ATOM      0  H3  ASN A   1       3.211   2.292   1.531  1.00 11.67           H   new
+ATOM      0  HA  ASN A   1       4.448   0.388   3.057  1.00 10.38           H   new
+ATOM      0  HB2 ASN A   1       5.343   2.984   2.360  1.00 11.65           H   new
+ATOM      0  HB3 ASN A   1       5.925   2.284   3.626  1.00 11.65           H   new
+ATOM      0 HD21 ASN A   1       8.126   1.892   0.804  1.00 15.31           H   new
+ATOM      0 HD22 ASN A   1       7.412   3.082   1.346  1.00 15.31           H   new
+ATOM      9  N   ASN A   2       3.063   0.982   5.021  1.00  9.61           N
+ATOM     10  CA  ASN A   2       2.425   1.353   6.293  1.00  6.91           C
+ATOM     11  C   ASN A   2       3.326   0.815   7.400  1.00  8.06           C
+ATOM     12  O   ASN A   2       3.599  -0.368   7.434  1.00  8.45           O
+ATOM     13  CB  ASN A   2       1.055   0.680   6.469  1.00  5.26           C
+ATOM     14  CG  ASN A   2      -0.071   1.341   5.711  1.00  5.76           C
+ATOM     15  OD1 ASN A   2      -0.112   2.558   5.522  1.00  9.70           O
+ATOM     16  ND2 ASN A   2      -1.038   0.528   5.313  1.00  7.31           N
+ATOM      0  H   ASN A   2       3.158   0.133   4.918  1.00  9.61           H   new
+ATOM      0  HA  ASN A   2       2.302   2.315   6.316  1.00  6.91           H   new
+ATOM      0  HB2 ASN A   2       1.123  -0.244   6.183  1.00  5.26           H   new
+ATOM      0  HB3 ASN A   2       0.832   0.670   7.413  1.00  5.26           H   new
+ATOM      0 HD21 ASN A   2      -1.726   0.845   4.906  1.00  7.31           H   new
+ATOM      0 HD22 ASN A   2      -0.978  -0.317   5.461  1.00  7.31           H   new
+ATOM     17  N   GLN A   3       3.742   1.682   8.319  1.00  9.80           N
+ATOM     18  CA  GLN A   3       4.661   1.318   9.397  1.00  8.25           C
+ATOM     19  C   GLN A   3       4.192   1.934  10.703  1.00  7.41           C
+ATOM     20  O   GLN A   3       3.929   3.129  10.771  1.00  7.60           O
+ATOM     21  CB  GLN A   3       6.069   1.806   9.050  1.00  8.02           C
+ATOM     22  CG  GLN A   3       7.161   1.427  10.051  1.00 11.30           C
+ATOM     23  CD  GLN A   3       8.510   2.005   9.664  1.00 13.07           C
+ATOM     24  OE1 GLN A   3       8.723   3.220   9.721  1.00 10.86           O
+ATOM     25  NE2 GLN A   3       9.431   1.135   9.256  1.00  8.57           N
+ATOM      0  H   GLN A   3       3.497   2.506   8.335  1.00  9.80           H   new
+ATOM      0  HA  GLN A   3       4.678   0.354   9.500  1.00  8.25           H   new
+ATOM      0  HB2 GLN A   3       6.312   1.452   8.180  1.00  8.02           H   new
+ATOM      0  HB3 GLN A   3       6.049   2.772   8.967  1.00  8.02           H   new
+ATOM      0  HG2 GLN A   3       6.915   1.745  10.934  1.00 11.30           H   new
+ATOM      0  HG3 GLN A   3       7.227   0.461  10.106  1.00 11.30           H   new
+ATOM      0 HE21 GLN A   3       9.247   0.295   9.229  1.00  8.57           H   new
+ATOM      0 HE22 GLN A   3      10.210   1.413   9.019  1.00  8.57           H   new
+ATOM     26  N   GLN A   4       4.065   1.109  11.740  1.00 10.50           N
+ATOM     27  CA  GLN A   4       3.653   1.603  13.060  1.00 13.23           C
+ATOM     28  C   GLN A   4       4.267   0.783  14.189  1.00 17.04           C
+ATOM     29  O   GLN A   4       4.912  -0.221  13.917  1.00 10.73           O
+ATOM     30  CB  GLN A   4       2.133   1.601  13.170  1.00 13.90           C
+ATOM     31  CG  GLN A   4       1.523   0.225  13.111  1.00 12.46           C
+ATOM     32  CD  GLN A   4      -0.002   0.229  13.199  1.00 18.50           C
+ATOM     33  OE1 GLN A   4      -0.614  -0.835  13.240  1.00 15.34           O
+ATOM     34  NE2 GLN A   4      -0.617   1.419  13.241  1.00 19.68           N
+ATOM     35  OXT GLN A   4       4.133   1.082  15.384  1.00  7.44           O
+ATOM      0  H   GLN A   4       4.211   0.262  11.704  1.00 10.50           H   new
+ATOM      0  HA  GLN A   4       3.979   2.512  13.149  1.00 13.23           H   new
+ATOM      0  HB2 GLN A   4       1.877   2.024  14.004  1.00 13.90           H   new
+ATOM      0  HB3 GLN A   4       1.764   2.141  12.453  1.00 13.90           H   new
+ATOM      0  HG2 GLN A   4       1.791  -0.204  12.283  1.00 12.46           H   new
+ATOM      0  HG3 GLN A   4       1.880  -0.310  13.837  1.00 12.46           H   new
+ATOM      0 HE21 GLN A   4      -0.154   2.143  13.210  1.00 19.68           H   new
+ATOM      0 HE22 GLN A   4      -1.474   1.458  13.299  1.00 19.68           H   new
+TER
+END
