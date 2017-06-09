@@ -7,14 +7,12 @@ from ase.units import Hartree, Bohr, mol, kcal
 import iotbx.pdb
 import mmtbx.command_line
 import libtbx.load_env
-from libtbx.utils import Sorry
 from scitbx.array_family import flex
 from libtbx.test_utils import approx_equal
 from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
-from qrefine.plugin.ase.mopac_qr import Mopac
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")

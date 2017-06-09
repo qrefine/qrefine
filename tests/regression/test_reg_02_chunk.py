@@ -1,8 +1,8 @@
 from __future__ import division
 
-import os,sys,time
+import os
 import libtbx.load_env
-from cluster_wrapper import Clusterer,Result
+from cluster_wrapper import Clusterer
 from test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")

@@ -1,12 +1,11 @@
 from __future__ import division
 import os.path
 import libtbx.load_env
-from qrefine.restraints import from_qm,from_cctbx
-from restraint_wrapper import Restraints, Result
+from restraint_wrapper import Restraints
 from test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qr_reg_data = os.path.join(qrefine_path, "tests/regression/datasets/cluster")
+qr_reg_data = os.path.join(qrefine_path, "tests","regression","datasets","cluster")
 
 class test_restraint(test_base):
   def __init__(self):
