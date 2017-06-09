@@ -58,7 +58,7 @@ cluster{
 
 restraints = cctbx *qm
 .type = choice(multi=False)
-qm_engine_name = mopac terachem turbomole *pyscf
+qm_engine_name = *mopac terachem turbomole pyscf
 .type = choice(multi=False)
 charge= None
 .type = int
@@ -239,19 +239,19 @@ def create_restraints_manager(
       has_hd             = model.has_hd)
       #fragment_manager   = fragment_manager)
   else:
-    assert cmdline.params.restraint.restraints == "qm"
+    assert cmdline.params.restraints == "qm"
     restraints_manager = restraints.from_qm(
       #fragment_manager           = fragment_manager,
       basis                      = cmdline.params.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
-      clustering_method          = cmdline.params.clustering_method,
+      clustering_method          = cmdline.params.cluster.clustering_method,
       charge                     = cmdline.params.charge,
       qm_engine_name             = cmdline.params.qm_engine_name,
       crystal_symmetry           = cmdline.crystal_symmetry,
       shared_disk                = cmdline.params.shared_disk,
-      charge_embedding           = cmdline.params.charge_embedding,
-      clustering                 = cmdline.params.clustering,
-      maxnum_residues_in_cluster = cmdline.params.maxnum_residues_in_cluster)
+      charge_embedding           = cmdline.params.cluster.charge_embedding,
+      clustering                 = cmdline.params.cluster.clustering,
+      maxnum_residues_in_cluster = cmdline.params.cluster.maxnum_residues_in_cluster)
   return restraints_manager
 
 def create_calculator(weights, fmodel, params, restraints_manager):

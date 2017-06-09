@@ -1,6 +1,6 @@
 Quantum|Refinement: final-stage refinement with restraints from Quantum Chemistry.
 
-Authors(s)
+Authors
  -Min Zheng, Pavel Afonine, Mark Waller, Nigel Moriarty
 
 Purpose
