@@ -50,9 +50,42 @@ def run():
       '''
       for env_var, help in java_env_vars.items():
         print '%s %s : %s' % (' '*10, env_var, help)
+      print '''
+      On OSX use
+        /usr/libexec/java_home -v 1.8
+      to find the install directory
+      '''
       break
   else:
-    assert 0
+    print '\n  Java appears to be installed'
+
+  qm_engine_env_vars = {'MOPAC_CMD' : 'Mopac executable',
+                        }
+  count = 0
+  for env_var in qm_engine_env_vars:
+    if os.environ.get(env_var, False):
+      print '\n  Environmental variable %s set for "%s" to %s\n' % (
+        env_var,
+        qm_engine_env_vars[env_var],
+        os.environ[env_var],
+        )
+      count+=1
+    else:
+      print '\n  Environmental variable %s for "%s" not found\n' % (
+        env_var,
+        qm_engine_env_vars[env_var],
+        )
+  if count:
+    pass
+  else:
+    print '''
+    No QM engines found!
+
+    Install and set an environmental variable from the list.
+    '''
+    for env_var, help in qm_engine_env_vars.items():
+      print '%s %s : %s' % (' '*10, env_var, help)
+    print
 
 if __name__=="__main__":
   args = sys.argv[1:]
