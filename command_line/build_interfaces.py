@@ -45,6 +45,7 @@ def run():
                    'JAVA_LIB_PATH' : 'absolute_path_of_java_lib',
                    'LD_LIBRARY_PATH' : '$LD_LIBRARY_PATH:$JAVA_LIB_PATH/server',
                    }
+  count = 0
   for env_var in java_env_vars:
     if not os.environ.get(env_var, False):
       print '''
@@ -57,11 +58,16 @@ def run():
         /usr/libexec/java_home -v 1.8
       to find the install directory
       '''
+      count+=1
       break
   else:
     print '\n  Java appears to be installed'
+  if count:
+    print '   STOPPING'
+    sys.exit()
 
-  qm_engine_env_vars = {'MOPAC_CMD' : 'Mopac executable',
+  qm_engine_env_vars = {'MOPAC_COMMAND' : 'Mopac executable',
+                        'TERACHEM_COMMAND' : 'TeraChem directory',
                         }
   count = []
   for env_var in qm_engine_env_vars:
