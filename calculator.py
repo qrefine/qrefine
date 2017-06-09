@@ -117,7 +117,8 @@ class calculator(object):
     return f, g.as_double()
 
 class sites_opt(calculator):
-  def __init__(self, restraints_manager, fmodel):
+  def __init__(self, restraints_manager, fmodel, dump_gradients):
+    self.dump_gradients = dump_gradients
     self.restraints_manager = restraints_manager
     self.x = None
     self.fmodel = fmodel
@@ -133,9 +134,10 @@ class sites_opt(calculator):
     self.update(x = x)
     f, g = self.restraints_manager.target_and_gradients(
       sites_cart = flex.vec3_double(self.x))
-    #from libtbx import easy_pickle
-    #easy_pickle.dump("cluster_true.pickle",g)
-    #STOP()
+    if(self.dump_gradients is not None):
+      from libtbx import easy_pickle
+      easy_pickle.dump(self.dump_gradients, g)
+      STOP()
     return f, g.as_double()
 
   def update_fmodel_opt(self):

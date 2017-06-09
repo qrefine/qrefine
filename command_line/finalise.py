@@ -1,30 +1,73 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
 import os, sys, time
-import argparse
-import libtbx.load_env
-import qrefine.finalise
-from libtbx import  easy_run
+from qrefine import finalise
+import iotbx
+import mmtbx
 
 log = sys.stdout
-
-qrefine_path = libtbx.env.find_in_repositories("qrefine")
 
 legend = """\
 Finalise a model before quantum refinement
 """
 
+master_params_str = """
+model_file_name = None
+  .type = path
+  .short_caption = Model file
+  .multiple = False
+  .help = Model file name
+  .style = file_type:pdb bold input_file
+action = *model_completion capping
+  .type = choice
+  .help = The type of hydrogen addition requested
+"""
+
+def master_params():
+  return iotbx.phil.parse(master_params_str, process_includes=True)
+
+def print_legend_and_usage(log):
+  print >> log, "-"*79
+  print >> log, "                               qr.finalise"
+  print >> log, "-"*79
+  print >> log, legend
+  print >> log, "-"*79
+  print >> log, master_params().show()
+
+def get_inputs(args, log, master_params):
+  inputs = mmtbx.utils.process_command_line_args(
+    args                             = args,
+    master_params                    = master_params,
+    suppress_symmetry_related_errors = True)
+  params = inputs.params.extract()
+  # Check model file
+  if (len(inputs.pdb_file_names) == 0 and (params.model_file_name is None)):
+    raise Sorry("No model file found.")
+  elif (len(inputs.pdb_file_names) == 1):
+    params.model_file_name = inputs.pdb_file_names[0]
+  elif (len(inputs.pdb_file_names) > 1):
+  #else:
+    raise Sorry("Only one model file should be given")
+  return params
+
 def run(args, log):
-  cmd = "phenix.python " +  \
-        os.path.join(qrefine_path,"finalise.py ") + \
-        " ".join(args).replace("\n", "")
-  cmd = cmd.replace("\n", "")
-  print "Running example:", cmd
-  easy_run.fully_buffered(command=cmd)
+  if len(args)==0: 
+    print_legend_and_usage(log)
+    return
+  params = get_inputs(
+    args          = args,
+    log           = log,
+    master_params = master_params(),
+    #validated     = validated,
+  )
+  model_completion=True
+  if params.action=='capping': model_completion=False
+  finalise.run(params.model_file_name,
+               model_completion=model_completion,
+               )
 
 if __name__ == '__main__':
-
   t0 = time.time()
-  print >> log,"Starting Q|R"
+  print >> log,"Starting Q|R finalise"
   run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

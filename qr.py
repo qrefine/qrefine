@@ -128,6 +128,8 @@ shared_disk = True
 rst_file = None
 .type = str
 
+dump_gradients=None
+  .type = str
 """
 
 def get_master_phil():
@@ -270,7 +272,8 @@ def create_calculator(weights, fmodel, params, restraints_manager):
     else:
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
-        fmodel             = fmodel)
+        fmodel             = fmodel,
+        dump_gradients     = params.dump_gradients)
   if(params.refine.refine_adp):
     return calculator.adp(
       fmodel             = fmodel,
@@ -305,8 +308,8 @@ def run(cmdline, log):
         raise Sorry("Alternative conformations are not supported.")
     if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")
-    if (cmdline.crystal_symmetry.space_group().type().number() != 1):
-      raise Sorry("Only P1 is supported.")
+    #if (cmdline.crystal_symmetry.space_group().type().number() != 1):
+    #  raise Sorry("Only P1 is supported.")
     cmdline.working_phil.show(out=log, prefix="   ")
     fmodel = create_fmodel(cmdline=cmdline, log=log)
     fragment_manager = create_fragment_manager(
