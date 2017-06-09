@@ -7,16 +7,15 @@ import iotbx.pdb
 import libtbx.load_env
 from libtbx import easy_run
 
-import charges
-import completion
-from utils import hierarchy_utils
-
+from qrefine import charges
+from qrefine import completion
+from qrefine.utils import hierarchy_utils
+from qrefine.utils import model_statistics
 from qrefine.tests.unit.skip import skip
-
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
-def remove_alt_loc(hierarchy):
+def remove_alternative_locations(hierarchy):
   # should use cctbx
   for rg in hierarchy.residue_groups():
     if len(rg.atom_groups())==1: continue
@@ -71,7 +70,10 @@ def loop_over_dir(d):
     else:
       run(os.path.join(d, filename))
 
-def run(pdb_filename, model_completion=True):
+def run(pdb_filename,
+        model_completion=True,
+        remove_alt_loc=False,
+        ):
   print "run",pdb_filename
   #
   # do all *.pdb in a directory
@@ -113,8 +115,16 @@ def run(pdb_filename, model_completion=True):
     hierarchy = pdb_inp.construct_hierarchy()
     ppf = hierarchy_utils.get_processed_pdb(pdb_inp=hierarchy.as_pdb_input())
 
+  initial_model_statistics = model_statistics.get_model_stat(
+    pdb_hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
+    crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+    )
+
   # should use cctbx
-  hierarchy = remove_alt_loc(ppf.all_chain_proxies.pdb_hierarchy)
+  if remove_alt_loc:
+    hierarchy = remove_alternative_locations(
+      ppf.all_chain_proxies.pdb_hierarchy
+    )
   if 0:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename, # uses to get output filename
@@ -174,6 +184,11 @@ def run(pdb_filename, model_completion=True):
                                   ppf.all_chain_proxies.pdb_inp,
                                   ppf.all_chain_proxies.pdb_hierarchy,
                                   fname)
+
+  final_model_statistics = model_statistics.get_model_stat(
+    pdb_hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
+    crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+    )
 
 if __name__=="__main__":
   def _fake_phil_parse(arg):
