@@ -9,8 +9,7 @@ import libtbx.load_env
 from libtbx.test_utils import approx_equal
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests = os.path.join(qrefine, "tests","unit")
-qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
+qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
 def run(prefix = "tst_15"):
   """

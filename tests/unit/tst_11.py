@@ -10,13 +10,13 @@ import batch_run_finalise
 from qrefine.skip import skip
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests = os.path.join(qrefine, "tests/unit/")
+qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
 def run(prefix = "tst_11"):
   """
   Exercise structure completion by finalise.py
   """
-  pdb_dir_cluster=os.path.join(qr_unit_tests,"babel_pdbs/clusters/")
+  pdb_dir_cluster=os.path.join(qr_unit_tests,"babel_pdbs","clusters")
   expected_list_cluster = []
   for filename in os.listdir(pdb_dir_cluster):
     if filename.endswith('.pdb'):
@@ -64,7 +64,7 @@ def run(prefix = "tst_11"):
                        "1ly2",
                        "1i07",
                        "1a7y"]
-  pdb_dir_p1 = os.path.join(qrefine,"regression/datasets/p1")
+  pdb_dir_p1 = os.path.join(qrefine,"regression","datasets","p1")
   complete_pdbs(expected_list_cluster, pdb_dir_cluster)
   complete_pdbs(expected_list_p1, pdb_dir_p1)
 

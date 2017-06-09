@@ -20,7 +20,7 @@ from qrefine.cluster_restraints import from_cluster
 from qrefine.clustering import betweenness_centrality_clustering
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests = os.path.join(qrefine, "tests/unit/")
+qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
 master_params_str ="""
 method = *multiprocessing pbs sge lsf threading
@@ -63,7 +63,7 @@ def run(prefix = "tst_13"):
   """
   compare gradients from entire qm and clustered qm.
   """
-  pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
+  pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files","helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
 

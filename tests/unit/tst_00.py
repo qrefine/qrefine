@@ -1,5 +1,6 @@
 from __future__ import division
 
+import os
 import time
 import iotbx.pdb
 import mmtbx.f_model
@@ -14,7 +15,7 @@ def run(prefix = "tst_00"):
   run_tests.run_cmd(prefix, args = ["restraints=cctbx"])
   # Check results
   xrs_refined = iotbx.pdb.input(
-    file_name = "%s/m00_poor_refined.pdb"%prefix).xray_structure_simple()
+    file_name = os.path.join(prefix,"m00_poor_refined.pdb")).xray_structure_simple()
   d = flex.sqrt((xrs_good.sites_cart() - xrs_poor.sites_cart()).dot())
   assert flex.mean(d) > 0.10
   d = flex.sqrt((xrs_good.sites_cart() - xrs_refined.sites_cart()).dot())

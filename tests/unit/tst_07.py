@@ -9,21 +9,21 @@ from qrefine.utils import yoink_utils
 from qrefine.plugin.yoink.pyoink import PYoink
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests = os.path.join(qrefine, "tests/unit/")
+qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
 def run(prefix = "tst_07"):
   """
   Exercise interaction graph construction.
   """
-  pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"./data_files/2lvr.pdb"))
+  pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"data_files","2lvr.pdb"))
   ph = pdb_inp.construct_hierarchy()
-  yoink_utils.write_yoink_infiles("./cluster.xml",
-                                  "./qmmm.xml",
+  yoink_utils.write_yoink_infiles("cluster.xml",
+                                  "qmmm.xml",
                                   ph,
-                                  os.path.join(qrefine,"plugin/yoink/dat"))
-  pyoink=PYoink(os.path.join(qrefine,"plugin/yoink/Yoink-0.0.1.jar"),
-                os.path.join(qrefine,"plugin/yoink/dat"),
-                "./cluster.xml")
+                                  os.path.join(qrefine,"plugin","yoink","dat"))
+  pyoink=PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"),
+                os.path.join(qrefine,"plugin","yoink","dat"),
+                "cluster.xml")
   interaction_list, weight = pyoink.get_interactions_list()
   #print interaction_list
   expected_list = [[24, 27], [19, 22], [5, 11], [18, 22], [25, 26], [23, 26], [2, 3], [5, 7], [9, 11], [27, 29],
