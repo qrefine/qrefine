@@ -1,5 +1,5 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.chunk
+# LIBTBX_SET_DISPATCHER_NAME qr.cluster
 import sys
 import time
 import os.path
@@ -15,11 +15,6 @@ log = sys.stdout
 legend = """\
 Cluster a system into many small pieces
 """
-
-
-def example():
-  example_pdb = os.path.join(qrefine_path,"examples/3dtj/3dtj_complete.pdb")
-  run(example_pdb)
 
 def run(pdb_file, maxnum_residues_in_cluster=15):
   pdb_inp = iotbx.pdb.input(pdb_file)
@@ -50,8 +45,5 @@ if (__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   del sys.argv[1:]
-  if len(args) == 1:
-    run(args[0])
-  else:
-    example()
+  run(args[0], log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

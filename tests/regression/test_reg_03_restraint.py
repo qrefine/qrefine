@@ -6,9 +6,7 @@ from restraint_wrapper import Restraints, Result
 from test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qr_path = os.path.join(qrefine_path, "core")
-utils_path= os.path.join(qr_path,"utils")
-qr_reg_data = os.path.join(qrefine_path, "test/regression/datasets/cluster")
+qr_reg_data = os.path.join(qrefine_path, "tests/regression/datasets/cluster")
 
 class test_restraint(test_base):
   def __init__(self):

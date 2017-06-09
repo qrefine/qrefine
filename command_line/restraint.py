@@ -17,7 +17,6 @@ legend = """\
 Compute energy and gradient for a system
 """
 
-
 def example():
   print >> log, "Running helix example "
   example_pdb = os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb")

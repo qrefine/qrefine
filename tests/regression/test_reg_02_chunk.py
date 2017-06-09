@@ -6,7 +6,7 @@ from cluster_wrapper import Clusterer,Result
 from test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qr_reg_data = os.path.join(qrefine_path, "test/regression/datasets/cluster")
+qr_reg_data = os.path.join(qrefine_path, "tests/regression/datasets/cluster")
 
 class test_chunk(test_base):
 

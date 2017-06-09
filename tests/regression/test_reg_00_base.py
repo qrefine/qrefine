@@ -36,8 +36,8 @@ class test_base:
     test_results =parallel_map(
       func=self.func,
       iterable=self.pdbs,
-      method='pbs',
-#      method='multiprocessing',
+#      method='pbs',
+      method='multiprocessing',
       preserve_exception_message=True,
 #      processes=4,
       processes=len(self.pdbs),
