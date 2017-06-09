@@ -4,13 +4,17 @@ import sys
 
 import iotbx
 import iotbx.pdb
+import libtbx.load_env
 from libtbx import easy_run
 
 import charges
 import completion
 from utils import hierarchy_utils
 
-from skip import skip
+from qrefine.tests.unit.skip import skip
+
+
+qrefine = libtbx.env.find_in_repositories("qrefine")
 
 def remove_alt_loc(hierarchy):
   # should use cctbx

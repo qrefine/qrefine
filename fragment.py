@@ -11,6 +11,7 @@ import qrefine.completion as model_completion
 from qrefine.plugin.yoink.pyoink import PYoink
 from qrefine.utils.yoink_utils import write_yoink_infiles
 import completion
+
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
 class fragments(object):
