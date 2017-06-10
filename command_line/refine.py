@@ -19,16 +19,9 @@ legend = """
 Refine a model using restraints from Quantum Chemistry
 """
 
-master_params_str ="""
-import scope qrefine.qr.master_params_str
-"""
-
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=qr.master_params_str)
-
-  #return mmtbx.command_line.generate_master_phil_with_inputs(
-  #  phil_string=master_params_str)
 
 def print_legend_and_usage(log):
   print >> log, "-"*79
@@ -36,30 +29,8 @@ def print_legend_and_usage(log):
   print >> log, "-"*79
   print >> log, get_master_phil().show()
 
-def run_cmd(cmd):
-  # we want a reference to the running job.
-  if cmd.find("qsub_command") is not -1:
-    easy_qsub.run(
-      phenix_source=phenix_source,
-      where="working_dir",
-      commands=cmd
-    )
-  else:
-    # we want a reference to the running job.
-    result = easy_run.fully_buffered(cmd).raise_if_errors()
-
-def example():
-  cmd = "phenix.python " +  \
-      os.path.join(qrefine_core_path,"qr.py ") +  \
-      os.path.join(qrefine_path,"examples/1us0/data.mtz ") + \
-      os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb ") + \
-      "output_folder_name = 1us0 > 1us0.log"
-  cmd = cmd.replace("\n", "")
-  print "Running example:", cmd
-  run_cmd(cmd)
-
 def run(args, log):
-  print "running refine "
+  print >> log,"Running refinement"
   print_legend_and_usage(log)
   cmdline = mmtbx.command_line.load_model_and_data(
        args          = args,

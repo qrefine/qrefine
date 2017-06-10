@@ -7,7 +7,7 @@ import mmtbx.f_model
 from scitbx.array_family import flex
 import run_tests
 
-def run(prefix = "tst_00"):
+def run(prefix):
   """
   Exercise standard (cctbx-based restraints) refinement with all defaults.
   """
@@ -40,7 +40,7 @@ def run(prefix = "tst_00"):
   run_tests.clean_up(prefix)
 
 if(__name__ == "__main__"):
+  prefix = "tst_00"
   t0 = time.time()
-  run()
-  print "Time: %6.2f"%(time.time()-t0)
-  print "OK"
+  run(prefix)
+  print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)

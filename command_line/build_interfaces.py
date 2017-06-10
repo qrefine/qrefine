@@ -24,7 +24,7 @@ def draw_box_around_text(msg, width=78):
 
 def run():
   msg = ['',
-         'Welcome to the Q|R inteface checker',
+         'Welcome to the Q|R interface checker',
          '',
          ]
   draw_box_around_text(msg, width=78)

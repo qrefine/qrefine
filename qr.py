@@ -121,7 +121,7 @@ qsub_command = None
 
 output_file_name_prefix = None
 .type = str
-output_folder_name = "./pdb/"
+output_folder_name = "pdb"
 .type = str
 shared_disk = True
 .type = bool
@@ -219,7 +219,7 @@ def create_fragment_manager(
       pdb_hierarchy,
       crystal_symmetry,
       params,
-      file_name      = "./ase/tmp_ase.pdb"):
+      file_name      = os.path.join("ase","tmp_ase.pdb")):
   if(not params.cluster.clustering): return None
   return fragments(
     working_folder             = os.path.split(file_name)[0]+ "/",

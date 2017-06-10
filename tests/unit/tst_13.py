@@ -120,8 +120,6 @@ def qm_opt(cs, ph, file, cluster=False):
     clustering=cluster,
     maxnum_residues_in_cluster=8)
 
-
-
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   opt = lbfgs_gradient(sys, fq)
   opt.run(5)
@@ -130,6 +128,9 @@ def qm_opt(cs, ph, file, cluster=False):
 if(__name__ == "__main__"):
   t0 = time.time()
   log = sys.stdout
-  run()
-  print "Time: %6.2f"%(time.time()-t0)
-  print "OK"
+  prefix = "tst_13"
+  if(0):
+    run(prefix)
+    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  else:
+    print prefix + ":  Skipped    "

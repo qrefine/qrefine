@@ -11,7 +11,7 @@ try:
   import pyscf
   from pyscf import gto,scf,grad,dft
 except:
-  print "no pyscf found"
+  pass
 
 class Pyscf(Calculator):
     def __init__(self, label='ase',basis='321g',charge=0,spin=0,method="hf", **kwargs):

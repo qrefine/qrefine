@@ -8,7 +8,6 @@ from qrefine.tests.regression import regression_tests
 log = sys.stdout
 
 if __name__ == '__main__':
-  print "Testing Q|R"
   parser = argparse.ArgumentParser(description='Test runners for Q|R code')
   parser.add_argument('--unit',
                       action='store_true',
@@ -29,13 +28,13 @@ if __name__ == '__main__':
                       help='''run all tests, only run on a HPC cluster''')
   args = parser.parse_args()
   if (args.unit)      :
-    print >> log,"Running unit tests"
+    print >> log,"Running Q|R unit tests"
     unit_tests.run()
   if (args.reg):
-    print >> log,"Running regression tests"
+    print >> log,"Running Q|R regression tests"
     regression_tests.run()
   if (args.pdb)       :
-    print >> log,"Running pdb tests"
+    print >> log,"Running Q|R pdb tests"
     # swith to acceptance_tests.py
     regression_tests.run(args=sys.argv[1:])
   if(args.all):
@@ -44,5 +43,5 @@ if __name__ == '__main__':
     regression_tests.run()
     regression_tests.run(args=sys.argv[1:])
   if(not args.all and not args.unit and not args.reg and not args.pdb):
-    print >> log,"Running unit tests"
+    print >> log,"Running Q|R unit tests"
     unit_tests.run()

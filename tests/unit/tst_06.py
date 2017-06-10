@@ -21,6 +21,6 @@ def run(prefix = "tst_06"):
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  run()
-  print "Time: %6.2f"%(time.time()-t0)
-  print "OK"
+  prefix = "tst_06"
+  run(prefix)
+  print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)

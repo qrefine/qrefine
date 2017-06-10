@@ -89,7 +89,7 @@ class betweenness_centrality_clustering(object):
         betweenness_centrality_clustering(graph=self.g, threshold=threshold)
       components = cca.connected_components(graph=self.g)
       components_size = [ len(component) for component in components]
-      print "max(components_size): ",max(components_size)
+      #print "max(components_size): ",max(components_size)
       if max(components_size) <= self.maxnum_residues_in_cluster:
         clustering = False
       else:

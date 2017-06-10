@@ -9,8 +9,7 @@ from libtbx.test_utils import approx_equal
 import libtbx.load_env
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests = os.path.join(qrefine, "tests","unit")
-qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
+qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
 def run(prefix = "tst_16"):
   """
@@ -43,6 +42,9 @@ def run(prefix = "tst_16"):
 
 if __name__ == '__main__':
   t0 = time.time()
-  run()
-  print "Time: %6.2f"%(time.time()-t0)
-  print "OK"
+  prefix = "tst_16"
+  if(0):
+    run(prefix)
+    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  else:
+    print prefix + ":  Skipped    "

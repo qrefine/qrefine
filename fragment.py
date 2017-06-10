@@ -1,4 +1,5 @@
 import os
+import time
 import libtbx.load_env
 from scitbx.array_family import flex
 from charges import get_total_charge_from_pdb
@@ -17,7 +18,7 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 class fragments(object):
 
   def __init__(self,
-      working_folder             = "./ase/",
+      working_folder             = "ase",
       clustering_method          = None,
       maxnum_residues_in_cluster = 20,
       charge_embedding           = False,
@@ -41,9 +42,12 @@ class fragments(object):
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
     if(clustering):
-      self.yoink_dat_path = os.path.join(qrefine,"plugin/yoink/dat")
-      self.pyoink = PYoink(os.path.join(qrefine,"plugin/yoink/Yoink-0.0.1.jar"))
+      self.yoink_dat_path = os.path.join(qrefine,"plugin","yoink","dat")
+      self.pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"))
+      #t0 = time.time()
       self.set_up_cluster_qm()
+      #print "time taken for interaction graph",(time.time() - t0)
+
 
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
@@ -59,8 +63,8 @@ class fragments(object):
       self.get_fragment_hierarchies_and_charges()
 
   def get_clusters(self):
-    self.cluster_file_name = self.working_folder + "./cluster.xml"
-    self.qmmm_file_name = self.working_folder + "./qmmm.xml"
+    self.cluster_file_name = self.working_folder + "cluster.xml"
+    self.qmmm_file_name = self.working_folder + "qmmm.xml"
     ##  write yoink input file to get interactions
     write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
                         self.pdb_hierarchy, self.yoink_dat_path)
@@ -71,6 +75,7 @@ class fragments(object):
     self.interaction_list += self.backbone_connections
 
     import clustering
+    #t0 = time.time()
     self.clustering = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size=len(self.pyoink.molecules),
@@ -78,6 +83,7 @@ class fragments(object):
     clusters = self.clustering.get_clusters()
     self.clusters = sorted(clusters,
       lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
+    #print "time taken for clustering", (time.time() - t0)
 
   def get_fragments(self):
     self.cluster_atoms = []
@@ -90,6 +96,7 @@ class fragments(object):
     write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
                         self.pdb_hierarchy_super, self.yoink_dat_path)
     ##TODO conformer check
+    #t0 = time.time()
     for i in range(len(clusters)):
       pyoink.input_file = self.qmmm_file_name
       pyoink.update(clusters[i])
@@ -99,6 +106,7 @@ class fragments(object):
       self.fragment_super_atoms.append(atoms_in_one_fragment)
       if(0):
         print i, "atoms in cluster: ", atoms_in_one_cluster
+    #print "time taken for building fragments", (time.time() - t0)
 
   def get_fragment_hierarchies_and_charges(self):
 

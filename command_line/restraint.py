@@ -6,6 +6,8 @@ import os.path
 import argparse
 import iotbx.pdb
 import libtbx.load_env
+import mmtbx.command_line
+import qrefine.qr as qr
 from qrefine.restraints import from_qm, from_cctbx
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -17,58 +19,29 @@ legend = """\
 Compute energy and gradient for a system
 """
 
-def example():
-  print >> log, "Running helix example "
-  example_pdb = os.path.join(qrefine_path,"examples/1us0/a87_99_h.pdb")
-  run(example_pdb,"mopac")
+def get_master_phil():
+  return mmtbx.command_line.generate_master_phil_with_inputs(
+    phil_string=qr.master_params_str)
 
-def run(pdb_file,name):
-  pdb_inp = iotbx.pdb.input(pdb_file)
-  ph = pdb_inp.construct_hierarchy()
-  cs = pdb_inp.crystal_symmetry()
-  sites_cart = ph.atoms().extract_xyz()
-  restraint_manager = from_qm(
-            calculator_name=name,
-            pdb_hierarchy=ph,
-            crystal_symmetry=cs,
-            use_cluster_qm=False),
-  print type(restraint_manager)
-  energy,gradients = restraint_manager.target_and_gradients()
-  print >> log,"Energy: ", energy
-  print >> log,"Gradients: "
-  for gradient in list(gradients):
-    print >> log, gradient
+def print_legend_and_usage(log):
+  print >> log, "-"*79
+  print >> log, legend
+  print >> log, "-"*79
+  print >> log, get_master_phil().show()
+
+def run(args, log):
+  print "args are" , args
+  print_legend_and_usage(log)
+  cmdline = mmtbx.command_line.load_model_and_data(
+        args=args,
+        master_phil=get_master_phil(),
+        create_fmodel=False,
+        out=log)
+  qr.run(cmdline=cmdline, log=log)
 
 if (__name__ == "__main__"):
   print "Restraint for Q|R"
-  parser = argparse.ArgumentParser(description='Calculate restraint for Q|R')
-  parser.add_argument('--cctbx',
-                      action='store_true',
-                      default=False,
-                      help='''compute the standard cctbx restraint''')
-  parser.add_argument('--qm',
-                      action='store_true',
-                      default=False,
-                      help='compute the energy and gradient using a QM calculator ')
-  parser.add_argument('--cluster',
-                      action='store_true',
-                      default=False,
-                      help='''construct a set of chunk,
-                              and then calculate the combined gradient''')
-  parser.add_argument('--all',
-                      action='store_true',
-                      default=True,
-                      help='''run the full set of restraints for comparison''')
-  parser.add_argument('--example',
-                      action='store_true',
-                      default=False,
-                      help='run restraint example.')
-  known, unknown = parser.parse_known_args()
   t0 = time.time()
-  args = sys.argv[1:]
-  del sys.argv[1:]
-  if (known.example):
-    example()
-  else:
-    run(args[0])
+  print >> log, "Starting Q|R"
+  run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)
