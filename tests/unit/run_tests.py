@@ -45,7 +45,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
       cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  #print " ".join(cmd)
+  print " ".join(cmd)
   return easy_run.go(" ".join(cmd))
 
 def clean_up(prefix,mtz_name = "m00_good.mtz"):
@@ -73,7 +73,8 @@ def run():
     "tst_13.py",
     "tst_14.py",
     "tst_15.py",
-    "tst_16.py"
+    "tst_16.py",
+    "tst_17.py"
   ]
   for file_name in tests:
     easy_run.call("cctbx.python %s"%(
