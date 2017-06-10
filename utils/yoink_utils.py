@@ -6,6 +6,7 @@ def write_yoink_infiles(cluster_file_name,qmmm_file_name,pdb_hierarchy,dat_dir):
     positions = []
     symbols = []
     for chain in pdb_hierarchy.chains():
+      #for conf in chain.conformers():
       for residue_group in chain.residue_groups():
         symbols_res = []
         positions_res = []
