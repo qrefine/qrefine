@@ -7,7 +7,7 @@ from libtbx.utils import Sorry
 import os
 import libtbx.load_env
 import batch_run_finalise
-from qrefine.skip import skip
+from qrefine.tests.unit import skip
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")

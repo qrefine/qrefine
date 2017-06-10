@@ -7,7 +7,7 @@ pdb_dir='./tmp'
 
 results = {}
 
-from qrefine.core.skip import skip
+from qrefine.tests.unit.skip import skip
 
 def callback(args):
   #print "call back",args
