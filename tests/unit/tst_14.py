@@ -16,7 +16,7 @@ from qrefine import super_cell
 pdb_str = """
 CRYST1   10.000   10.000   10.000  90.00  90.00  90.00 P 1
 ATOM      9  O   HOH Z 333       5.000   5.000   5.000  1.00137.30           O
-ATOM      1  O   HOH A 444       5.000   5.000   5.000  1.00137.30           O
+remark ATOM      1  O   HOH A 444       5.000   5.000   5.000  1.00137.30           O
 TER
 """
 
