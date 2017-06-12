@@ -47,21 +47,28 @@ def run():
                    }
   count = 0
   for env_var in java_env_vars:
+    print '  Set? "%s" "%s"' % (env_var, os.environ.get(env_var, False))
     if not os.environ.get(env_var, False):
       print '''
       The following environment variables need setting.
       '''
       for env_var, help in java_env_vars.items():
         print '%s %s : %s' % (' '*10, env_var, help)
-      print '''
+      if env_var.startswith('JAVA'):
+        print '''
       On OSX use
         /usr/libexec/java_home -v 1.8
       to find the install directory
       '''
+      elif env_var=='LD_LIBRARY_PATH':
+        print '''
+      The Phenix environment ignores the user set LD_LIBRARY_PATH unless the
+      environmental variable PHENIX_TRUST_OTHER_ENV is set.
+      '''
       count+=1
       break
   else:
-    print '\n  Java appears to be installed'
+    print '\n  Java appears to be installed\n'
   if count:
     print '   STOPPING'
     sys.exit()
@@ -86,7 +93,7 @@ def run():
         sys.exit()
       count.append(env_var)
     else:
-      print '\n  Environmental variable %s for "%s" not found\n' % (
+      print '  Environmental variable %s for "%s" not found\n' % (
         env_var,
         qm_engine_env_vars[env_var],
         )
