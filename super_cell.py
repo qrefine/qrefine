@@ -77,7 +77,8 @@ class expand(object):
       mon_lib_srv              = mon_lib_srv,
       ener_lib                 = ener_lib,
       params                   = params,
-      pdb_inp                  = self.ph_super_sphere.as_pdb_input(), # XXX Does this loose precision?
+      pdb_hierarchy            = self.ph_super_sphere,
+      #pdb_inp                  = self.ph_super_sphere.as_pdb_input(), # XXX Does this loose precision?
       strict_conflict_handling = False,
       crystal_symmetry         = self.cs_box, #XXX I hope this is correct
       force_symmetry           = True,

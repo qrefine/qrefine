@@ -149,35 +149,35 @@ def create_fmodel(cmdline, log):
   log.flush()
   return fmodel
 
-def orig_process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
-  params = monomer_library.pdb_interpretation.master_params.extract()
-  params.use_neutron_distances = True
-  params.restraints_library.cdl = False
-  params.sort_atoms = False
-  processed_pdb_files_srv = mmtbx.utils.process_pdb_file_srv(
-    pdb_interpretation_params = params,
-    stop_for_unknowns         = True,
-    log                       = null_out(),
-    crystal_symmetry          = crystal_symmetry,
-    cif_objects               = cif_objects,
-    use_neutron_distances     = True)
-  processed_pdb_file, junk = processed_pdb_files_srv.\
-    process_pdb_files(pdb_file_names = [pdb_file_name])
-  xray_structure = processed_pdb_file.xray_structure()
-  sctr_keys = \
-    xray_structure.scattering_type_registry().type_count_dict().keys()
-  has_hd = "H" in sctr_keys or "D" in sctr_keys
-  pdb_hierarchy = processed_pdb_file.all_chain_proxies.pdb_hierarchy
-  super_cell = expand( # XXX needs to be optional?
-    pdb_hierarchy        = pdb_hierarchy,
-    crystal_symmetry     = crystal_symmetry,
-     select_within_radius = 15) # XXX needs to be a parameter?
-  return group_args(
-    processed_pdb_file = processed_pdb_file,
-    pdb_hierarchy      = pdb_hierarchy,
-    xray_structure     = xray_structure,
-    super_cell         = super_cell,
-    has_hd             = has_hd)
+#def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
+#  params = monomer_library.pdb_interpretation.master_params.extract()
+#  params.use_neutron_distances = True
+#  params.restraints_library.cdl = False
+#  params.sort_atoms = False
+#  processed_pdb_files_srv = mmtbx.utils.process_pdb_file_srv(
+#    pdb_interpretation_params = params,
+#    stop_for_unknowns         = True,
+#    log                       = null_out(),
+#    crystal_symmetry          = crystal_symmetry,
+#    cif_objects               = cif_objects,
+#    use_neutron_distances     = True)
+#  processed_pdb_file, junk = processed_pdb_files_srv.\
+#    process_pdb_files(pdb_file_names = [pdb_file_name])
+#  xray_structure = processed_pdb_file.xray_structure()
+#  sctr_keys = \
+#    xray_structure.scattering_type_registry().type_count_dict().keys()
+#  has_hd = "H" in sctr_keys or "D" in sctr_keys
+#  pdb_hierarchy = processed_pdb_file.all_chain_proxies.pdb_hierarchy
+#  #super_cell = expand( # XXX needs to be optional?
+#  #  pdb_hierarchy        = pdb_hierarchy,
+#  #  crystal_symmetry     = crystal_symmetry,
+#  #   select_within_radius = 15) # XXX needs to be a parameter?
+#  return group_args(
+#    processed_pdb_file = processed_pdb_file,
+#    pdb_hierarchy      = pdb_hierarchy,
+#    xray_structure     = xray_structure,
+#    #super_cell         = super_cell,
+#    has_hd             = has_hd)
 
 def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   import iotbx.pdb
@@ -200,7 +200,7 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
        mon_lib_srv              = mon_lib_srv,
        ener_lib                 = ener_lib,
        params                   = params,
-       pdb_inp                  = ph.as_pdb_input(), # XXX Does this loose precision?
+       pdb_hierarchy            = ph,
        strict_conflict_handling = False,
        crystal_symmetry         = pdb_inp.crystal_symmetry(), #XXX I hope this is correct
        force_symmetry           = True,
@@ -211,8 +211,7 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   return group_args(
       processed_pdb_file = processed_pdb_file,
       pdb_hierarchy      = ph,
-       xray_structure     = xrs,
-      # super_cell         = super_cell,
+       xray_structure    = xrs,
       has_hd             = has_hd)
 
 def create_fragment_manager(
