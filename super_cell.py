@@ -17,8 +17,8 @@ import string
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
-def all_chain_ids():
-  chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+def all_chain_ids(): # XXX This may go to cctbx/iotbx/pdb.
+  chars = string.ascii_letters+string.digits
   def permutations(iterable, r=None):
     pool = tuple(iterable)
     n = len(pool)
