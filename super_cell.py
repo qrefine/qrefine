@@ -136,6 +136,7 @@ class expand(object):
     # INEFFICIENT XXXX
     xrs_p1 = self.ph_p1.extract_xray_structure(crystal_symmetry = self.cs_p1)
     sites_frac = xrs_p1.sites_frac()
+    om = self.cs_p1.unit_cell().orthogonalization_matrix()
     #
     cntr=0
     model_id_orig = None
@@ -144,12 +145,7 @@ class expand(object):
         for z in [-1, 0, 1]:
           if([x,y,z]==[0,0,0]): model_id_orig = cntr
           ph_ = self.ph_p1.deep_copy()
-          #
-          tmp = sites_frac+[x,y,z]
-          xrs_p1.set_sites_frac(tmp)
-          tmp = xrs_p1.sites_cart()
-          #
-          ph_.atoms().set_xyz(tmp)
+          ph_.atoms().set_xyz(om*(sites_frac+[x,y,z]))
           models = ph_.models()
           md = models[0].detached_copy()
           md.id = str(cntr)

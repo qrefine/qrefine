@@ -16,7 +16,6 @@ from qrefine import super_cell
 pdb_str = """
 CRYST1   10.000   10.000   10.000  90.00  90.00  90.00 P 1
 ATOM      9  O   HOH Z 333       5.000   5.000   5.000  1.00137.30           O
-remark ATOM      1  O   HOH A 444       5.000   5.000   5.000  1.00137.30           O
 TER
 """
 
@@ -31,7 +30,7 @@ def run(prefix = "tst_14"):
   ph = pdb_inp.construct_hierarchy()
   sites_cart_start = ph.atoms().extract_xyz()
   o = super_cell.expand(
-    pdb_hierarchy        = ph, 
+    pdb_hierarchy        = ph,
     crystal_symmetry     = pdb_inp.crystal_symmetry(),
     select_within_radius = 11)
   #
