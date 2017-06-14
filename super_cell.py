@@ -10,50 +10,24 @@ import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
 
+from itertools import product
+import string
+
+
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
-# This must be a method of iotbx.pdb.hierarchy and used in phenix.models_as_chains
-def models_as_chains(h, model_id_orig, original_chain_ids):
-  r = iotbx.pdb.hierarchy.root()
-  m = iotbx.pdb.hierarchy.model()
-  idl = [i for i in string.ascii_lowercase]
-  idu = [i for i in string.ascii_uppercase]
-  taken = original_chain_ids[:]
-  c1 = None
-  c2 = None
-  n_atoms = []
-  original_chains = []
-  neibor_chains = []
-  for model_id, m_ in enumerate(list(h.models())):
-    if(model_id !=model_id_orig):
-      for c_ in m_.chains():
-        n_at = len(c_.atoms())
-        if(not n_at in n_atoms): n_atoms.append(n_at)
-        c_ = c_.detached_copy()
-        found = False
-        for idu_ in idu:
-          for idl_ in idl:
-            id_ = idu_+idl_
-            if(not id_ in taken):
-              taken.append(id_)
-              found = id_
-              break
-          if(found): break
-        c_.id = found
-        neibor_chains.append(c_)
-        #m.append_chain(c_)
-    else:
-      for c_ in m_.chains():
-        original_chains.append(c_.detached_copy())
-        #m.append_chain(c_.detached_copy())
-  ## put original pdb in the beginning and neibours at the end
-  for chain in original_chains:
-    m.append_chain(chain)
-  for chain in neibor_chains:
-    m.append_chain(chain)
-  r.append_model(m)
-  return r
+def all_chain_ids():
+  chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  def permutations(iterable, r=None):
+    pool = tuple(iterable)
+    n = len(pool)
+    r = n if r is None else r
+    for indices in product(range(n), repeat=r):
+      if(len(set(indices)) == r):
+        yield tuple(pool[i] for i in indices)
+  result = permutations(iterable = chars, r = 2)
+  return [c for c in chars]+["".join(p) for p in result]
 
 class expand(object):
   def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15):
@@ -72,7 +46,6 @@ class expand(object):
     self.sel_str_focus = " or ".join([
       "chain %s"%c for c in self.original_chain_ids])
     #
-    self.ph_super  = None
     self.ph_chains = None
     self._build_super_cell()
     # Box is needed for selection criteria to not select periodically
@@ -131,31 +104,44 @@ class expand(object):
     return self.ph_chains.select(self.selection_keep)
 
   def _build_super_cell(self):
-    # super-cell (models)
-    self.ph_super = iotbx.pdb.hierarchy.root()
-    # INEFFICIENT XXXX
+    #
     xrs_p1 = self.ph_p1.extract_xray_structure(crystal_symmetry = self.cs_p1)
     sites_frac = xrs_p1.sites_frac()
     om = self.cs_p1.unit_cell().orthogonalization_matrix()
+    fm = self.cs_p1.unit_cell().fractionalization_matrix()
     #
-    cntr=0
-    model_id_orig = None
+    r = iotbx.pdb.hierarchy.root()
+    m = iotbx.pdb.hierarchy.model()
+    chains = list(self.ph_p1.chains())
+    #
+    original_chain_ids = set([c.id for c in self.pdb_hierarchy.chains()])
+    all_ci = set(all_chain_ids())
+    available_ci = list(original_chain_ids.symmetric_difference(all_ci))
+    taken_ci = []
+    # make sure original chains come first
+    for chain in chains:
+      m.append_chain(chain.detached_copy())
+    #
     for x in [-1, 0, 1]:
       for y in [-1, 0, 1]:
         for z in [-1, 0, 1]:
-          if([x,y,z]==[0,0,0]): model_id_orig = cntr
-          ph_ = self.ph_p1.deep_copy()
-          ph_.atoms().set_xyz(om*(sites_frac+[x,y,z]))
-          models = ph_.models()
-          md = models[0].detached_copy()
-          md.id = str(cntr)
-          self.ph_super.append_model(md)
-          cntr+=1
-    # super-cell (chains)
-    self.ph_chains = models_as_chains(
-      h                  = self.ph_super,
-      model_id_orig      = model_id_orig,
-      original_chain_ids = self.original_chain_ids)
+          if([x,y,z]==[0,0,0]): continue # skip original chains
+          for chain in chains:
+            c_ = chain.detached_copy()
+            sites_frac = fm*(c_.atoms().extract_xyz())
+            sites_cart = om*(sites_frac+[x,y,z])
+            c_.atoms().set_xyz(sites_cart)
+            new_ci = None
+            for ci in available_ci:
+              if(not ci in taken_ci):
+                new_ci = ci
+                taken_ci.append(new_ci)
+                break
+            assert new_ci is not None
+            c_.id = new_ci
+            m.append_chain(c_)
+    r.append_model(m)
+    self.ph_chains = r
     self.ph_chains.atoms().reset_i_seq()
 
   def _select_within(self):
