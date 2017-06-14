@@ -9,10 +9,8 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
-
 from itertools import product
 import string
-
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
@@ -31,34 +29,43 @@ def all_chain_ids(): # XXX This may go to cctbx/iotbx/pdb.
 
 class expand(object):
   def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15):
-    self.pdb_hierarchy = pdb_hierarchy
-    self.select_within_radius = select_within_radius
+    # fixed members
     self.crystal_symmetry = crystal_symmetry
-    self.super_sphere_geometry_restraints_manager = None
+    self.select_within_radius = select_within_radius
     self.cs_p1 = crystal.symmetry(self.crystal_symmetry.unit_cell(), "P1")
-    self.ph_p1 = self.pdb_hierarchy.expand_to_p1(
-      crystal_symmetry=self.crystal_symmetry)
-    self.selection_keep = None
-    # original chain IDs
-    self.original_chain_ids = []
-    for c in self.pdb_hierarchy.chains():
-      self.original_chain_ids.append(c.id)
     self.sel_str_focus = " or ".join([
-      "chain %s"%c for c in self.original_chain_ids])
+      "chain %s"%c.id for c in pdb_hierarchy.chains()])
+    # variable members (can change upon self.update() call) or by end of
+    # constructor execution
+    self.pdb_hierarchy = pdb_hierarchy
+    self.super_sphere_geometry_restraints_manager = None
+    self.ph_p1           = None
+    self.selection_keep  = None
+    self.ph_super_cell   = None
+    self.cs_box          = None
+    self.ph_super_sphere = None
     #
-    self.ph_chains = None
+    self.update()
+
+  def update(self, sites_cart=None):
+    if(sites_cart is not None):
+      self.pdb_hierarchy.atoms().set_xyz(sites_cart)
+    if(self.ph_p1 is None or sites_cart is not None):
+      self.ph_p1 = self.pdb_hierarchy.expand_to_p1(
+        crystal_symmetry = self.crystal_symmetry)
     self._build_super_cell()
     # Box is needed for selection criteria to not select periodically
     box = uctbx.non_crystallographic_unit_cell_with_the_sites_in_its_center(
-      sites_cart   = self.ph_chains.atoms().extract_xyz(),
+      sites_cart   = self.ph_super_cell.atoms().extract_xyz(),
       buffer_layer = 10)
     self.cs_box = box.crystal_symmetry()
-    self.xrs_super = self.ph_chains.extract_xray_structure(
-                              crystal_symmetry = self.cs_box)
+    self.xrs_super = self.ph_super_cell.extract_xray_structure(
+      crystal_symmetry = self.cs_box)
     #
     self._select_within()
-    self.ph_super_sphere = self.ph_chains.select(self.selection_keep)
+    self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
     self.update_super_sphere_geometry_restraints_manager()
+    return self
 
   def update_super_sphere_geometry_restraints_manager(self):
     # XXX Unify with process_model_file of qr.py
@@ -90,23 +97,14 @@ class expand(object):
       crystal_symmetry = self.cs_p1)
 
   def write_super_cell(self, file_name="super.pdb"):
-    self.ph_chains.write_pdb_file(file_name=file_name)
+    self.ph_super_cell.write_pdb_file(file_name=file_name)
 
   def write_p1(self, file_name="p1.pdb"):
-    self.ph_p1.write_pdb_file(file_name=file_name,
-      crystal_symmetry=self.crystal_symmetry)
-
-  def update(self, sites_cart):
-    self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    self.ph_p1 = self.pdb_hierarchy.expand_to_p1(
-      crystal_symmetry=self.crystal_symmetry)
-    self._build_super_cell()
-    return self.ph_chains.select(self.selection_keep)
+    self.ph_p1.write_pdb_file(
+      file_name        = file_name,
+      crystal_symmetry = self.cs_p1)
 
   def _build_super_cell(self):
-    #
-    xrs_p1 = self.ph_p1.extract_xray_structure(crystal_symmetry = self.cs_p1)
-    sites_frac = xrs_p1.sites_frac()
     om = self.cs_p1.unit_cell().orthogonalization_matrix()
     fm = self.cs_p1.unit_cell().fractionalization_matrix()
     #
@@ -141,18 +139,18 @@ class expand(object):
             c_.id = new_ci
             m.append_chain(c_)
     r.append_model(m)
-    self.ph_chains = r
-    self.ph_chains.atoms().reset_i_seq()
+    self.ph_super_cell = r
+    self.ph_super_cell.atoms().reset_i_seq()
 
   def _select_within(self):
     #
-    sel_model_orig = self.ph_chains.atom_selection_cache().selection(
+    sel_model_orig = self.ph_super_cell.atom_selection_cache().selection(
       string = self.sel_str_focus)
     selection = self.xrs_super.selection_within(radius=self.select_within_radius,
       selection=sel_model_orig)
     #
     self.selection_keep = flex.size_t()
-    for rg in self.ph_chains.residue_groups():
+    for rg in self.ph_super_cell.residue_groups():
       keep=True
       sel = rg.atoms().extract_i_seq()
       for i in sel:

@@ -51,7 +51,8 @@ class fragments(object):
 
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
-      self.pdb_hierarchy_super = self.super_cell.update(sites_cart=sites_cart)
+      self.pdb_hierarchy_super = self.super_cell.update(
+        sites_cart=sites_cart).ph_super_sphere
     ###get clusters and their buffer regions using yoink and graph clustering.
     try:
       pre_clusters = self.clusters
@@ -91,7 +92,8 @@ class fragments(object):
     pyoink = self.pyoink
     clusters = self.clusters##from graph clustring, molecular indices
     sites_cart = self.pdb_hierarchy.atoms().extract_xyz()
-    self.pdb_hierarchy_super = self.super_cell.update(sites_cart=sites_cart)
+    self.pdb_hierarchy_super = self.super_cell.update(
+      sites_cart=sites_cart).ph_super_sphere
     ## write yoink input file to get fragment
     write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
                         self.pdb_hierarchy_super, self.yoink_dat_path)

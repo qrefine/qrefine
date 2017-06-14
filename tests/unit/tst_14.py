@@ -39,7 +39,7 @@ def run(prefix = "tst_14"):
   o.write_super_cell_selected_in_sphere(file_name="%s_super_sphere.pdb"%prefix)
   sites_cart = ph.atoms().extract_xyz()
   o.update(sites_cart = sites_cart)
-  o.write_super_cell()
+  o.write_super_cell(file_name="%s_super_cell.pdb"%prefix)
 
 if(__name__ == "__main__"):
   t0 = time.time()
