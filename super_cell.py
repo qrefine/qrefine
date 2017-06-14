@@ -158,19 +158,3 @@ class expand(object):
           keep=False
           break
       if(keep): self.selection_keep.extend(sel)
-
-def exercise():
-  pdb_inp = iotbx.pdb.input(file_name="2ona_complete_occH0_cctbx_refined.pdb")
-  ph = pdb_inp.construct_hierarchy()
-  cs = pdb_inp.crystal_symmetry()
-
-  o = expand(pdb_hierarchy = ph, crystal_symmetry = cs)
-  o.write_super_cell()
-  o.write_p1()
-  o.write_super_cell_selected_in_sphere()
-  sites_cart = ph.atoms().extract_xyz()
-  o.update(sites_cart = sites_cart)
-  o.write_super_cell()
-
-if __name__ == "__main__":
-  exercise()
