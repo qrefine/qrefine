@@ -50,6 +50,8 @@ cluster{
     .type = bool
   charge_embedding = False
     .type = bool
+  two_buffers = False
+    .type = bool
   maxnum_residues_in_cluster = 15
     .type = int
   clustering_method = gnc  *bcc
@@ -225,6 +227,7 @@ def create_fragment_manager(
     clustering_method          = params.cluster.clustering_method,
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
+    two_buffers                = params.cluster.two_buffers,
     pdb_hierarchy              = pdb_hierarchy,
     qm_engine_name             = params.qm_engine_name,
     crystal_symmetry           = crystal_symmetry)

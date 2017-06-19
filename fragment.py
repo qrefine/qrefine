@@ -22,11 +22,13 @@ class fragments(object):
       clustering_method          = None,
       maxnum_residues_in_cluster = 20,
       charge_embedding           = False,
+      two_buffers                = False,
       pdb_hierarchy              = None,
       qm_engine_name             = None,
       crystal_symmetry           = None,
       clustering                 = True):
     self.charge_embedding = charge_embedding
+    self.two_buffers = two_buffers,
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = working_folder
     self.pdb_hierarchy = pdb_hierarchy
@@ -101,16 +103,26 @@ class fragments(object):
                         self.pdb_hierarchy_super, self.yoink_dat_path)
     ##TODO conformer check
     #t0 = time.time()
+    molecules_in_fragments = []
     for i in range(len(clusters)):
       pyoink.input_file = self.qmmm_file_name
       pyoink.update(clusters[i])
       atoms_in_one_cluster = pyoink.qm_core_fixed_indices
       self.cluster_atoms.append(atoms_in_one_cluster)
-      atoms_in_one_fragment, qm_molecules = pyoink.get_qm_indices()
+      atoms_in_one_fragment, molecules_in_one_fragment = pyoink.get_qm_indices()
       self.fragment_super_atoms.append(atoms_in_one_fragment)
+      molecules_in_fragments.append(molecules_in_one_fragment)
       if(0):
         print i, "atoms in cluster: ", atoms_in_one_cluster
+    if(self.two_buffers):
+      self.fragment_super_atoms = []
+      for molecules in molecules_in_fragments:
+        pyoink.input_file = self.qmmm_file_name
+        pyoink.update(molecules)
+        atoms_in_one_fragment, junk = pyoink.get_qm_indices()
+        self.fragment_super_atoms.append(atoms_in_one_fragment)
     #print "time taken for building fragments", (time.time() - t0)
+
 
   def get_fragment_hierarchies_and_charges(self):
 
