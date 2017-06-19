@@ -51,6 +51,8 @@ class fragments(object):
 
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
+      ## update the selection of super_cell_sphere, and its 
+      ## geometry_restraints_manager and pdb_hierarchy
       self.pdb_hierarchy_super = self.super_cell.update(
         sites_cart=sites_cart).ph_super_sphere
     ###get clusters and their buffer regions using yoink and graph clustering.

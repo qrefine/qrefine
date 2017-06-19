@@ -48,6 +48,18 @@ class expand(object):
     self.update()
 
   def update(self, sites_cart=None):
+    self.update_super_cell(sites_cart)
+    self._select_within()
+    self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
+    self.update_super_sphere_geometry_restraints_manager()
+    return self
+
+  def update_xyz(self, sites_cart=None):
+    self.update_super_cell(sites_cart)
+    self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
+    return self
+
+  def update_super_cell(self, sites_cart):
     if(sites_cart is not None):
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
     if(self.ph_p1 is None or sites_cart is not None):
@@ -62,10 +74,6 @@ class expand(object):
     self.xrs_super = self.ph_super_cell.extract_xray_structure(
       crystal_symmetry = self.cs_box)
     #
-    self._select_within()
-    self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
-    self.update_super_sphere_geometry_restraints_manager()
-    return self
 
   def update_super_sphere_geometry_restraints_manager(self):
     # XXX Unify with process_model_file of qr.py
