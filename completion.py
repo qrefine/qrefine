@@ -5,6 +5,7 @@ from string import letters
 import iotbx
 from mmtbx.monomer_library import server
 from scitbx import matrix
+from scitbx.math import dihedral_angle
 
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
@@ -185,9 +186,16 @@ def add_c_terminal_oxygens_to_atom_group(ag,
   if ca is None: return
   n = ag.get_atom("N")
   if n is None: return
+  atom = ag.get_atom('O')
+  dihedral = dihedral_angle(sites=[atom.xyz,
+                                   c.xyz,
+                                   ca.xyz,
+                                   n.xyz,
+                                 ],
+                            deg=True)
   ro2 = construct_xyz(c, bond_length,
                       ca, 120.,
-                      n, 160.,
+                      n, dihedral,
                       period=2,
                      )
   oxys = [' O  ', atom_name]
@@ -195,7 +203,7 @@ def add_c_terminal_oxygens_to_atom_group(ag,
     name = oxys[i]
     atom = ag.get_atom(name.strip())
     if atom:
-      atom.xyz = ro2[i]
+      pass #atom.xyz = ro2[i]
     else:
       atom = iotbx.pdb.hierarchy.atom()
       atom.name = name
