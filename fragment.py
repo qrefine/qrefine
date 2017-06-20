@@ -28,7 +28,7 @@ class fragments(object):
       crystal_symmetry           = None,
       clustering                 = True):
     self.charge_embedding = charge_embedding
-    self.two_buffers = two_buffers,
+    self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = working_folder
     self.pdb_hierarchy = pdb_hierarchy
