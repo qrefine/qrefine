@@ -76,6 +76,7 @@ def _add_atom_to_residue_group(atom, ag):
 def add_n_terminal_hydrogens_to_atom_group(ag,
                                            use_capping_hydrogens=False,
                                            append_to_end_of_model=False,
+                                           retain_original_hydrogens=True,
                                           ):
   rc=[]
   n = ag.get_atom("N")
@@ -84,18 +85,29 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
   if ca is None: return
   c = ag.get_atom("C")
   if c is None: return
-  if ag.get_atom("H"): # maybe needs to be smarter or actually work
-    #for atom in ag.atoms(): print atom.quote()
-    ag.remove_atom(ag.get_atom('H'))
-  if use_capping_hydrogens and 0:
-    for i, atom in enumerate(ag.atoms()):
-      if atom.name == ' H3 ':
-        ag.remove_atom(i)
-        break
+  atom = ag.get_atom('H')
+  dihedral=120.
+  if atom:
+    dihedral = dihedral_angle(sites=[atom.xyz,
+                                     n.xyz,
+                                     ca.xyz,
+                                     c.xyz,
+                                   ],
+                              deg=True)
+  if retain_original_hydrogens: pass
+  else:
+    if ag.get_atom("H"): # maybe needs to be smarter or actually work
+      #for atom in ag.atoms(): print atom.quote()
+      ag.remove_atom(ag.get_atom('H'))
+  #if use_capping_hydrogens and 0:
+  #  for i, atom in enumerate(ag.atoms()):
+  #    if atom.name == ' H3 ':
+  #      ag.remove_atom(i)
+  #      break
   # add H1
   rh3 = construct_xyz(n, 0.9,
                       ca, 109.5,
-                      c, 120.,
+                      c, dihedral,
                      )
   # this could be smarter
   possible = ['H', 'H1', 'H2', 'H3', 'HT1', 'HT2']
@@ -111,6 +123,8 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
   if h_count>=number_of_hydrogens: return []
   for i in range(0, number_of_hydrogens):
     name = " H%d " % (i+1)
+    if retain_original_hydrogens:
+      if i==0 and ag.get_atom('H'): continue
     if ag.get_atom(name.strip()): continue
     if ag.resname=='PRO':
       if i==0:
