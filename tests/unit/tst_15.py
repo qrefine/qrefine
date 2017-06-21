@@ -45,7 +45,8 @@ def run(prefix = "tst_15"):
         for i, diff_i in enumerate(diff):
           print i+1, diff_i, g1[i], g2[i]
         print
-      assert approx_equal(diff.max(), [0,0,0])
+      #assert approx_equal(diff.max(), [0,0,0])
+      assert approx_equal(g1, g2, [1.0E-4,1.0E-4,1.0E-4])
 
 if __name__ == '__main__':
   t0 = time.time()
