@@ -175,7 +175,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
                       crystal_symmetry=fragment_extracts.super_cell.cs_box,
                       model_completion=False)
   ##for debugging
-  if (0):  ## for degugging
+  if(0):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell.cs_box)
