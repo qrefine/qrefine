@@ -37,6 +37,7 @@ class from_cctbx(object):
       es = grm.select(super_selection).energies_sites(
         sites_cart=sites_cart.select(super_selection), compute_gradients=True)
       es.gradients = es.gradients[:selection.count(True)]
+      es.gradients *= self.fragment_extracts.fragment_scales[index]
     else:
       es = self.geometry_restraints_manager.energies_sites(
         sites_cart=sites_cart, compute_gradients=True)
@@ -94,6 +95,7 @@ class from_qm(object):
       index      = fragment_selection_and_sites_cart[2])
 
   def target_and_gradients(self,sites_cart, selection=None, index=None):
+    gradients_scale = 1.0
     if(self.clustering):
       from fragment import get_qm_file_name_and_pdb_hierarchy
       from fragment import charge
@@ -107,6 +109,7 @@ class from_qm(object):
                                       index=index)
       charge_file =  write_mm_charge_file(fragment_extracts=self.fragment_extracts,
                                       index=index)
+      gradients_scale = self.fragment_extracts.fragment_scales[index]
     else:
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
       self.pdb_hierarchy.write_pdb_file(file_name=self.file_name)
@@ -128,6 +131,7 @@ class from_qm(object):
     ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
     gradients = ase_gradients[:selection.count(True)]#remove capping and neibouring buffer
     gradients =  flex.vec3_double(gradients)
+    gradients *= gradients_scale
     return energy, gradients
 
 from ase import Atoms

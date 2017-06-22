@@ -306,7 +306,9 @@ def run(cmdline, log):
   else:
     weights = None
     for chain in cmdline.pdb_hierarchy.chains():
-      if (len(chain.conformers()) > 1):
+      ##TODO altloc funtion has not been tested using clustering qm
+      if (len(chain.conformers()) > 1 and
+            (params.restraints=="qm" and not params.cluster.clustering)):
         raise Sorry("Alternative conformations are not supported.")
     if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")

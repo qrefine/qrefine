@@ -43,6 +43,7 @@ class fragments(object):
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
+    self.pdb_hierarchy_super = self.super_cell.ph_super_sphere
     if(clustering):
       self.yoink_dat_path = os.path.join(qrefine,"plugin","yoink","dat")
       self.pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"))
@@ -91,47 +92,107 @@ class fragments(object):
     #print "time taken for clustering", (time.time() - t0)
 
   def get_fragments(self):
+
+    def selected_atom_indices_in_entire_ph(selected_atom_indices_in_sub_ph, sub_ph):
+      selected_atom_indices_in_entire_ph = []
+      for index, number in enumerate(sub_ph.atoms().extract_serial()):
+        if(index+1 in selected_atom_indices_in_sub_ph):
+          selected_atom_indices_in_entire_ph.append(int(number))
+      return selected_atom_indices_in_entire_ph
+    self.pdb_hierarchy_super.atoms_reset_serial()
+    phs = [self.pdb_hierarchy_super]
+    altloc_size = self.pdb_hierarchy_super.altloc_indices().size()
+    if(altloc_size>1):
+      ## make pdb_hierarchy for each altloc case
+      phs = []
+      asc = self.pdb_hierarchy_super.atom_selection_cache()
+      ## the first one altloc is " ", A B.. altlocs start from 1
+      for altloc in self.pdb_hierarchy_super.altloc_indices().keys()[1:]:
+        sel = asc.selection("altloc %s or altloc ' '"%altloc)
+        ph_altloc = self.pdb_hierarchy_super.select(sel)
+        phs.append(ph_altloc)
+    cluster_atoms_in_phs = []
+    fragment_super_atoms_in_phs = []
+    clusters = self.clusters##from graph clustring, molecular indices
+    ##loop over each cluster in every pdb_hierarchy to define buffer region
+    ##fragment consists of cluster and buffer
+    ##all pdb_hierarchies have the same clusters at molecular level
+    for ph in phs:
+      pyoink = self.pyoink
+      cluster_atoms_in_ph = []
+      fragment_super_atoms_in_ph = []
+      ## write yoink input file to get fragment
+      write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
+                          ph, self.yoink_dat_path)
+      molecules_in_fragments = []
+      for i in range(len(clusters)):
+        pyoink.input_file = self.qmmm_file_name
+        pyoink.update(clusters[i])
+        atoms_in_one_cluster = pyoink.qm_core_fixed_indices
+        atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
+                                                    atoms_in_one_cluster, ph)
+        cluster_atoms_in_ph.append(atoms_in_one_cluster)
+        atoms_in_one_fragment, molecules_in_one_fragment = pyoink.get_qm_indices()
+        atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
+                                                     atoms_in_one_fragment, ph)
+        fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
+        molecules_in_fragments.append(molecules_in_one_fragment)
+        if(0):
+          print i, "atoms in cluster: ", atoms_in_one_cluster
+      if(self.two_buffers):## define a second buffer layer
+        fragment_super_atoms_in_ph = []
+        for molecules in molecules_in_fragments:
+          pyoink.input_file = self.qmmm_file_name
+          pyoink.update(molecules)
+          atoms_in_one_fragment, junk = pyoink.get_qm_indices()
+          atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
+                                                     atoms_in_one_fragment, ph)
+          fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
+      cluster_atoms_in_phs.append(cluster_atoms_in_ph)
+      fragment_super_atoms_in_phs.append(fragment_super_atoms_in_ph)
+    ##check conformers and get all clusters and fragments
     self.cluster_atoms = []
     self.fragment_super_atoms = []
-    pyoink = self.pyoink
-    clusters = self.clusters##from graph clustring, molecular indices
-    sites_cart = self.pdb_hierarchy.atoms().extract_xyz()
-    self.pdb_hierarchy_super = self.super_cell.update(
-      sites_cart=sites_cart).ph_super_sphere
-    ## write yoink input file to get fragment
-    write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
-                        self.pdb_hierarchy_super, self.yoink_dat_path)
-    ##TODO conformer check
-    #t0 = time.time()
-    molecules_in_fragments = []
-    for i in range(len(clusters)):
-      pyoink.input_file = self.qmmm_file_name
-      pyoink.update(clusters[i])
-      atoms_in_one_cluster = pyoink.qm_core_fixed_indices
-      self.cluster_atoms.append(atoms_in_one_cluster)
-      atoms_in_one_fragment, molecules_in_one_fragment = pyoink.get_qm_indices()
-      self.fragment_super_atoms.append(atoms_in_one_fragment)
-      molecules_in_fragments.append(molecules_in_one_fragment)
-      if(0):
-        print i, "atoms in cluster: ", atoms_in_one_cluster
-    if(self.two_buffers):
-      self.fragment_super_atoms = []
-      for molecules in molecules_in_fragments:
-        pyoink.input_file = self.qmmm_file_name
-        pyoink.update(molecules)
-        atoms_in_one_fragment, junk = pyoink.get_qm_indices()
-        self.fragment_super_atoms.append(atoms_in_one_fragment)
-    #print "time taken for building fragments", (time.time() - t0)
+    self.fragment_scales = []
+    for i_cluster in range(len(clusters)):
+      ##always collect the clustering result from phs[0]
+      self.collect_cluster_and_fragment(cluster_atoms_in_phs,
+                                    fragment_super_atoms_in_phs, i_cluster, 0)
+      if(len(phs)>1):
+        for j_ph in xrange(1, len(phs)):
+          fragment_same = (set(fragment_super_atoms_in_phs[0][i_cluster])==
+               set(fragment_super_atoms_in_phs[j_ph][i_cluster]))
+          if(fragment_same):continue
+          self.collect_cluster_and_fragment(cluster_atoms_in_phs,
+                              fragment_super_atoms_in_phs, i_cluster, j_ph)
+          overlap_atoms_in_one_cluster = self.atoms_overlap(
+                                        cluster_atoms_in_phs, i_cluster, j_ph)
+          overlap_atoms_in_one_fragment = self.atoms_overlap(
+                                  fragment_super_atoms_in_phs, i_cluster, j_ph)
+          self.cluster_atoms.append(list(overlap_atoms_in_one_cluster))
+          self.fragment_super_atoms.append(list(overlap_atoms_in_one_fragment))
+          self.fragment_scales.append(-1.0)#substract the contribution from overlap
 
+  def atoms_overlap(self, cluster_atoms_in_phs, i_cluster, j_ph):
+    overlap_atoms_in_one_cluster = set(cluster_atoms_in_phs[0][i_cluster]) & \
+                                   set(cluster_atoms_in_phs[j_ph][i_cluster])
+    return overlap_atoms_in_one_cluster
+
+  def collect_cluster_and_fragment(self, cluster_atoms_in_phs,
+                                fragment_super_atoms_in_phs, i_cluster, j_ph):
+    self.cluster_atoms.append(cluster_atoms_in_phs[j_ph][i_cluster])
+    self.fragment_super_atoms.append(fragment_super_atoms_in_phs[j_ph][i_cluster])
+    self.fragment_scales.append(1.0)
 
   def get_fragment_hierarchies_and_charges(self):
-
+    
     def pdb_hierarchy_select(atoms_size, selection):
       selection_array = flex.bool(atoms_size, False)
       for item in selection:
         if(item<=atoms_size):
           selection_array[item-1] = True
       return selection_array
+    
     self.fragment_selections = []
     self.fragment_super_selections = []
     self.fragment_charges = []
@@ -144,13 +205,16 @@ class fragments(object):
       fragment_super_selection = pdb_hierarchy_select(
         self.pdb_hierarchy_super.atoms_size(), self.fragment_super_atoms[i])
       qm_pdb_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
-      if(0):
-        qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
-          crystal_symmetry=self.super_cell.cs_box)
       raw_records = qm_pdb_hierarchy.as_pdb_string(
         crystal_symmetry=self.super_cell.cs_box)
-      ## cell size self.expand.cs_p1 from expand, seems not right
-      charge = get_total_charge_from_pdb(raw_records=raw_records)
+      ##TODO: remove if-esle statement
+      ## finalise could not complete altloc yet
+      ## charge calculation needs a completed structure
+      ## temprary solution: skip charge calculation if conformers in PDB
+      if(self.pdb_hierarchy_super.altloc_indices().size()>1):
+        charge = 0
+      else:
+        charge = get_total_charge_from_pdb(raw_records=raw_records)
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
@@ -161,6 +225,13 @@ class fragments(object):
       s = fragment_selection==cluster_selection
       buffer_selection = fragment_selection.deep_copy().set_selected(s, False)
       self.buffer_selections.append(buffer_selection)
+      if(0):
+        print "write pdb files for cluster and fragment"
+        qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
+          crystal_symmetry=self.super_cell.cs_box)
+        cluster_pdb_hierarchy = self.pdb_hierarchy_super.select(cluster_selection)
+        cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
+          crystal_symmetry=self.super_cell.cs_box)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
@@ -235,4 +306,5 @@ def fragment_extracts(fragments):
     pdb_hierarchy        = fragments.pdb_hierarchy,
     pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
     super_cell           = fragments.super_cell,
-    buffer_selections    = fragments.buffer_selections)
+    buffer_selections    = fragments.buffer_selections,
+    fragment_scales      = fragments.fragment_scales)
