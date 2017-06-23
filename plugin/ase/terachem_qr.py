@@ -1,5 +1,5 @@
 """
-  based on ASE script for Mopac
+  based on ASE script for Mopac 
 
 
 """
@@ -44,14 +44,14 @@ class TeraChem(Calculator):
 	key_parameters = self.key_parameters
 	if self.terachem_file==True:
         	pass
-	#print "use the existing terachem input file"
-	else:
-	    	if self.atoms!=None:
+	#print "use the existing terachem input file"    
+	else:   
+	    	if self.atoms!=None:	
 			atoms = copy.deepcopy(self.atoms)
 			atoms.set_pbc(pbc=(0,0,0))
-			write(self.coordinates,atoms)
+			write(key_parameters["coordinates"],atoms)
 	    	finput = open(fname,"w")
-                working_dir = os.path.dirname(self.coordinates)
+                working_dir = os.path.dirname(key_parameters["coordinates"])
                 key_parameters["scrdir"] = working_dir + "/scr"
                 if os.path.exists(key_parameters["scrdir"]+"/c0"):
                   key_parameters["guess"] =  key_parameters["scrdir"]+"/c0"
@@ -66,25 +66,18 @@ class TeraChem(Calculator):
                                   for item in value.split(','):
                                     line = ' '.join([item,'\n'])
                                     finput.write(line)
-                                  finput.write('$end \n')
+                                  finput.write('$end \n') 
                                 else:
-				  line=' '.join([key,value,'\n'])
+				  line=' '.join([key,value,'\n']) 
 				  finput.write(line)
 		finput.write('end')
-		finput.close()
+		finput.close()    
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
         if ('TeraChem_COMMAND' in os.environ):
             command = os.environ['TeraChem_COMMAND']
         return command
-
-    def run_qr(atoms,
-               charge=None,
-               pointcharges=None,
-               coordinates=None,
-               define_str=None):
-        pass
 
     def run(self):
 	import subprocess
@@ -95,7 +88,7 @@ class TeraChem(Calculator):
         """
         # set the input file name
         finput = self.label + '.sp'
-        foutput = self.label + '.out'
+        foutput = self.label + '.out'       
         self.write_input(finput, self.atoms)
 
         working_dir = os.path.dirname(finput)
@@ -106,14 +99,14 @@ class TeraChem(Calculator):
 	#print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
 	exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         if exitcode != 0:
-
+		
             raise RuntimeError('TeraChem exited with error code')
 
 
         energy = self.read_energy(foutput)
         self.energy_zero = energy
         self.energy_free = energy
-
+        
         self.forces = self.read_forces(foutput)
     def read_energy(self, fname):
         """
@@ -145,7 +138,7 @@ class TeraChem(Calculator):
 
         nats = len(self.atoms)
         forces = np.zeros((nats, 3), float)
-
+        
         infinite_force="*****"
         for i, line in enumerate(lines):
             if line.find('Gradient units') != -1:
@@ -156,38 +149,38 @@ class TeraChem(Calculator):
                     for each_force in pre_force:
                        if infinite_force in each_force:
                              each_force = 999999999.9999
-                       atom_force.append(each_force)
+                       atom_force.append(each_force) 
                     forces[j]=atom_force
                 break
-        forces *= -(Hartree/Bohr)/(kcal / mol)
+        forces *= -(Hartree/Bohr)/(kcal / mol) 
         return forces
-
+        
     def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
         comparison of atoms to self.atoms using tolerances to account
         for float/double differences and float math.
         '''
-
+    
         TOL = 1.0e-6  # angstroms
 
         # check for change in cell parameters
         test = len(atoms_new) == len(self.atoms)
         if test is not True:
             return False
-
+        
         # check for change in cell parameters
         test = (abs(self.atoms.get_cell() - atoms_new.get_cell()) <= TOL).all()
         if test is not True:
             return False
-
+        
         old = self.atoms.arrays
         new = atoms_new.arrays
-
+        
         # check for change in atom position
         test = (abs(new['positions'] - old['positions']) <= TOL).all()
         if test is not True:
             return False
-
+        
         # passed all tests
         return True
 
@@ -197,7 +190,13 @@ class TeraChem(Calculator):
             self.run()
     def set_atoms(self, atoms):
 	self.atoms=atoms
-
+    	
     def set(self, **kwargs):
 	for key, value in kwargs.items():
+           if key in key_parameters:
  		self.key_parameters[str(key)]=value
+
+    def run_qr(self, atoms_new, **kwargs):
+        self.atoms=atoms_new
+        self.set(**kwargs)
+        self.run()
