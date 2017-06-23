@@ -30,7 +30,7 @@ class fragments(object):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
-    self.working_folder = working_folder
+    self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
@@ -237,7 +237,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   fragment_hierarchy = fragment_extracts.pdb_hierarchy_super.select(
     fragment_selection)
-  sub_working_folder = fragment_extracts.working_folder + str(index) + "/"
+  sub_working_folder = fragment_extracts.working_folder + "/"+ str(index) + "/"
   if (not os.path.isdir(sub_working_folder)):
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"

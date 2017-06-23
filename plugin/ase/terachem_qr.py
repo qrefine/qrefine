@@ -1,7 +1,6 @@
+
 """
   based on ASE script for Mopac 
-
-
 """
 import os
 import string
@@ -52,7 +51,11 @@ class TeraChem(Calculator):
 			write(key_parameters["coordinates"],atoms)
 	    	finput = open(fname,"w")
                 working_dir = os.path.dirname(key_parameters["coordinates"])
-                key_parameters["scrdir"] = working_dir + "/scr"
+                parent_dir = "/tmp/qr/"+ working_dir.strip("/").split("/")[-1]
+                if(not os.path.isdir(parent_dir)):
+                  os.makedirs(parent_dir)
+                key_parameters["scrdir"] = parent_dir + "/scr"
+                #key_parameters["scrdir"] = working_dir + "/scr"
                 if os.path.exists(key_parameters["scrdir"]+"/c0"):
                   key_parameters["guess"] =  key_parameters["scrdir"]+"/c0"
                 else:
@@ -97,7 +100,11 @@ class TeraChem(Calculator):
         if command is None:
             raise RuntimeError('TeraChem command not specified')
 	#print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
-	exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
+	#exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
+        import subprocess
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        process.wait()
+        exitcode = process.returncode
         if exitcode != 0:
 		
             raise RuntimeError('TeraChem exited with error code')
