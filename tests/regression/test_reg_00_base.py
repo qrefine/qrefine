@@ -13,7 +13,7 @@ qsub_command = 'qsub  -N reg_test_cluster -m ae -q fat  -l nodes=1:ppn=32'
 
 class test_base:
   __metaclass__ = ABCMeta
-  
+
   def __init__(self):
     self.db = MongoClient('localhost', 27017).pyoink
 

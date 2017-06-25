@@ -8,7 +8,7 @@ files_per_folder=1000
 
 file_names=[]
 for input_file in listdir(root_dir):
-    #make a new sub dir for every 1000 files 
+    #make a new sub dir for every 1000 files
     file_names.append(input_file)
 print len(file_names)
 
@@ -26,4 +26,3 @@ for fold in folders:
        print fold+"/"+file_names[index]
        os.rename(root_dir+"/"+file_names[index], fold+"/"+file_names[index])
    counter += files_per_folder
-

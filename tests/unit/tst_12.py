@@ -640,7 +640,7 @@ def run(prefix = "tst_12"):
   for i, (func, j) in enumerate(tests):
     if j==1: argss.append((i,None))
     else:
-      j = min(1,j)    
+      j = min(1,j)
       for p in range(j):
         if (i,p) in [(10,60)]: continue # capping and completion of PRO
         argss.append((i,p))

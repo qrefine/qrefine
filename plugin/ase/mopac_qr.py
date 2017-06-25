@@ -29,7 +29,7 @@ class Mopac(Calculator):
         self.int_params = {}
         self.bool_params = {}
         self.float_params = {}
-        
+
         # initials parameter fields
         for key in str_keys:
             self.str_params[key] = None
@@ -39,7 +39,7 @@ class Mopac(Calculator):
             self.bool_params[key] = None
         for key in float_keys:
             self.float_params[key] = None
-                        
+
         # set initial values
         self.set(restart=0,
                  spin=0,
@@ -53,7 +53,7 @@ class Mopac(Calculator):
 
         # save label
         self.label = label
-        
+
         #set atoms
         self.atoms = None
         # initialize the results
@@ -62,10 +62,10 @@ class Mopac(Calculator):
         self.energy_free = None
         self.forces = None
         self.stress = None
-        
+
         # initialize the results
         self.occupations = None
-        
+
     def set(self, **kwargs):
         """
         Sets the parameters on the according keywords
@@ -93,7 +93,7 @@ class Mopac(Calculator):
         """
         Writes the files that have to be written each timestep
         """
-        
+
         # start the input
         mopac_input = ''
 
@@ -101,18 +101,18 @@ class Mopac(Calculator):
         for key in 'functional', 'job_type':
             if self.str_params[key] != None:
                 mopac_input += self.str_params[key] + ' '
-                
+
         if self.float_params['RELSCF'] != None:
             mopac_input += 'RELSCF=' + str(self.float_params['RELSCF']) + ' '
-            
+
         #write charge/
         # charge = sum(atoms.get_initial_charges())
         #if charge != 0:
         #   mopac_input += 'CHARGE=%i ' % (charge)
         charge=self.int_params['charge']
         mopac_input += 'CHARGE= ' + str(charge)+'  '
-        
-        
+
+
         #write spin
         spin = self.int_params['spin']
         if spin == 1.:
@@ -138,7 +138,7 @@ class Mopac(Calculator):
         if atoms.pbc.any():
             for v in atoms.get_cell():
                 mopac_input += 'Tv %8.3f %8.3f %8.3f\n' % (v[0], v[1], v[2])
-        
+
         # write input
         myfile = open(fname, 'w')
         myfile.write(mopac_input)
@@ -156,18 +156,18 @@ class Mopac(Calculator):
 
     def run(self):
         import subprocess, shlex
-	from threading import Timer
+        from threading import Timer
 
-	def run_tiemout(cmd, timeout_sec):
-  		proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, 
-    		stderr=subprocess.PIPE)
-  		kill_proc = lambda p: p.kill()
-  		timer = Timer(timeout_sec, kill_proc, [proc])
-  		try:
-    			timer.start()
-    			stdout,stderr = proc.communicate()
-  		finally:
-    			timer.cancel()
+        def run_tiemout(cmd, timeout_sec):
+                proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+                kill_proc = lambda p: p.kill()
+                timer = Timer(timeout_sec, kill_proc, [proc])
+                try:
+                        timer.start()
+                        stdout,stderr = proc.communicate()
+                finally:
+                        timer.cancel()
 
         """
         Writes input in label.mop
@@ -178,7 +178,7 @@ class Mopac(Calculator):
         finput = self.label + '.mop'
         foutput = self.label + '.out'
         self.write_input(finput, self.atoms)
-       
+
         command = self.get_command()
         if command is None:
             raise RuntimeError('MOPAC command not specified')
@@ -186,7 +186,7 @@ class Mopac(Calculator):
         command_exc= "  ".join([command , finput])
         run_tiemout(command_exc ,72000)# 20hours
 #        exitcode = os.system('%s %s' % (command, finput)+ '  > /dev/null 2>&1    ')
-        
+
 #        if exitcode != 0:
 #            raise RuntimeError('MOPAC exited with error code')
 
@@ -246,14 +246,14 @@ class Mopac(Calculator):
         infinite_force="*****"
         if 'mozyme' in self.str_params['job_type'].lower():
             for i, line in enumerate(lines):
-            	if line.find('FINAL  POINT  AND  DERIVATIVES') != -1:
+                if line.find('FINAL  POINT  AND  DERIVATIVES') != -1:
                     for j in range(nats):
                         gline = lines[i + j + 5]
                         pre_force=gline[8:35]
                         if(infinite_force in pre_force):
-			    forces[j] = [999999999.9999,999999999.9999,999999999.9999]		  
-			else:
-			    forces[j] =  [float( pre_force[0:9].strip()),float( pre_force[9:18].strip()),float( pre_force[18:27].strip())]   	
+                            forces[j] = [999999999.9999,999999999.9999,999999999.9999]
+                        else:
+                            forces[j] =  [float( pre_force[0:9].strip()),float( pre_force[9:18].strip()),float( pre_force[18:27].strip())]
         else:
           for i, line in enumerate(lines):
             if line.find('GRADIENT\n') != -1:
@@ -265,36 +265,36 @@ class Mopac(Calculator):
                     else:
                         forces[int(j/3), int(j%3)] = float(pre_force)
                 break
-#do not change unit for mopac       
+#do not change unit for mopac
         forces *= - (kcal / mol)
         return forces
-        
+
     def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
         comparison of atoms to self.atoms using tolerances to account
         for float/double differences and float math.
         '''
-    
+
         TOL = 1.0e-6  # angstroms
 
         # check for change in cell parameters
         test = len(atoms_new) == len(self.atoms)
         if test is not True:
             return False
-        
+
         # check for change in cell parameters
         test = (abs(self.atoms.get_cell() - atoms_new.get_cell()) <= TOL).all()
         if test is not True:
             return False
-        
+
         old = self.atoms.arrays
         new = atoms_new.arrays
-        
+
         # check for change in atom position
         test = (abs(new['positions'] - old['positions']) <= TOL).all()
         if test is not True:
             return False
-        
+
         # passed all tests
         return True
 
@@ -303,8 +303,8 @@ class Mopac(Calculator):
         if not self.atoms_are_equal(atoms_new):
             self.atoms = atoms_new.copy()
             self.run()
-            
-    def run_qr(self, atoms_new, **kwargs): 
+
+    def run_qr(self, atoms_new, **kwargs):
         for key in kwargs:
           if key in self.bool_params:
               self.bool_params[key] = kwargs[key]
@@ -313,9 +313,6 @@ class Mopac(Calculator):
           elif key in self.str_params:
               self.str_params[key] = kwargs[key]
           elif key in self.float_params:
-              self.float_params[key] = kwargs[key]             
+              self.float_params[key] = kwargs[key]
         self.atoms = atoms_new.copy()
         self.run()
-        
-    
-    

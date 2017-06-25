@@ -15,7 +15,7 @@ class from_cluster(object):
     # update the pdb hierarchy of the center
     system_size = sites_cart.size()
     self.fragment_manager.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    ## the super_sphere's selection, and its pdb_hierarchy and 
+    ## the super_sphere's selection, and its pdb_hierarchy and
     ##geometry_restraints_manager get updated when a new clustering is executing.
     ## just update the xyz of pdb_hierarchy_super_sphere
     self.fragment_manager.pdb_hierarchy_super =  \

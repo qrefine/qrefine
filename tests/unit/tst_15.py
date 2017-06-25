@@ -47,7 +47,7 @@ def run(prefix = "tst_15"):
       g2 = easy_pickle.load("cluster_true.pkl")
       if(restraints is "cctbx"):
         ##tight comparison
-        ## clustering cctbx should match the atomic gradients 
+        ## clustering cctbx should match the atomic gradients
         ## at x,y,z directions
         g1 = g1.as_double()
         g2 = g2.as_double()
@@ -59,8 +59,8 @@ def run(prefix = "tst_15"):
           print
         assert approx_equal(g1, g2, 1.0E-4)
       else:
-        ## loose comparison  
-        ## clustering qm just checks the norm of gradients from 
+        ## loose comparison
+        ## clustering qm just checks the norm of gradients from
         ## x, y, z directions
         g1_norm = flex.double([tuple_norm(x) for x in g1])
         g2_norm = flex.double([tuple_norm(x) for x in g2])

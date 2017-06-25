@@ -58,7 +58,7 @@ def get_inputs(args, log, master_params):
   return params
 
 def run(args, log):
-  if len(args)==0: 
+  if len(args)==0:
     print_legend_and_usage(log)
     return
   params = get_inputs(

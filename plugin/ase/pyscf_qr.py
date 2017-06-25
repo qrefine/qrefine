@@ -25,7 +25,7 @@ class Pyscf(Calculator):
         self.method = method
         # set user values
         self.set(**kwargs)
-         
+
     def set(self, **kwargs):
         """
         Sets the parameters on the according keywords
@@ -33,14 +33,14 @@ class Pyscf(Calculator):
         """
         for key in kwargs:
             if key is "charge":
-            	self.mol.charge = kwargs[key]
+                self.mol.charge = kwargs[key]
             if key is "spin":
                 self.mol.spin = kwargs[key]
             if key is "method":
                 self.method = kwargs[key]
             if key is "basis":
                 self.mol.basis = kwargs[key]
-	    	
+
     def get_version(self):
         return self.version
 
@@ -66,40 +66,40 @@ class Pyscf(Calculator):
             self.energy_zero = self.energy
             self.energy_free = self.energy
             grad = np.array(result.grad())
-            self.forces = grad*(-(Hartree/Bohr)/(kcal / unit_mol))         
+            self.forces = grad*(-(Hartree/Bohr)/(kcal / unit_mol))
 
     def read_energy(self, fname):
         return self.energy
 
     def read_forces(self, fname):
         return self.forces
-        
+
     def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
         comparison of atoms to self.atoms using tolerances to account
         for float/double differences and float math.
         '''
-    
+
         TOL = 1.0e-6  # angstroms
 
         # check for change in cell parameters
         test = len(atoms_new) == len(self.atoms)
         if test is not True:
             return False
-        
+
         # check for change in cell parameters
         test = (abs(self.atoms.get_cell() - atoms_new.get_cell()) <= TOL).all()
         if test is not True:
             return False
-        
+
         old = self.atoms.arrays
         new = atoms_new.arrays
-        
+
         # check for change in atom position
         test = (abs(new['positions'] - old['positions']) <= TOL).all()
         if test is not True:
             return False
-        
+
         # passed all tests
         return True
 

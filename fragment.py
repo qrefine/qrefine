@@ -54,7 +54,7 @@ class fragments(object):
 
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
-      ## update the selection of super_cell_sphere, and its 
+      ## update the selection of super_cell_sphere, and its
       ## geometry_restraints_manager and pdb_hierarchy
       self.pdb_hierarchy_super = self.super_cell.update(
         sites_cart=sites_cart).ph_super_sphere
@@ -185,14 +185,14 @@ class fragments(object):
     self.fragment_scales.append(1.0)
 
   def get_fragment_hierarchies_and_charges(self):
-    
+
     def pdb_hierarchy_select(atoms_size, selection):
       selection_array = flex.bool(atoms_size, False)
       for item in selection:
         if(item<=atoms_size):
           selection_array[item-1] = True
       return selection_array
-    
+
     self.fragment_selections = []
     self.fragment_super_selections = []
     self.fragment_charges = []

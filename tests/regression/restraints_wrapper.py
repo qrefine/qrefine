@@ -39,5 +39,5 @@ def pbs():
   for pdb in pdbs:
      with open(work_dir+pdb+".sp","w") as f:
         f.write(template + coords + pdb + ".pdb " +template2)
-        
+
 pbs()

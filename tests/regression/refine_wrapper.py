@@ -2,7 +2,7 @@ from __future__ import division
 import iotbx.pdb
 
 class Driver(object):
-  
+
   def create(self,pdb):
       self.pdb = pdb
       self.pdb_inp = iotbx.pdb.input(self.pdb)

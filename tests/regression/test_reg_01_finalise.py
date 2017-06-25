@@ -23,4 +23,4 @@ class test_finalise(test_base):
 
 # charge : get_total_charge
 # wrtie charges
-#completion                            
+#completion
