@@ -5,7 +5,6 @@ from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
 from fragment import fragment_extracts
-from restraints import from_cctbx
 
 class from_cluster(object):
   def __init__(self, restraints_manager, fragment_manager, parallel_params):

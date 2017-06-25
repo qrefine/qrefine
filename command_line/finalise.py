@@ -1,6 +1,6 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
-import os, sys, time
+import sys, time
 from qrefine import finalise
 import iotbx
 import mmtbx

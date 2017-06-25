@@ -1,6 +1,6 @@
 from __future__ import division
 
-import time, os
+import os
 import iotbx.pdb
 import libtbx
 from libtbx import easy_run
