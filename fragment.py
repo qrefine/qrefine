@@ -69,8 +69,8 @@ class fragments(object):
       self.get_fragment_hierarchies_and_charges()
 
   def get_clusters(self):
-    self.cluster_file_name = self.working_folder + "cluster.xml"
-    self.qmmm_file_name = self.working_folder + "qmmm.xml"
+    self.cluster_file_name = self.working_folder + "/cluster.xml"
+    self.qmmm_file_name = self.working_folder + "/qmmm.xml"
     ##  write yoink input file to get interactions
     write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
                         self.pdb_hierarchy, self.yoink_dat_path)

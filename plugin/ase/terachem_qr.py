@@ -51,7 +51,9 @@ class TeraChem(Calculator):
 			write(key_parameters["coordinates"],atoms)
 	    	finput = open(fname,"w")
                 working_dir = os.path.dirname(key_parameters["coordinates"])
-                parent_dir = "/tmp/qr/"+ working_dir.strip("/").split("/")[-1]
+                working_dir =  working_dir.strip("/").split("/")
+                working_dir[0] = "tmp"
+                parent_dir = "/"+"/".join(working_dir)
                 if(not os.path.isdir(parent_dir)):
                   os.makedirs(parent_dir)
                 key_parameters["scrdir"] = parent_dir + "/scr"
@@ -93,9 +95,6 @@ class TeraChem(Calculator):
         finput = self.label + '.sp'
         foutput = self.label + '.out'       
         self.write_input(finput, self.atoms)
-
-        working_dir = os.path.dirname(finput)
-        key_parameters["scrdir"] = working_dir + "/scr"
         command = self.get_command()
         if command is None:
             raise RuntimeError('TeraChem command not specified')
