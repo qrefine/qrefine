@@ -1,6 +1,6 @@
 
 """
-  based on ASE script for Mopac
+  based on ASE script for Mopac 
 """
 import os
 import string
@@ -16,17 +16,17 @@ key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd 
 class TeraChem(Calculator):
     name = 'TeraChem'
     def __init__(self, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='yes',run='gradient',atoms=None, **kwargs):
-        self.terachem_file=terachem_file
+	self.terachem_file=terachem_file
         coordinates=os.path.dirname(label)+"/"+ coordinates
-        self.coordinates=coordinates
+	self.coordinates=coordinates
         self.key_parameters = copy.deepcopy(key_parameters)
-        self.key_parameters['gpus']=gpus
-        self.key_parameters['basis']=basis
-        self.key_parameters['coordinates']=coordinates
-        self.key_parameters['charge']=charge
-        self.key_parameters['method']=method
-        self.key_parameters['dftd']=dftd
-        self.key_parameters['run']=run
+	self.key_parameters['gpus']=gpus
+	self.key_parameters['basis']=basis
+	self.key_parameters['coordinates']=coordinates
+	self.key_parameters['charge']=charge
+	self.key_parameters['method']=method
+	self.key_parameters['dftd']=dftd
+	self.key_parameters['run']=run
         # save label
         self.label = label
         #set atoms
@@ -40,16 +40,16 @@ class TeraChem(Calculator):
 
 
     def write_input(self, fname, atoms):
-        key_parameters = self.key_parameters
-        if self.terachem_file==True:
-                pass
-        #print "use the existing terachem input file"
-        else:
-                if self.atoms!=None:
-                        atoms = copy.deepcopy(self.atoms)
-                        atoms.set_pbc(pbc=(0,0,0))
-                        write(key_parameters["coordinates"],atoms)
-                finput = open(fname,"w")
+	key_parameters = self.key_parameters
+	if self.terachem_file==True:
+        	pass
+	#print "use the existing terachem input file"    
+	else:   
+	    	if self.atoms!=None:	
+			atoms = copy.deepcopy(self.atoms)
+			atoms.set_pbc(pbc=(0,0,0))
+			write(key_parameters["coordinates"],atoms)
+	    	finput = open(fname,"w")
                 working_dir = os.path.dirname(key_parameters["coordinates"])
                 parent_dir = "/tmp/qr/"+ working_dir.strip("/").split("/")[-1]
                 if(not os.path.isdir(parent_dir)):
@@ -61,20 +61,20 @@ class TeraChem(Calculator):
                 else:
                   key_parameters["guess"] = None
                 for key, value in key_parameters.iteritems():
-                        if(value!=None):
-                                if  not isinstance(value, str):
-                                        value = str(value)
+			if(value!=None):
+				if  not isinstance(value, str):
+					value = str(value)
                                 if key is  'multibasis':
                                   finput.write('$multibasis \n')
                                   for item in value.split(','):
                                     line = ' '.join([item,'\n'])
                                     finput.write(line)
-                                  finput.write('$end \n')
+                                  finput.write('$end \n') 
                                 else:
-                                  line=' '.join([key,value,'\n'])
-                                  finput.write(line)
-                finput.write('end')
-                finput.close()
+				  line=' '.join([key,value,'\n']) 
+				  finput.write(line)
+		finput.write('end')
+		finput.close()    
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
@@ -83,7 +83,7 @@ class TeraChem(Calculator):
         return command
 
     def run(self):
-        import subprocess
+	import subprocess
         """
         Writes input in label.mop
         Runs TeraChem
@@ -91,7 +91,7 @@ class TeraChem(Calculator):
         """
         # set the input file name
         finput = self.label + '.sp'
-        foutput = self.label + '.out'
+        foutput = self.label + '.out'       
         self.write_input(finput, self.atoms)
 
         working_dir = os.path.dirname(finput)
@@ -99,21 +99,21 @@ class TeraChem(Calculator):
         command = self.get_command()
         if command is None:
             raise RuntimeError('TeraChem command not specified')
-        #print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
-        #exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
+	#print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
+	#exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         import subprocess
+        command = '%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1'
+        print command
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         process.wait()
         exitcode = process.returncode
+        print exitcode
         if exitcode != 0:
-
             raise RuntimeError('TeraChem exited with error code')
-
-
         energy = self.read_energy(foutput)
         self.energy_zero = energy
         self.energy_free = energy
-
+        
         self.forces = self.read_forces(foutput)
     def read_energy(self, fname):
         """
@@ -145,7 +145,7 @@ class TeraChem(Calculator):
 
         nats = len(self.atoms)
         forces = np.zeros((nats, 3), float)
-
+        
         infinite_force="*****"
         for i, line in enumerate(lines):
             if line.find('Gradient units') != -1:
@@ -156,38 +156,38 @@ class TeraChem(Calculator):
                     for each_force in pre_force:
                        if infinite_force in each_force:
                              each_force = 999999999.9999
-                       atom_force.append(each_force)
+                       atom_force.append(each_force) 
                     forces[j]=atom_force
                 break
-        forces *= -(Hartree/Bohr)/(kcal / mol)
+        forces *= -(Hartree/Bohr)/(kcal / mol) 
         return forces
-
+        
     def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
         comparison of atoms to self.atoms using tolerances to account
         for float/double differences and float math.
         '''
-
+    
         TOL = 1.0e-6  # angstroms
 
         # check for change in cell parameters
         test = len(atoms_new) == len(self.atoms)
         if test is not True:
             return False
-
+        
         # check for change in cell parameters
         test = (abs(self.atoms.get_cell() - atoms_new.get_cell()) <= TOL).all()
         if test is not True:
             return False
-
+        
         old = self.atoms.arrays
         new = atoms_new.arrays
-
+        
         # check for change in atom position
         test = (abs(new['positions'] - old['positions']) <= TOL).all()
         if test is not True:
             return False
-
+        
         # passed all tests
         return True
 
@@ -196,12 +196,12 @@ class TeraChem(Calculator):
             self.atoms = atoms_new.copy()
             self.run()
     def set_atoms(self, atoms):
-        self.atoms=atoms
-
+	self.atoms=atoms
+    	
     def set(self, **kwargs):
-        for key, value in kwargs.items():
+	for key, value in kwargs.items():
            if key in key_parameters:
-                self.key_parameters[str(key)]=value
+ 		self.key_parameters[str(key)]=value
 
     def run_qr(self, atoms_new, **kwargs):
         self.atoms=atoms_new
