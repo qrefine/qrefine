@@ -7,14 +7,9 @@ import time
 import run_tests
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
-import numpy as np
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
-
-def tuple_norm(tuple_input):
-      x = np.array(list(tuple_input))
-      return np.linalg.norm(x)
 
 def run(prefix = "tst_15"):
   """
@@ -62,11 +57,12 @@ def run(prefix = "tst_15"):
         ## loose comparison
         ## clustering qm just checks the norm of gradients from
         ## x, y, z directions
-        g1_norm = flex.double([tuple_norm(x) for x in g1])
-        g2_norm = flex.double([tuple_norm(x) for x in g2])
-        for i in range(g1_norm.size()):
-          print i+1, g1_norm[i], g2_norm[i], g1_norm[i]*0.1
-          assert approx_equal(g1_norm[i], g2_norm[i], g1_norm[i]*0.1)
+        assert approx_equal(g1.norm(), g2.norm(), g1.norm()*0.05)
+        g1_norms = flex.sqrt(g1.dot())
+        g2_norms = flex.sqrt(g2.dot())
+        for i in range(g1_norms.size()):
+          #print i+1, g1_norms[i], g2_norms[i], g1_norms[i]*0.2
+          assert approx_equal(g1_norms[i], g2_norms[i], g1_norms[i]*0.2)
 
 if __name__ == '__main__':
   t0 = time.time()

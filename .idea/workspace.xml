@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7832ba0-530d-4e7d-a3c2-f6f22cea7e6b" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/run_tests.py" afterPath="$PROJECT_DIR$/tests/unit/run_tests.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/tst_18.py" afterPath="$PROJECT_DIR$/tests/unit/tst_18.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/unit/tst_15.py" afterPath="$PROJECT_DIR$/tests/unit/tst_15.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -51,26 +50,27 @@
               <caret line="103" column="66" lean-forward="false" selection-start-line="103" selection-start-column="66" selection-end-line="103" selection-end-column="66" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
+                <marker date="1498569937000" expanded="true" signature="577:1122" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="restraints.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="restraints.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/restraints.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1672">
-              <caret line="100" column="7" lean-forward="false" selection-start-line="100" selection-start-column="7" selection-end-line="100" selection-end-column="7" />
+            <state relative-caret-position="560">
+              <caret line="42" column="9" lean-forward="false" selection-start-line="42" selection-start-column="9" selection-end-line="42" selection-end-column="9" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tst_18.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tst_18.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/unit/tst_18.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="38">
-              <caret line="13" column="27" lean-forward="false" selection-start-line="13" selection-start-column="27" selection-end-line="13" selection-end-column="27" />
+            <state relative-caret-position="513">
+              <caret line="27" column="11" lean-forward="false" selection-start-line="27" selection-start-column="11" selection-end-line="27" selection-end-column="11" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -81,11 +81,10 @@
       <file leaf-file-name="tst_15.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/unit/tst_15.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="361">
-              <caret line="28" column="57" lean-forward="false" selection-start-line="28" selection-start-column="4" selection-end-line="28" selection-end-column="57" />
+            <state relative-caret-position="266">
+              <caret line="23" column="57" lean-forward="false" selection-start-line="23" selection-start-column="57" selection-end-line="23" selection-end-column="57" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
-                <marker date="1498569937000" expanded="true" signature="2334:2364" ph="..." />
               </folding>
             </state>
           </provider>
@@ -958,11 +957,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/unit/tst_15.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="28" column="57" lean-forward="false" selection-start-line="28" selection-start-column="4" selection-end-line="28" selection-end-column="57" />
+        <state relative-caret-position="266">
+          <caret line="23" column="57" lean-forward="false" selection-start-line="23" selection-start-column="57" selection-end-line="23" selection-end-column="57" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
-            <marker date="1498569937000" expanded="true" signature="2334:2364" ph="..." />
           </folding>
         </state>
       </provider>
@@ -973,15 +971,8 @@
           <caret line="103" column="66" lean-forward="false" selection-start-line="103" selection-start-column="66" selection-end-line="103" selection-end-column="66" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
+            <marker date="1498569937000" expanded="true" signature="577:1122" ph="..." />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/restraints.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1672">
-          <caret line="100" column="7" lean-forward="false" selection-start-line="100" selection-start-column="7" selection-end-line="100" selection-end-column="7" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -997,11 +988,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/unit/tst_18.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="13" column="27" lean-forward="false" selection-start-line="13" selection-start-column="27" selection-end-line="13" selection-end-column="27" />
+        <state relative-caret-position="513">
+          <caret line="27" column="11" lean-forward="false" selection-start-line="27" selection-start-column="11" selection-end-line="27" selection-end-column="11" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/restraints.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="42" column="9" lean-forward="false" selection-start-line="42" selection-start-column="9" selection-end-line="42" selection-end-column="9" />
+          <folding />
         </state>
       </provider>
     </entry>
