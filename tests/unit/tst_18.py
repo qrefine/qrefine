@@ -18,7 +18,7 @@ def run(prefix = "tst_18"):
       -- using clustering with less clusters vs not using clustering.
       -- using clustering with more clusters vs not using clustering.
   """
-  for data_file_prefix in ["h_altconf", "h_altconf_2"]:
+  for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
     for maxnum in ["15", "2"]:
       common_args = ["restraints=cctbx", "mode=opt", "nproc=1"] +\
                     ["maxnum_residues_in_cluster="+maxnum]
