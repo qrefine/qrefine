@@ -5,6 +5,7 @@ from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
 from fragment import fragment_extracts
+from restraints import from_qm
 
 class from_cluster(object):
   def __init__(self, restraints_manager, fragment_manager, parallel_params):
@@ -24,8 +25,12 @@ class from_cluster(object):
     self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
       file_name=self.restraints_manager.file_name,
       crystal_symmetry=self.fragment_manager.super_cell.cs_box)
-    self.restraints_manager.fragment_extracts = fragment_extracts(
-      self.fragment_manager)
+    fragment_extracts_obj = fragment_extracts(self.fragment_manager)
+    # super_sphere_geometry_restraints_manager will cause qusb submits
+    # a single job instead of batch jobs
+    if(isinstance(self.restraints_manager, from_qm)):
+      fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
+    self.restraints_manager.fragment_extracts = fragment_extracts_obj
     selection_and_sites_cart=[]
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
@@ -36,7 +41,7 @@ class from_cluster(object):
     if(self.parallel_params.nproc is None):
       self.parallel_params.nproc = Auto
     energy_gradients = parallel_map(
-      func                       = self.restraints_manager,
+      func                       = self.restraints_manager,  
       iterable                   = selection_and_sites_cart,
       method                     = self.parallel_params.method,
       preserve_exception_message = True,

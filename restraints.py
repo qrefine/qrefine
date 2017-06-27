@@ -45,7 +45,7 @@ class from_cctbx(object):
 
 class from_qm(object):
   def __init__(self,
-      fragment_extracts           = None,
+      fragment_extracts          = None,
       pdb_hierarchy              = None,
       charge                     = None,
       qm_engine_name             = None,
@@ -57,7 +57,7 @@ class from_qm(object):
       clustering                 = False,
       shared_disk                = True,
       basis                      = "sto-3g"):
-    self.fragment_extracts  = None
+    self.fragment_extracts  = fragment_extracts
     self.basis = basis
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name

@@ -228,10 +228,10 @@ class fragments(object):
       if(0):
         print "write pdb files for cluster and fragment"
         qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
-          crystal_symmetry=self.super_cell.cs_box)
+          crystal_symmetry=self.super_cell_cs)
         cluster_pdb_hierarchy = self.pdb_hierarchy_super.select(cluster_selection)
         cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
-          crystal_symmetry=self.super_cell.cs_box)
+          crystal_symmetry=self.super_cell_cs)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
@@ -243,13 +243,13 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
-                      crystal_symmetry=fragment_extracts.super_cell.cs_box,
+                      crystal_symmetry=fragment_extracts.super_cell_cs,
                       model_completion=False)
   ##for debugging
   if(0):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
-      crystal_symmetry=fragment_extracts.super_cell.cs_box)
+      crystal_symmetry=fragment_extracts.super_cell_cs)
     ph.write_pdb_file(file_name=complete_qm_pdb_file)
   return os.path.abspath(complete_qm_pdb_file), ph
 
@@ -305,6 +305,6 @@ def fragment_extracts(fragments):
     crystal_symmetry     = fragments.crystal_symmetry,
     pdb_hierarchy        = fragments.pdb_hierarchy,
     pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
-    super_cell           = fragments.super_cell,
+    super_cell_cs           = fragments.super_cell.cs_box,
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales)
