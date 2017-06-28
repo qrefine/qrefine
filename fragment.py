@@ -39,6 +39,7 @@ class fragments(object):
       os.mkdir(self.working_folder)
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
+    self.get_altloc_molecular_indices()
     self.super_cell = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
@@ -50,8 +51,16 @@ class fragments(object):
       #t0 = time.time()
       self.set_up_cluster_qm()
       #print "time taken for interaction graph",(time.time() - t0)
-
-
+   
+  def get_altloc_molecular_indices(self):
+    self.altloc_molecular_indices=[]
+    index = 0
+    for chain in self.pdb_hierarchy.chains():
+      for residue_group in chain.residue_groups():
+        index +=1
+        if(residue_group.have_conformers()):
+          self.altloc_molecular_indices.append(index)
+    
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
       ## update the selection of super_cell_sphere, and its
@@ -79,7 +88,14 @@ class fragments(object):
     self.interaction_list, weight = self.pyoink.get_interactions_list()
     self.interacting_pairs = len(self.interaction_list)
     self.interaction_list += self.backbone_connections
-
+    ## isolate altloc molecules
+    new_interaction_list = []
+    if(1):
+      for item in self.interaction_list:
+        contain_altlocs = set(self.altloc_molecular_indices)&set(item)
+        if(len(contain_altlocs)==0):
+          new_interaction_list.append(item)
+      self.interaction_list = new_interaction_list
     import clustering
     #t0 = time.time()
     self.clustering = clustering.betweenness_centrality_clustering(
@@ -163,15 +179,18 @@ class fragments(object):
           fragment_same = (set(fragment_super_atoms_in_phs[0][i_cluster])==
                set(fragment_super_atoms_in_phs[j_ph][i_cluster]))
           if(fragment_same):continue
-          self.collect_cluster_and_fragment(cluster_atoms_in_phs,
-                              fragment_super_atoms_in_phs, i_cluster, j_ph)
           overlap_atoms_in_one_cluster = self.atoms_overlap(
                                         cluster_atoms_in_phs, i_cluster, j_ph)
-          overlap_atoms_in_one_fragment = self.atoms_overlap(
+          empty_overlap_cluster = ((overlap_atoms_in_one_cluster)==0)
+          if(empty_overlap_cluster):continue
+          else:
+            self.collect_cluster_and_fragment(cluster_atoms_in_phs,
+                              fragment_super_atoms_in_phs, i_cluster, j_ph)
+            overlap_atoms_in_one_fragment = self.atoms_overlap(
                                   fragment_super_atoms_in_phs, i_cluster, j_ph)
-          self.cluster_atoms.append(list(overlap_atoms_in_one_cluster))
-          self.fragment_super_atoms.append(list(overlap_atoms_in_one_fragment))
-          self.fragment_scales.append(-1.0)#substract the contribution from overlap
+            self.cluster_atoms.append(list(overlap_atoms_in_one_cluster))
+            self.fragment_super_atoms.append(list(overlap_atoms_in_one_fragment))
+            self.fragment_scales.append(-1.0)#substract the contribution from overlap
 
   def atoms_overlap(self, cluster_atoms_in_phs, i_cluster, j_ph):
     overlap_atoms_in_one_cluster = set(cluster_atoms_in_phs[0][i_cluster]) & \
