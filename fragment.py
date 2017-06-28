@@ -281,7 +281,7 @@ def write_mm_charge_file(fragment_extracts, index):
   if (fragment_extracts.charge_embedding is True):
     non_fragment_hierarchy = \
       fragment_extracts.pdb_hierarchy_super.select(~fragment_selection)
-    sub_working_folder = fragment_extracts.working_folder + str(index) + "/"
+    sub_working_folder = fragment_extracts.working_folder + "/" + str(index) + "/"
     if (not os.path.isdir(sub_working_folder)):
       os.mkdir(sub_working_folder)
     non_fragment_pdb_file = sub_working_folder + str(index) + "_mm.pdb"
