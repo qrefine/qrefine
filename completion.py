@@ -409,10 +409,7 @@ def iterate_using_original(hierarchy,
     else: continue
     #print i, slots[i].atoms()[0].quote(),start,end
     rg = slots[i]
-    #if use_capping_hydrogens:
-    #  for i in range(len(three)):
-    #    rg = get_residue_group(three[i])
-    #    add_cys_hg_to_residue_group(rg)
+    add_cys_hg_to_residue_group(rg)
     if start:
       ptr+=1
       assert ptr==1
