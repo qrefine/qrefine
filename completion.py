@@ -311,26 +311,19 @@ def add_cys_hg_to_residue_group(rg,
     )
   return rc
 
-def add_terminal_hydrogens(
-    hierarchy,
-    geometry_restraints_manager,
-    add_to_chain_breaks=False,
-    use_capping_hydrogens=False,  # instead of terminal H
-    append_to_end_of_model=False, # useful for Q|R
-    #use_capping_only_on_chain_breaks=False,
-    occupancy=1.,
-    verbose=False,
-    ):
-  # add N terminal hydrogens because Reduce only does it to resseq=1
-  # needs to be alt.loc. aware for non-quantum-refine
+def iterate_over_threes(hierarchy,
+                        geometry_restraints_manager,
+                        use_capping_hydrogens=False,
+                        append_to_end_of_model=False,
+                        ):
   atoms = hierarchy.atoms()
+  ###
   def get_residue_group(residue):
     for atom in residue.atoms():
       atom = atoms[atom.i_seq]
       break
     return atom.parent().parent()
   ###
-  additional_hydrogens=[]
   for three in hierarchy_utils.generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,
@@ -369,6 +362,107 @@ def add_terminal_hydrogens(
       #hierarchy.reset_i_seq_if_necessary()
     else:
       pass
+  return additional_hydrogens
+
+def iterate_using_original(hierarchy,
+                           geometry_restraints_manager,
+                           original_hierarchy,
+                           use_capping_hydrogens=False,
+                           append_to_end_of_model=False,
+                           ):
+  slots=[]
+  start=12
+  assert len(original_hierarchy.models())==1
+  assert len(hierarchy.models())==1
+  for chain in original_hierarchy.chains():
+    for org in chain.residue_groups():
+      protein = True
+      for atom_group in org.atom_groups():
+        if get_class(atom_group.resname) not in ["common_amino_acid",
+                                                 "modified_amino_acid",
+                                               ]:
+          protein=False
+          break
+      if not protein:
+        slots.append(False)
+        continue
+      org_atom1_quote = org.atoms()[0].quote()[start:]
+      for rg in hierarchy.residue_groups():
+        if rg.atoms()[0].quote()[start:]==org_atom1_quote:
+          slots.append(rg)
+          break
+      else:
+        slots.append(0)
+    slots.append(None)
+
+  ptr=0
+  additional_hydrogens=[]
+  for i in range(len(slots)):
+    start=False
+    end=False
+    if slots[i]:
+      if i==0: start=True
+      elif not slots[i-1]: start=True
+      if i==len(slots)-1: end=True
+      elif not slots[i+1]: end=True
+      # does not work for chain ends
+    else: continue
+    #print i, slots[i].atoms()[0].quote(),start,end
+    rg = slots[i]
+    #if use_capping_hydrogens:
+    #  for i in range(len(three)):
+    #    rg = get_residue_group(three[i])
+    #    add_cys_hg_to_residue_group(rg)
+    if start:
+      ptr+=1
+      assert ptr==1
+      rc = add_n_terminal_hydrogens_to_residue_group(
+        rg,
+        use_capping_hydrogens=use_capping_hydrogens,
+        append_to_end_of_model=append_to_end_of_model,
+      )
+      if rc: additional_hydrogens.append(rc)
+    if end:
+      ptr-=1
+      assert ptr==0
+      rc = add_c_terminal_oxygens_to_residue_group(
+        rg,
+        use_capping_hydrogens=use_capping_hydrogens,
+        append_to_end_of_model=append_to_end_of_model,
+      )
+      if rc: additional_hydrogens.append(rc)
+    else:
+      pass
+  return additional_hydrogens
+
+def add_terminal_hydrogens(
+    hierarchy,
+    geometry_restraints_manager,
+    add_to_chain_breaks=False,
+    use_capping_hydrogens=False,  # instead of terminal H
+    append_to_end_of_model=False, # useful for Q|R
+    #use_capping_only_on_chain_breaks=False,
+    original_hierarchy=None,
+    occupancy=1.,
+    verbose=False,
+    ):
+  # add N terminal hydrogens because Reduce only does it to resseq=1
+  # needs to be alt.loc. aware for non-quantum-refine
+  if original_hierarchy:
+    additional_hydrogens = iterate_using_original(
+      hierarchy,
+      geometry_restraints_manager,
+      original_hierarchy,
+      use_capping_hydrogens=use_capping_hydrogens,
+      append_to_end_of_model=append_to_end_of_model,
+      )
+  else:
+    additional_hydrogens=iterate_over_threes(
+      hierarchy,
+      geometry_restraints_manager,
+      use_capping_hydrogens=use_capping_hydrogens,
+      append_to_end_of_model=append_to_end_of_model,
+    )
 
   if append_to_end_of_model and additional_hydrogens:
     tmp = []
@@ -410,6 +504,7 @@ def complete_pdb_hierarchy(hierarchy,
                            append_to_end_of_model=False,
                            pdb_filename=None,
                            pdb_inp=None,
+                           original_pdb_filename=None,
                            verbose=False,
                            debug=False,
                           ):
@@ -420,7 +515,12 @@ def complete_pdb_hierarchy(hierarchy,
   params=None
   if use_capping_hydrogens:
     params = hierarchy_utils.get_pdb_interpretation_params()
-    params.link_distance_cutoff=1.8
+    params.link_distance_cutoff=1.8 # avoid linking across a single missing AA
+    if original_pdb_filename:
+      original_pdb_inp = iotbx.pdb.input(original_pdb_filename)
+      original_hierarchy = original_pdb_inp.construct_hierarchy()
+    else:
+      original_hierarchy = None
   if debug:
     output = hierarchy_utils.write_hierarchy(pdb_filename,
                                              pdb_inp,
@@ -499,11 +599,11 @@ def complete_pdb_hierarchy(hierarchy,
     sites_cart = hierarchy.atoms().extract_xyz()
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
 
-
   add_terminal_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
                          ppf.geometry_restraints_manager(),
                          use_capping_hydrogens=use_capping_hydrogens,
                          append_to_end_of_model=append_to_end_of_model,
+                         original_hierarchy=original_hierarchy,
                          verbose=verbose,
                         ) # in place
   ppf.all_chain_proxies.pdb_hierarchy.atoms().set_chemical_element_simple_if_necessary()
@@ -515,6 +615,7 @@ def run(pdb_filename=None,
         pdb_hierarchy=None,
         crystal_symmetry=None,
         model_completion=True,
+        original_pdb_filename=None,
         ):
   #
   # function as be used in two main modes
@@ -549,14 +650,17 @@ def run(pdb_filename=None,
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             params=params,
                                           )
-  ppf = complete_pdb_hierarchy(ppf.all_chain_proxies.pdb_hierarchy,
-                               ppf.geometry_restraints_manager(),
-                               use_capping_hydrogens=use_capping_hydrogens,
-                               append_to_end_of_model=True,
-                               pdb_filename=pdb_filename,
-                               pdb_inp=ppf.all_chain_proxies.pdb_inp,
-                               verbose=False,
-                             )
+  ppf = complete_pdb_hierarchy(
+    ppf.all_chain_proxies.pdb_hierarchy,
+    ppf.geometry_restraints_manager(),
+    use_capping_hydrogens=use_capping_hydrogens,
+    append_to_end_of_model=True, # needed for clustering code and Molprobity
+    pdb_filename=pdb_filename,   # used just for naming of debug output
+    pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why?
+    original_pdb_filename=original_pdb_filename, # used to define breaks in
+                                                 # main chain for capping
+    verbose=False,
+  )
   if pdb_filename:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
@@ -565,7 +669,6 @@ def run(pdb_filename=None,
       fname,
     )
   return ppf.all_chain_proxies.pdb_hierarchy
-
 
 def display_hierarchy_atoms(hierarchy, n=5):
   #print '-'*80
@@ -578,7 +681,7 @@ if __name__=="__main__":
     def _boolean(s):
       if s.lower() in ['1', 'true']: return True
       elif s.lower() in ['0', 'false']: return False
-      else: assert 0
+      else: return s
     rc = {arg.split('=')[0] : _boolean(arg.split('=')[1])}
     return rc
   args = sys.argv[1:]
@@ -604,4 +707,5 @@ if __name__=="__main__":
     #print '='*80
     display_hierarchy_atoms(rc)
     assert 0, 'FINISHED TESTING'
+  print 'run',args,kwds
   run(*tuple(args), **kwds)
