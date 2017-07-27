@@ -15,8 +15,8 @@ from qrefine.utils import hierarchy_utils
 qr_repo_parent_env = 'QR_REPO_PARENT'
 qr_repo_parent = os.environ.get(qr_repo_parent_env, None)
 
-qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests = os.path.join(qrefine, "tests","unit")
+qrefine_d = libtbx.env.find_in_repositories("qrefine")
+qr_unit_tests = os.path.join(qrefine_d, "tests", "unit")
 
 pdbs = {'short_gap' : '''
 CRYST1   51.603   51.675   51.797 109.94 108.48 110.02 P 1
@@ -268,6 +268,61 @@ ATOM     91  H   GLY A  99      10.505   7.607  21.565  1.00 80.00           H
 ATOM     92  HA2 GLY A  99      12.210   7.256  23.832  1.00 80.00           H
 ATOM     93  HA3 GLY A  99      11.525   8.746  23.181  1.00 80.00           H
 ATOM     94  HXT GLY A  99       8.983   6.901  23.568  1.00 80.00           H
+''',
+  '2ona_short' : '''
+CRYST1  114.000   56.292   72.397  90.00  90.00  90.00 P 1
+SCALE1      0.008772  0.000000  0.000000        0.00000
+SCALE2      0.000000  0.017764  0.000000        0.00000
+SCALE3      0.000000  0.000000  0.013813        0.00000
+ATOM    165  N   MET C   1      14.152   2.166  -0.478  1.00 15.83           N
+ATOM    166  CA  MET C   1      15.414   1.757  -0.009  1.00 17.63           C
+ATOM    167  C   MET C   1      15.735   2.284   1.263  1.00 16.04           C
+ATOM    168  O   MET C   1      15.707   3.281   1.413  1.00 16.36           O
+ATOM    169  CB  MET C   1      16.620   2.011  -1.087  1.00 18.45           C
+ATOM    170  CG  MET C   1      16.159   1.909  -2.489  1.00 19.74           C
+ATOM    171  SD  MET C   1      17.429   2.249  -3.647  1.00 23.51           S
+ATOM    172  CE  MET C   1      18.248   0.458  -3.569  1.00 20.93           C
+ATOM    173  H1  MET C   1      13.895   1.827  -1.399  0.00 15.83           H
+ATOM    174  H2  MET C   1      13.445   1.937   0.155  0.00 15.83           H
+ATOM    175  H3  MET C   1      14.143   3.214  -0.522  0.00 15.83           H
+ATOM    176  HA  MET C   1      15.333   0.490  -0.011  0.00 17.63           H
+ATOM    177  HB2 MET C   1      16.810   3.090  -0.817  0.00 18.45           H
+ATOM    178  HB3 MET C   1      17.426   1.461  -0.916  0.00 18.45           H
+ATOM    179  HG2 MET C   1      15.631   1.057  -2.711  0.00 19.74           H
+ATOM    180  HG3 MET C   1      15.340   2.800  -2.721  0.00 19.74           H
+ATOM    181  HE1 MET C   1      19.100   0.489  -3.948  0.00 20.93           H
+ATOM    182  HE2 MET C   1      18.238   0.239  -2.466  0.00 20.93           H
+ATOM    183  HE3 MET C   1      17.540  -0.167  -4.039  0.00 20.93           H
+ATOM    184  N   VAL C   2      16.257   1.376   2.152  1.00 15.45           N
+ATOM    185  CA  VAL C   2      16.718   1.803   3.523  1.00 13.04           C
+ATOM    186  C   VAL C   2      17.869   1.072   3.958  1.00 13.01           C
+ATOM    187  O   VAL C   2      17.993  -0.053   3.718  1.00 14.93           O
+ATOM    188  CB  VAL C   2      15.419   1.470   4.437  1.00 13.15           C
+ATOM    189  CG1 VAL C   2      15.836   1.829   5.758  1.00 14.23           C
+ATOM    190  CG2 VAL C   2      14.183   2.221   3.883  1.00 10.68           C
+ATOM    191  H   VAL C   2      16.309   0.427   2.022  0.00 15.45           H
+ATOM    192  HA  VAL C   2      16.792   2.913   3.458  0.00 13.04           H
+ATOM    193  HB  VAL C   2      15.364   0.400   4.385  0.00 13.15           H
+ATOM    194 HG11 VAL C   2      14.883   1.588   6.649  0.00 14.23           H
+ATOM    195 HG12 VAL C   2      16.739   1.495   6.255  0.00 14.23           H
+ATOM    196 HG13 VAL C   2      15.814   3.066   5.872  0.00 14.23           H
+ATOM    197 HG21 VAL C   2      13.371   1.925   4.711  0.00 10.68           H
+ATOM    198 HG22 VAL C   2      14.338   3.199   3.993  0.00 10.68           H
+ATOM    199 HG23 VAL C   2      13.911   1.843   3.055  0.00 10.68           H
+ATOM    200  N   GLY C   3      18.880   1.891   4.469  1.00 12.47           N
+ATOM    201  CA  GLY C   3      20.087   1.084   4.948  1.00 11.62           C
+ATOM    202  C   GLY C   3      20.572   1.927   5.959  1.00 12.37           C
+ATOM    203  O   GLY C   3      20.540   3.143   6.238  1.00 11.90           O
+ATOM    204  H   GLY C   3      18.832   2.730   4.574  0.00 12.47           H
+ATOM    205  HA2 GLY C   3      19.858   0.168   5.145  0.00 11.62           H
+ATOM    206  HA3 GLY C   3      20.801   1.122   4.102  0.00 11.62           H
+ATOM    207  N   GLY C   4      21.647   0.940   7.016  1.00 13.71           N
+ATOM    208  CA  GLY C   4      22.303   1.777   8.031  1.00 12.70           C
+ATOM    209  C   GLY C   4      23.367   1.000   8.506  1.00 13.38           C
+ATOM    210  O   GLY C   4      23.465  -0.397   8.245  1.00 10.64           O
+ATOM    211  H   GLY C   4      21.543   0.170   6.750  0.00 13.71           H
+ATOM    212  HA2 GLY C   4      22.533   2.649   7.724  0.00 12.70           H
+ATOM    213  HA3 GLY C   4      21.527   1.870   8.830  0.00 12.70           H
 ''',
         }
 
@@ -607,11 +662,34 @@ def test_short_gap():
   print result_file
   assert result_size==28
 
+def test_original_pdb():
+  f=file('test_original_pdb.pdb', 'wb')
+  f.write(pdbs['2ona_short'])
+  f.close()
+  cmd = 'phenix.python %s %s %s %s' % (
+    os.path.join(qrefine_d, 'completion.py'),
+    'test_original_pdb.pdb',
+    'model_completion=0',
+    'original_pdb_filename=%s' % os.path.join(qrefine_d,
+                                              'tests',
+                                              'unit',
+                                              'charmm_pdbs',
+                                              '2ona.pdb')
+    )
+  print cmd
+  pdb_inp = pdb.input('test_original_pdb.pdb')
+  assert len(pdb_inp.atoms())==49
+  pdb_inp = pdb.input('test_original_pdb_capping.pdb')
+  assert len(pdb_inp.atoms())==50
+
 def run(prefix = "tst_12"):
   """
   Exercise structure preparation including charge, capping, completion
   """
   tests = [
+    [test_original_pdb, 1],
+  ]
+  juk = [
     [test_short_gap, 1],
     [test_GLY_terminal_and_alt_loc, 1],
     [test_PRO_terminal_and_alt_loc, 1],
@@ -677,7 +755,7 @@ def run(prefix = "tst_12"):
 if(__name__ == "__main__"):
   t0 = time.time()
   prefix = "tst_12"
-  if(0):
+  if(1):
     run(prefix)
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
