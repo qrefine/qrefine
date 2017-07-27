@@ -316,10 +316,10 @@ def run(cmdline, log):
     #  raise Sorry("Only P1 is supported.")
     cmdline.working_phil.show(out=log, prefix="   ")
     fmodel = create_fmodel(cmdline=cmdline, log=log)
-    fragment_manager = create_fragment_manager(
-      params           = params,
-      pdb_hierarchy    = model.pdb_hierarchy,
-      crystal_symmetry = cmdline.crystal_symmetry)
+#    fragment_manager = create_fragment_manager(
+#      params           = params,
+#      pdb_hierarchy    = model.pdb_hierarchy,
+#      crystal_symmetry = cmdline.crystal_symmetry)
     geometry_rmsd_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd).geometry_restraints_manager
@@ -352,6 +352,10 @@ def run(cmdline, log):
     print >> log, "***********************************************************\n"
     start_fmodel = fmodel
     start_ph = None # is it used anywhere? I don't see where it is used!
+  fragment_manager = create_fragment_manager(
+    params           = params,
+    pdb_hierarchy    = model.pdb_hierarchy,
+    crystal_symmetry = cmdline.crystal_symmetry)
   restraints_manager = create_restraints_manager(
     cmdline          = cmdline,
     model            = model)
