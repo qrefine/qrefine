@@ -252,7 +252,8 @@ class fragments(object):
         cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
           crystal_symmetry=self.super_cell_cs)
 
-def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
+def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index, 
+                                       original_pdb_filename=None):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   fragment_hierarchy = fragment_extracts.pdb_hierarchy_super.select(
     fragment_selection)
@@ -263,7 +264,8 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
                       crystal_symmetry=fragment_extracts.super_cell_cs,
-                      model_completion=False)
+                      model_completion=False,
+                      original_pdb_filename=original_pdb_filename)
   ##for debugging
   if(0):  ## for degugging
     fragment_hierarchy.write_pdb_file(

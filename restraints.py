@@ -102,8 +102,9 @@ class from_qm(object):
       from fragment import write_mm_charge_file
       #
       qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
-                                      fragment_extracts=self.fragment_extracts,
-                                      index=index)
+                          fragment_extracts=self.fragment_extracts,
+                          index=index,
+                          original_pdb_filename=os.path.abspath(self.file_name))
       #
       qm_charge = charge(fragment_extracts=self.fragment_extracts,
                                       index=index)
