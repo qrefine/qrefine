@@ -70,7 +70,6 @@ def _add_atom_to_residue_group(atom, ag):
     if c==ag.parent().parent().id:
       break
   atom.tmp = i
-  #for atom in rg.atoms(): print atom.format_atom_record()
   return rg
 
 def add_n_terminal_hydrogens_to_atom_group(ag,
@@ -135,6 +134,7 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
     atom.xyz = rh3[i]
     atom.occ = n.occ
     atom.b = n.b
+    atom.segid = ' '*4
     if append_to_end_of_model and i+1==number_of_hydrogens:
       rg = _add_atom_to_residue_group(atom, ag)
       rc.append(rg)
@@ -224,6 +224,7 @@ def add_c_terminal_oxygens_to_atom_group(ag,
       atom.element = atom_element
       atom.occ = c.occ
       atom.b = c.b
+      atom.segid = ' '*4
       atom.xyz = ro2[i]
       if append_to_end_of_model:
         rg = _add_atom_to_residue_group(atom, ag)
@@ -291,6 +292,7 @@ def add_cys_hg_to_atom_group(ag,
   atom.element = atom_element
   atom.occ = sg.occ
   atom.b = sg.b
+  atom.segid = ' '*4
   atom.xyz = ro2[0]
   if append_to_end_of_model:
     rg = _add_atom_to_residue_group(atom, ag)
@@ -315,6 +317,7 @@ def iterate_over_threes(hierarchy,
                         geometry_restraints_manager,
                         use_capping_hydrogens=False,
                         append_to_end_of_model=False,
+                        verbose=False,
                         ):
   atoms = hierarchy.atoms()
   ###
@@ -324,6 +327,7 @@ def iterate_over_threes(hierarchy,
       break
     return atom.parent().parent()
   ###
+  additional_hydrogens=[]
   for three in hierarchy_utils.generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,
@@ -510,14 +514,13 @@ def complete_pdb_hierarchy(hierarchy,
       raise Sorry('')
   from mmtbx.building import extend_sidechains
   params=None
+  original_hierarchy = None
   if use_capping_hydrogens:
     params = hierarchy_utils.get_pdb_interpretation_params()
     params.link_distance_cutoff=1.8 # avoid linking across a single missing AA
     if original_pdb_filename:
       original_pdb_inp = iotbx.pdb.input(original_pdb_filename)
       original_hierarchy = original_pdb_inp.construct_hierarchy()
-    else:
-      original_hierarchy = None
   if debug:
     output = hierarchy_utils.write_hierarchy(pdb_filename,
                                              pdb_inp,
@@ -605,7 +608,9 @@ def complete_pdb_hierarchy(hierarchy,
                         ) # in place
   ppf.all_chain_proxies.pdb_hierarchy.atoms().set_chemical_element_simple_if_necessary()
   ppf.all_chain_proxies.pdb_hierarchy.sort_atoms_in_place()
-  display_hierarchy_atoms(ppf.all_chain_proxies.pdb_hierarchy)
+  #display_hierarchy_atoms(ppf.all_chain_proxies.pdb_hierarchy)
+  #ppf.all_chain_proxies.pdb_hierarchy.atoms_reset_serial()
+  #ppf.all_chain_proxies.pdb_hierarchy.atoms().reset_i_seq()
   return ppf
 
 def run(pdb_filename=None,
