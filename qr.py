@@ -41,6 +41,8 @@ import restraints
 import cluster_restraints
 import results
 from qrefine.super_cell import expand
+from mmtbx import model_statistics
+
 master_params_str ="""
 
 max_atoms = 15000
@@ -68,48 +70,50 @@ basis = "sto-3g"
 .type = str
 
 refine {
-sf_algorithm = *direct fft
-.type = choice(multi=False)
-refinement_target_name = *ml ls_wunit_k1
-.type = choice
-mode = opt *refine
-.type = choice(multi=False)
-number_of_macro_cycles=1
-.type = int
-number_of_weight_search_cycles=50
-.type = int
-number_of_micro_cycles=50
-.type = int
-data_weight=None
-.type = float
-max_iterations = 50
-.type = int
-line_search = True
-.type = bool
-stpmax = 1.e9
-.type = float
-gradient_only = False
-.type = bool
-update_all_scales = True
-.type = bool
-refine_sites = True
-.type = bool
-refine_adp = False
-.type = bool
-restraints_weight_scale = 1.0
-.type = float
-shake_sites = False
-.type = bool
-use_convergence_test = True
-.type = bool
-max_bond_rmsd = 0.03
-.type = float
-max_r_work_r_free_gap = 5.0
-.type = float
-r_tolerance = 0.001
-.type = float
-rmsd_tolerance = 0.01
-.type = float
+  dry_run=False
+    .type = bool
+  sf_algorithm = *direct fft
+    .type = choice(multi=False)
+  refinement_target_name = *ml ls_wunit_k1
+    .type = choice
+  mode = opt *refine
+    .type = choice(multi=False)
+  number_of_macro_cycles=1
+    .type = int
+  number_of_weight_search_cycles=50
+    .type = int
+  number_of_micro_cycles=50
+    .type = int
+  data_weight=None
+    .type = float
+  max_iterations = 50
+    .type = int
+  line_search = True
+    .type = bool
+  stpmax = 1.e9
+    .type = float
+  gradient_only = False
+    .type = bool
+  update_all_scales = True
+    .type = bool
+  refine_sites = True
+    .type = bool
+  refine_adp = False
+    .type = bool
+  restraints_weight_scale = 1.0
+    .type = float
+  shake_sites = False
+    .type = bool
+  use_convergence_test = True
+    .type = bool
+  max_bond_rmsd = 0.03
+    .type = float
+  max_r_work_r_free_gap = 5.0
+    .type = float
+  r_tolerance = 0.001
+    .type = float
+  rmsd_tolerance = 0.01
+    .type = float
 }
 
 parallel_params {
@@ -147,7 +151,7 @@ def create_fmodel(cmdline, log):
   if(cmdline.params.refine.update_all_scales):
     fmodel.update_all_scales(remove_outliers=False)
     fmodel.show(show_header=False, show_approx=False)
-  print >> log, "r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free())
+  print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free())
   log.flush()
   return fmodel
 
@@ -326,6 +330,16 @@ def run(cmdline, log):
     cctbx_rm_bonds_rmsd = calculator.get_bonds_angles_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = fmodel.xray_structure)
+    # Show full model statistics
+    sel = ~model.xray_structure.hd_selection()
+    mso = model_statistics.geometry(
+      pdb_hierarchy      = model.pdb_hierarchy.select(sel),
+      restraints_manager = geometry_rmsd_manager.select(sel),
+      molprobity_scores  = True)
+    mso.show(lowercase=True, out=log)
+    #
+    if(params.refine.dry_run): return
+    #
     results_manager = results.manager(
       r_work                  = fmodel.r_work(),
       r_free                  = fmodel.r_free(),
