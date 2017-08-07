@@ -178,3 +178,17 @@ def add_hydrogens_using_ReadySet(pdb_filename,
     f.close()
   else:
     return rc['model_hierarchy']
+
+def attempt_to_squash_alt_loc(hierarchy):
+  indices = hierarchy.altloc_indices()
+  altlocs = filter(None,indices)
+  if len(altlocs)==0: return None
+  squash_hierarchy = hierarchy.deep_copy()
+  for rg in squash_hierarchy.residue_groups():
+    if len(rg.atom_groups())==1: continue
+    ags = rg.atom_groups()
+    detached_ag = ags[1].detached_copy()
+    for atom in detached_ag.atoms():
+      ags[0].append_atom(atom.detached_copy())
+    rg.remove_atom_group(ags[1])
+  return squash_hierarchy

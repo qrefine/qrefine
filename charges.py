@@ -125,7 +125,6 @@ def calculate_residue_charge(rg,
                              inter_residue_bonds=None,
                              verbose=False,
                              ):
-  #verbose=1
   if verbose: print '-'*80
   def _terminal(names, check):
     for name in check:
@@ -378,20 +377,27 @@ def get_partial_point_charges(rg, hetero_charges=None):
 def calculate_pdb_hierarchy_charge(hierarchy,
                                    hetero_charges=None,
                                    inter_residue_bonds=None,
+                                   assert_no_alt_loc=True,
                                    check=None,
                                    verbose=False,
                                    ):
   charge = 0
   if inter_residue_bonds is None: inter_residue_bonds=[]
-  for residue in hierarchy_utils.generate_residue_groups(hierarchy,
-                                                         assert_no_alt_loc=True,
-                                                         exclude_water=True,
-                                                     ):
+  if assert_no_alt_loc:
+    # see if we can squash into a single conf.
+    hierarchy = hierarchy_utils.attempt_to_squash_alt_loc(hierarchy)
+    assert hierarchy
+  for residue in hierarchy_utils.generate_residue_groups(
+      hierarchy,
+      assert_no_alt_loc=assert_no_alt_loc,
+      exclude_water=True,
+      ):
     #for atom in residue.atoms(): print atom.quote()
     validate_all_atoms(residue)
     tmp, rc = calculate_residue_charge(residue,
                                        hetero_charges=hetero_charges,
                                        inter_residue_bonds=inter_residue_bonds,
+                                       assert_no_alt_loc=assert_no_alt_loc,
                                        verbose=verbose,
                                       )
     if check:
@@ -427,7 +433,7 @@ def get_total_charge_from_pdb(pdb_filename=None,
                               inter_residue_bonds=None,
                               verbose=False,
                               check = None,
-                                   ):
+  ):
   ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                           raw_records=raw_records,
                                           pdb_inp=pdb_inp,
@@ -644,9 +650,10 @@ def run(pdb_filename):
                                            check=None, #data,
                                            verbose=False,
   )
- # print "total_charge",total_charge
+  return total_charge
 
 if __name__=="__main__":
   args = sys.argv[1:]
   del sys.argv[1:]
-  run(*tuple(args))
+  total_charge = run(*tuple(args))
+  print "total_charge",total_charge
