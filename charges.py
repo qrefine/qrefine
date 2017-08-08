@@ -386,7 +386,7 @@ def calculate_pdb_hierarchy_charge(hierarchy,
   if assert_no_alt_loc:
     # see if we can squash into a single conf.
     hierarchy = hierarchy_utils.attempt_to_squash_alt_loc(hierarchy)
-    assert hierarchy
+    if hierarchy is None: raise Sorry('too many alt locs to squash')
   for residue in hierarchy_utils.generate_residue_groups(
       hierarchy,
       assert_no_alt_loc=assert_no_alt_loc,
