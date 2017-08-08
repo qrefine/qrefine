@@ -182,7 +182,8 @@ def add_hydrogens_using_ReadySet(pdb_filename,
 def attempt_to_squash_alt_loc(hierarchy):
   indices = hierarchy.altloc_indices()
   altlocs = filter(None,indices)
-  if len(altlocs)==0: return None
+  if len(altlocs)==0: return hierarchy
+  elif len(altlocs)>1: return None
   squash_hierarchy = hierarchy.deep_copy()
   for rg in squash_hierarchy.residue_groups():
     if len(rg.atom_groups())==1: continue
