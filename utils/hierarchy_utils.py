@@ -55,8 +55,15 @@ def generate_residues_via_conformer(hierarchy,
               print '    residue: resname="%s" resid="%s"' % (
                 residue.resname, residue.resid())
           if verbose: print '      residue class : %s' % get_class(residue.resname)
-          if get_class(residue.resname) not in ["common_amino_acid"]:
-            continue
+          if get_class(residue.resname) not in ["common_amino_acid",
+                                                'modified_amino_acid',
+                                              ]:
+            # this needs to be moved to cctbx get_class
+            if residue.resname not in ['DVA',
+                                       'DLE',
+                                       'ETA', # COOH terminal - not in modified
+                                       ]:
+              continue
           yield residue
 
 def generate_residue_groups(hierarchy,

@@ -342,9 +342,16 @@ def iterate_over_threes(hierarchy,
       for i in range(len(three)):
         rg = get_residue_group(three[i])
         add_cys_hg_to_residue_group(rg)
-    if three.start:
+    # check if N-term residue - FVA
+    n_term_done = False
+    if three[0].resname in ['FVA',
+                            ]:
+      n_term_done = True
       ptr+=1
-      assert ptr==1
+      assert ptr==1, 'ptr (%d) is not 1' % ptr
+    if three.start and not n_term_done:
+      ptr+=1
+      assert ptr==1, 'ptr (%d) is not 1' % ptr
       rg = get_residue_group(three[0])
       rc = add_n_terminal_hydrogens_to_residue_group(
         rg,
@@ -353,9 +360,15 @@ def iterate_over_threes(hierarchy,
       )
       if rc: additional_hydrogens.append(rc)
       #hierarchy.reset_i_seq_if_necessary()
-    if three.end:
+    c_term_done = False
+    if three[-1].resname in ['ETA',
+                             ]:
+      c_term_done = True
       ptr-=1
-      assert ptr==0
+      assert ptr==0, 'ptr (%d) is not 0' % ptr
+    if three.end and not c_term_done:
+      ptr-=1
+      assert ptr==0, 'ptr (%d) is not 0' % ptr
       rg = get_residue_group(three[-1])
       rc = add_c_terminal_oxygens_to_residue_group(
         rg,

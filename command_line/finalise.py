@@ -67,7 +67,9 @@ def run(args, log):
     master_params = master_params(),
     #validated     = validated,
   )
+  del sys.argv[1:]
   model_completion=True
+  # this is a pour plumbing job
   if params.action=='capping': model_completion=False
   finalise.run(params.model_file_name,
                model_completion=model_completion,
