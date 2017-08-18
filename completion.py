@@ -611,7 +611,6 @@ def complete_pdb_hierarchy(hierarchy,
                                            )
     sites_cart = hierarchy.atoms().extract_xyz()
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
-
   add_terminal_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
                          ppf.geometry_restraints_manager(),
                          use_capping_hydrogens=use_capping_hydrogens,
@@ -631,6 +630,7 @@ def run(pdb_filename=None,
         crystal_symmetry=None,
         model_completion=True,
         original_pdb_filename=None,
+        append_to_end_of_model=True,
         ):
   #
   # function as be used in two main modes
@@ -669,7 +669,8 @@ def run(pdb_filename=None,
     ppf.all_chain_proxies.pdb_hierarchy,
     ppf.geometry_restraints_manager(),
     use_capping_hydrogens=use_capping_hydrogens,
-    append_to_end_of_model=True, # needed for clustering code and Molprobity
+    append_to_end_of_model=append_to_end_of_model, # needed for clustering 
+                                                   # code and Molprobity
     pdb_filename=pdb_filename,   # used just for naming of debug output
     pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why?
     original_pdb_filename=original_pdb_filename, # used to define breaks in

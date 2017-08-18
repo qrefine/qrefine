@@ -466,9 +466,8 @@ def test_capping_of_C_terminal():
   f=file(tf,'wb')
   f.write(pdbs['c_terminal_capping'])
   f.close()
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  cmd = 'iotbx.python %s/qr-core/finalise.py model_completion=False %s' % (
-    qr_repo_parent,
+  cmd = 'iotbx.python %s model_completion=False %s' % (
+    os.path.join(qrefine_d, 'finalise.py'),
     tf,
     )
   easy_run.call(cmd)
@@ -487,10 +486,13 @@ def test_helix():
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
+  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
   assert charge==0, 'charge of helix should be zero not %s' % charge
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
+  cmd = 'iotbx.python %s %s' % (
+    os.path.join(qrefine_d, 'completion.py'),
+    tf)
+  cmd += ' append_to_end_of_model=0'
+  print cmd
   easy_run.call(cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
@@ -501,7 +503,7 @@ def test_helix():
   assert not must_find
   pdb_inp=pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
+  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
   assert charge==1, 'charge of helix should be one not %s' % charge
 
 def test_charge_for_charmm_pdbs(only_i=None):
@@ -651,8 +653,8 @@ def test_short_gap():
   f=file('test_short_gap.pdb', 'wb')
   f.write(pdbs['short_gap'])
   f.close()
-  cmd = "phenix.python %s/qr-core/completion.py %s model_completion=False" % (
-    qr_repo_parent,
+  cmd = "phenix.python %s %s model_completion=False" % (
+    os.path.join(qrefine_d, 'completion.py'),
     'test_short_gap.pdb',
   )
   print cmd
@@ -689,15 +691,15 @@ def run(prefix = "tst_12"):
   """
   tests = [
     [test_original_pdb, 1],
+    [test_short_gap, 1],
+    [test_helix, 1],
+    [test_capping_of_C_terminal, 1],
   ]
   juk = [
-    [test_short_gap, 1],
     [test_GLY_terminal_and_alt_loc, 1],
     [test_PRO_terminal_and_alt_loc, 1],
-    [test_capping_of_C_terminal, 1],
     [test_charge_of_neutral_terminal, 1],
     [test_qxyz_non_zero, 1],
-    [test_helix, 1],
     [test_qxyz_xyzq, 1],
     [test_1yjp_charge, 1],
     [test_charge_for_charmm_pdbs, 80],
@@ -706,9 +708,8 @@ def run(prefix = "tst_12"):
     [test_GLY_terminal_charge, 1],
     [test_PRO_terminal_charge, 1],
     ]
-  if 0:
+  if 1:
     tests = [
-      [test_short_gap, 1],
       ]
   def get_test(i, j):
     func = tests[i][0]
