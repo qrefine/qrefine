@@ -677,6 +677,7 @@ def test_original_pdb():
                                               '2ona.pdb')
     )
   print cmd
+  rc = easy_run.go(cmd)
   pdb_inp = pdb.input('test_original_pdb.pdb')
   assert len(pdb_inp.atoms())==49
   pdb_inp = pdb.input('test_original_pdb_capping.pdb')
