@@ -224,99 +224,96 @@ def refine(fmodel,
       rmsd_tolerance = params.refine.rmsd_tolerance * 100)
     print >> results.log, "\ninteracting pairs number:  ", \
       calculator.restraints_manager.fragments.interacting_pairs
-  #
-  # Optimal weight search loop
-  #
+  weight_cycle = weight_cycle_start
   print >> results.log, "Start:"
   results.show(prefix="  ")
-  print >> results.log, "Optimal weight search:"
-  fmodel_copy = fmodel.deep_copy()
-  for weight_cycle in xrange(weight_cycle_start,
-                             params.refine.number_of_weight_search_cycles+1):
-    if((weight_cycle!=1 and weight_cycle==weight_cycle_start) or
-       (refine_cycle_start is not None)):
-      fmodel = calculator.fmodel.deep_copy()
-    else:
-      fmodel = fmodel_copy.deep_copy()
-    if(refine_cycle_start is not None):
-      print >> results.log, \
-        "Found the optimal weight. Proceed to further refinement with this weight."
-      break
-    calculator.reset_fmodel(fmodel = fmodel)
-    if(clustering):
-      cluster_qm_update.re_clustering(calculator)
-    # Calculate weight
-    try:
-      calculator.calculate_weight()
-    except Exception as e:
-      print >> results.log, e
-      raise Sorry("Failed to get weight")
-    # Collect state
-    rst_data.write_rst_file(
-      rst_file     = rst_file,
-      refine_cycle = None,
-      weight_cycle = weight_cycle,
-      fmodel       = fmodel,
-      weights      = calculator.weights,
-      conv_test    = conv_test,
-      results      = results)
-    # Run minimization
-    n_fev = 0
-    for mc in xrange(params.refine.number_of_macro_cycles):
-      minimized = run_minimize(calculator=calculator, params=params,
-        results=results)
+  if(refine_cycle_start is not None):
+    print >> results.log, \
+          "Found the optimal weight. Proceed to further refinement with this weight."
+    fmodel = calculator.fmodel.deep_copy()
+  else:
+    print >> results.log, "Optimal weight search:"
+    fmodel_copy = fmodel.deep_copy()
+    for weight_cycle in xrange(weight_cycle_start,
+                               params.refine.number_of_weight_search_cycles+1):
+      if((weight_cycle!=1 and weight_cycle==weight_cycle_start)):
+        fmodel = calculator.fmodel.deep_copy()
+      else:
+        fmodel = fmodel_copy.deep_copy()
       calculator.reset_fmodel(fmodel = fmodel)
-      calculator.update_fmodel()
-      n_fev += minimized.number_of_function_and_gradients_evaluations
-    # collect
+      if(clustering):
+        cluster_qm_update.re_clustering(calculator)
+      # Calculate weight
+      try:
+        calculator.calculate_weight()
+      except Exception as e:
+        print >> results.log, e
+        raise Sorry("Failed to get weight")
+      # Collect state
+      rst_data.write_rst_file(
+        rst_file     = rst_file,
+        refine_cycle = None,
+        weight_cycle = weight_cycle,
+        fmodel       = fmodel,
+        weights      = calculator.weights,
+        conv_test    = conv_test,
+        results      = results)
+      # Run minimization
+      n_fev = 0
+      for mc in xrange(params.refine.number_of_macro_cycles):
+        minimized = run_minimize(calculator=calculator, params=params,
+          results=results)
+        calculator.reset_fmodel(fmodel = fmodel)
+        calculator.update_fmodel()
+        n_fev += minimized.number_of_function_and_gradients_evaluations
+      # collect
+      run_collect(
+        n_fev                 = n_fev,
+        results               = results,
+        fmodel                = fmodel,
+        calculator            = calculator,
+        geometry_rmsd_manager = geometry_rmsd_manager)
+      # Dump model at this step
+      results.write_pdb_file(
+        output_folder_name = params.output_folder_name,
+        output_file_name   = str(weight_cycle)+"_weight_cycle.pdb")
+      # show this step
+      results.show(prefix="  ")
+      if(conv_test.is_converged(fmodel=fmodel, restraints_weight_scale =
+         calculator.weights.restraints_weight_scale)):
+        break
+      calculator.weights.adjust_restraints_weight_scale(
+        fmodel                = fmodel,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        max_bond_rmsd         = params.refine.max_bond_rmsd)
+      calculator.weights.\
+          add_restraints_weight_scale_to_restraints_weight_scales()
+    print >> results.log, "At end of weight search:"
+    results.show(prefix="  ")
+    #
+    # Done with weight search. Now get best result and refine it further.
+    #
+    xrs_best, dummy, dummy, wsc_best = results.choose_best()
+    fmodel.update_xray_structure(
+      xray_structure = xrs_best,
+      update_f_calc  = True,
+      update_f_mask  = True)
+    fmodel.update_all_scales(remove_outliers=False)
+    calculator.update_restraints_weight_scale(restraints_weight_scale=wsc_best)
+    ####
     run_collect(
-      n_fev                 = n_fev,
+      n_fev                 = 0,
       results               = results,
       fmodel                = fmodel,
       calculator            = calculator,
       geometry_rmsd_manager = geometry_rmsd_manager)
-    # Dump model at this step
-    results.write_pdb_file(
-      output_folder_name = params.output_folder_name,
-      output_file_name   = str(weight_cycle)+"_weight_cycle.pdb")
-    #
-    if(conv_test.is_converged(fmodel=fmodel, restraints_weight_scale =
-       calculator.weights.restraints_weight_scale)):
-      break
-    calculator.weights.adjust_restraints_weight_scale(
-      fmodel                = fmodel,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      max_bond_rmsd         = params.refine.max_bond_rmsd)
+    ####
+    # show best
+    print >> results.log, "At start of further refinement:"
     results.show(prefix="  ")
-    if(params.refine.mode == "refine"):
-      calculator.weights.\
-        add_restraints_weight_scale_to_restraints_weight_scales()
-  print >> results.log, "At end of weight search:"
-  results.show(prefix="  ")
-  #
-  # Done with weight search. Now get best result and refine it further.
-  #
-  xrs_best, dummy, dummy, wsc_best = results.choose_best()
-  fmodel.update_xray_structure(
-    xray_structure = xrs_best,
-    update_f_calc  = True,
-    update_f_mask  = True)
-  fmodel.update_all_scales(remove_outliers=False)
-  calculator.update_restraints_weight_scale(restraints_weight_scale=wsc_best)
-  ####
-  run_collect(
-    n_fev                 = 0,
-    results               = results,
-    fmodel                = fmodel,
-    calculator            = calculator,
-    geometry_rmsd_manager = geometry_rmsd_manager)
-  ####
-  # show best
-  print >> results.log, "At start of further refinement:"
-  results.show(prefix="  ")
-  print >> results.log, "Start further refinement:"
-  if(refine_cycle_start is None): refine_cycle_start = 1
-  for refine_cycle in xrange(refine_cycle_start, 5+1):
+    print >> results.log, "Start further refinement:"
+    refine_cycle_start = 1
+  for refine_cycle in xrange(refine_cycle_start, 5+refine_cycle_start):
     calculator.reset_fmodel(fmodel=fmodel)
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
@@ -336,11 +333,6 @@ def refine(fmodel,
       calculator.reset_fmodel(fmodel = fmodel)
       calculator.update_fmodel()
       n_fev += minimized.number_of_function_and_gradients_evaluations
-    #for micro_cycle in xrange(params.number_of_macro_cycles):
-    #  minimized = run_minimize(calculator=calculator, params=params,
-    #    results=results)
-    #  calculator.update_fmodel()
-    #
     run_collect(
       n_fev                 = n_fev,
       results               = results,
@@ -357,8 +349,17 @@ def refine(fmodel,
         fmodel                = fmodel,
         geometry_rmsd_manager = geometry_rmsd_manager,
         max_bond_rmsd         = params.refine.max_bond_rmsd)
+  rst_data.write_rst_file(
+      rst_file     = rst_file,
+      refine_cycle = refine_cycle+1,
+      weight_cycle = weight_cycle,
+      fmodel       = fmodel,
+      weights      = calculator.weights,
+      conv_test    = conv_test,
+      results      = results)
   print >> results.log, "At end of further refinement:"
   results.show(prefix="  ")
+    
 
 def opt(fmodel,
         params,
@@ -374,6 +375,8 @@ def opt(fmodel,
       print >> results.log, "\n***********************************************************"
       print >> results.log, "restarts from micro_cycle: %d"%( micro_cycle_start)
       print >> results.log, "***********************************************************\n"
+      ## check the restart fmodel
+      fmodel = calculator.fmodel
   else:
     micro_cycle_start = 1
   try:
@@ -387,7 +390,7 @@ def opt(fmodel,
     print >> results.log, "\ninteracting pairs number:  ",\
       calculator.restraints_manager.fragments.interacting_pairs
   results.show(prefix="start")
-  for micro_cycle in xrange(micro_cycle_start, params.refine.number_of_micro_cycles+1):
+  for micro_cycle in xrange(micro_cycle_start, params.refine.number_of_micro_cycles+micro_cycle_start):
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
     conv_test = convergence(fmodel=calculator.fmodel, params=params)
@@ -416,3 +419,5 @@ def opt(fmodel,
        sites_cart = fmodel.xray_structure.sites_cart())):
       print >> results.log, " Convergence at micro_cycle:", micro_cycle
       break
+  rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1, fmodel=fmodel,
+        results=results)

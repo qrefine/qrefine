@@ -227,7 +227,14 @@ def run1():
                 flex.double(esW.gradients[0]))
   assert approx_equal(result, es.gradients[0])
 
-if(__name__ == "__main__"):
-  run1()
-  run2()
-  run3()
+
+if __name__ == '__main__':
+  t0 = time.time()
+  prefix = "tst_17"
+  if(1):
+    run1()
+    run2()
+    run3()
+    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  else:
+    print prefix + ":  Skipped    "

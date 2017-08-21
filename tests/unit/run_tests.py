@@ -74,7 +74,8 @@ def run():
     "tst_14.py",
     "tst_15.py",
     "tst_16.py",
-    "tst_17.py"
+    "tst_17.py",
+    "tst_18.py"
   ]
   for file_name in tests:
     easy_run.call("cctbx.python %s"%(
