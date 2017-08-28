@@ -289,7 +289,7 @@ def write_mm_charge_file(fragment_extracts, index):
     non_fragment_pdb_file = sub_working_folder + str(index) + "_mm.pdb"
     non_fragment_hierarchy.write_pdb_file(
       file_name=non_fragment_pdb_file,
-      crystal_symmetry=fragment_extracts.crystal_symmetry)
+      crystal_symmetry=fragment_extracts.super_cell_cs)
     pdb_hierarchy = fragment_extracts.pdb_hierarchy_super
     non_qm_edge_positions = fragment_utils.get_edge_atom_positions(
       pdb_hierarchy, non_fragment_hierarchy, charge_embed=True)
