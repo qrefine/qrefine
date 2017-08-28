@@ -4,6 +4,7 @@ import sys, time
 from qrefine import finalise
 import iotbx
 import mmtbx
+from mmtbx import utils
 
 log = sys.stdout
 

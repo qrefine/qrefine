@@ -21,6 +21,8 @@ default_ion_charges = {
 allowable_amino_acid_charges = {
   "ARG" : 1,
   "CYS" : 0,
+  'GLU' : -1,
+  'ASP' : -1,
   }
 charge_per_aa_polymer = {}
 hydrogens_per_aa_polymer = {}
@@ -135,23 +137,27 @@ def calculate_residue_charge(rg,
     return False
   def n_terminal(residue_name, atom_names):
     if residue_name in ["PRO"]:
-      check_names = [' H2 ',' H3 ']
+      check_names = [[' H2 ',' H3 '],
+                     [' H 1', ' H 2'], # CHARMM...
+                     [' HN1', ' HN2'], # BABEL...
+                     ]
     else:
-      check_names = [' H1 ',' H2 ',' H3 ']
-    rc = _terminal(atom_names, check_names)
-    if not rc and residue_name in ['PRO']: # CHARMM...
-      check_names = [' H 1', ' H 2']
-      rc = _terminal(atom_names, check_names)
-    if not rc and residue_name in ['PRO']: # BABEL...
-      check_names = [' HN1', ' HN2']
-      rc = _terminal(atom_names, check_names)
+      check_names = [[' H1 ',' H2 ',' H3 '],
+                     ]
+    for check_name in check_names:
+      rc = _terminal(atom_names, check_name)
+      if rc: break
     return rc
   def n_capping(residue_name, atom_names):
     if residue_name in ["PRO"]:
-      check_names = [' H2 ']
+      check_names = [[' H2 ']]
     else:
-      check_names = [' H1 ',' H2 ']
-    rc = _terminal(atom_names, check_names)
+      check_names = [[' H1 ',' H2 '],
+                     [' H  ',' H2 '], # from finalise
+                     ]
+    for check_name in check_names:
+      rc = _terminal(atom_names, check_name)
+      if rc: break
     if residue_name=='PRO' and rc:
       print residue_name
       print atom_names
@@ -174,7 +180,7 @@ def calculate_residue_charge(rg,
       if i_seq in inter_residue_bonds:
         return True
     return False
-
+  ############
   max_charge=1
   if assert_no_alt_loc:
     if len(rg.atom_groups())>1:
@@ -215,6 +221,8 @@ def calculate_residue_charge(rg,
   ag = rg.atom_groups()[0]
   charge = get_aa_charge(ag.resname)
   rc = get_aa_charge(ag.resname)
+  if ag.resname in ['GLU', 'ASP']: rc=-1 # reporting only
+  annot = ''
   if verbose:
     print '%s\nstarting charge: %s' % ('*'*80, charge)
   if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
@@ -240,17 +248,23 @@ def calculate_residue_charge(rg,
                                                       poly_hs,
                                                       diff_hs,
         )
+      annot += 'N-term. '
     elif nh3_terminal(atom_names):
       diff_hs-=1
       max_charge+=1
-      if verbose: print 'nh3_terminal'
+      if verbose: print 'nh3_terminal True'
+      annot += 'NH3-term. '
     elif nh2_terminal(atom_names):
       diff_hs-=1
       max_charge+=1
-      if verbose: print 'nh2_terminal'
+      if verbose: print 'nh2_terminal True'
+      annot += 'NH2-term. '
     elif n_capping(ag.resname, atom_names):
-      diff_hs-=2
-      if verbose: print 'n_capping'
+      diff_hs-=1
+      if verbose: print 'n_capping True'
+      annot += 'N-capp. '
+    else:
+      if verbose: print 'no N term'
     if c_terminal(atom_names):
       diff_hs-=1
       max_charge+=1
@@ -260,8 +274,8 @@ def calculate_residue_charge(rg,
                                                       poly_hs,
                                                       diff_hs,
                                                     )
-    elif c_capping(atom_names) and 0:
-      assert 0
+      annot += 'C-term. '
+    elif c_capping(atom_names):
       diff_hs-=1
       #max_charge+=1
       if verbose:
@@ -270,10 +284,14 @@ def calculate_residue_charge(rg,
                                                       poly_hs,
                                                       diff_hs,
                                                     )
+      annot += 'C-capp. '
+    else:
+      if verbose: print 'no C term'
     if covalent_bond(atom_i_seqs, inter_residue_bonds):
       diff_hs+=1
       if verbose:
         print 'covalent_bond',atom_i_seqs, inter_residue_bonds
+      annot += 'Coval. '
     if verbose:
       print 'residue charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                             poly_hs,
@@ -309,7 +327,7 @@ def calculate_residue_charge(rg,
                           "HM7",
                         ]:
       assert 0
-  return charge, rc
+  return charge, rc, annot
 
 def _get_restraints_from_resname(resname):
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
@@ -378,10 +396,12 @@ def calculate_pdb_hierarchy_charge(hierarchy,
                                    hetero_charges=None,
                                    inter_residue_bonds=None,
                                    assert_no_alt_loc=True,
+                                   list_charges=False,
                                    check=None,
                                    verbose=False,
                                    ):
   charge = 0
+  charges = []
   if inter_residue_bonds is None: inter_residue_bonds=[]
   if assert_no_alt_loc:
     # see if we can squash into a single conf.
@@ -392,14 +412,14 @@ def calculate_pdb_hierarchy_charge(hierarchy,
       assert_no_alt_loc=assert_no_alt_loc,
       exclude_water=True,
       ):
-    #for atom in residue.atoms(): print atom.quote()
     validate_all_atoms(residue)
-    tmp, rc = calculate_residue_charge(residue,
-                                       hetero_charges=hetero_charges,
-                                       inter_residue_bonds=inter_residue_bonds,
-                                       assert_no_alt_loc=assert_no_alt_loc,
-                                       verbose=verbose,
-                                      )
+    tmp, rc, annot = calculate_residue_charge(
+      residue,
+      hetero_charges=hetero_charges,
+      inter_residue_bonds=inter_residue_bonds,
+      assert_no_alt_loc=assert_no_alt_loc,
+      verbose=verbose,
+    )
     if check:
       print residue
       key = 'PRO%s' % residue.parent().id
@@ -411,8 +431,15 @@ def calculate_pdb_hierarchy_charge(hierarchy,
       if 1:
         print inter_residue_bonds
       assert abs(check[key]-tmp)<0.001
+      assert 0
+    if list_charges:
+      outl = residue.id_str()
+      for ag in residue.atom_groups():
+        outl += '%s ' % ag.resname
+      print 'CHARGE %s %2d (%2d) %s' % (outl, tmp, rc, annot)
+      charges.append([outl, tmp, annot])
     charge += tmp
-    if verbose:
+    if verbose: # or display_residue_charges:
       if tmp:
         outl = '-'*80
         outl += '\nNON-ZERO CHARGE current %2d base %2d total %2d' % (tmp,rc,charge)
@@ -424,6 +451,10 @@ def calculate_pdb_hierarchy_charge(hierarchy,
           outl += "\n%s" % atom.quote()
         outl += '\n%s' % ('-'*80)
         print outl
+  if list_charges:
+    print 'CHARGE',charge
+    charges.append(['Total', charge])
+    return charges
   return charge
 
 def get_total_charge_from_pdb(pdb_filename=None,
@@ -431,8 +462,9 @@ def get_total_charge_from_pdb(pdb_filename=None,
                               pdb_inp=None,
                               hetero_charges=None,
                               inter_residue_bonds=None,
-                              verbose=False,
+                              list_charges=False,
                               check = None,
+                              verbose=False,
   ):
   ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                           raw_records=raw_records,
@@ -457,6 +489,7 @@ def get_total_charge_from_pdb(pdb_filename=None,
     ppf.all_chain_proxies.pdb_hierarchy,
     hetero_charges=hetero_charges,
     inter_residue_bonds=inter_residue_bonds,
+    list_charges=list_charges,
     check=check,
     verbose=verbose,
   )
@@ -628,7 +661,9 @@ def get_inter_residue_bonds(ppf, verbose=False):
         #assert not verbose
   return inter_residue_bonds
 
-def run(pdb_filename):
+def run(pdb_filename,
+        list_charges=False,
+        verbose=False):
   #print "run",pdb_filename
   data = {}
   if os.path.exists(pdb_filename.replace('.pdb', '.psf')):
@@ -646,9 +681,11 @@ def run(pdb_filename):
       data[key]+=float(tmp[6])
     #print data
 
+  # needs hetero_charges?
   total_charge = get_total_charge_from_pdb(pdb_filename,
+                                           list_charges=list_charges,
                                            check=None, #data,
-                                           verbose=False,
+                                           verbose=verbose,
   )
   return total_charge
 
