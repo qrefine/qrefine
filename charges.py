@@ -402,6 +402,7 @@ def calculate_pdb_hierarchy_charge(hierarchy,
                                    ):
   charge = 0
   charges = []
+  annotations = []
   if inter_residue_bonds is None: inter_residue_bonds=[]
   if assert_no_alt_loc:
     # see if we can squash into a single conf.
@@ -420,6 +421,7 @@ def calculate_pdb_hierarchy_charge(hierarchy,
       assert_no_alt_loc=assert_no_alt_loc,
       verbose=verbose,
     )
+    annotations.append(annot)
     if check:
       print residue
       key = 'PRO%s' % residue.parent().id
@@ -451,6 +453,9 @@ def calculate_pdb_hierarchy_charge(hierarchy,
           outl += "\n%s" % atom.quote()
         outl += '\n%s' % ('-'*80)
         print outl
+  # check annotations
+  assert filter(None, annotations), 'No terminal or capping hydrogens found'
+  print filter(None, annotations)
   if list_charges:
     print 'CHARGE',charge
     charges.append(['Total', charge])

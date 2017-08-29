@@ -37,7 +37,6 @@ def print_legend_and_usage(log):
   print >> log, master_params().show()
 
 def get_inputs(args, log, master_params):
-  print dir(mmtbx)
   inputs = mmtbx.utils.process_command_line_args(
     args                             = args,
     master_params                    = master_params,
