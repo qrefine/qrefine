@@ -26,10 +26,9 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
  phenix.python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine
  ```
  Note: adding --nproc=N can speedup the compilation step.
+
  Note: you may need to use sudo depending on the permissions of your PHENIX installation.
 
- ###### tests
- 
  ### Run Tests 
 
 ``` 
