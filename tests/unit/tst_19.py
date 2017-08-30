@@ -1,57 +1,49 @@
 from __future__ import division
-
-import os
 import iotbx.pdb
-import libtbx
-from libtbx import easy_run
+import os
+from scitbx.array_family import flex
+from libtbx import easy_pickle
+import time
+import run_tests
+from libtbx.test_utils import approx_equal
+import libtbx.load_env
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-stats = {'h_altconf.pdb' :
-         [
-           [{' N  ': 14, ' O  ': 17, ' H  ': 57, ' C  ': 42}],
-           [{' N  ': 14, ' O  ': 17, ' H  ': 2, ' C  ': 42}],
-          ],
-         'h_altconf_2.pdb' :
-         [
-           [{' N  ': 14, ' O  ': 17, ' H  ': 57, ' C  ': 42}],
-           [{' N  ': 14, ' O  ': 17, ' H  ': 2, ' C  ': 42}],
-          ],
-         }
+def run(prefix = "tst_19"):
+  """
+  Exercise refinement  match:
+  -- pdbs with altlocs
+      -- using subtract vs using average
+  """
+  import multiprocessing
+  nproc = str(multiprocessing.cpu_count())
+  for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
+    for maxnum in ["15"]:
+      common_args = ["restraints=cctbx", "mode=refine", "nproc="+nproc, "clustering=true"] +\
+        ["gradient_only=true", "maxnum_residues_in_cluster="+maxnum]
+      r = run_tests.run_cmd(prefix,
+        args     = common_args+["altloc_method=subtract", "output_file_name_prefix=subtract-"+data_file_prefix],
+        pdb_name = os.path.join(qr_unit_tests_data,"%s.pdb"%data_file_prefix),
+        mtz_name = os.path.join(qr_unit_tests_data,"%s.mtz"%data_file_prefix))
+      r = run_tests.run_cmd(prefix,
+        args     = common_args+["altloc_method=average", "output_file_name_prefix=average-"+data_file_prefix],
+        pdb_name = os.path.join(qr_unit_tests_data,"%s.pdb"%data_file_prefix),
+        mtz_name = os.path.join(qr_unit_tests_data,"%s.mtz"%data_file_prefix))
+      sites_cart_average = iotbx.pdb.input("%s/average-%s_refined.pdb"%(prefix,data_file_prefix)).\
+                       construct_hierarchy().extract_xray_structure().sites_cart()
+      sites_cart_subtract = iotbx.pdb.input("%s/subtract-%s_refined.pdb"%(prefix,data_file_prefix)).\
+                       construct_hierarchy().extract_xray_structure().sites_cart()
+      rmsd_diff = sites_cart_average.rms_difference(sites_cart_subtract)
+      assert approx_equal(rmsd_diff, 0, 0.1)
+  run_tests.clean_up(prefix)
 
-def run1():
-  for key, item in stats.items():
-    print '-'*80
-    print key
-    print item
-  for i, (pdb_filename, results) in enumerate(stats.items()):
-    for j, complete_cap in enumerate(['model_completion',
-                                      'capping',
-                                    ]):
-      #if not j: continue
-      pdb_filename = os.path.join(qr_unit_tests_data, pdb_filename)
-      cmd = 'qr.finalise %(pdb_filename)s action=%(complete_cap)s' % locals()
-      cmd += ' keep_alt_loc=True'
-      cmd += ' skip_validation=True'
-      print cmd
-      rc = easy_run.go(cmd)
-      print dir(rc)
-      rc.show_stdout()
-      rc.show_stderr()
-      assert rc.return_code==0, 'qr.finalise failed'
-      fn = ['complete', 'capping'][j]
-      pdb_inp = iotbx.pdb.input(
-        file_name=os.path.basename(pdb_filename).replace('.pdb',
-                                                         '_%s.pdb' % fn),
-      )
-      ph = pdb_inp.construct_hierarchy()
-      oc = ph.overall_counts()
-      oc.show()
-      print '-'*80
-      assert oc.element_charge_types==results[j][0], '''
-      Failed to match %s %s
-      ''' % (oc.element_charge_types, results[j][0])
-
-if(__name__ == "__main__"):
-  run1()
+if __name__ == '__main__':
+  t0 = time.time()
+  prefix = "tst_19"
+  if(1):
+    run(prefix)
+    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  else:
+    print prefix + ":  Skipped    "

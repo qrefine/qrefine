@@ -14,14 +14,16 @@ qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 def run(prefix = "tst_18"):
   """
   Exercise gradients match:
-    - one conformer in buffer region vs two conformers in buffer region
+  -- pdbs with altlocs
       -- using clustering with less clusters vs not using clustering.
       -- using clustering with more clusters vs not using clustering.
   """
-  for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
+  import multiprocessing
+  nproc = str(multiprocessing.cpu_count())
+  for data_file_prefix in [ "h_altconf_complete", "h_altconf_2_complete"]:
     for maxnum in ["15", "2"]:
-      common_args = ["restraints=cctbx", "mode=opt", "nproc=1"] +\
-                    ["maxnum_residues_in_cluster="+maxnum]
+      common_args = ["restraints=cctbx", "mode=opt", "nproc="+nproc] +\
+                ["altloc_method=subtract","maxnum_residues_in_cluster="+maxnum]
       r = run_tests.run_cmd(prefix,
         args     = common_args+["clustering=true",
                                 "dump_gradients=cluster_true.pkl"],
@@ -40,7 +42,8 @@ def run(prefix = "tst_18"):
       if(0):
         for i, diff_i in enumerate(diff):
           print i, diff_i#, g1[i], g2[i]
-      assert approx_equal(diff.max(), [0,0,0])
+      assert approx_equal(diff.max(), [0,0,0], [1.0E-3,1.0E-3,1.0E-3])
+  run_tests.clean_up(prefix)
 
 if __name__ == '__main__':
   t0 = time.time()

@@ -18,8 +18,8 @@ class from_cluster(object):
     ## the super_sphere's selection, and its pdb_hierarchy and
     ##geometry_restraints_manager get updated when a new clustering is executing.
     ## just update the xyz of pdb_hierarchy_super_sphere
-    self.fragment_manager.pdb_hierarchy_super =  \
-      self.fragment_manager.super_cell.update_xyz(sites_cart=sites_cart).ph_super_sphere
+    self.fragment_manager.pdb_hierarchy_super = self.fragment_manager.\
+      super_cell.update_xyz(sites_cart=sites_cart).ph_super_sphere
     sites_cart = self.fragment_manager.pdb_hierarchy_super.atoms().extract_xyz()
     #
     self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
@@ -55,7 +55,6 @@ class from_cluster(object):
       g = item[1]
       selection_fragment = self.fragment_manager.fragment_selections[index]
       selection_buffer =  self.fragment_manager.buffer_selections[index]
-
       gradients_i = flex.vec3_double(system_size)
       gradients_i = gradients_i.set_selected(selection_fragment, g)
       gradients_i = gradients_i.set_selected(selection_buffer,[0,0,0])

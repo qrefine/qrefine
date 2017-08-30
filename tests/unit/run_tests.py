@@ -45,14 +45,14 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
       cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  print " ".join(cmd)
+  if(0):print " ".join(cmd)
   return easy_run.go(" ".join(cmd))
 
-def clean_up(prefix,mtz_name = "m00_good.mtz"):
+def clean_up(prefix,mtz_name = None):
   test_folder_name = prefix
   if(os.path.exists(test_folder_name)):
     shutil.rmtree(test_folder_name)
-  os.remove(mtz_name)
+  if(mtz_name is not None): os.remove(mtz_name)
   os.remove("%s.log"%prefix)
 
 def run():
@@ -75,7 +75,8 @@ def run():
     "tst_15.py",
     "tst_16.py",
     "tst_17.py",
-    "tst_18.py"
+    "tst_18.py",
+    "tst_19.py"
   ]
   for file_name in tests:
     easy_run.call("cctbx.python %s"%(

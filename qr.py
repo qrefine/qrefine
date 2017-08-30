@@ -58,6 +58,8 @@ cluster{
     .type = int
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
+  altloc_method = *subtract average 
+    .type = choice(multi=False)
 }
 
 restraints = cctbx *qm
@@ -229,6 +231,7 @@ def create_fragment_manager(
   return fragments(
     working_folder             = os.path.split(file_name)[0]+ "/",
     clustering_method          = params.cluster.clustering_method,
+    altloc_method              = params.cluster.altloc_method,
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
     two_buffers                = params.cluster.two_buffers,
@@ -253,6 +256,7 @@ def create_restraints_manager(
       basis                      = cmdline.params.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
       clustering_method          = cmdline.params.cluster.clustering_method,
+      altloc_method              = cmdline.params.cluster.altloc_method,
       charge                     = cmdline.params.charge,
       qm_engine_name             = cmdline.params.qm_engine_name,
       crystal_symmetry           = cmdline.crystal_symmetry,
@@ -331,12 +335,15 @@ def run(cmdline, log):
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = fmodel.xray_structure)
     # Show full model statistics
-    sel = ~model.xray_structure.hd_selection()
-    mso = model_statistics.geometry(
-      pdb_hierarchy      = model.pdb_hierarchy.select(sel),
-      restraints_manager = geometry_rmsd_manager.select(sel),
-      molprobity_scores  = True)
-    mso.show(lowercase=True, out=log)
+    if(0):
+      # block this:
+      #AttributeError: 'module' object has no attribute 'geometry
+      sel = ~model.xray_structure.hd_selection()
+      mso = model_statistics.geometry(
+        pdb_hierarchy      = model.pdb_hierarchy.select(sel),
+        restraints_manager = geometry_rmsd_manager.select(sel),
+        molprobity_scores  = True)
+      mso.show(lowercase=True, out=log)
     #
     if(params.refine.dry_run): return
     #

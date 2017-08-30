@@ -37,7 +37,8 @@ class from_cctbx(object):
       es = grm.select(super_selection).energies_sites(
         sites_cart=sites_cart.select(super_selection), compute_gradients=True)
       es.gradients = es.gradients[:selection.count(True)]
-      es.gradients *= self.fragment_extracts.fragment_scales[index]
+      es.gradients = es.gradients * flex.double(
+            self.fragment_extracts.fragment_scales[index])
     else:
       es = self.geometry_restraints_manager.energies_sites(
         sites_cart=sites_cart, compute_gradients=True)
@@ -65,13 +66,14 @@ class from_qm(object):
     self.working_folder = os.path.split(self.file_name)[0]+ "/"
     if(os.path.exists(self.working_folder) is not True):
       os.mkdir(self.working_folder)
-    if(charge is None):
+    if(charge is None and clustering is False):
       raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
       self.charge = get_total_charge_from_pdb(raw_records=raw_records)
     else: self.charge = charge
     self.clustering = clustering
     self.shared_disk = shared_disk
     self.qm_engine = self.create_qm_engine()
+    self.system_size = self.pdb_hierarchy.atoms_size()
 
   def create_qm_engine(self):
     if(self.qm_engine_name == "turbomole"):
@@ -95,7 +97,6 @@ class from_qm(object):
       index      = fragment_selection_and_sites_cart[2])
 
   def target_and_gradients(self,sites_cart, selection=None, index=None):
-    gradients_scale = 1.0
     if(self.clustering):
       from fragment import get_qm_file_name_and_pdb_hierarchy
       from fragment import charge
@@ -118,8 +119,8 @@ class from_qm(object):
       qm_pdb_file = self.file_name
       qm_charge = self.charge
       charge_file = None
-      system_size = self.pdb_hierarchy.atoms_size()
-      selection =flex.bool(system_size, True)
+      selection =flex.bool(self.system_size, True)
+      gradients_scale = [1.0]*system_size
     define_str = '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'\
     + str(qm_charge)\
     + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
@@ -132,7 +133,9 @@ class from_qm(object):
     ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
     gradients = ase_gradients[:selection.count(True)]#remove capping and neibouring buffer
     gradients =  flex.vec3_double(gradients)
-    gradients *= gradients_scale
+    ## TODO
+    ## unchange the altloc gradient, averagely scale the non-altloc gradient
+    gradients = gradients*flex.double(gradients_scale)
     return energy, gradients
 
 from ase import Atoms
