@@ -2,17 +2,33 @@
 
 [![Build Status](https://travis-ci.org/qrefine/qrefine.svg?branch=master)](https://travis-ci.org/qrefine/qrefine)
 
-Quantum Chemistry can improve bio-macromolecular structures, especially when only low-resolution data derived from crystallographic or cryo-electron microscopy experiments are available. Quantum-based refinement utilizes chemical restraints derived from quantum chemical methods instead of the standard parameterized library-based restraints used in experimental refinement packages. The motivation for a quantum refinement is twofold: firstly, the restraints have the potential to be more accurate, and secondly, the restraints can be more easily applied to new molecules such as drugs or novel cofactors.
+Quantum Chemistry can improve bio-macromolecular structures,
+especially when only low-resolution data derived from crystallographic
+or cryo-electron microscopy experiments are available. Quantum-based
+refinement utilizes chemical restraints derived from quantum chemical
+methods instead of the standard parameterized library-based restraints
+used in experimental refinement packages. The motivation for a quantum
+refinement is twofold: firstly, the restraints have the potential to
+be more accurate, and secondly, the restraints can be more easily
+applied to new molecules such as drugs or novel cofactors.
 
-However, accurately refining bio-macromolecules using a quantum chemical method is challenging due to issues related to scaling. Quantum chemistry has proven to be very useful for studying bio-macromolecules by employing a divide and conquer type approach. We have developed a new fragmentation approach for achieving a quantum-refinement of bio-macromolecules.
+However, accurately refining bio-macromolecules using a quantum
+chemical method is challenging due to issues related to
+scaling. Quantum chemistry has proven to be very useful for studying
+bio-macromolecules by employing a divide and conquer type approach. We
+have developed a new fragmentation approach for achieving a
+quantum-refinement of bio-macromolecules.
 
-### Citations:
-Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine, Q|R: Quantum-based Refinement , Acta Crystallographica Section D (2017) D73, 45-52. DOI: 10.1107/S2059798316019847
+### Citations: Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel
+Afonine, Q|R: Quantum-based Refinement , Acta Crystallographica
+Section D (2017) D73, 45-52. DOI: 10.1107/S2059798316019847
 
-Min Zheng, Mark P. Waller, Toward more efficient density-based adaptive QM/MM methods, Int J. Quant. Chem (2017) e25336
-DOI: qua.25336
+Min Zheng, Mark P. Waller, Toward more efficient density-based
+adaptive QM/MM methods, Int J. Quant. Chem (2017) e25336 DOI:
+qua.25336
 
-Min Zheng, Mark P. Waller, Adaptive QM/MM Methods, WIREs Comput. Mol. Sci. (2016) DOI: 10.1002/wcms.1255
+Min Zheng, Mark P. Waller, Adaptive QM/MM Methods, WIREs
+Comput. Mol. Sci. (2016) DOI: 10.1002/wcms.1255
 
 
 ### Quickstart
@@ -28,6 +44,12 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
  Note: adding --nproc=N can speedup the compilation step.
 
  Note: you may need to use sudo depending on the permissions of your PHENIX installation.
+
+ ###### Using the Git repository of *cctbx*.
+
+To remain up-to-date with the changes in the *cctbx* project that contains many
+of the functions used in Q|R, remove the **cctbx_project** directory in the
+modules directory. The above command will clone it from *GitHub*.
 
  ### Run Tests 
 

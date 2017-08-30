@@ -200,3 +200,19 @@ def attempt_to_squash_alt_loc(hierarchy):
       ags[0].append_atom(atom.detached_copy())
     rg.remove_atom_group(ags[1])
   return squash_hierarchy
+
+def merge_atoms_at_end_to_residues(hierarchy):
+  residues = {}
+  for ag in hierarchy.atom_groups():
+    previous_instance = residues.setdefault(ag.id_str(), None)
+    if previous_instance:
+      # move atoms from here to there
+      for atom in ag.atoms():
+        previous_instance.append_atom(atom.detached_copy())
+        ag.remove_atom(atom)
+      rg = ag.parent()
+      rg.remove_atom_group(ag)
+      chain = rg.parent()
+      chain.remove_residue_group(rg)
+    residues[ag.id_str()] = ag
+  return hierarchy

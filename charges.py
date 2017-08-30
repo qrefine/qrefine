@@ -490,8 +490,11 @@ def get_total_charge_from_pdb(pdb_filename=None,
   if verbose:
     for key, item in inter_residue_bonds.items():
       if type(key)!=type(0) and len(key)==2: print key, item
-  total_charge = calculate_pdb_hierarchy_charge(
+  pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
     ppf.all_chain_proxies.pdb_hierarchy,
+    )
+  total_charge = calculate_pdb_hierarchy_charge(
+    pdb_hierarchy, # ppf.all_chain_proxies.pdb_hierarchy,
     hetero_charges=hetero_charges,
     inter_residue_bonds=inter_residue_bonds,
     list_charges=list_charges,
