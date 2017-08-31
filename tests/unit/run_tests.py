@@ -78,9 +78,13 @@ def run():
     "tst_18.py",
     "tst_19.py"
   ]
+  failed = 0
   for file_name in tests:
-    easy_run.call("cctbx.python %s"%(
+    rc = easy_run.call("cctbx.python %s"%(
       os.path.join(qr_unit_tests,file_name)))
+    print 'return code',rc
+    if rc: failed+=1
+  assert not failed, 'Failed tests : %d' % failed
 
 if(__name__ == "__main__"):
   t0 = time.time()

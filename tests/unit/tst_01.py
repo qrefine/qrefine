@@ -47,9 +47,11 @@ def run(prefix = "tst_01"):
   # Cleanup
   run_tests.clean_up(prefix)
 
+  return 0
+
 if(__name__ == "__main__"):
   t0 = time.time()
   prefix = "tst_01"
-  run(prefix)
+  rc = run(prefix)
   print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)
 

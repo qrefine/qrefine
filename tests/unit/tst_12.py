@@ -714,7 +714,7 @@ def test_1yjp_charge():
   easy_run.call(cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
+  charge = charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=False)
   assert charge==0, 'charge of 1yjp should be zero not %s' % charge
 
 def test_terminal_charge(residue, charge=0):
@@ -733,7 +733,7 @@ def test_terminal_charge(residue, charge=0):
     hierarchy,
     hetero_charges=hetero_charges,
     inter_residue_bonds=inter_residue_bonds,
-    verbose=True,
+    verbose=False,
   )
   assert total_charge==charge, "total_charge: %d, charge:%d"%(total_charge,charge)
 
@@ -768,7 +768,8 @@ def test_helix():
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
+  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy,
+                                                          verbose=False)
   assert charge==0, 'charge of helix should be zero not %s' % charge
   cmd = 'iotbx.python %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
@@ -785,7 +786,8 @@ def test_helix():
   assert not must_find
   pdb_inp=pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=1)
+  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy,
+                                                          verbose=False)
   assert charge==1, 'charge of helix should be one not %s' % charge
 
 def test_charge_for_charmm_pdbs(only_i=None):
@@ -984,7 +986,7 @@ def test_10_capping():
       calculated_charge,
       )
 
-def run(prefix = "tst_12"):
+def run(prefix = "tst_12", nproc=1):
   """
   Exercise structure preparation including charge, capping, completion
   """
@@ -1041,7 +1043,7 @@ def run(prefix = "tst_12"):
   #
   passed=0
   failed=0
-  for args, res, errstr in easy_mp.multi_core_run(get_test, argss, 6):
+  for args, res, errstr in easy_mp.multi_core_run(get_test, argss, nproc):
     if errstr:
       print '-'*80
       print args
@@ -1053,12 +1055,15 @@ def run(prefix = "tst_12"):
       print 'RESULT - SUCCESS : %s %s' % (tests[args[0]][0].func_name, args)
       passed+=1
   print '\n\tpassed : %d\n\tfailed : %s' % (passed, failed)
+  if failed: return -1
+  return 0
 
 if(__name__ == "__main__"):
   t0 = time.time()
   prefix = "tst_12"
   if(1):
-    run(prefix)
+    rc = run(prefix)
+    assert rc==0
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
     print prefix + ":  Skipped    "
