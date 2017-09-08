@@ -752,6 +752,7 @@ def test_capping_of_C_terminal():
     os.path.join(qrefine_d, 'finalise.py'),
     tf,
     )
+  print cmd
   easy_run.call(cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_capping.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
@@ -1012,6 +1013,7 @@ def run(prefix = "tst_12", nproc=1):
     ]
   if 0:
     tests = [
+      [test_capping_of_C_terminal, 1],
       ]
   def get_test(i, j):
     func = tests[i][0]
@@ -1026,21 +1028,6 @@ def run(prefix = "tst_12", nproc=1):
       for p in range(j):
         if (i,p) in [(10,60)]: continue # capping and completion of PRO
         argss.append((i,p))
-  # for testing the tests
-  if 0:
-    argss = [
-      #[10, 59],
-      #[10, 60],
-      #[10,7],
-      #[9,47],
-      #[7,None],
-      #[8,None],
-      #[6,None],
-      #[11,None],
-      #[12,None],
-      [7,None],
-      ]
-  #
   passed=0
   failed=0
   for args, res, errstr in easy_mp.multi_core_run(get_test, argss, nproc):
