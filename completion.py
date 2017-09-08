@@ -59,6 +59,14 @@ def construct_xyz(ba, bv,
     rh_list.append(rh)
   return rh_list
 
+def _add_atom_to_chain(atom, ag):
+  rg = _add_atom_to_residue_group(atom, ag)
+  chain = ag.parent().parent()
+  tc = iotbx.pdb.hierarchy.chain()
+  tc.id = chain.id
+  tc.append_residue_group(rg)
+  return tc
+
 def _add_atom_to_residue_group(atom, ag):
   tag = iotbx.pdb.hierarchy.atom_group()
   tag.resname = ag.resname
@@ -96,7 +104,6 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
   if retain_original_hydrogens: pass
   else:
     if ag.get_atom("H"): # maybe needs to be smarter or actually work
-      #for atom in ag.atoms(): print atom.quote()
       ag.remove_atom(ag.get_atom('H'))
   #if use_capping_hydrogens and 0:
   #  for i, atom in enumerate(ag.atoms()):
@@ -136,11 +143,10 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
     atom.b = n.b
     atom.segid = ' '*4
     if append_to_end_of_model and i+1==number_of_hydrogens:
-      rg = _add_atom_to_residue_group(atom, ag)
+      rg = _add_atom_to_chain(atom, ag)
       rc.append(rg)
     else:
       ag.append_atom(atom)
-  #for atom in rc: print atom.quote()
   return rc
 
 def add_n_terminal_hydrogens_to_residue_group(rg,
@@ -227,9 +233,10 @@ def add_c_terminal_oxygens_to_atom_group(ag,
       atom.segid = ' '*4
       atom.xyz = ro2[i]
       if append_to_end_of_model:
-        rg = _add_atom_to_residue_group(atom, ag)
-        rc.append(rg)
+        chain = _add_atom_to_chain(atom, ag)
+        rc.append(chain)
       else:
+        # add the atom to the hierarchy
         ag.append_atom(atom)
   return rc
 
@@ -295,8 +302,8 @@ def add_cys_hg_to_atom_group(ag,
   atom.segid = ' '*4
   atom.xyz = ro2[0]
   if append_to_end_of_model:
-    rg = _add_atom_to_residue_group(atom, ag)
-    rc.append(rg)
+    chain = _add_atom_to_chain(atom, ag)
+    rc.append(chain)
   else:
     ag.append_atom(atom)
   return rc
@@ -424,7 +431,6 @@ def iterate_using_original(hierarchy,
       elif not slots[i+1]: end=True
       # does not work for chain ends
     else: continue
-    #print i, slots[i].atoms()[0].quote(),start,end
     rg = slots[i]
     add_cys_hg_to_residue_group(rg)
     if start:
@@ -483,12 +489,28 @@ def add_terminal_hydrogens(
     for group in additional_hydrogens:
       for atom in group:
         tmp.append(atom)
-    _add_atoms_to_end_of_hierarchy(hierarchy, tmp)
+    _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, tmp)
 
-def _add_atoms_to_end_of_hierarchy(hierarchy, rgs):
+def _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, chains):
+  lookup = {}
+  for chain in chains:
+    lookup.setdefault(chain.id, [])
+    lookup[chain.id].append(chain)
+  model = hierarchy.models()[0]
+  for i, chain_group in sorted(lookup.items()):
+    tc = iotbx.pdb.hierarchy.chain()
+    tc.id = i
+    for chain in chain_group:
+      for rg in chain.residue_groups():
+        tc.append_residue_group(rg.detached_copy())
+    model.append_chain(tc)
+
+def _add_atoms_from_residue_groups_to_end_of_hierarchy(hierarchy, rgs):
+  assert 0
   chains = {}
   for rg in rgs:
     for atom in rg.atoms():
+      # this is a bad idea
       cid = atom.tmp
       if cid not in chains:
         chains[cid] = iotbx.pdb.hierarchy.chain()
@@ -689,7 +711,6 @@ def run(pdb_filename=None,
 def display_hierarchy_atoms(hierarchy, n=5):
   #print '-'*80
   for i, atom in enumerate(hierarchy.atoms()):
-    #print atom.quote(), atom.xyz
     if i>n: break
 
 if __name__=="__main__":
