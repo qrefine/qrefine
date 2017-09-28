@@ -744,5 +744,5 @@ if __name__=="__main__":
     #print '='*80
     display_hierarchy_atoms(rc)
     assert 0, 'FINISHED TESTING'
-  print 'run',args,kwds
+  #print 'run',args,kwds
   run(*tuple(args), **kwds)

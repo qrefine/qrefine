@@ -438,7 +438,7 @@ def calculate_pdb_hierarchy_charge(hierarchy,
       outl = residue.id_str()
       for ag in residue.atom_groups():
         outl += '%s ' % ag.resname
-      print 'CHARGE %s %2d (%2d) %s' % (outl, tmp, rc, annot)
+      #print 'CHARGE %s %2d (%2d) %s' % (outl, tmp, rc, annot)
       charges.append([outl, tmp, annot])
     charge += tmp
     if verbose: # or display_residue_charges:
@@ -455,9 +455,9 @@ def calculate_pdb_hierarchy_charge(hierarchy,
         print outl
   # check annotations
   assert filter(None, annotations), 'No terminal or capping hydrogens found'
-  print filter(None, annotations)
+  #print filter(None, annotations)
   if list_charges:
-    print 'CHARGE',charge
+    #print 'CHARGE',charge
     charges.append(['Total', charge])
     return charges
   return charge

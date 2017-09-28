@@ -1,4 +1,5 @@
-import os
+import os, sys
+import StringIO
 import iotbx
 from libtbx.utils import Sorry
 from mmtbx import monomer_library
@@ -165,6 +166,10 @@ def add_hydrogens_using_ReadySet(pdb_filename,
   output_file_name=pdb_filename.replace('.pdb',
                                         '.updated.pdb',
                                         )
+  if 1:
+    sys_std = sys.stdout
+    sys.stdout = StringIO.StringIO()
+    print 'NOT'*20
   rc = run_though_all_the_options(
     pdb_lines,
     [], # args
@@ -176,6 +181,9 @@ def add_hydrogens_using_ReadySet(pdb_filename,
     metals=False,
     output_file_name=output_file_name, # needed
     )
+  if 1:
+    print 'NOT'*20
+    sys.stdout = sys_std
   if 0:
     #print 'overwriting',pdb_filename
     f=file(pdb_filename, 'wb')

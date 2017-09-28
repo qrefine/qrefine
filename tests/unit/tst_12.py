@@ -978,7 +978,7 @@ def test_10_capping():
   rc = charges.run('test_10_capping.pdb',
                    list_charges=True,
                    )
-  print '+'*80
+  #print '+'*80
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):
