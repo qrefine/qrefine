@@ -334,7 +334,7 @@ def iterate_over_threes(hierarchy,
       break
     return atom.parent().parent()
   ###
-  additional_hydrogens=[]
+  additional_hydrogens=hierarchy_utils.smart_add_atoms()
   for three in hierarchy_utils.generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,

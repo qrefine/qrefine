@@ -216,3 +216,28 @@ def merge_atoms_at_end_to_residues(hierarchy):
       chain.remove_residue_group(rg)
     residues[ag.id_str()] = ag
   return hierarchy
+
+def remove_atom_from_chain(chain, atom):
+  for rg in chain.residue_groups():
+    for ag in rg.atom_groups():
+      for at in ag.atoms():
+        if atom==at:
+          ag.remove_atom(atom)
+          break
+
+class smart_add_atoms(list):
+  def __init__(self): pass
+
+  def append(self, item):
+    for chain1 in item:
+      remove = []
+      for atom1 in chain1.atoms():
+        for chain_list in self:
+          for chain2 in chain_list:
+            for atom2 in chain2.atoms():
+              if atom1.quote()==atom2.quote():
+                remove.append(atom1)
+      if remove:
+        for atom in remove:
+          remove_atom_from_chain(chain1, atom)
+    list.append(self, item)
