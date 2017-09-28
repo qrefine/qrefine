@@ -45,7 +45,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
       cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  if(0):print " ".join(cmd)
+  if(1): print " ".join(cmd)
   return easy_run.go(" ".join(cmd))
 
 def clean_up(prefix,mtz_name = None):
@@ -59,7 +59,6 @@ def run():
   tests = [
     "tst_00.py",
     "tst_01.py",
-    "tst_02.py",
     "tst_03.py",
     "tst_04.py",
     "tst_05.py",
