@@ -82,7 +82,6 @@ def run():
   for file_name in tests:
     rc = easy_run.call("cctbx.python %s"%(
       os.path.join(qr_unit_tests,file_name)))
-    print 'return code',rc
     if rc: failed+=1
   assert not failed, 'Failed tests : %d' % failed
 

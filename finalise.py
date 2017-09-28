@@ -10,8 +10,8 @@ from libtbx import easy_run
 from qrefine import charges
 from qrefine import completion
 from qrefine.utils import hierarchy_utils
-from qrefine.utils import model_statistics
 from qrefine.tests.unit.skip import skip
+import mmtbx.model
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -117,10 +117,8 @@ def run(pdb_filename,
     ppf = hierarchy_utils.get_processed_pdb(pdb_inp=hierarchy.as_pdb_input())
 
   if not skip_validation:
-    initial_model_statistics = model_statistics.get_model_stat(
-      pdb_hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
-      crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
-    )
+    initial_model_statistics = mmtbx.model.statistics(
+      pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
 
   # should use cctbx
   if keep_alt_loc: pass
@@ -192,10 +190,8 @@ def run(pdb_filename,
                                   fname)
 
   if not skip_validation:
-    final_model_statistics = model_statistics.get_model_stat(
-      pdb_hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
-      crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
-    )
+    final_model_statistics = mmtbx.model.statistics(
+      pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
 
 if __name__=="__main__":
   def _fake_phil_parse(arg):
