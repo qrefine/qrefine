@@ -1,5 +1,6 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.test
+# LIBTBX_SET_DISPATCHER_NAME qr.run_tests
 import sys
 import argparse
 import qrefine.tests.unit.run_tests as unit_tests

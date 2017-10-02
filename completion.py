@@ -80,6 +80,15 @@ def _add_atom_to_residue_group(atom, ag):
   atom.tmp = i
   return rg
 
+def get_atoms_by_names(ag, l=None, all_or_nothing=True):
+  assert l
+  rc = []
+  for name in l:
+    atom = ag.get_atom(name)
+    rc.append(atom)
+  if len(l)!=len(filter(None, rc)): return None
+  return rc
+
 def add_n_terminal_hydrogens_to_atom_group(ag,
                                            use_capping_hydrogens=False,
                                            append_to_end_of_model=False,
@@ -648,18 +657,67 @@ def _eta_peptide_h(hierarchy,
   #      hierarchy.show()
   #assert 0
 
+def _h_h2_on_N(hierarchy,
+               geometry_restraints_manager,
+               verbose=False,
+               ):
+  atoms = hierarchy.atoms()
+  ###
+  def get_residue_group(residue):
+    for atom in residue.atoms():
+      atom = atoms[atom.i_seq]
+      break
+    return atom.parent().parent()
+  ###
+  def get_atom_from_residue_group(residue, label):
+    h = None
+    for ag in residue.atom_groups():
+      h = ag.get_atom(label)
+      if h: break
+    return h
+  ###
+  for three in hierarchy_utils.generate_protein_fragments(
+    hierarchy,
+    geometry_restraints_manager,
+    backbone_only=False,
+    #use_capping_hydrogens=use_capping_hydrogens,
+    ):
+    if len(three)==1: continue
+    for i, residue in enumerate(three):
+      if not i: continue
+      residue = get_residue_group(residue)
+      h = get_atom_from_residue_group(residue, 'H')
+      if h is None:
+        ag = residue.atom_groups()[0] # HACK
+        n, ca, c = get_atoms_by_names(ag,
+                                      ['N', 'CA', 'C'],
+                                    )
+        dihedral = 0
+        rh3 = construct_xyz(n, 0.9,
+                            ca, 109.5,
+                            c, dihedral,
+                          )
+        atom = iotbx.pdb.hierarchy.atom()
+        atom.name = ' H  '
+        atom.element = "H"
+        atom.xyz = rh3[0]
+        atom.occ = n.occ
+        atom.b = n.b
+        atom.segid = ' '*4
+        ag.append_atom(atom)
+
 def special_case_hydrogens(hierarchy,
                            geometry_restraints_manager,
                            verbose=False,
                           ):
-  assert 0
-  for special_case in [_eta_peptide_h,
+  for special_case in [
+      #_eta_peptide_h,
+      _h_h2_on_N,
                        ]:
     rc = special_case(hierarchy,
                       geometry_restraints_manager,
                       verbose=verbose,
                       )
-    print rc
   hierarchy.sort_atoms_in_place()
 
 def complete_pdb_hierarchy(hierarchy,
@@ -744,28 +802,27 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # add hydrogens in special cases
   #  eg ETA
+  #  eg N - H, H2
   #
-  #if debug:
-  #  ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output,
-  #                                          params=params,
-  #                                        )
-  #else:
-  #  hierarchy = ppf.all_chain_proxies.pdb_hierarchy
-  #  raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-  #  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
-  #                                          params=params,
-  #                                        )
-  #  sites_cart = hierarchy.atoms().extract_xyz()
-  #  ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
-  #special_case_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
-  #                       ppf.geometry_restraints_manager(),
-  #                       #use_capping_hydrogens=use_capping_hydrogens,
-  #                       #append_to_end_of_model=append_to_end_of_model,
-  #                       #original_hierarchy=original_hierarchy,
-  #                       verbose=verbose,
-  #                     )
-  
-  #
+  if debug:
+    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output,
+                                            params=params,
+                                          )
+  else:
+    hierarchy = ppf.all_chain_proxies.pdb_hierarchy
+    raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
+    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+                                            params=params,
+                                          )
+    sites_cart = hierarchy.atoms().extract_xyz()
+    ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  special_case_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
+                         ppf.geometry_restraints_manager(),
+                         #use_capping_hydrogens=use_capping_hydrogens,
+                         #append_to_end_of_model=append_to_end_of_model,
+                         #original_hierarchy=original_hierarchy,
+                         verbose=verbose,
+                       )
   #
   # add terminals atoms including hydrogens and OXT - more docs here...
   #
@@ -782,7 +839,7 @@ def complete_pdb_hierarchy(hierarchy,
   else:
     hierarchy = ppf.all_chain_proxies.pdb_hierarchy
     raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-   ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
                                             params=params,
                                            )
     sites_cart = hierarchy.atoms().extract_xyz()
