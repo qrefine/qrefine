@@ -166,6 +166,7 @@ def add_hydrogens_using_ReadySet(pdb_filename,
   output_file_name=pdb_filename.replace('.pdb',
                                         '.updated.pdb',
                                         )
+  sys_std = None
   if 1:
     sys_std = sys.stdout
     sys.stdout = StringIO.StringIO()
@@ -181,7 +182,7 @@ def add_hydrogens_using_ReadySet(pdb_filename,
     metals=False,
     output_file_name=output_file_name, # needed
     )
-  if 1:
+  if sys_std:
     print 'NOT'*20
     sys.stdout = sys_std
   if 0:
