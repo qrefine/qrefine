@@ -87,11 +87,11 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
                                           ):
   rc=[]
   n = ag.get_atom("N")
-  if n is None: return
+  if n is None: return 'no N'
   ca = ag.get_atom("CA")
-  if ca is None: return
+  if ca is None: return 'no CA'
   c = ag.get_atom("C")
-  if c is None: return
+  if c is None: return 'no C'
   atom = ag.get_atom('H')
   dihedral=120.
   if atom:
@@ -155,11 +155,13 @@ def add_n_terminal_hydrogens_to_residue_group(rg,
                                              ):
   rc=[]
   for ag in rg.atom_groups():
-    rc += add_n_terminal_hydrogens_to_atom_group(
+    tmp = add_n_terminal_hydrogens_to_atom_group(
       ag,
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
     )
+    assert type(tmp)!=type('')
+    rc += tmp
   return rc
 
 def add_n_terminal_hydrogens(hierarchy,
@@ -272,12 +274,71 @@ def add_c_terminal_oxygens(hierarchy,
   hierarchy.atoms().reset_i_seq()
   return hierarchy
 
+def _add_hydrogens_to_atom_group_using_bad(ag,
+                                           atom_name,
+                                           atom_element,
+                                           bond_atom,
+                                           angle_atom,
+                                           dihedral_atom,
+                                           bond_length,
+                                           angle,
+                                           dihedral,
+                                           append_to_end_of_model=False,
+                                           ):
+  rc = []
+  if ag.get_atom(atom_name.strip()): return []
+  if type(bond_atom)==type(''):
+    ba = ag.get_atom(bond_atom)
+    if ba is None: return
+  else: ba = bond_atom
+  if type(angle_atom)==type(''):
+    aa = ag.get_atom(angle_atom)
+    if aa is None: return
+  else: aa = angle_atom
+  if type(dihedral_atom)==type(''):
+    da = ag.get_atom(dihedral_atom)
+    if da is None: return
+  else: da = dihedral_atom
+  ro2 = construct_xyz(ba, bond_length,
+                      aa, angle,
+                      da, dihedral,
+                      period=1,
+                     )
+  atom = iotbx.pdb.hierarchy.atom()
+  atom.name = atom_name
+  atom.element = atom_element
+  atom.occ = ba.occ
+  atom.b = ba.b
+  # altloc???
+  atom.hetero = ba.hetero
+  atom.segid = ' '*4
+  atom.xyz = ro2[0]
+  if append_to_end_of_model:
+    chain = _add_atom_to_chain(atom, ag)
+    rc.append(chain)
+  else:
+    ag.append_atom(atom)
+  return rc
+
 def add_cys_hg_to_atom_group(ag,
                              append_to_end_of_model=False,
                             ):
   #
   # do we need ANISOU
   #
+  rc = _add_hydrogens_to_atom_group_using_bad(
+    ag,
+    ' HG ',
+    'H',
+    'SG',
+    'CB',
+    'CA',
+    1.,
+    120.,
+    160.,
+    append_to_end_of_model=append_to_end_of_model,
+   )
+  assert 0
   rc = []
   atom_name=' HG '
   atom_element = 'H'
@@ -487,8 +548,8 @@ def add_terminal_hydrogens(
   if append_to_end_of_model and additional_hydrogens:
     tmp = []
     for group in additional_hydrogens:
-      for atom in group:
-        tmp.append(atom)
+      for chain in group:
+        tmp.append(chain)
     _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, tmp)
 
 def _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, chains):
@@ -533,6 +594,73 @@ def remove_acid_side_chain_hydrogens(hierarchy):
   hierarchy.atoms_reset_serial()
   hierarchy.atoms().reset_i_seq()
   return hierarchy
+
+def _eta_peptide_h(hierarchy,
+                   geometry_restraints_manager,
+                   verbose=False,
+                   ):
+  atoms = hierarchy.atoms()
+  ###
+  def get_residue_group(residue):
+    for atom in residue.atoms():
+      atom = atoms[atom.i_seq]
+      break
+    return atom.parent().parent()
+  ###
+  for three in hierarchy_utils.generate_protein_fragments(
+    hierarchy,
+    geometry_restraints_manager,
+    backbone_only=False,
+    #use_capping_hydrogens=use_capping_hydrogens,
+    ):
+    if len(three)==1: continue
+    if three[-1].resname!='ETA': continue
+    print three
+    eta = get_residue_group(three[-1])
+    print dir(eta)
+    previous = get_residue_group(three[-2])
+    print previous
+    print dir(previous)
+    for ag in previous.atom_groups(): # smarter?
+      previous_c = ag.get_atom('C')
+      previous_o = ag.get_atom('O')
+    for ag in eta.atom_groups(): # needs to be conformers...
+      atom_name = ' H  '
+      if ag.get_atom(atom_name):
+        assert 0
+      else:
+        for atom in ag.atoms(): print atom.format_atom_record()
+        rc = _add_hydrogens_to_atom_group_using_bad(
+          ag,
+          atom_name,
+          'H',
+          'N',
+          previous_c, #'CA', 
+          previous_o, #'CB',
+          1.,
+          120.,
+          180.,
+          #append_to_end_of_model=append_to_end_of_model,
+        )
+        assert rc is not None
+        print '-'*80
+        for atom in ag.atoms(): print atom.format_atom_record()
+  #      hierarchy.show()
+  #assert 0
+
+def special_case_hydrogens(hierarchy,
+                           geometry_restraints_manager,
+                           verbose=False,
+                          ):
+  assert 0
+  for special_case in [_eta_peptide_h,
+                       ]:
+    rc = special_case(hierarchy,
+                      geometry_restraints_manager,
+                      verbose=verbose,
+                      )
+    print rc
+  hierarchy.sort_atoms_in_place()
 
 def complete_pdb_hierarchy(hierarchy,
                            geometry_restraints_manager,
@@ -588,7 +716,7 @@ def complete_pdb_hierarchy(hierarchy,
                                                'temp2',
                                              )
   #
-  # need to use Reduce to add hydrogens
+  # need to use Reduce/ReadySet! to add hydrogens
   #
   if not use_capping_hydrogens:
     output = hierarchy_utils.write_hierarchy(
@@ -614,6 +742,31 @@ def complete_pdb_hierarchy(hierarchy,
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
   remove_acid_side_chain_hydrogens(ppf.all_chain_proxies.pdb_hierarchy)
   #
+  # add hydrogens in special cases
+  #  eg ETA
+  #
+  #if debug:
+  #  ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output,
+  #                                          params=params,
+  #                                        )
+  #else:
+  #  hierarchy = ppf.all_chain_proxies.pdb_hierarchy
+  #  raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
+  #  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+  #                                          params=params,
+  #                                        )
+  #  sites_cart = hierarchy.atoms().extract_xyz()
+  #  ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  #special_case_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
+  #                       ppf.geometry_restraints_manager(),
+  #                       #use_capping_hydrogens=use_capping_hydrogens,
+  #                       #append_to_end_of_model=append_to_end_of_model,
+  #                       #original_hierarchy=original_hierarchy,
+  #                       verbose=verbose,
+  #                     )
+  
+  #
+  #
   # add terminals atoms including hydrogens and OXT - more docs here...
   #
   if debug:
@@ -627,8 +780,9 @@ def complete_pdb_hierarchy(hierarchy,
                                             params=params,
                                            )
   else:
+    hierarchy = ppf.all_chain_proxies.pdb_hierarchy
     raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+   ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
                                             params=params,
                                            )
     sites_cart = hierarchy.atoms().extract_xyz()
