@@ -9,23 +9,11 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
-from itertools import product
-import string
+import iotbx.pdb.utils
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
-def all_chain_ids(): # XXX This may go to cctbx/iotbx/pdb.
-  chars = string.ascii_letters+string.digits
-  def permutations(iterable, r=None):
-    pool = tuple(iterable)
-    n = len(pool)
-    r = n if r is None else r
-    for indices in product(range(n), repeat=r):
-      if(len(set(indices)) == r):
-        yield tuple(pool[i] for i in indices)
-  result = permutations(iterable = chars, r = 2)
-  return [c for c in chars]+["".join(p) for p in result]
 
 class expand(object):
   def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15):
@@ -122,7 +110,7 @@ class expand(object):
     chains = list(self.ph_p1.chains())
     #
     original_chain_ids = set([c.id for c in self.pdb_hierarchy.chains()])
-    all_ci = set(all_chain_ids())
+    all_ci = set(iotbx.pdb.utils.all_chain_ids())
     available_ci = list(original_chain_ids.symmetric_difference(all_ci))
     taken_ci = []
     # make sure original chains come first
