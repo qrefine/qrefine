@@ -676,6 +676,35 @@ def _h_h2_on_N(hierarchy,
       if h: break
     return h
   ###
+  def _generate_atom_group_atom_names(rg, names):
+    '''
+    Generate all alt. loc. groups of names
+    '''
+    atom_groups = rg.atom_groups()
+    atom_altlocs = {}
+    for ag in atom_groups:
+      for atom in ag.atoms():
+        atom_altlocs.setdefault(atom.parent().altloc, [])
+        atom_altlocs[atom.parent().altloc].append(atom)
+    keys = atom_altlocs.keys()
+    if len(keys)>1 and '' in keys:
+      for key in keys:
+        if key=='': continue
+        for atom in atom_altlocs['']:
+          atom_altlocs[key].append(atom)
+      del atom_altlocs['']
+    for key, item in atom_altlocs.items():
+      atoms=[]
+      for name in names:
+        for atom in item:
+          if atom.name.strip()==name.strip():
+            atoms.append(atom)
+            break
+        else:
+          assert 0
+      yield atoms[0].parent(), atoms
+  ###
+  n_done = []
   for three in hierarchy_utils.generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,
@@ -688,23 +717,24 @@ def _h_h2_on_N(hierarchy,
       residue = get_residue_group(residue)
       h = get_atom_from_residue_group(residue, 'H')
       if h is None:
-        ag = residue.atom_groups()[0] # HACK
-        n, ca, c = get_atoms_by_names(ag,
-                                      ['N', 'CA', 'C'],
-                                    )
-        dihedral = 0
-        rh3 = construct_xyz(n, 0.9,
-                            ca, 109.5,
-                            c, dihedral,
-                          )
-        atom = iotbx.pdb.hierarchy.atom()
-        atom.name = ' H  '
-        atom.element = "H"
-        atom.xyz = rh3[0]
-        atom.occ = n.occ
-        atom.b = n.b
-        atom.segid = ' '*4
-        ag.append_atom(atom)
+        for ag, (n, ca, c) in _generate_atom_group_atom_names(residue,
+                                                              ['N', 'CA', 'C'],
+                                                            ):
+          if n in n_done: continue
+          n_done.append(n)
+          dihedral = 0
+          rh3 = construct_xyz(n, 0.9,
+                              ca, 109.5,
+                              c, dihedral,
+                            )
+          atom = iotbx.pdb.hierarchy.atom()
+          atom.name = ' H  '
+          atom.element = "H"
+          atom.xyz = rh3[0]
+          atom.occ = n.occ
+          atom.b = n.b
+          atom.segid = ' '*4
+          ag.append_atom(atom)
 
 def special_case_hydrogens(hierarchy,
                            geometry_restraints_manager,
