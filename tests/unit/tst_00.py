@@ -19,7 +19,8 @@ def run(prefix):
   d = flex.sqrt((xrs_good.sites_cart() - xrs_poor.sites_cart()).dot())
   assert flex.mean(d) > 0.10
   d = flex.sqrt((xrs_good.sites_cart() - xrs_refined.sites_cart()).dot())
-  assert flex.mean(d) < 0.02
+  assert flex.mean(d) < 0.02, 'Mean difference %0.3f is greater than 0.02' % (
+    flex.mean(d))
   # Check R-factors
   r_start, r_final = None,None
   ofo = open("%s.log"%prefix,"r")
