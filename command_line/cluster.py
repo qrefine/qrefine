@@ -5,7 +5,7 @@ import time
 import os.path
 import libtbx
 import iotbx.pdb
-from qrefine.restraints import from_qm
+from qrefine.fragment import fragments
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_yoink_path =os.path.join(qrefine_path, "plugin","yoink","yoink")
@@ -16,30 +16,20 @@ legend = """\
 Cluster a system into many small pieces
 """
 
-def run(pdb_file, maxnum_residues_in_cluster=15):
+def run(pdb_file, log,  maxnum_residues_in_cluster=15):
+  print >> log, "max number of residues in each cluster:\n", maxnum_residues_in_cluster
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
-  fq = from_qm(
+  fq = fragments(
     pdb_hierarchy=ph,
     crystal_symmetry=cs,
-    use_cluster_qm=True,
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster))
   chunks = []
   chunk_sizes = []
-  #This should be in chunk
-  for chunk in fq.fragments.qm_pdb_hierarchies:
-    res_in_chunk = []
-    atom_tot_per_residue = 0
-    for chain in chunk.only_model().chains():
-      for residue_group in chain.residue_groups():
-        res_in_chunk.append(residue_group.resid())
-        for atom_group in residue_group.atom_groups():
-          atom_tot_per_residue += atom_group.atoms_size()
-          chunk_sizes.append(atom_tot_per_residue)
-    chunks.append(res_in_chunk)
-  print >> log, "Residue indices in each chunk:", fq.fragments.clusters
-  print >> log, "pdb hierarchy for each fragment (cluster+buffer)", chunks
+  print >> log, "Residue indices for each cluster:\n", fq.clusters
+  print >> log, "Atom indices for each cluster:\n", fq.cluster_atoms
+  print >> log, "Atom indices for each cluster and its buffer in the super_buffer:\n",fq.fragment_super_atoms
 
 if (__name__ == "__main__"):
   t0 = time.time()
