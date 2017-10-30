@@ -313,11 +313,6 @@ def run(cmdline, log):
       start_fmodel.xray_structure)
   else:
     weights = None
-    for chain in cmdline.pdb_hierarchy.chains():
-      ##TODO altloc funtion has not been tested using clustering qm
-      if (len(chain.conformers()) > 1 and
-            (params.restraints=="qm" and not params.cluster.clustering)):
-        raise Sorry("Alternative conformations are not supported.")
     if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")
     #if (cmdline.crystal_symmetry.space_group().type().number() != 1):

@@ -408,12 +408,15 @@ def calculate_pdb_hierarchy_charge(hierarchy,
     # see if we can squash into a single conf.
     hierarchy = hierarchy_utils.attempt_to_squash_alt_loc(hierarchy)
     if hierarchy is None: raise Sorry('too many alt locs to squash')
+  residue_types = []
   for residue in hierarchy_utils.generate_residue_groups(
       hierarchy,
       assert_no_alt_loc=assert_no_alt_loc,
       exclude_water=True,
       ):
     validate_all_atoms(residue)
+    assert len(residue.atom_groups())==1
+    residue_types.append(get_class(residue.atom_groups()[0].resname))
     tmp, rc, annot = calculate_residue_charge(
       residue,
       hetero_charges=hetero_charges,
@@ -454,8 +457,8 @@ def calculate_pdb_hierarchy_charge(hierarchy,
         outl += '\n%s' % ('-'*80)
         print outl
   # check annotations
-  assert filter(None, annotations), 'No terminal or capping hydrogens found'
-  #print filter(None, annotations)
+  if residue_types:
+    assert filter(None, annotations), 'No terminal or capping hydrogens found'
   if list_charges:
     #print 'CHARGE',charge
     charges.append(['Total', charge])
