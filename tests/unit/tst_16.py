@@ -35,15 +35,16 @@ def run(prefix = "tst_16"):
   g2 = flex.vec3_double(easy_pickle.load("cluster_true.pkl"))
   assert g1.size() == g2.size()
   diff = g1-g2
-  for i, diff_i in enumerate(diff):
-    print i, diff_i#, g1[i], g2[i]
-  print
+  if(0):
+    for i, diff_i in enumerate(diff):
+      print i, diff_i#, g1[i], g2[i]
+    print
   assert approx_equal(diff.max(), [0,0,0])
 
 if __name__ == '__main__':
   t0 = time.time()
   prefix = "tst_16"
-  if(0):
+  if(1):
     run(prefix)
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
