@@ -24,12 +24,10 @@ def run(pdb_file, log,  maxnum_residues_in_cluster=15):
   fq = fragments(
     pdb_hierarchy=ph,
     crystal_symmetry=cs,
-    maxnum_residues_in_cluster=int(maxnum_residues_in_cluster))
-  chunks = []
-  chunk_sizes = []
+    maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
+    qm_run=False)# not run qm_calculation, just the clustering result
   print >> log, "Residue indices for each cluster:\n", fq.clusters
-  print >> log, "Atom indices for each cluster:\n", fq.cluster_atoms
-  print >> log, "Atom indices for each cluster and its buffer in the super_buffer:\n",fq.fragment_super_atoms
+  
 
 if (__name__ == "__main__"):
   t0 = time.time()

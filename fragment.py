@@ -29,7 +29,8 @@ class fragments(object):
       pdb_hierarchy              = None,
       qm_engine_name             = None,
       crystal_symmetry           = None,
-      clustering                 = True):
+      clustering                 = True,
+      qm_run                     = True):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
@@ -56,6 +57,7 @@ class fragments(object):
     if(clustering):
       self.yoink_dat_path = os.path.join(qrefine,"plugin","yoink","dat")
       self.pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"))
+      self.qm_run = qm_run
       #t0 = time.time()
       self.set_up_cluster_qm()
       #print "time taken for interaction graph",(time.time() - t0)
@@ -81,7 +83,8 @@ class fragments(object):
     except:
       pre_clusters = None
     self.get_clusters()
-    if pre_clusters!=self.clusters:
+    ## if not run qm calculation for each cluster, skip the fragment setup
+    if self.qm_run is True and pre_clusters!=self.clusters:
       self.get_fragments()
       self.get_fragment_hierarchies_and_charges()
 
