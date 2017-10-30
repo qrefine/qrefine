@@ -298,14 +298,17 @@ def _add_hydrogens_to_atom_group_using_bad(ag,
   if ag.get_atom(atom_name.strip()): return []
   if type(bond_atom)==type(''):
     ba = ag.get_atom(bond_atom)
+    #print bond_atom,ba.quote()
     if ba is None: return
   else: ba = bond_atom
   if type(angle_atom)==type(''):
     aa = ag.get_atom(angle_atom)
+    #print angle_atom,aa.quote()
     if aa is None: return
   else: aa = angle_atom
   if type(dihedral_atom)==type(''):
     da = ag.get_atom(dihedral_atom)
+    #print dihedral_atom, da.quote()
     if da is None: return
   else: da = dihedral_atom
   ro2 = construct_xyz(ba, bond_length,
@@ -347,35 +350,6 @@ def add_cys_hg_to_atom_group(ag,
     160.,
     append_to_end_of_model=append_to_end_of_model,
    )
-  assert 0
-  rc = []
-  atom_name=' HG '
-  atom_element = 'H'
-  bond_length=1.
-  if ag.get_atom(atom_name.strip()): return []
-  sg = ag.get_atom("SG")
-  if sg is None: return
-  cb = ag.get_atom("CB")
-  if cb is None: return
-  ca = ag.get_atom("CA")
-  if ca is None: return
-  ro2 = construct_xyz(sg, bond_length,
-                      cb, 120.,
-                      ca, 160.,
-                      period=1,
-                     )
-  atom = iotbx.pdb.hierarchy.atom()
-  atom.name = atom_name
-  atom.element = atom_element
-  atom.occ = sg.occ
-  atom.b = sg.b
-  atom.segid = ' '*4
-  atom.xyz = ro2[0]
-  if append_to_end_of_model:
-    chain = _add_atom_to_chain(atom, ag)
-    rc.append(chain)
-  else:
-    ag.append_atom(atom)
   return rc
 
 def add_cys_hg_to_residue_group(rg,
