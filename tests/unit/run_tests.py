@@ -60,7 +60,6 @@ def run():
     "tst_00.py",
     "tst_01.py",
     "tst_03.py",
-    "tst_04.py",
     "tst_05.py",
     "tst_06.py",
     "tst_07.py",
