@@ -83,8 +83,7 @@ class fragments(object):
     except:
       pre_clusters = None
     self.get_clusters()
-    ## if not run qm calculation for each cluster, skip the fragment setup
-    if self.qm_run is True and pre_clusters!=self.clusters:
+    if(self.qm_run is True and pre_clusters!=self.clusters):
       self.get_fragments()
       self.get_fragment_hierarchies_and_charges()
 
@@ -311,14 +310,22 @@ class fragments(object):
       ## QM part is fragment_super
       fragment_super_selection = pdb_hierarchy_select(
         self.pdb_hierarchy_super.atoms_size(), self.fragment_super_atoms[i])
-      qm_pdb_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
-      raw_records = qm_pdb_hierarchy.as_pdb_string(
+      fragment_super_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
+      fragment_super_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
+          crystal_symmetry=self.super_cell.cs_box)
+      charge_hierarchy = completion.run(pdb_hierarchy=fragment_super_hierarchy,
+                      crystal_symmetry=self.super_cell.cs_box,
+                      model_completion=False,
+                      original_pdb_filename=None)
+      raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.super_cell.cs_box)
+      charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
+          crystal_symmetry=self.super_cell.cs_box)
       ##TODO: remove if-esle statement
       ## temprary solution: skip charge calculation for an altloc pdb
       if(self.pdb_hierarchy_super.altloc_indices().size()>1):
         charge = 0
-      else:
+      if(1):
         charge = get_total_charge_from_pdb(raw_records=raw_records)
       self.fragment_super_selections.append(fragment_super_selection)
       #
@@ -332,7 +339,7 @@ class fragments(object):
       self.buffer_selections.append(buffer_selection)
       if(0):
         print "write pdb files for cluster and fragment"
-        qm_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
+        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
           crystal_symmetry=self.super_cell.cs_box)
         cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
         cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
@@ -349,16 +356,18 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
   if(0):  ## for degugging
-    print "fragment pdb"
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
-
+  ##TODO: remove if 
+  ## original_pdb_filename has altlocs, it will throw  error
+  ## 
+  #if(fragment_extracts.pdb_hierarchy_super.altloc_indices().size()>1):
+  #  original_pdb_filename=None
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
                       crystal_symmetry=fragment_extracts.super_cell_cs,
                       model_completion=False,
-  #                    original_pdb_filename=original_pdb_filename) ##debuging
-                      original_pdb_filename=None)
+                      original_pdb_filename=original_pdb_filename) ##debuging
   ##for debugging
   if(1):  ## for degugging
     fragment_hierarchy.write_pdb_file(
