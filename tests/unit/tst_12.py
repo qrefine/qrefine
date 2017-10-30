@@ -604,8 +604,52 @@ ATOM    260 HG22 THR A  53     -11.650   6.245  -3.356  0.00 32.39           H
 ATOM    261 HG23 THR A  53     -12.513   7.484  -3.818  0.00 32.39           H
 ATOM         HC  THR A  53     -12.515   7.072   1.010  1.00 37.53           H
 TER
-
-'''
+  ''',
+  'cys_hg_capping' : '''
+ATOM    660  N   CYS A  44     -13.948  11.544   0.019  1.00 43.55           N
+ATOM    661  CA  CYS A  44     -13.878  12.244  -1.255  1.00 43.52           C
+ATOM    662  C   CYS A  44     -14.755  11.508  -2.256  1.00 30.63           C
+ATOM    663  O   CYS A  44     -14.828  10.276  -2.247  1.00 33.62           O
+ATOM    664  CB  CYS A  44     -12.437  12.346  -1.775  1.00 42.78           C
+ATOM    665  SG  CYS A  44     -12.212  13.498  -3.156  1.00 52.39           S
+ATOM    666  H   CYS A  44     -14.083  10.698  -0.061  0.00 43.55           H
+ATOM    667  HA  CYS A  44     -14.227  13.143  -1.147  0.00 43.52           H
+ATOM    668  HB2 CYS A  44     -11.866  12.643  -1.049  0.00 42.78           H
+ATOM    669  HB3 CYS A  44     -12.153  11.468  -2.075  0.00 42.78           H
+ATOM    670  N   TYR A  45     -15.425  12.272  -3.116  1.00 37.87           N
+ATOM    671  CA  TYR A  45     -16.349  11.715  -4.094  1.00 35.01           C
+ATOM    672  C   TYR A  45     -16.036  12.276  -5.473  1.00 39.01           C
+ATOM    673  O   TYR A  45     -15.818  13.482  -5.623  1.00 40.51           O
+ATOM    674  CB  TYR A  45     -17.803  12.019  -3.718  1.00 31.40           C
+ATOM    675  CG  TYR A  45     -18.805  11.563  -4.755  1.00 39.51           C
+ATOM    676  CD1 TYR A  45     -19.028  10.211  -4.984  1.00 32.44           C
+ATOM    677  CD2 TYR A  45     -19.523  12.482  -5.508  1.00 28.96           C
+ATOM    678  CE1 TYR A  45     -19.939   9.788  -5.931  1.00 29.90           C
+ATOM    679  CE2 TYR A  45     -20.436  12.069  -6.457  1.00 28.60           C
+ATOM    680  CZ  TYR A  45     -20.640  10.721  -6.664  1.00 34.71           C
+ATOM    681  OH  TYR A  45     -21.549  10.302  -7.609  1.00 35.76           O
+ATOM    682  H   TYR A  45     -15.359  13.129  -3.151  0.00 37.87           H
+ATOM    683  HA  TYR A  45     -16.239  10.752  -4.126  0.00 35.01           H
+ATOM    684  HB2 TYR A  45     -18.012  11.568  -2.885  0.00 31.40           H
+ATOM    685  HB3 TYR A  45     -17.904  12.977  -3.608  0.00 31.40           H
+ATOM    686  HD1 TYR A  45     -18.556   9.580  -4.490  0.00 32.44           H
+ATOM    687  HD2 TYR A  45     -19.387  13.392  -5.370  0.00 28.96           H
+ATOM    688  HE1 TYR A  45     -20.079   8.880  -6.073  0.00 29.90           H
+ATOM    689  HE2 TYR A  45     -20.911  12.696  -6.954  0.00 28.60           H
+ATOM    690  HH  TYR A  45     -21.904  10.966  -7.981  0.00 35.76           H
+ATOM    691  N   ASP A  46     -16.018  11.397  -6.473  1.00 29.94           N
+ATOM    692  CA  ASP A  46     -15.796  11.772  -7.866  1.00 32.85           C
+ATOM    693  C   ASP A  46     -17.051  11.409  -8.649  1.00 31.89           C
+ATOM    694  O   ASP A  46     -17.367  10.225  -8.807  1.00 36.43           O
+ATOM    695  CB  ASP A  46     -14.564  11.067  -8.434  1.00 33.02           C
+ATOM    696  CG  ASP A  46     -14.084  11.681  -9.738  1.00 40.82           C
+ATOM    697  OD1 ASP A  46     -14.799  12.536 -10.301  1.00 36.55           O
+ATOM    698  OD2 ASP A  46     -12.986  11.303 -10.200  1.00 39.31           O
+ATOM    699  H   ASP A  46     -16.136  10.552  -6.364  0.00 29.94           H
+ATOM    700  HA  ASP A  46     -15.659  12.730  -7.927  0.00 32.85           H
+ATOM    701  HB2 ASP A  46     -13.841  11.127  -7.790  0.00 33.02           H
+ATOM    702  HB3 ASP A  46     -14.782  10.137  -8.603  0.00 33.02           H
+  ''',
         }
 
 def test_qxyz_non_zero():
@@ -987,6 +1031,15 @@ def test_10_capping():
       calculated_charge,
       )
 
+def test_cys_hg_capping():
+  f=file('test_cys_hg_capping.pdb', 'wb')
+  f.write(pdbs['cys_hg_capping'])
+  f.close()
+  cmd = 'qr.finalise %s action=capping' % 'test_cys_hg_capping.pdb'
+  print cmd
+  rc = easy_run.go(cmd)
+  assert rc.return_code==0, rc.show_stdout()
+
 def run(prefix = "tst_12", nproc=1):
   """
   Exercise structure preparation including charge, capping, completion
@@ -997,6 +1050,7 @@ def run(prefix = "tst_12", nproc=1):
     [test_helix, 1],
     [test_capping_of_C_terminal, 1],
     [test_10_capping, 1],
+    [test_cys_hg_capping, 1],
   ]
   junk = [
     [test_GLY_terminal_and_alt_loc, 1],
