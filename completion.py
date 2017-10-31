@@ -93,14 +93,18 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
                                            use_capping_hydrogens=False,
                                            append_to_end_of_model=False,
                                            retain_original_hydrogens=True,
+                                           n_ca_c=None,
                                           ):
   rc=[]
-  n = ag.get_atom("N")
-  if n is None: return 'no N'
-  ca = ag.get_atom("CA")
-  if ca is None: return 'no CA'
-  c = ag.get_atom("C")
-  if c is None: return 'no C'
+  if n_ca_c is not None:
+    n, ca, c = n_ca_c
+  else:
+    n = ag.get_atom("N")
+    if n is None: return 'no N'
+    ca = ag.get_atom("CA")
+    if ca is None: return 'no CA'
+    c = ag.get_atom("C")
+    if c is None: return 'no C'
   atom = ag.get_atom('H')
   dihedral=120.
   if atom:
@@ -158,16 +162,19 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
       ag.append_atom(atom)
   return rc
 
-def add_n_terminal_hydrogens_to_residue_group(rg,
+def add_n_terminal_hydrogens_to_residue_group(residue_group,
                                               use_capping_hydrogens=False,
                                               append_to_end_of_model=False,
                                              ):
   rc=[]
-  for ag in rg.atom_groups():
+  for ag, (n, ca, c) in generate_atom_group_atom_names(residue_group,
+                                                       ['N', 'CA', 'C'],
+                                                       ):
     tmp = add_n_terminal_hydrogens_to_atom_group(
       ag,
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
+      n_ca_c=[n,ca,c],
     )
     assert type(tmp)!=type(''), 'not string "%s" %s' % (tmp, type(tmp))
     rc += tmp
@@ -197,6 +204,7 @@ def add_n_terminal_hydrogens(hierarchy,
 def add_c_terminal_oxygens_to_atom_group(ag,
                                          use_capping_hydrogens=False,
                                          append_to_end_of_model=False,
+                                         c_ca_n=None,
                                         ):
   #
   # do we need ANISOU
@@ -211,12 +219,15 @@ def add_c_terminal_oxygens_to_atom_group(ag,
     atom_element="H"
     bond_length=1.
   if ag.get_atom(atom_name.strip()): return []
-  c = ag.get_atom("C")
-  if c is None: return
-  ca = ag.get_atom("CA")
-  if ca is None: return
-  n = ag.get_atom("N")
-  if n is None: return
+  if c_ca_n is not None:
+    c, ca, n = c_ca_n
+  else:
+    c = ag.get_atom("C")
+    if c is None: return
+    ca = ag.get_atom("CA")
+    if ca is None: return
+    n = ag.get_atom("N")
+    if n is None: return
   atom = ag.get_atom('O')
   dihedral = dihedral_angle(sites=[atom.xyz,
                                    c.xyz,
@@ -251,17 +262,21 @@ def add_c_terminal_oxygens_to_atom_group(ag,
         ag.append_atom(atom)
   return rc
 
-def add_c_terminal_oxygens_to_residue_group(rg,
+def add_c_terminal_oxygens_to_residue_group(residue_group,
                                             use_capping_hydrogens=False,
                                             append_to_end_of_model=False,
                                           ):
   rc=[]
-  for ag in rg.atom_groups():
-    rc += add_c_terminal_oxygens_to_atom_group(
+  for ag, (c, ca, n) in generate_atom_group_atom_names(residue_group,
+                                                       ['C', 'CA', 'N'],
+                                                       ):
+    tmp = add_c_terminal_oxygens_to_atom_group(
       ag,
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
+      c_ca_n = [c, ca, n],
     )
+    rc += tmp
   return rc
 
 def add_c_terminal_oxygens(hierarchy,
@@ -631,6 +646,34 @@ def _eta_peptide_h(hierarchy,
   #      hierarchy.show()
   #assert 0
 
+def generate_atom_group_atom_names(rg, names):
+  '''
+  Generate all alt. loc. groups of names
+  '''
+  atom_groups = rg.atom_groups()
+  atom_altlocs = {}
+  for ag in atom_groups:
+    for atom in ag.atoms():
+      atom_altlocs.setdefault(atom.parent().altloc, [])
+      atom_altlocs[atom.parent().altloc].append(atom)
+  keys = atom_altlocs.keys()
+  if len(keys)>1 and '' in keys:
+    for key in keys:
+      if key=='': continue
+      for atom in atom_altlocs['']:
+        atom_altlocs[key].append(atom)
+    del atom_altlocs['']
+  for key, item in atom_altlocs.items():
+    atoms=[]
+    for name in names:
+      for atom in item:
+        if atom.name.strip()==name.strip():
+          atoms.append(atom)
+          break
+      else:
+        assert 0
+    yield atoms[0].parent(), atoms
+
 def _h_h2_on_N(hierarchy,
                geometry_restraints_manager,
                verbose=False,
@@ -650,34 +693,6 @@ def _h_h2_on_N(hierarchy,
       if h: break
     return h
   ###
-  def _generate_atom_group_atom_names(rg, names):
-    '''
-    Generate all alt. loc. groups of names
-    '''
-    atom_groups = rg.atom_groups()
-    atom_altlocs = {}
-    for ag in atom_groups:
-      for atom in ag.atoms():
-        atom_altlocs.setdefault(atom.parent().altloc, [])
-        atom_altlocs[atom.parent().altloc].append(atom)
-    keys = atom_altlocs.keys()
-    if len(keys)>1 and '' in keys:
-      for key in keys:
-        if key=='': continue
-        for atom in atom_altlocs['']:
-          atom_altlocs[key].append(atom)
-      del atom_altlocs['']
-    for key, item in atom_altlocs.items():
-      atoms=[]
-      for name in names:
-        for atom in item:
-          if atom.name.strip()==name.strip():
-            atoms.append(atom)
-            break
-        else:
-          assert 0
-      yield atoms[0].parent(), atoms
-  ###
   n_done = []
   for three in hierarchy_utils.generate_protein_fragments(
     hierarchy,
@@ -691,8 +706,8 @@ def _h_h2_on_N(hierarchy,
       residue = get_residue_group(residue)
       h = get_atom_from_residue_group(residue, 'H')
       if h is None:
-        for ag, (n, ca, c) in _generate_atom_group_atom_names(residue,
-                                                              ['N', 'CA', 'C'],
+        for ag, (n, ca, c) in generate_atom_group_atom_names(residue,
+                                                             ['N', 'CA', 'C'],
                                                             ):
           if ag.resname in ['PRO']: continue
           if n in n_done: continue
