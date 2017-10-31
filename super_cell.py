@@ -14,7 +14,6 @@ import iotbx.pdb.utils
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
-
 class expand(object):
   def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15):
     # fixed members
@@ -111,7 +110,7 @@ class expand(object):
     #
     original_chain_ids = set([c.id for c in self.pdb_hierarchy.chains()])
     all_ci = set(iotbx.pdb.utils.all_chain_ids())
-    available_ci = list(original_chain_ids.symmetric_difference(all_ci))
+    available_ci = list(all_ci.difference(original_chain_ids))
     taken_ci = []
     # make sure original chains come first
     for chain in chains:
