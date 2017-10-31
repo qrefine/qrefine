@@ -169,7 +169,7 @@ def add_n_terminal_hydrogens_to_residue_group(rg,
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
     )
-    assert type(tmp)!=type('')
+    assert type(tmp)!=type(''), 'not string "%s" %s' % (tmp, type(tmp))
     rc += tmp
   return rc
 
@@ -694,6 +694,7 @@ def _h_h2_on_N(hierarchy,
         for ag, (n, ca, c) in _generate_atom_group_atom_names(residue,
                                                               ['N', 'CA', 'C'],
                                                             ):
+          if ag.resname in ['PRO']: continue
           if n in n_done: continue
           n_done.append(n)
           dihedral = 0
@@ -709,6 +710,7 @@ def _h_h2_on_N(hierarchy,
           atom.b = n.b
           atom.segid = ' '*4
           ag.append_atom(atom)
+          assert ag.resname!='PRO'
 
 def special_case_hydrogens(hierarchy,
                            geometry_restraints_manager,
