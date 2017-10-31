@@ -349,8 +349,7 @@ class fragments(object):
           crystal_symmetry=self.super_cell.cs_box)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index, 
-                                       original_pdb_filename=None,
-                                       debug=False):
+                                       original_pdb_filename=None):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   fragment_hierarchy = fragment_extracts.pdb_hierarchy_super.select(
     fragment_selection)
@@ -359,7 +358,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
-  if(debug):  ## for degugging
+  if(fragment_extracts.debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -373,7 +372,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
                       model_completion=False,
                       original_pdb_filename=original_pdb_filename) ##debuging
   ##for debugging
-  if(debug):  ## for degugging
+  if(fragment_extracts.debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -415,6 +414,7 @@ def write_mm_charge_file(fragment_extracts, index):
     sub_working_folder = fragment_extracts.working_folder + "/" + str(index) + "/"
     if (not os.path.isdir(sub_working_folder)):
       os.mkdir(sub_working_folder)
+    if(fragment_extracts.debug): print "write mm pdb file:", index
     non_fragment_pdb_file = sub_working_folder + str(index) + "_mm.pdb"
     non_fragment_hierarchy.write_pdb_file(
       file_name=non_fragment_pdb_file,
@@ -422,23 +422,23 @@ def write_mm_charge_file(fragment_extracts, index):
     non_qm_edge_positions = fragment_utils.get_edge_atom_positions(
       ph, non_fragment_hierarchy, charge_embed=True)
     charge_scaling_positions = non_qm_edge_positions
-    if (fragment_extracts.qm_engine_name == "turbomole"):
+    if(fragment_extracts.qm_engine_name == "turbomole"):
       file_name = sub_working_folder + str(index) + "_xyzq_cctbx.dat"
       write_pdb_hierarchy_xyzq_file(
         non_fragment_hierarchy,
         file_name=file_name,
         exclude_water=False,
         charge_scaling_positions=charge_scaling_positions)
-    if (fragment_extracts.qm_engine_name == "terachem"):
+    if(fragment_extracts.qm_engine_name == "terachem"):
       file_name = sub_working_folder + str(index) + "_qxyz_cctbx.dat"
       write_pdb_hierarchy_qxyz_file(
         non_fragment_hierarchy,
         file_name=file_name,
         exclude_water=False,
         charge_scaling_positions=charge_scaling_positions)
-    file_name = os.path.abspath(file_name)
-    if (not os.path.exists(file_name)):
+    if(file_name is None):
       raise Sorry("There is no point charge file") 
+    file_name = os.path.abspath(file_name)
   return file_name
 
 def fragment_extracts(fragments):
@@ -458,4 +458,5 @@ def fragment_extracts(fragments):
     pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
     super_cell_cs        = fragments.super_cell.cs_box,
     buffer_selections    = fragments.buffer_selections,
-    fragment_scales      = fragments.fragment_scales)
+    fragment_scales      = fragments.fragment_scales,
+    debug                = fragments.debug)
