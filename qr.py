@@ -47,6 +47,8 @@ master_params_str ="""
 
 max_atoms = 15000
   .type = int
+debug = False
+    .type = bool
 cluster{
   clustering = False
     .type = bool
@@ -237,7 +239,8 @@ def create_fragment_manager(
     two_buffers                = params.cluster.two_buffers,
     pdb_hierarchy              = pdb_hierarchy,
     qm_engine_name             = params.qm_engine_name,
-    crystal_symmetry           = crystal_symmetry)
+    crystal_symmetry           = crystal_symmetry,
+    debug                      = params.debug)
 
 def create_restraints_manager(
       cmdline,
@@ -248,22 +251,15 @@ def create_restraints_manager(
     restraints_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd)
-      #fragment_manager   = fragment_manager)
   else:
     assert cmdline.params.restraints == "qm"
     restraints_manager = restraints.from_qm(
-      #fragment_manager           = fragment_manager,
       basis                      = cmdline.params.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
-      clustering_method          = cmdline.params.cluster.clustering_method,
-      altloc_method              = cmdline.params.cluster.altloc_method,
       charge                     = cmdline.params.charge,
       qm_engine_name             = cmdline.params.qm_engine_name,
       crystal_symmetry           = cmdline.crystal_symmetry,
-      shared_disk                = cmdline.params.shared_disk,
-      charge_embedding           = cmdline.params.cluster.charge_embedding,
-      clustering                 = cmdline.params.cluster.clustering,
-      maxnum_residues_in_cluster = cmdline.params.cluster.maxnum_residues_in_cluster)
+      clustering                 = cmdline.params.cluster.clustering)
   return restraints_manager
 
 def create_calculator(weights, fmodel, params, restraints_manager):
@@ -315,14 +311,8 @@ def run(cmdline, log):
     weights = None
     if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")
-    #if (cmdline.crystal_symmetry.space_group().type().number() != 1):
-    #  raise Sorry("Only P1 is supported.")
     cmdline.working_phil.show(out=log, prefix="   ")
     fmodel = create_fmodel(cmdline=cmdline, log=log)
-#    fragment_manager = create_fragment_manager(
-#      params           = params,
-#      pdb_hierarchy    = model.pdb_hierarchy,
-#      crystal_symmetry = cmdline.crystal_symmetry)
     geometry_rmsd_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd).geometry_restraints_manager
@@ -375,7 +365,6 @@ def run(cmdline, log):
   restraints_manager = create_restraints_manager(
     cmdline          = cmdline,
     model            = model)
-    #fragment_manager = fragment_manager)
   if(fragment_manager is not None):
     cluster_restraints_manager = cluster_restraints.from_cluster(
       restraints_manager = restraints_manager,

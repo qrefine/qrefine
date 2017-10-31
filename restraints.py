@@ -51,12 +51,12 @@ class from_qm(object):
       charge                     = None,
       qm_engine_name             = None,
       file_name                  = "./ase/tmp_ase.pdb",
-      clustering_method          = betweenness_centrality_clustering,
-      maxnum_residues_in_cluster = 20,
-      charge_embedding           = False,
+      #clustering_method          = betweenness_centrality_clustering,
+      #maxnum_residues_in_cluster = 20,
+      #charge_embedding           = False,
       crystal_symmetry           = None,
       clustering                 = False,
-      shared_disk                = True,
+      #shared_disk                = True,
       basis                      = "sto-3g"):
     self.fragment_extracts  = fragment_extracts
     self.basis = basis
@@ -71,7 +71,7 @@ class from_qm(object):
       self.charge = get_total_charge_from_pdb(raw_records=raw_records)
     else: self.charge = charge
     self.clustering = clustering
-    self.shared_disk = shared_disk
+    #self.shared_disk = shared_disk
     self.qm_engine = self.create_qm_engine()
     self.system_size = self.pdb_hierarchy.atoms_size()
 
@@ -91,6 +91,7 @@ class from_qm(object):
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
+    print "here __call__"
     return self.target_and_gradients(
       sites_cart = fragment_selection_and_sites_cart[1],
       selection  = fragment_selection_and_sites_cart[0],
@@ -102,6 +103,7 @@ class from_qm(object):
       from fragment import charge
       from fragment import write_mm_charge_file
       #
+      print index
       qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=self.fragment_extracts,
                           index=index,
@@ -111,6 +113,7 @@ class from_qm(object):
                                       index=index)
       charge_file =  write_mm_charge_file(fragment_extracts=self.fragment_extracts,
                                       index=index)
+      print charge_file
       gradients_scale = self.fragment_extracts.fragment_scales[index]
     else:
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)

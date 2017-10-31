@@ -30,7 +30,8 @@ class fragments(object):
       qm_engine_name             = None,
       crystal_symmetry           = None,
       clustering                 = True,
-      qm_run                     = True):
+      qm_run                     = True,
+      debug                      = False):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
@@ -40,6 +41,7 @@ class fragments(object):
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
     self.altloc_method =  altloc_method
+    self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
     if(os.path.exists(self.working_folder) is not True):
       os.mkdir(self.working_folder)
@@ -132,13 +134,13 @@ class fragments(object):
       ## generate pdb_hierarchy for each altloc case
       phs = []
       asc = self.pdb_hierarchy_super.atom_selection_cache()
-      if(0):self.pdb_hierarchy_super.write_pdb_file(file_name="super.pdb")
+      if(self.debug):self.pdb_hierarchy_super.write_pdb_file(file_name="super.pdb")
       ## the first one altloc is " ", A B.. altlocs start from 1
       for altloc in self.pdb_hierarchy_super.altloc_indices().keys()[1:]:
         sel = asc.selection("altloc %s or altloc ' '"%altloc)
         ph_altloc = self.pdb_hierarchy_super.select(sel)
         phs.append(ph_altloc)
-        if(0):ph_altloc.write_pdb_file(file_name="super-"+str(altloc)+".pdb")
+        if(self.debug):ph_altloc.write_pdb_file(file_name="super-"+str(altloc)+".pdb")
     cluster_atoms_in_phs = []
     fragment_super_atoms_in_phs = []
     clusters = self.clusters##from graph clustring, molecular indices
@@ -311,7 +313,9 @@ class fragments(object):
       fragment_super_selection = pdb_hierarchy_select(
         self.pdb_hierarchy_super.atoms_size(), self.fragment_super_atoms[i])
       fragment_super_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
-      fragment_super_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
+      if(self.debug):
+        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"-origin-cs.pdb")
+        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
           crystal_symmetry=self.super_cell.cs_box)
       charge_hierarchy = completion.run(pdb_hierarchy=fragment_super_hierarchy,
                       crystal_symmetry=self.super_cell.cs_box,
@@ -319,7 +323,7 @@ class fragments(object):
                       original_pdb_filename=None)
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.super_cell.cs_box)
-      charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
+      if(self.debug):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
           crystal_symmetry=self.super_cell.cs_box)
       ##TODO: remove if-esle statement
       ## temprary solution: skip charge calculation for an altloc pdb
@@ -337,8 +341,7 @@ class fragments(object):
       s = fragment_selection==cluster_selection
       buffer_selection = fragment_selection.deep_copy().set_selected(s, False)
       self.buffer_selections.append(buffer_selection)
-      if(0):
-        print "write pdb files for cluster and fragment"
+      if(self.debug):
         fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
           crystal_symmetry=self.super_cell.cs_box)
         cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
@@ -355,7 +358,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
-  if(0):  ## for degugging
+  if(self.debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -369,7 +372,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
                       model_completion=False,
                       original_pdb_filename=original_pdb_filename) ##debuging
   ##for debugging
-  if(1):  ## for degugging
+  if(self.debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -445,13 +448,13 @@ def fragment_extracts(fragments):
     super_sphere_geometry_restraints_manager= \
           fragments.super_cell.super_sphere_geometry_restraints_manager,
     working_folder       = fragments.working_folder,
-    fragment_super_atoms      = fragments.fragment_super_atoms,
+    fragment_super_atoms = fragments.fragment_super_atoms,
     cluster_atoms        = fragments.cluster_atoms,
     qm_engine_name       = fragments.qm_engine_name,
     charge_embedding     = fragments.charge_embedding,
     crystal_symmetry     = fragments.crystal_symmetry,
     pdb_hierarchy        = fragments.pdb_hierarchy,
     pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
-    super_cell_cs           = fragments.super_cell.cs_box,
+    super_cell_cs        = fragments.super_cell.cs_box,
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales)

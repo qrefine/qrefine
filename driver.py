@@ -244,6 +244,7 @@ def refine(fmodel,
       if(clustering):
         cluster_qm_update.re_clustering(calculator)
       # Calculate weight
+      calculator.calculate_weight()
       try:
         calculator.calculate_weight()
       except Exception as e:
