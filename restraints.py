@@ -123,7 +123,7 @@ class from_qm(object):
       qm_charge = self.charge
       charge_file = None
       selection =flex.bool(self.system_size, True)
-      gradients_scale = [1.0]*system_size
+      gradients_scale = [1.0]*self.system_size
     define_str = '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'\
     + str(qm_charge)\
     + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
