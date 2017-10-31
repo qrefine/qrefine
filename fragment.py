@@ -349,7 +349,8 @@ class fragments(object):
           crystal_symmetry=self.super_cell.cs_box)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index, 
-                                       original_pdb_filename=None):
+                                       original_pdb_filename=None,
+                                       debug=False):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   fragment_hierarchy = fragment_extracts.pdb_hierarchy_super.select(
     fragment_selection)
@@ -358,7 +359,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
-  if(self.debug):  ## for degugging
+  if(debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -372,7 +373,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
                       model_completion=False,
                       original_pdb_filename=original_pdb_filename) ##debuging
   ##for debugging
-  if(self.debug):  ## for degugging
+  if(debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
