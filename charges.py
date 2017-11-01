@@ -158,11 +158,6 @@ def calculate_residue_charge(rg,
     for check_name in check_names:
       rc = _terminal(atom_names, check_name)
       if rc: break
-    if residue_name=='PRO' and rc:
-      print residue_name
-      print atom_names
-      print rc
-      assert 0
     return rc
   def nh2_terminal(atom_names):
     return _terminal(atom_names, [' HT1', ' HT2'])
@@ -293,10 +288,12 @@ def calculate_residue_charge(rg,
         print 'covalent_bond',atom_i_seqs, inter_residue_bonds
       annot += 'Coval. '
     if verbose:
-      print 'residue charge: %s poly_hs: %s diff_hs: %s' % (charge,
-                                                            poly_hs,
-                                                            diff_hs,
-                                                          )
+      print 'residue: %s charge: %s poly_hs: %s diff_hs: %s' % (
+        ag.resname,
+        charge,
+        poly_hs,
+        diff_hs,
+      )
     charge+=diff_hs
     if charge: verbose=0
     if verbose:
@@ -330,13 +327,14 @@ def calculate_residue_charge(rg,
   return charge, rc, annot
 
 def _get_restraints_from_resname(resname):
+  input_resname = resname
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
     resname = d_amino_acids.get(resname, None)
     if resname is not None:
       restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
-    assert restraints, 'no restraints for "%s" found' % resname
+    assert restraints, 'no restraints for "%s" found' % input_resname
   return restraints
 
 def get_partial_point_charges(rg, hetero_charges=None):
