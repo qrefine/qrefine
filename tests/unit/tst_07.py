@@ -7,6 +7,7 @@ import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from qrefine.utils import yoink_utils
 from qrefine.plugin.yoink.pyoink import PYoink
+import run_tests
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -15,6 +16,7 @@ def run(prefix = "tst_07"):
   """
   Exercise interaction graph construction.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"data_files","2lvr.pdb"))
   ph = pdb_inp.construct_hierarchy()
   yoink_utils.write_yoink_infiles("cluster.xml",
@@ -49,3 +51,4 @@ if(__name__ == "__main__"):
   prefix = "tst_07"
   run(prefix)
   print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  run_tests.clean_up(prefix)

@@ -18,6 +18,7 @@ def run(prefix = "tst_16"):
       -- using clustering vs not using clustering.
   Non-P1 case (P212121)
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   data_file_prefix = "2olx"
   common_args = ["restraints=cctbx", "mode=opt", "nproc=1"]
   r = run_tests.run_cmd(prefix,
@@ -49,3 +50,4 @@ if __name__ == '__main__':
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
     print prefix + ":  Skipped    "
+  run_tests.clean_up(prefix)

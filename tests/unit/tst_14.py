@@ -4,6 +4,7 @@ import time
 import iotbx.pdb
 from qrefine import super_cell
 from libtbx.test_utils import approx_equal
+import run_tests
 
 pdb_str = """
 CRYST1   10.000   10.000   10.000  90.00  90.00  90.00 P 1
@@ -93,6 +94,7 @@ def run(prefix = "tst_14"):
   """
   Exercise supercell.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   of = open("%s.pdb"%prefix,"w")
   print >> of, pdb_str
   of.close()
@@ -126,3 +128,4 @@ if(__name__ == "__main__"):
   prefix = "tst_14"
   run(prefix)
   print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  run_tests.clean_up(prefix)

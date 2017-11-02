@@ -9,6 +9,7 @@ import qrefine.finalise
 import qrefine.charges
 import qrefine.completion
 from qrefine.utils import hierarchy_utils
+import run_tests
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
@@ -1108,3 +1109,4 @@ if(__name__ == "__main__"):
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
     print prefix + ":  Skipped    "
+  run_tests.clean_up(prefix)

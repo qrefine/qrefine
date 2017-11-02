@@ -3,11 +3,13 @@ from __future__ import division
 import time
 from libtbx.test_utils import approx_equal
 import qrefine.clustering as clustering
+import run_tests
 
 def run(prefix = "tst_08"):
   """
   Exercise interaction graph clustering.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   interaction_list = [[24, 27], [19, 22], [5, 11], [18, 22], [25, 26], [23, 26], [2, 3], [5, 7], [9, 11], [27, 29],
                    [5, 10], [9, 10], [18, 21], [11, 12], [24, 25], [5, 12], [6, 10], [6, 7], [20, 21], [10, 11],
                    [21, 25], [5, 6], [21, 24], [17, 21], [6, 11], [12, 13], [5, 13], [17, 20], [4, 5], [3, 12],
@@ -40,3 +42,4 @@ if(__name__ == "__main__"):
   prefix = "tst_08"
   run(prefix)
   print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  run_tests.clean_up(prefix)

@@ -18,6 +18,7 @@ def run(prefix = "tst_18"):
       -- using clustering with less clusters vs not using clustering.
       -- using clustering with more clusters vs not using clustering.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   import multiprocessing
   nproc = str(multiprocessing.cpu_count())
   for data_file_prefix in [ "h_altconf_complete", "h_altconf_2_complete"]:
@@ -53,3 +54,4 @@ if __name__ == '__main__':
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
     print prefix + ":  Skipped    "
+  run_tests.clean_up(prefix)

@@ -15,6 +15,7 @@ import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
 import libtbx.load_env
+import run_tests
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
@@ -231,6 +232,7 @@ def run1():
 if __name__ == '__main__':
   t0 = time.time()
   prefix = "tst_17"
+  run_tests.assert_folder_is_empty(prefix=prefix)
   if(1):
     run1()
     run2()
@@ -238,3 +240,4 @@ if __name__ == '__main__':
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
     print prefix + ":  Skipped    "
+  run_tests.clean_up(prefix)

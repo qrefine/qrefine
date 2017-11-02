@@ -17,6 +17,7 @@ def run(prefix = "tst_15"):
     - small vs large box:
       -- using clustering vs not using clustering.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   for restraints in ["cctbx","qm"]:
   #for restraints in ["cctbx",]:
   # XXX qm option is not supposed to work fulfull the test with 2ona_box_S
@@ -69,3 +70,4 @@ if __name__ == '__main__':
   prefix = "tst_15"
   run(prefix)
   print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  run_tests.clean_up(prefix)

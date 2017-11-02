@@ -11,6 +11,12 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
 
+def assert_folder_is_empty(prefix):
+  if(len(os.listdir("."))>0):
+    print "Folder is not empty: test prefix:", prefix
+    print "Remove before proceeding:", os.listdir(".")
+    STOP()
+
 def setup_helix_example(pdb_name = "m00_good.pdb",
                         mtz_name = "m00_good.mtz"):
   # Read good model and compute data from it.
@@ -42,7 +48,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
         mtz_name,
         os.path.join(qr_unit_tests_data,pdb_name)]
   for arg in args:
-      cmd.append(arg)
+    cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
   if(0): print " ".join(cmd)
@@ -53,7 +59,27 @@ def clean_up(prefix,mtz_name = None):
   if(os.path.exists(test_folder_name)):
     shutil.rmtree(test_folder_name)
   if(mtz_name is not None): os.remove(mtz_name)
-  os.remove("%s.log"%prefix)
+  try: os.remove("%s.log"%prefix)
+  except: pass
+  try: os.remove("m00_good.mtz")
+  except: pass
+  files_to_remove1 = [
+    'c_terminal_capping.pdb', 'c_terminal_capping_capping.pdb', 'cluster.xml', 
+    'helix.pdb', 'helix_complete.pdb', 'helix_readyset_input.pdb', 'qmmm.xml', 
+    'test_10_capping.pdb', 'test_cys_hg_capping.pdb', 
+    'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb', 
+    'test_original_pdb_capping.pdb', 'test_short_gap.pdb', 
+    'test_short_gap_capping.pdb']
+  files_to_remove2 = [
+    'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 
+    'tst_14_super_sphere.pdb']
+  files_to_remove3 = ['cluster_false.pkl', 'cluster_true.pkl']
+  files_to_remove4 = ['A.pdb', 'B.pdb', 'W.pdb']
+  for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
+    try: os.remove(f)
+    except: pass
+  try: shutil.rmtree('ase')
+  except: pass
 
 def run():
   tests = [

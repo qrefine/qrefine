@@ -11,6 +11,7 @@ def run(prefix):
   """
   Exercise standard (cctbx-based restraints) refinement with all defaults.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   run_tests.run_cmd(prefix, args = ["restraints=cctbx"])
   # Check results
@@ -45,3 +46,4 @@ if(__name__ == "__main__"):
   t0 = time.time()
   run(prefix)
   print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)
+  run_tests.clean_up(prefix)

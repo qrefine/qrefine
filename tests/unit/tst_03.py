@@ -16,6 +16,7 @@ def run(prefix = "tst_03"):
   """
   Exercise refine_sites=False.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","refine_sites=False"])
   xrs_start = iotbx.pdb.input(
@@ -31,4 +32,5 @@ if(__name__ == "__main__"):
   prefix = "tst_03"
   run(prefix)
   print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)
+  run_tests.clean_up(prefix)
 

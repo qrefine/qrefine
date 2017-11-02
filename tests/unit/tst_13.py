@@ -9,6 +9,7 @@ import iotbx.pdb
 import mmtbx.command_line
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
+import run_tests
 
 from ase.io import write
 from ase.io import read as ase_io_read
@@ -63,6 +64,7 @@ def run(prefix = "tst_13"):
   """
   compare gradients from entire qm and clustered qm.
   """
+  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files","helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
@@ -134,3 +136,4 @@ if(__name__ == "__main__"):
     print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   else:
     print prefix + ":  Skipped    "
+  run_tests.clean_up(prefix)
