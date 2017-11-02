@@ -28,6 +28,7 @@ charge_per_aa_polymer = {}
 hydrogens_per_aa_polymer = {}
 non_hydrogens_per_aa_polymer = {}
 d_amino_acids = {"DVA" : "VAL",
+                 'DLE' : 'LEU',
                  }
 non_standard_amino_acids = { #"SAR" : None,
                             }
@@ -510,11 +511,12 @@ def write_charge_and_coordinates_from_hierarchy(hierarchy,
                                                 hetero_charges=None,
                                                 exclude_water=True,
                                                 charge_scaling_positions=None,
+                                                assert_no_alt_loc=False,
                                                 scale=0
                                                 ):
   qxyz = None
   for residue in hierarchy_utils.generate_residue_groups(hierarchy,
-                                         assert_no_alt_loc=True,
+                                         assert_no_alt_loc=assert_no_alt_loc,
                                          exclude_water=exclude_water,
                                         ):
     if qxyz is None:
