@@ -551,6 +551,7 @@ def write_charge_and_coordinates_from_hierarchy(hierarchy,
   if outl:
     print 'WARNINGS'
     print outl
+    raise Sorry('point charges are not set.')
 
 def write_pdb_hierarchy_qxyz_file(hierarchy,
                                   file_name="qxyz_cctbx.dat",
