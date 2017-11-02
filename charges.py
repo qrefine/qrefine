@@ -694,6 +694,8 @@ def run(pdb_filename,
     #print data
 
   # needs hetero_charges?
+  print 'list_charges',list_charges
+  print 'verbose     ',verbose
   total_charge = get_total_charge_from_pdb(pdb_filename,
                                            list_charges=list_charges,
                                            check=None, #data,
@@ -704,5 +706,8 @@ def run(pdb_filename,
 if __name__=="__main__":
   args = sys.argv[1:]
   del sys.argv[1:]
-  total_charge = run(*tuple(args))
+  list_charges=False
+  if len(args)>1 and args[1]:
+    list_charges=True
+  total_charge = run(*tuple(args), list_charges=list_charges)
   print "total_charge",total_charge

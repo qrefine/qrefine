@@ -662,55 +662,57 @@ HETATM    3  C   FVA A   1       8.123   2.761  15.952  1.00 12.34           C
 HETATM    4  O   FVA A   1       8.432   2.185  17.000  1.00 15.44           O
 HETATM    5  CN  FVA A   1       4.866   4.251  16.548  1.00 16.52           C
 HETATM    6  O1  FVA A   1       4.490   4.713  15.459  1.00 19.98           O
-HETATM    7  H   FVA A   1       6.398   3.535  17.722  0.00 11.30           H
-HETATM    8  HN  FVA A   1       4.170   4.067  17.400  0.00 16.52           H
+HETATM    7  H   FVA A   1       6.367   3.584  17.602  0.00 11.30           H
+HETATM    8  HN  FVA A   1       4.261   4.091  17.289  0.00 16.52           H
 HETATM    9  CB AFVA A   1       8.153   5.260  16.162  0.72 14.88           C
 HETATM   10  CG1AFVA A   1       9.025   5.015  17.376  0.72 16.40           C
 HETATM   11  CG2AFVA A   1       9.019   5.589  14.965  0.72 18.48           C
-HETATM   12  HA AFVA A   1       6.836   4.108  14.844  0.00  9.02           H
-HETATM   13  HB AFVA A   1       7.480   6.137  16.373  0.00 14.95           H
-HETATM   14 HG11AFVA A   1       9.355   5.984  17.823  0.00 18.82           H
-HETATM   15 HG12AFVA A   1       9.933   4.433  17.085  0.00 18.82           H
-HETATM   16 HG13AFVA A   1       8.467   4.442  18.157  0.00 18.82           H
-HETATM   17 HG21AFVA A   1       9.725   6.420  15.208  0.00 23.20           H
-HETATM   18 HG22AFVA A   1       8.397   5.897  14.091  0.00 23.20           H
-HETATM   19 HG23AFVA A   1       9.617   4.693  14.669  0.00 23.20           H
-ATOM     31  N   GLY A   2       8.526   2.318  14.765  1.00  9.14           N
-ATOM     32  CA  GLY A   2       9.367   1.142  14.630  1.00  9.18           C
-ATOM     33  C   GLY A   2       8.922   0.225  13.508  1.00 13.11           C
-ATOM     34  O   GLY A   2       8.413   0.681  12.484  1.00 17.27           O
-ATOM     35  H   GLY A   2       8.322   2.688  14.016  0.00  9.14           H
-ATOM     36  HA2 GLY A   2      10.280   1.419  14.454  0.00  9.18           H
-ATOM     37  HA3 GLY A   2       9.356   0.636  15.457  0.00  9.18           H
-ATOM     38  N   ALA A   3       9.116  -1.075  13.703  1.00  9.39           N
-ATOM     39  CA  ALA A   3       8.738  -2.068  12.704  1.00  8.93           C
-ATOM     40  C   ALA A   3       7.287  -2.497  12.896  1.00 15.88           C
-ATOM     41  O   ALA A   3       6.570  -1.940  13.728  1.00 14.37           O
-ATOM     42  CB  ALA A   3       9.664  -3.273  12.779  1.00 13.63           C
-ATOM     43  H   ALA A   3       9.468  -1.411  14.413  0.00  9.39           H
-ATOM     44  HA  ALA A   3       8.823  -1.678  11.820  0.00  8.93           H
-ATOM     45  HB1 ALA A   3       9.418  -3.906  12.087  0.00 13.63           H
-ATOM     46  HB2 ALA A   3      10.578  -2.976  12.646  0.00 13.63           H
-ATOM     47  HB3 ALA A   3       9.575  -3.685  13.653  0.00 13.63           H
-HETATM   48  N   DLE A   4       6.859  -3.489  12.121  1.00  9.50           N
-HETATM   49  CA  DLE A   4       5.494  -3.993  12.202  1.00 10.70           C
-HETATM   50  C   DLE A   4       4.592  -3.260  11.215  1.00 14.72           C
-HETATM   51  O   DLE A   4       5.072  -2.581  10.307  1.00 14.32           O
-HETATM   52  CB  DLE A   4       5.464  -5.496  11.915  1.00 15.03           C
-HETATM   53  CG  DLE A   4       6.263  -6.378  12.877  1.00 25.23           C
-HETATM   54  CD1 DLE A   4       5.684  -6.310  14.283  1.00 29.22           C
-HETATM   55  CD2 DLE A   4       6.299  -7.815  12.380  1.00 38.38           C
-ATOM     56  H   DLE A   4       7.345  -3.890  11.536  0.00  9.50           H
-HETATM   57  HA  DLE A   4       5.148  -3.845  13.096  0.00 10.70           H
-HETATM   58  HB2 DLE A   4       5.819  -5.644  11.025  0.00 15.03           H
-HETATM   59  HB3 DLE A   4       4.542  -5.794  11.947  0.00 15.03           H
-HETATM   60  HG  DLE A   4       7.176  -6.054  12.915  0.00 25.23           H
-HETATM   61 HD11 DLE A   4       6.163  -6.933  14.851  0.00 29.22           H
-HETATM   62 HD12 DLE A   4       4.744  -6.549  14.248  0.00 29.22           H
-HETATM   63 HD13 DLE A   4       5.784  -5.407  14.622  0.00 29.22           H
-HETATM   64 HD21 DLE A   4       6.806  -8.354  13.008  0.00 38.38           H
-HETATM   65 HD22 DLE A   4       6.724  -7.836  11.508  0.00 38.38           H
-HETATM   66 HD23 DLE A   4       5.391  -8.150  12.314  0.00 38.38           H
+HETATM   12  HA AFVA A   1       6.897   4.095  14.996  0.00  9.02           H
+HETATM   13  HB AFVA A   1       7.573   6.016  16.344  0.00 14.95           H
+HETATM   14 HG11AFVA A   1       9.312   5.856  17.764  0.00 18.82           H
+HETATM   15 HG12AFVA A   1       9.813   4.510  17.123  0.00 18.82           H
+HETATM   16 HG13AFVA A   1       8.541   4.518  18.054  0.00 18.82           H
+HETATM   17 HG21AFVA A   1       9.632   6.311  15.176  0.00 23.20           H
+HETATM   18 HG22AFVA A   1       8.478   5.857  14.205  0.00 23.20           H
+HETATM   19 HG23AFVA A   1       9.538   4.811  14.708  0.00 23.20           H
+ATOM     20  N   GLY A   2       8.526   2.318  14.765  1.00  9.14           N
+ATOM     21  CA  GLY A   2       9.367   1.142  14.630  1.00  9.18           C
+ATOM     22  C   GLY A   2       8.922   0.225  13.508  1.00 13.11           C
+ATOM     23  O   GLY A   2       8.413   0.681  12.484  1.00 17.27           O
+ATOM     24  H   GLY A   2       8.322   2.688  14.016  0.00  9.14           H
+ATOM     25  HA2 GLY A   2      10.280   1.419  14.454  0.00  9.18           H
+ATOM     26  HA3 GLY A   2       9.356   0.636  15.457  0.00  9.18           H
+ATOM     27  N   ALA A   3       9.116  -1.075  13.703  1.00  9.39           N
+ATOM     28  CA  ALA A   3       8.738  -2.068  12.704  1.00  8.93           C
+ATOM     29  C   ALA A   3       7.287  -2.497  12.896  1.00 15.88           C
+ATOM     30  O   ALA A   3       6.570  -1.940  13.728  1.00 14.37           O
+ATOM     31  CB  ALA A   3       9.664  -3.273  12.779  1.00 13.63           C
+ATOM     32  H   ALA A   3       9.468  -1.411  14.413  0.00  9.39           H
+ATOM     33  HA  ALA A   3       8.823  -1.678  11.820  0.00  8.93           H
+ATOM     34  HB1 ALA A   3       9.418  -3.906  12.087  0.00 13.63           H
+ATOM     35  HB2 ALA A   3      10.578  -2.976  12.646  0.00 13.63           H
+ATOM     36  HB3 ALA A   3       9.575  -3.685  13.653  0.00 13.63           H
+HETATM   37  N   DLE A   4       6.859  -3.489  12.121  1.00  9.50           N
+HETATM   38  CA  DLE A   4       5.494  -3.993  12.202  1.00 10.70           C
+HETATM   39  C   DLE A   4       4.592  -3.260  11.215  1.00 14.72           C
+HETATM   40  O   DLE A   4       5.072  -2.581  10.307  1.00 14.32           O
+HETATM   41  CB  DLE A   4       5.464  -5.496  11.915  1.00 15.03           C
+HETATM   42  CG  DLE A   4       6.263  -6.378  12.877  1.00 25.23           C
+HETATM   43  CD1 DLE A   4       5.684  -6.310  14.283  1.00 29.22           C
+HETATM   44  CD2 DLE A   4       6.299  -7.815  12.380  1.00 38.38           C
+ATOM         OXT DLE A   4       3.368  -3.343  11.321  1.00 14.72           O
+ATOM     45  H   DLE A   4       7.345  -3.890  11.536  0.00  9.50           H
+HETATM   46  HA  DLE A   4       5.148  -3.845  13.096  0.00 10.70           H
+HETATM   47  HB2 DLE A   4       5.819  -5.644  11.025  0.00 15.03           H
+HETATM   48  HB3 DLE A   4       4.542  -5.794  11.947  0.00 15.03           H
+HETATM   49  HG  DLE A   4       7.176  -6.054  12.915  0.00 25.23           H
+HETATM   50 HD11 DLE A   4       6.163  -6.933  14.851  0.00 29.22           H
+HETATM   51 HD12 DLE A   4       4.744  -6.549  14.248  0.00 29.22           H
+HETATM   52 HD13 DLE A   4       5.784  -5.407  14.622  0.00 29.22           H
+HETATM   53 HD21 DLE A   4       6.806  -8.354  13.008  0.00 38.38           H
+HETATM   54 HD22 DLE A   4       6.724  -7.836  11.508  0.00 38.38           H
+HETATM   55 HD23 DLE A   4       5.391  -8.150  12.314  0.00 38.38           H
+
   ''',
         }
 
@@ -1106,11 +1108,17 @@ def test_cys_hg_capping():
   rc = _run_go_cmd_on_pdb('cys_hg_capping', 'qr.finalise action=capping')
   assert rc.return_code==0, rc.show_stdout()
 
+def test_fva():
+  rc = _run_go_cmd_on_pdb('fva', 'qr.charges')
+  assert rc.return_code==0, rc.show_stdout()
+  assert 0
+
 def run(prefix = "tst_12", nproc=1):
   """
   Exercise structure preparation including charge, capping, completion
   """
   tests = [
+    #[test_fva, 1],
     [test_original_pdb, 1],
     [test_short_gap, 1],
     [test_helix, 1],
