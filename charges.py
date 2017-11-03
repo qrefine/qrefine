@@ -220,7 +220,7 @@ def calculate_residue_charge(rg,
   if verbose:
     print '%s\nstarting charge: %s' % ('*'*80, charge)
   if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
-       ag.resname in aac.three_letter_l_given_three_letter_d
+       ag.resname in acc.three_letter_l_given_three_letter_d
        ):
     if verbose:
       print ag.id_str()
