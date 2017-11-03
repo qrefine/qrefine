@@ -63,10 +63,10 @@ class chemical_component_class(dict):
 
 class charges_class:
   def __init__(self,
-               pdb_filename=None,
+               pdb_filename,
+               ligand_cif_file_names=None,
                raw_records=None,
                pdb_inp=None,
-               ligand_cif_file_names=None,
                #list_charges=False,
                verbose=False,
                ):
@@ -728,13 +728,11 @@ def run(pdb_filename,
       data[key]+=float(tmp[6])
 
   # needs hetero_charges?
-  total_charge = get_total_charge_from_pdb(
-    pdb_filename,
-    mon_lib_server,
-    list_charges=list_charges,
-    assert_correct_chain_terminii=assert_correct_chain_terminii,
-    check=None, #data,
-    verbose=verbose,
+  total_charge = get_total_charge_from_pdb(pdb_filename,
+                                           mon_lib_server,
+                                           list_charges=list_charges,
+                                           check=None, #data,
+                                           verbose=verbose,
   )
   return total_charge
 
