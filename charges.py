@@ -63,10 +63,10 @@ class chemical_component_class(dict):
 
 class charges_class:
   def __init__(self,
-               pdb_filename=None,
+               pdb_filename,
+               ligand_cif_file_names=None,
                raw_records=None,
                pdb_inp=None,
-               ligand_cif_file_names=None,
                #list_charges=False,
                verbose=False,
                ):
@@ -741,7 +741,6 @@ def run(pdb_filename,
       key = '.'.join(tmp[1:4])
       data.setdefault(key, 0)
       data[key]+=float(tmp[6])
-
   return total_charge
 
 if __name__=="__main__":
