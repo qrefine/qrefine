@@ -7,6 +7,11 @@ from mmtbx.monomer_library import server
 from scitbx import matrix
 from scitbx.math import dihedral_angle
 
+from iotbx.pdb import amino_acid_codes as aac
+
+n_terminal_amino_acid_codes = ['FVA']
+c_terminal_amino_acid_codes = []
+
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -447,6 +452,14 @@ def iterate_over_threes(hierarchy,
       pass
   return additional_hydrogens
 
+def is_n_terminal_residue(residue_group):
+  residues = []
+  for atom_group in residue_group.atom_groups():
+    if atom_group.resname not in residues: residues.append(atom_group.resname)
+  assert len(residues)==1
+  if residues[0] in n_terminal_amino_acid_codes: return True
+  return False
+
 def iterate_using_original(hierarchy,
                            geometry_restraints_manager,
                            original_hierarchy,
@@ -461,9 +474,10 @@ def iterate_using_original(hierarchy,
     for org in chain.residue_groups():
       protein = True
       for atom_group in org.atom_groups():
-        if get_class(atom_group.resname) not in ["common_amino_acid",
+        if(get_class(atom_group.resname) not in ["common_amino_acid",
                                                  "modified_amino_acid",
-                                               ]:
+                                               ] and
+           atom_group.resname not in aac.three_letter_l_given_three_letter_d):
           protein=False
           break
       if not protein:
@@ -495,11 +509,14 @@ def iterate_using_original(hierarchy,
     if start:
       ptr+=1
       assert ptr==1
-      rc = add_n_terminal_hydrogens_to_residue_group(
-        rg,
-        use_capping_hydrogens=use_capping_hydrogens,
-        append_to_end_of_model=append_to_end_of_model,
-      )
+      if is_n_terminal_residue(rg):
+        rc = None
+      else:
+        rc = add_n_terminal_hydrogens_to_residue_group(
+          rg,
+          use_capping_hydrogens=use_capping_hydrogens,
+          append_to_end_of_model=append_to_end_of_model,
+        )
       if rc: additional_hydrogens.append(rc)
     if end:
       ptr-=1

@@ -6,6 +6,7 @@ from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
 from utils import hierarchy_utils
+from iotbx.pdb import amino_acid_codes as acc
 
 mon_lib_server = server.server()
 
@@ -27,9 +28,6 @@ allowable_amino_acid_charges = {
 charge_per_aa_polymer = {}
 hydrogens_per_aa_polymer = {}
 non_hydrogens_per_aa_polymer = {}
-d_amino_acids = {"DVA" : "VAL",
-                 'DLE' : 'LEU',
-                 }
 non_standard_amino_acids = { #"SAR" : None,
                             }
 
@@ -222,8 +220,7 @@ def calculate_residue_charge(rg,
   if verbose:
     print '%s\nstarting charge: %s' % ('*'*80, charge)
   if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
-       ag.resname in ['DVA', # need complete list of D-amino and non-standard
-                      ]
+       ag.resname in aac.three_letter_l_given_three_letter_d
        ):
     if verbose:
       print ag.id_str()
@@ -331,7 +328,7 @@ def _get_restraints_from_resname(resname):
   input_resname = resname
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
-    resname = d_amino_acids.get(resname, None)
+    resname = acc.three_letter_l_given_three_letter_d.get(resname, None)
     if resname is not None:
       restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:

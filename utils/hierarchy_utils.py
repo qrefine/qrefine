@@ -6,6 +6,8 @@ from mmtbx import monomer_library
 from mmtbx.monomer_library import server
 from mmtbx.monomer_library import pdb_interpretation
 
+from iotbx.pdb import amino_acid_codes as aac
+
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -60,10 +62,8 @@ def generate_residues_via_conformer(hierarchy,
                                                 'modified_amino_acid',
                                               ]:
             # this needs to be moved to cctbx get_class
-            if residue.resname not in ['DVA',
-                                       'DLE',
-                                       'ETA', # COOH terminal - not in modified
-                                       ]:
+            #'ETA', # COOH terminal - not in modified
+            if residue.resname not in aac.three_letter_l_given_three_letter_d:
               continue
           yield residue
 
