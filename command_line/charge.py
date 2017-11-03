@@ -19,6 +19,14 @@ model_file_name = None
   .multiple = False
   .help = Model file name
   .style = file_type:pdb bold input_file
+ligand_cif_file_name = None
+  .type = path
+  .short_caption = Optional Ligand restraints file in CIF format
+  .caption = This restraints file will be used to get the formal \
+    charge of the ligand.
+  .help = This restraints file will be used to get the formal \
+    charge of the ligand.
+  .style = file_type:cif input_file
 list_charges = False
   .type = bool
 verbose = False
@@ -66,13 +74,13 @@ def run(args, log):
   if(params.verbose):
     print >> log,"Starting Q|R charge"
   del sys.argv[1:]
-  rc = charges.run(params.model_file_name,
-                   list_charges=params.list_charges,
-                   verbose=params.verbose,
-                 )
-  if(params.verbose): 
-    print >> log, rc
-    print >> log, "Time: %6.4f" % (time.time() - t0)
+  cc = charges.charges_class(params.model_file_name,
+                             ligand_file_names=[params.ligand_cif_file_name],
+                             list_charges=params.list_charges,
+                             verbose=params.verbose,
+  )
+  rc = cc.get_total_charge()
+  print rc
 
 if __name__ == '__main__':
   run(args=sys.argv[1:], log=log)
