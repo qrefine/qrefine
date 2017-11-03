@@ -76,15 +76,18 @@ def run(args, log):
   if(params.verbose):
     print >> log,"Starting Q|R charge"
   del sys.argv[1:]
-  rc = charges.run(
+  cc = charges.charges_class(
     params.model_file_name,
+    ligand_file_names=[params.ligand_cif_file_name],
     list_charges=params.list_charges,
     assert_correct_chain_terminii=params.assert_correct_chain_terminii,
     verbose=params.verbose,
   )
+  rc = cc.get_total_charge()
   if(params.verbose): 
     print >> log, rc
     print >> log, "Time: %6.4f" % (time.time() - t0)
+
 
 if __name__ == '__main__':
   run(args=sys.argv[1:], log=log)
