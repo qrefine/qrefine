@@ -50,7 +50,7 @@ def run(pdb_file, log):
       qm_engine.label = qm_pdb_file[:-4]
       qm_engine.run_qr(atoms,charge=qm_charge, pointcharges=None,
           coordinates=qm_pdb_file[:-4]+".xyz", define_str=None)
-      energy = self.qm_engine.energy_free*unit_convert
+      energy = qm_engine.energy_free #*unit_convert
       print >> log, " frag:", i, "  energy:", energy 
 
 
