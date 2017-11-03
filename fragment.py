@@ -367,7 +367,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
                       crystal_symmetry=fragment_extracts.super_cell_cs,
                       model_completion=False,
-                      original_pdb_filename=self.super_cell_file) 
+                      original_pdb_filename=fragment_extracts.super_cell_file) 
   ##for debugging
   if(fragment_extracts.debug):  
     fragment_hierarchy.write_pdb_file(
