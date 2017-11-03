@@ -26,12 +26,15 @@ def run(pdb_file, log):
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
+  print >> log, '\n\tfragmenting "%s"' % pdb_file
+  t0=time.time()
   fq = fragments(
     pdb_hierarchy=ph,
     crystal_symmetry=cs,
     charge_embedding=True,
     debug=True,
     qm_engine_name="mopac")
+  print >> log, '\n\tfragmenting took %0.1f\n' % (time.time()-t0)
   print >> log, "Residue indices for each cluster:\n", fq.clusters
   fq_ext = fragment_extracts(fq)
   qm_engine = Mopac()
