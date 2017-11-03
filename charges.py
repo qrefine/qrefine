@@ -63,14 +63,13 @@ class chemical_component_class(dict):
 
 class charges_class:
   def __init__(self,
-               pdb_filename,
-               ligand_cif_file_names=None,
+               pdb_filename=None,
                raw_records=None,
                pdb_inp=None,
+               ligand_cif_file_names=None,
                #list_charges=False,
                verbose=False,
                ):
-    print 'pdb_filename',pdb_filename
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
@@ -706,6 +705,7 @@ def run(pdb_filename,
         ligand_file_names=None,
         list_charges=False,
         verbose=False):
+  assert 0
   #print "run",pdb_filename
   data = {}
   if os.path.exists(pdb_filename.replace('.pdb', '.psf')):
@@ -724,6 +724,7 @@ def run(pdb_filename,
     #print data
 
   # needs hetero_charges?
+  mon_lib_server = get_mon_lib_server(ligand_cif_file_names=ligand_file_names)
   total_charge = get_total_charge_from_pdb(pdb_filename,
                                            mon_lib_server,
                                            list_charges=list_charges,
