@@ -63,13 +63,14 @@ class chemical_component_class(dict):
 
 class charges_class:
   def __init__(self,
-               pdb_filename=None,
+               pdb_filename,
+               ligand_cif_file_names=None,
                raw_records=None,
                pdb_inp=None,
-               ligand_cif_file_names=None,
                #list_charges=False,
                verbose=False,
                ):
+    print 'pdb_filename',pdb_filename
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
@@ -728,15 +729,6 @@ def run(pdb_filename,
       data[key]+=float(tmp[6])
 
   # needs hetero_charges?
-  if(verbose):
-    print 'list_charges',list_charges
-    print 'verbose     ',verbose
-  total_charge = get_total_charge_from_pdb(
-    pdb_filename,
-    list_charges=list_charges,
-    assert_correct_chain_terminii=assert_correct_chain_terminii,
-    check=None, #data,
-    verbose=verbose,
   )
   return total_charge
 
