@@ -6,9 +6,7 @@ from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
 from utils import hierarchy_utils
-from iotbx.pdb import amino_acid_codes as acc
-
-mon_lib_server = server.server()
+from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -31,6 +29,17 @@ non_hydrogens_per_aa_polymer = {}
 non_standard_amino_acids = { #"SAR" : None,
                             }
 
+def get_mon_lib_server(ligand_cif_file_names=None):
+  mon_lib_server = server.server()
+  if ligand_cif_file_names:
+    for fn in ligand_cif_file_names:
+      #iotbx.cif.reader(input_string=ligand_cif,
+      #                 cif_object=cif_object,
+      #                 strict=False,
+      #)
+      mon_lib_server.process_cif(file_name=fn)
+  return mon_lib_server
+
 class chemical_component_class(dict):
   def get_total_charge(self):
     total = 0
@@ -51,6 +60,125 @@ class chemical_component_class(dict):
       if not getattr(atom, 'type_symbol') in ["H", "D"]:
         hs.append(atom)
     return hs
+
+class charges_class:
+  def __init__(self,
+               pdb_filename,
+               ligand_cif_file_names=None,
+               raw_records=None,
+               pdb_inp=None,
+               #list_charges=False,
+               verbose=False,
+               ):
+    print 'pdb_filename',pdb_filename
+    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
+                                            raw_records=raw_records,
+                                            pdb_inp=pdb_inp,
+                                           )
+    print ppf
+    self.pdb_inp = ppf.all_chain_proxies.pdb_inp
+    self.pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy
+    self.crystal_symmetry = self.pdb_inp.crystal_symmetry_from_cryst1()
+    assert self.crystal_symmetry, 'There is no CRYST1 record in the input file'
+
+    self.hetero_charges = get_hetero_charges(self.pdb_inp,
+                                             self.pdb_hierarchy,
+    )
+    if not self.hetero_charges:
+      # some defaults
+      self.hetero_charges = default_ion_charges
+    self.inter_residue_bonds = get_inter_residue_bonds(ppf)
+    if verbose:
+      for key, item in inter_residue_bonds.items():
+        if type(key)!=type(0) and len(key)==2: print key, item
+    # merge atoms from clustering
+    self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
+      self.pdb_hierarchy,
+      )
+    # needs hetero_charges?
+    self.mon_lib_server = get_mon_lib_server(
+      ligand_cif_file_names=ligand_cif_file_names)
+
+  def get_total_charge(self,
+                       list_charges=False,
+                       check=False,
+                       verbose=False,
+                      ):
+    total_charge = calculate_pdb_hierarchy_charge(
+      self.pdb_hierarchy,
+      hetero_charges=self.hetero_charges,
+      inter_residue_bonds=self.inter_residue_bonds,
+      list_charges=list_charges,
+      check=check,
+      verbose=verbose,
+    )
+    print 'total_charge',total_charge
+    return total_charge
+
+  def write_pdb_hierarchy_qxyz_file(self,
+                                    file_name="qxyz_cctbx.dat",
+                                    exclude_water=True,
+                                    charge_scaling_positions=None,
+                                    scale=0,
+                                    ):
+    self.write_charge_and_coordinates_from_hierarchy(
+      file_name=file_name,
+      qxyz_order='qxyz',
+      exclude_water=exclude_water,
+      charge_scaling_positions=None,
+      scale=0,
+    )
+
+  def write_charge_and_coordinates_from_hierarchy(self,
+                                                  file_name,
+                                                  qxyz_order='qxyz',
+                                                  exclude_water=True,
+                                                  charge_scaling_positions=None,
+                                                  scale=0,
+                                                  assert_no_alt_loc=False,
+                                                  ):
+    qxyz = None
+    for residue in hierarchy_utils.generate_residue_groups(
+      self.pdb_hierarchy,
+      assert_no_alt_loc=assert_no_alt_loc,
+      exclude_water=exclude_water,
+      ):
+      if qxyz is None:
+        qxyz = get_partial_point_charges(residue,
+                                         self.mon_lib_server,
+                                         hetero_charges=self.hetero_charges)
+      else:
+        qxyz = qxyz + get_partial_point_charges(residue,
+                                                self.mon_lib_server,
+                                                hetero_charges=self.hetero_charges)
+    if qxyz is None: return
+    scale_partial_point_charges(qxyz,charge_scaling_positions, scale=0)
+    qxyz_file = open(file_name,"w+")
+    if qxyz_order=='qxyz': # tetrachem?
+      qxyz_file.write(str(self.pdb_hierarchy.atoms_size())+ "  \n")
+      qxyz_file.write("  \n")
+    elif qxyz_order=='xyzq':
+      pass
+    else:
+      raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
+    outl = ""
+    for i, item in enumerate(qxyz):
+      if item[0]==0 or item[0] is None:
+        outl += ' %s has zero/None partial charge\n' % hierarchy.atoms()[i].quote()
+      if qxyz_order=='qxyz':
+        item_list = item + ["  \n"]
+      elif qxyz_order=='xyzq':
+        item_list = item[1:]+item[0:1] + ["  \n"]
+      else:
+        raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
+      item_string = "  ".join(str(elm) for elm in item_list)
+      qxyz_file.write(item_string)
+    qxyz_file.close()
+
+    if outl:
+      print 'WARNINGS'
+      print outl
+      raise Sorry('point charges are not set.')
 
 def get_aa_charge(code):
   # get from cache first
@@ -339,18 +467,20 @@ def calculate_residue_charge(rg,
     annot = 'non-polymer'
   return charge, rc, annot
 
-def _get_restraints_from_resname(resname):
+def _get_restraints_from_resname(resname, mon_lib_server):
   input_resname = resname
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
-    resname = acc.three_letter_l_given_three_letter_d.get(resname, None)
+    resname = aac.three_letter_l_given_three_letter_d.get(resname, None)
     if resname is not None:
       restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
     assert restraints, 'no restraints for "%s" found' % input_resname
   return restraints
 
-def get_partial_point_charges(rg, hetero_charges=None):
+def get_partial_point_charges(rg,
+                              mon_lib_server,
+                              hetero_charges=None):
   """
   This function relies only on the residue group and monomer library server
   """
@@ -366,7 +496,7 @@ def get_partial_point_charges(rg, hetero_charges=None):
           }
   tmp = []
   for ag in rg.atom_groups():
-    restraints = _get_restraints_from_resname(ag.resname)
+    restraints = _get_restraints_from_resname(ag.resname, mon_lib_server)
     atom_dict = restraints.atom_dict()
     for atom in ag.atoms():
       # ions
@@ -477,113 +607,6 @@ def calculate_pdb_hierarchy_charge(hierarchy,
     return charges
   return charge
 
-def get_total_charge_from_pdb(pdb_filename=None,
-                              raw_records=None,
-                              pdb_inp=None,
-                              hetero_charges=None,
-                              inter_residue_bonds=None,
-                              list_charges=False,
-                              assert_correct_chain_terminii=True,
-                              check = None,
-                              verbose=False,
-  ):
-  ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
-                                          raw_records=raw_records,
-                                          pdb_inp=pdb_inp,
-                                      )
-  pdb_inp = ppf.all_chain_proxies.pdb_inp
-  cs = pdb_inp.crystal_symmetry_from_cryst1()
-  assert cs, 'There is no CRYST1 record in the input file'
-  if not hetero_charges:
-    hetero_charges = get_hetero_charges(ppf.all_chain_proxies.pdb_inp,
-                                        ppf.all_chain_proxies.pdb_hierarchy,
-    )
-    if not hetero_charges:
-      # some defaults
-      hetero_charges = default_ion_charges
-  if not inter_residue_bonds:
-    inter_residue_bonds = get_inter_residue_bonds(ppf)
-  if verbose:
-    for key, item in inter_residue_bonds.items():
-      if type(key)!=type(0) and len(key)==2: print key, item
-  pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
-    ppf.all_chain_proxies.pdb_hierarchy,
-    )
-  total_charge = calculate_pdb_hierarchy_charge(
-    pdb_hierarchy, # ppf.all_chain_proxies.pdb_hierarchy,
-    hetero_charges=hetero_charges,
-    inter_residue_bonds=inter_residue_bonds,
-    list_charges=list_charges,
-    assert_correct_chain_terminii=assert_correct_chain_terminii,
-    check=check,
-    verbose=verbose,
-  )
-  return total_charge
-
-def write_charge_and_coordinates_from_hierarchy(hierarchy,
-                                                file_name,
-                                                qxyz_order='qxyz',
-                                                hetero_charges=None,
-                                                exclude_water=True,
-                                                charge_scaling_positions=None,
-                                                assert_no_alt_loc=False,
-                                                scale=0
-                                                ):
-  qxyz = None
-  for residue in hierarchy_utils.generate_residue_groups(hierarchy,
-                                         assert_no_alt_loc=assert_no_alt_loc,
-                                         exclude_water=exclude_water,
-                                        ):
-    if qxyz is None:
-      qxyz = get_partial_point_charges(residue, hetero_charges=hetero_charges)
-    else:
-      qxyz = qxyz + get_partial_point_charges(residue,
-                                              hetero_charges=hetero_charges)
-  if qxyz is None: return
-  scale_partial_point_charges(qxyz,charge_scaling_positions, scale=0)
-  qxyz_file = open(file_name,"w+")
-  if qxyz_order=='qxyz': # tetrachem?
-    qxyz_file.write(str(hierarchy.atoms_size())+ "  \n")
-    qxyz_file.write("  \n")
-  elif qxyz_order=='xyzq':
-    pass
-  else:
-    raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
-  outl = ""
-  for i, item in enumerate(qxyz):
-    if item[0]==0 or item[0] is None:
-      outl += ' %s has zero/None partial charge\n' % hierarchy.atoms()[i].quote()
-    if qxyz_order=='qxyz':
-      item_list = item + ["  \n"]
-    elif qxyz_order=='xyzq':
-      item_list = item[1:]+item[0:1] + ["  \n"]
-    else:
-      raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
-    item_string = "  ".join(str(elm) for elm in item_list)
-    qxyz_file.write(item_string)
-  qxyz_file.close()
-
-  if outl:
-    print 'WARNINGS'
-    print outl
-    raise Sorry('point charges are not set.')
-
-def write_pdb_hierarchy_qxyz_file(hierarchy,
-                                  file_name="qxyz_cctbx.dat",
-                                  hetero_charges=None,
-                                  exclude_water=True,
-                                  charge_scaling_positions=None,
-                                  scale=0,
-                                 ):
-  write_charge_and_coordinates_from_hierarchy(hierarchy,
-                                              file_name=file_name,
-                                              qxyz_order='qxyz',
-                                              hetero_charges=hetero_charges,
-                                              exclude_water=exclude_water,
-                                              charge_scaling_positions=None,
-                                              scale=0,
-                                              )
-
 def write_pdb_hierarchy_xyzq_file(hierarchy,
                                   file_name="xyzq_cctbx.dat",
                                   hetero_charges=None,
@@ -689,6 +712,7 @@ def get_inter_residue_bonds(ppf, verbose=False):
   return inter_residue_bonds
 
 def run(pdb_filename,
+        ligand_file_names=None,
         list_charges=False,
         assert_correct_chain_terminii=True,
         verbose=False):

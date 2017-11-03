@@ -19,6 +19,14 @@ model_file_name = None
   .multiple = False
   .help = Model file name
   .style = file_type:pdb bold input_file
+ligand_cif_file_name = None
+  .type = path
+  .short_caption = Optional Ligand restraints file in CIF format
+  .caption = This restraints file will be used to get the formal \
+    charge of the ligand.
+  .help = This restraints file will be used to get the formal \
+    charge of the ligand.
+  .style = file_type:cif input_file
 list_charges = False
   .type = bool
 assert_correct_chain_terminii = True
