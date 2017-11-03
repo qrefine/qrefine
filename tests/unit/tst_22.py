@@ -14,9 +14,12 @@ def run(prefix):
   """
   run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_name = os.path.join(qr_unit_tests_data, "tst_22.pdb")
-  cmd = "qr.charges %s"%pdb_name
+  cmd = "qr.charges %s verbose=False"%pdb_name
   if(0): print cmd
-  easy_run.call(cmd)
+  r = easy_run.go(cmd)
+  # Make sure no
+  assert len(r.stderr_lines)==0, r.stderr_lines
+  assert len(r.stdout_lines)==0, r.stdout_lines
 
 if __name__ == '__main__':
   t0 = time.time()
