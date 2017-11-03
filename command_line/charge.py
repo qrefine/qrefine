@@ -53,6 +53,7 @@ def get_inputs(args, log, master_params):
   return params
 
 def run(args, log):
+  t0 = time.time()
   if len(args)==0:
     print_legend_and_usage(log)
     return
@@ -69,9 +70,9 @@ def run(args, log):
                    list_charges=params.list_charges,
                    verbose=params.verbose,
                  )
-  if(params.verbose): print rc
+  if(params.verbose): 
+    print >> log, rc
+    print >> log, "Time: %6.4f" % (time.time() - t0)
 
 if __name__ == '__main__':
-  t0 = time.time()
   run(args=sys.argv[1:], log=log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
