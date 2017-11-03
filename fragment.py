@@ -53,6 +53,9 @@ class fragments(object):
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
     self.pdb_hierarchy_super = self.super_cell.ph_super_sphere
+    ## write super_cell.pdb as the reference for capping 
+    self.super_cell_file = "super_cell.pdb"
+    self.super_cell.ph_super_cell.write_pdb_file(file_name=self.super_cell_file) 
     if(1):
       self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
                            if atom.pdb_label_columns()[4]!=" "]
@@ -320,7 +323,7 @@ class fragments(object):
       charge_hierarchy = completion.run(pdb_hierarchy=fragment_super_hierarchy,
                       crystal_symmetry=self.super_cell.cs_box,
                       model_completion=False,
-                      original_pdb_filename=None)
+                      original_pdb_filename=self.super_cell_file)
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.super_cell.cs_box)
       if(self.debug):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
@@ -348,8 +351,7 @@ class fragments(object):
         cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
           crystal_symmetry=self.super_cell.cs_box)
 
-def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index, 
-                                       original_pdb_filename=None):
+def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   fragment_hierarchy = fragment_extracts.pdb_hierarchy_super.select(
     fragment_selection)
@@ -362,17 +364,12 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index,
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
-  ##TODO: remove if 
-  ## original_pdb_filename has altlocs, it will throw  error
-  ## 
-  #if(fragment_extracts.pdb_hierarchy_super.altloc_indices().size()>1):
-  #  original_pdb_filename=None
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
                       crystal_symmetry=fragment_extracts.super_cell_cs,
                       model_completion=False,
-                      original_pdb_filename=original_pdb_filename) ##debuging
+                      original_pdb_filename=self.super_cell_file) 
   ##for debugging
-  if(fragment_extracts.debug):  ## for degugging
+  if(fragment_extracts.debug):  
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -459,4 +456,5 @@ def fragment_extracts(fragments):
     super_cell_cs        = fragments.super_cell.cs_box,
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales,
-    debug                = fragments.debug)
+    debug                = fragments.debug,
+    super_cell_file      = fragments.super_cell_file)

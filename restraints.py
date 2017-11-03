@@ -106,8 +106,7 @@ class from_qm(object):
       print index
       qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=self.fragment_extracts,
-                          index=index,
-                          original_pdb_filename=os.path.abspath(self.file_name))
+                          index=index)
       #
       qm_charge = charge(fragment_extracts=self.fragment_extracts,
                                       index=index)
