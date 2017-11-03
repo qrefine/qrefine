@@ -63,14 +63,13 @@ class chemical_component_class(dict):
 
 class charges_class:
   def __init__(self,
-               pdb_filename,
-               ligand_cif_file_names=None,
+               pdb_filename=None,
                raw_records=None,
                pdb_inp=None,
+               ligand_cif_file_names=None,
                #list_charges=False,
                verbose=False,
                ):
-    print 'pdb_filename',pdb_filename
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
