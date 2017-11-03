@@ -420,6 +420,7 @@ def write_mm_charge_file(fragment_extracts, index):
     charge_scaling_positions = non_qm_edge_positions
     if(fragment_extracts.qm_engine_name == "turbomole"):
       file_name = sub_working_folder + str(index) + "_xyzq_cctbx.dat"
+      assert 0
       write_pdb_hierarchy_xyzq_file(
         non_fragment_hierarchy,
         file_name=file_name,
@@ -427,6 +428,7 @@ def write_mm_charge_file(fragment_extracts, index):
         charge_scaling_positions=charge_scaling_positions)
     if(fragment_extracts.qm_engine_name == "terachem"):
       file_name = sub_working_folder + str(index) + "_qxyz_cctbx.dat"
+      assert 0
       write_pdb_hierarchy_qxyz_file(
         non_fragment_hierarchy,
         file_name=file_name,
