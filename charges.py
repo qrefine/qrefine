@@ -74,7 +74,6 @@ class charges_class:
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
                                            )
-    print ppf
     self.pdb_inp = ppf.all_chain_proxies.pdb_inp
     self.pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy
     self.crystal_symmetry = self.pdb_inp.crystal_symmetry_from_cryst1()
@@ -111,7 +110,6 @@ class charges_class:
       check=check,
       verbose=verbose,
     )
-    print 'total_charge',total_charge
     return total_charge
 
   def write_pdb_hierarchy_qxyz_file(self,
@@ -716,7 +714,6 @@ def run(pdb_filename,
         assert_correct_chain_terminii=True,
         verbose=False):
   assert 0
-  #print "run",pdb_filename
   data = {}
   if os.path.exists(pdb_filename.replace('.pdb', '.psf')):
     f=file(pdb_filename.replace('.pdb', '.psf'), 'rb')
@@ -726,12 +723,9 @@ def run(pdb_filename,
       tmp = line.split()
       if not tmp: continue
       if tmp[1].find('PRO')==-1: continue
-    #  print line
       key = '.'.join(tmp[1:4])
-     # print key
       data.setdefault(key, 0)
       data[key]+=float(tmp[6])
-    #print data
 
   return total_charge
 
