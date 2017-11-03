@@ -58,8 +58,12 @@ def get_aa_charge(code):
   # not sure what to do about novel ligands...
   tmp = charge_per_aa_polymer.get(code, None)
   if tmp: return tmp
+  l_peptide = acc.three_letter_l_given_three_letter_d.get(code, None)
   cc = chemical_component_class()
-  cc.update(get_cif_dictionary(code))
+  if l_peptide:
+    cc.update(get_cif_dictionary(l_peptide))
+  else:
+    cc.update(get_cif_dictionary(code))
   tmp = cc.get_total_charge()
   charge_per_aa_polymer[code] = tmp
   return tmp
@@ -285,12 +289,15 @@ def calculate_residue_charge(rg,
       if verbose:
         print 'covalent_bond',atom_i_seqs, inter_residue_bonds
       annot += 'Coval. '
+    if hierarchy_utils.is_n_terminal_atom_group(ag):
+      diff_hs-=1
     if verbose:
-      print 'residue: %s charge: %s poly_hs: %s diff_hs: %s' % (
+      print 'residue: %s charge: %s poly_hs: %s diff_hs: %s %s' % (
         ag.resname,
         charge,
         poly_hs,
         diff_hs,
+        annot,
       )
     charge+=diff_hs
     if charge: verbose=0

@@ -7,6 +7,9 @@ from mmtbx.monomer_library import server
 from mmtbx.monomer_library import pdb_interpretation
 
 from iotbx.pdb import amino_acid_codes as aac
+n_terminal_amino_acid_codes = ['FVA']
+c_terminal_amino_acid_codes = []
+
 
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
@@ -250,3 +253,15 @@ class smart_add_atoms(list):
         for atom in remove:
           remove_atom_from_chain(chain1, atom)
     list.append(self, item)
+
+def is_n_terminal_residue(residue_group):
+  residues = []
+  for atom_group in residue_group.atom_groups():
+    if atom_group.resname not in residues: residues.append(atom_group.resname)
+  assert len(residues)==1
+  if residues[0] in n_terminal_amino_acid_codes: return True
+  return False
+
+def is_n_terminal_atom_group(atom_group):
+  if atom_group.resname in n_terminal_amino_acid_codes: return True
+  return False

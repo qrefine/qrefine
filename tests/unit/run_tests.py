@@ -72,7 +72,7 @@ def clean_up(prefix,mtz_name = None):
     'test_original_pdb_capping.pdb', 'test_short_gap.pdb', 
     'test_short_gap_capping.pdb']
   files_to_remove2 = [
-    'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 
+    'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
     'tst_14_super_sphere.pdb']
   files_to_remove3 = ['cluster_false.pkl', 'cluster_true.pkl']
   files_to_remove4 = ['A.pdb', 'B.pdb', 'W.pdb']

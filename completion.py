@@ -9,9 +9,6 @@ from scitbx.math import dihedral_angle
 
 from iotbx.pdb import amino_acid_codes as aac
 
-n_terminal_amino_acid_codes = ['FVA']
-c_terminal_amino_acid_codes = []
-
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -452,14 +449,6 @@ def iterate_over_threes(hierarchy,
       pass
   return additional_hydrogens
 
-def is_n_terminal_residue(residue_group):
-  residues = []
-  for atom_group in residue_group.atom_groups():
-    if atom_group.resname not in residues: residues.append(atom_group.resname)
-  assert len(residues)==1
-  if residues[0] in n_terminal_amino_acid_codes: return True
-  return False
-
 def iterate_using_original(hierarchy,
                            geometry_restraints_manager,
                            original_hierarchy,
@@ -509,7 +498,7 @@ def iterate_using_original(hierarchy,
     if start:
       ptr+=1
       assert ptr==1
-      if is_n_terminal_residue(rg):
+      if hierarchy_utils.is_n_terminal_residue(rg):
         rc = None
       else:
         rc = add_n_terminal_hydrogens_to_residue_group(
