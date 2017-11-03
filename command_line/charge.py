@@ -76,6 +76,12 @@ def run(args, log):
   if(params.verbose):
     print >> log,"Starting Q|R charge"
   del sys.argv[1:]
+  cc = charges.charges_class(params.model_file_name,
+                             ligand_file_names=[params.ligand_cif_file_name],
+                             list_charges=params.list_charges,
+                             verbose=params.verbose,
+  )
+  rc = cc.get_total_charge()
 
 if __name__ == '__main__':
   run(args=sys.argv[1:], log=log)
