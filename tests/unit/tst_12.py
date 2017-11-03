@@ -1083,10 +1083,8 @@ def test_10_capping():
   f.write(pdbs['10_capping'])
   f.close()
   from qrefine import charges
-  rc = charges.run('test_10_capping.pdb',
-                   list_charges=True,
-                   )
-  #print '+'*80
+  cc = charges.charges_class('test_10_capping.pdb')
+  rc = cc.get_total_charge(list_charges=True)
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):
