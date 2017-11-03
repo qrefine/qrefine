@@ -15,7 +15,7 @@ def run(prefix):
   run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_name = os.path.join(qr_unit_tests_data, "tst_22.pdb")
   cmd = "qr.charges %s"%pdb_name
-  print cmd
+  if(0): print cmd
   easy_run.call(cmd)
 
 if __name__ == '__main__':

@@ -69,7 +69,7 @@ def run(args, log):
                    list_charges=params.list_charges,
                    verbose=params.verbose,
                  )
-  print rc
+  if(params.verbose): print rc
 
 if __name__ == '__main__':
   t0 = time.time()
