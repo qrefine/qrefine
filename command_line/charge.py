@@ -62,6 +62,8 @@ def run(args, log):
     master_params = master_params(),
     #validated     = validated,
   )
+  if(params.verbose):
+    print >> log,"Starting Q|R charge"
   del sys.argv[1:]
   rc = charges.run(params.model_file_name,
                    list_charges=params.list_charges,
@@ -71,6 +73,5 @@ def run(args, log):
 
 if __name__ == '__main__':
   t0 = time.time()
-  print >> log,"Starting Q|R charge"
   run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

@@ -691,8 +691,9 @@ def run(pdb_filename,
     #print data
 
   # needs hetero_charges?
-  print 'list_charges',list_charges
-  print 'verbose     ',verbose
+  if(verbose):
+    print 'list_charges',list_charges
+    print 'verbose     ',verbose
   total_charge = get_total_charge_from_pdb(pdb_filename,
                                            list_charges=list_charges,
                                            check=None, #data,
