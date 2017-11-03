@@ -1,5 +1,5 @@
 from __future__ import division
-# LIBTBX_SET_DISPATCHER_NAME qr.fragmentation
+# LIBTBX_SET_DISPATCHER_NAME qr.fqm_mopac
 import sys
 import time
 import os.path
@@ -10,6 +10,8 @@ from qrefine.fragment import fragment_extracts
 from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
 from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
+from qrefine.plugin.ase.mopac_qr import Mopac
+from qrefine.restraints import ase_atoms_from_pdb_hierarchy
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_yoink_path =os.path.join(qrefine_path, "plugin","yoink","yoink")
@@ -29,20 +31,24 @@ def run(pdb_file, log):
     crystal_symmetry=cs,
     charge_embedding=True,
     debug=True,
-    qm_engine_name="terachem")
+    qm_engine_name="mopac")
   print >> log, "Residue indices for each cluster:\n", fq.clusters
   fq_ext = fragment_extracts(fq)
+  qm_engine = Mopac()
   for i in xrange(len(fq.clusters)):
       # add capping for the cluster and buffer
       print >> log, "capping frag:", i
-      get_qm_file_name_and_pdb_hierarchy(
+      qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=fq_ext,
                           index=i)
-      print >>log, "point charge file:", i
-      #write mm point charge file
-      write_mm_charge_file(fragment_extracts=fq_ext,
+      qm_charge = charge(fragment_extracts=fq_ext,
                                       index=i)
-
+      atoms = ase_atoms_from_pdb_hierarchy(ph)
+      qm_engine.label = qm_pdb_file[:-4]
+      qm_engine.run_qr(atoms,charge=qm_charge, pointcharges=None,
+          coordinates=qm_pdb_file[:-4]+".xyz", define_str=None)
+      energy = self.qm_engine.energy_free*unit_convert
+      print >> log, " frag:", i, "  energy:", energy 
 
 
 if (__name__ == "__main__"):
