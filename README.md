@@ -19,8 +19,9 @@ bio-macromolecules by employing a divide and conquer type approach. We
 have developed a new fragmentation approach for achieving a
 quantum-refinement of bio-macromolecules.
 
-### Citations: Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel
-Afonine, Q|R: Quantum-based Refinement , Acta Crystallographica
+### Citations:
+Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
+Q|R: Quantum-based Refinement , Acta Crystallographica
 Section D (2017) D73, 45-52. DOI: 10.1107/S2059798316019847
 
 Min Zheng, Mark P. Waller, Toward more efficient density-based
@@ -29,7 +30,6 @@ qua.25336
 
 Min Zheng, Mark P. Waller, Adaptive QM/MM Methods, WIREs
 Comput. Mol. Sci. (2016) DOI: 10.1002/wcms.1255
-
 
 ### Quickstart
 
@@ -50,6 +50,16 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
 To remain up-to-date with the changes in the *cctbx* project that contains many
 of the functions used in Q|R, remove the **cctbx_project** directory in the
 modules directory. The above command will clone it from *GitHub*.
+
+ ###### In case the quickstart command fails
+
+ Clone the qrefine repo in the modules directory of the Phenix installation.
+```
+  phenix.python -m pip install ase
+  phenix.python -m pip install JPype1
+  phenix.python -m pip install pymongo
+  libtbx.configure qrefine
+```
 
  ### Run Tests 
 
