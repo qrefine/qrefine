@@ -4,9 +4,6 @@ import itertools
 import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
-from charges import get_total_charge_from_pdb
-from charges import write_pdb_hierarchy_qxyz_file
-from charges import write_pdb_hierarchy_xyzq_file
 from utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
@@ -333,7 +330,9 @@ class fragments(object):
       if(self.pdb_hierarchy_super.altloc_indices().size()>1):
         charge = 0
       if(1):
-        charge = get_total_charge_from_pdb(raw_records=raw_records)
+        from charges import charges_class
+        cc = charges_class(raw_records=raw_records)
+        charge = cc.get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)

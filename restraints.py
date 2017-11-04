@@ -4,7 +4,7 @@ import os
 import ase.units as ase_units
 import mmtbx.restraints
 from libtbx.utils import Sorry
-from charges import get_total_charge_from_pdb
+from charges import charges_class
 from scitbx.array_family import flex
 from clustering import betweenness_centrality_clustering
 from plugin.ase.mopac_qr import Mopac
@@ -68,7 +68,8 @@ class from_qm(object):
       os.mkdir(self.working_folder)
     if(charge is None and clustering is False):
       raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-      self.charge = get_total_charge_from_pdb(raw_records=raw_records)
+      cc = charges_class(raw_records=raw_records)
+      self.charge = cc.get_total_charge()
     else: self.charge = charge
     self.clustering = clustering
     #self.shared_disk = shared_disk
