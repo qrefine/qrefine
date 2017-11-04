@@ -6,7 +6,7 @@ from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
 from utils import hierarchy_utils
-from iotbx.pdb import amino_acid_codes as aac
+from iotbx.pdb import amino_acid_codes as acc
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
