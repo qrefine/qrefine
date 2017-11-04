@@ -74,8 +74,8 @@ class charges_class:
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
                                            )
+    self.update_pdb_hierarchy(ppf.all_chain_proxies.pdb_hierarchy)
     self.pdb_inp = ppf.all_chain_proxies.pdb_inp
-    self.pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy
     self.crystal_symmetry = self.pdb_inp.crystal_symmetry_from_cryst1()
     assert self.crystal_symmetry, 'There is no CRYST1 record in the input file'
 
@@ -96,6 +96,14 @@ class charges_class:
     # needs hetero_charges?
     self.mon_lib_server = get_mon_lib_server(
       ligand_cif_file_names=ligand_cif_file_names)
+
+  def update_pdb_hierarchy(self, pdb_hierarchy):
+    self.pdb_hierarchy = pdb_hierarchy
+    if hasattr(self, 'pdb_inp'): self.pdb_inp = None
+    # merge atoms from clustering
+    self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
+      self.pdb_hierarchy,
+      )
 
   def get_total_charge(self,
                        list_charges=False,
