@@ -104,7 +104,8 @@ def run():
     "tst_19.py",
     "tst_20.py",
     "tst_21.py",
-    "tst_22.py"
+    "tst_22.py",
+    "tst_23.py",
   ]
   failed = 0
   for file_name in tests:
