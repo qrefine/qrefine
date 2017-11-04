@@ -133,6 +133,7 @@ def run():
             ans,
             )
         print 'OK'
+        os.remove(fn)
 
 if __name__=='__main__':
   run()
