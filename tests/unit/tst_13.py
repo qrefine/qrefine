@@ -60,7 +60,7 @@ class lbfgs_gradient(object):
 random.seed(0)
 flex.set_random_seed(0)
 
-def run(prefix = "tst_13"):
+def run(prefix):
   """
   compare gradients from entire qm and clustered qm.
   """
@@ -87,12 +87,10 @@ def run(prefix = "tst_13"):
 
 def qm_gradient(cs, ph, clustering=False):
   fq = from_qm(
-    charge_embedding=False,
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
     crystal_symmetry=cs,
-    clustering=clustering,
-    maxnum_residues_in_cluster=8)
+    clustering=clustering)
 
   fm = fragments(
    working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
@@ -115,12 +113,10 @@ def qm_gradient(cs, ph, clustering=False):
 
 def qm_opt(cs, ph, file, cluster=False):
   fq = from_qm(
-    charge_embedding=False,
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
     crystal_symmetry=cs,
-    clustering=cluster,
-    maxnum_residues_in_cluster=8)
+    clustering=cluster)
 
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   opt = lbfgs_gradient(sys, fq)
@@ -131,9 +127,12 @@ if(__name__ == "__main__"):
   t0 = time.time()
   log = sys.stdout
   prefix = "tst_13"
-  if(0):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
+  try:
+    if(1):
+      run(prefix)
+      print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+    else:
+      print prefix + ":  Skipped    "
+  except Exception, e:
+    print prefix, str(e)
   run_tests.clean_up(prefix)
