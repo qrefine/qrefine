@@ -37,7 +37,7 @@ def run(prefix = "tst_19"):
       sites_cart_subtract = iotbx.pdb.input("%s/subtract-%s_refined.pdb"%(prefix,data_file_prefix)).\
                        construct_hierarchy().extract_xray_structure().sites_cart()
       rmsd_diff = sites_cart_average.rms_difference(sites_cart_subtract)
-      assert approx_equal(rmsd_diff, 0, 0.1)
+      assert approx_equal(rmsd_diff, 0, 0.1), 'rmsd diff between subtract and average is too large %0.3f' % rmsd_diff
   run_tests.clean_up(prefix)
 
 if __name__ == '__main__':

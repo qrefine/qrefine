@@ -21,6 +21,8 @@ model_file_name = None
   .style = file_type:pdb bold input_file
 list_charges = False
   .type = bool
+assert_correct_chain_terminii = True
+  .type = bool
 verbose = False
   .type = bool
 """
@@ -66,10 +68,12 @@ def run(args, log):
   if(params.verbose):
     print >> log,"Starting Q|R charge"
   del sys.argv[1:]
-  rc = charges.run(params.model_file_name,
-                   list_charges=params.list_charges,
-                   verbose=params.verbose,
-                 )
+  rc = charges.run(
+    params.model_file_name,
+    list_charges=params.list_charges,
+    assert_correct_chain_terminii=params.assert_correct_chain_terminii,
+    verbose=params.verbose,
+  )
   if(params.verbose): 
     print >> log, rc
     print >> log, "Time: %6.4f" % (time.time() - t0)

@@ -219,7 +219,8 @@ def calculate_residue_charge(rg,
   ag = rg.atom_groups()[0]
   charge = get_aa_charge(ag.resname)
   rc = get_aa_charge(ag.resname)
-  if ag.resname in ['GLU', 'ASP']: rc=-1 # reporting only
+  if ag.resname in ['GLU', 'ASP']:
+    rc=-1 # reporting only
   annot = ''
   if verbose:
     print '%s\nstarting charge: %s' % ('*'*80, charge)
@@ -292,11 +293,12 @@ def calculate_residue_charge(rg,
     if hierarchy_utils.is_n_terminal_atom_group(ag):
       diff_hs-=1
     if verbose:
-      print 'residue: %s charge: %s poly_hs: %s diff_hs: %s %s' % (
+      print 'residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
         ag.resname,
         charge,
         poly_hs,
         diff_hs,
+        charge+diff_hs,
         annot,
       )
     charge+=diff_hs
@@ -320,15 +322,21 @@ def calculate_residue_charge(rg,
         allowable_amino_acid_charges[resname]+1,
         )
   else:
- #   print "NOT POLY",ag.resname, get_class(ag.resname),
- #   print charge
-
-    if 0 and ag.resname not in ["NO3",
-                          "PXZ",
-                          "SRT",
-                          "HM7",
-                        ]:
-      assert 0
+    restraints = _get_restraints_from_resname(ag.resname)
+    ag_names = set()
+    for atom in ag.atoms():
+      ag_names.add(atom.name.strip())
+    atom_dict = restraints.atom_dict()
+    cif_names = set()
+    total = 0
+    for name, atom in atom_dict.items():
+      cif_names.add(name)
+      total += atom.partial_charge # should use formal charge!!!
+    assert len(cif_names)==len(cif_names.intersection(ag_names))
+    assert len(ag_names)==len(cif_names.intersection(ag_names))
+    assert abs(total-int(total))<0.01, 'sum of parial charges fo %s not accurate %f' % (ag.name, total)
+    charge = int(total)
+    annot = 'non-polymer'
   return charge, rc, annot
 
 def _get_restraints_from_resname(resname):
@@ -401,6 +409,7 @@ def calculate_pdb_hierarchy_charge(hierarchy,
                                    assert_no_alt_loc=True,
                                    list_charges=False,
                                    check=None,
+                                   assert_correct_chain_terminii=True,
                                    verbose=False,
                                    ):
   charge = 0
@@ -460,7 +469,7 @@ def calculate_pdb_hierarchy_charge(hierarchy,
         outl += '\n%s' % ('-'*80)
         print outl
   # check annotations
-  if residue_types:
+  if residue_types and assert_correct_chain_terminii:
     assert filter(None, annotations), 'No terminal or capping hydrogens found'
   if list_charges:
     #print 'CHARGE',charge
@@ -474,6 +483,7 @@ def get_total_charge_from_pdb(pdb_filename=None,
                               hetero_charges=None,
                               inter_residue_bonds=None,
                               list_charges=False,
+                              assert_correct_chain_terminii=True,
                               check = None,
                               verbose=False,
   ):
@@ -504,6 +514,7 @@ def get_total_charge_from_pdb(pdb_filename=None,
     hetero_charges=hetero_charges,
     inter_residue_bonds=inter_residue_bonds,
     list_charges=list_charges,
+    assert_correct_chain_terminii=assert_correct_chain_terminii,
     check=check,
     verbose=verbose,
   )
@@ -679,6 +690,7 @@ def get_inter_residue_bonds(ppf, verbose=False):
 
 def run(pdb_filename,
         list_charges=False,
+        assert_correct_chain_terminii=True,
         verbose=False):
   #print "run",pdb_filename
   data = {}
@@ -701,10 +713,12 @@ def run(pdb_filename,
   if(verbose):
     print 'list_charges',list_charges
     print 'verbose     ',verbose
-  total_charge = get_total_charge_from_pdb(pdb_filename,
-                                           list_charges=list_charges,
-                                           check=None, #data,
-                                           verbose=verbose,
+  total_charge = get_total_charge_from_pdb(
+    pdb_filename,
+    list_charges=list_charges,
+    assert_correct_chain_terminii=assert_correct_chain_terminii,
+    check=None, #data,
+    verbose=verbose,
   )
   return total_charge
 
