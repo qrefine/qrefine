@@ -83,7 +83,7 @@ def clean_up(prefix,mtz_name = None):
   except: pass
 
 def runner(function, prefix, disable=False):
-  run_tests.assert_folder_is_empty(prefix=prefix)
+  assert_folder_is_empty(prefix=prefix)
   try:
     if(disable):
       print prefix + ": Skipped (not recommended, enable ASAP or remove!)"
@@ -93,7 +93,7 @@ def runner(function, prefix, disable=False):
       print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   except Exception, e:
     print prefix, str(e)
-  run_tests.clean_up(prefix)
+  clean_up(prefix)
 
 def run():
   tests = [

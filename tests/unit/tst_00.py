@@ -11,7 +11,6 @@ def run(prefix):
   """
   Exercise standard (cctbx-based restraints) refinement with all defaults.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   run_tests.run_cmd(prefix, args = ["restraints=cctbx"])
   # Check results
@@ -39,11 +38,6 @@ def run(prefix):
     xray_structure = xrs_refined)
   fmodel.update_all_scales()
   assert fmodel.r_work() < 0.006
-  run_tests.clean_up(prefix)
 
 if(__name__ == "__main__"):
-  prefix = "tst_00"
-  t0 = time.time()
-  run(prefix)
-  print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_00", disable=False)
