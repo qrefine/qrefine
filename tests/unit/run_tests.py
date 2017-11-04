@@ -64,12 +64,12 @@ def clean_up(prefix,mtz_name = None):
   try: os.remove("m00_good.mtz")
   except: pass
   files_to_remove1 = [
-    'c_terminal_capping.pdb', 'c_terminal_capping_capping.pdb', 'cluster.xml', 
-    'helix.pdb', 'helix_complete.pdb', 'helix_readyset_input.pdb', 'qmmm.xml', 
+    'c_terminal_capping.pdb', 'c_terminal_capping_capping.pdb', 'cluster.xml',
+    'helix.pdb', 'helix_complete.pdb', 'helix_readyset_input.pdb', 'qmmm.xml',
     'test_10_capping.pdb', 'test_cys_hg_capping.pdb',
     'test_point_charges.pdb', 'q.xyz',
-    'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb', 
-    'test_original_pdb_capping.pdb', 'test_short_gap.pdb', 
+    'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb',
+    'test_original_pdb_capping.pdb', 'test_short_gap.pdb',
     'test_short_gap_capping.pdb', 'entire_qm.pdb']
   files_to_remove2 = [
     'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
@@ -81,6 +81,19 @@ def clean_up(prefix,mtz_name = None):
     except: pass
   try: shutil.rmtree('ase')
   except: pass
+
+def runner(function, prefix, disable=False):
+  run_tests.assert_folder_is_empty(prefix=prefix)
+  try:
+    if(disable):
+      print prefix + ": Skipped (not recommended, enable ASAP or remove!)"
+    else:
+      t0 = time.time()
+      function(prefix = prefix)
+      print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+  except Exception, e:
+    print prefix, str(e)
+  run_tests.clean_up(prefix)
 
 def run():
   tests = [
