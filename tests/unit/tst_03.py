@@ -12,11 +12,10 @@ from scitbx.array_family import flex
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-def run(prefix = "tst_03"):
+def run(prefix):
   """
   Exercise refine_sites=False.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","refine_sites=False"])
   xrs_start = iotbx.pdb.input(
@@ -25,12 +24,7 @@ def run(prefix = "tst_03"):
     file_name = os.path.join(prefix,"m00_poor_refined.pdb")).xray_structure_simple()
   d = flex.sqrt((xrs_start.sites_cart() - xrs_refined.sites_cart()).dot())
   assert approx_equal(d.min_max_mean().as_tuple(), [0,0,0])
-  run_tests.clean_up(prefix)
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_03"
-  run(prefix)
-  print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_03", disable=False)
 

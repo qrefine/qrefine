@@ -31,12 +31,11 @@ def get_bond_rmsd(file_name):
   es = geometry.energies_sites(sites_cart = sites_cart)
   return es.bond_deviations()[2]
 
-def run(prefix = "tst_01"):
+def run(prefix):
   """
   Exercise standard (cctbx-based restraints) optimization.
   Assert mode=opt is approximately equivalent to data_weight=0.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   # Run optimization
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","mode=opt"])
@@ -45,15 +44,7 @@ def run(prefix = "tst_01"):
   #Run refinement without data term
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","data_weight=0"])
   assert get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb")) < 0.0009
-  # Cleanup
-  run_tests.clean_up(prefix)
-
-  return 0
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_01"
-  rc = run(prefix)
-  print prefix +":  OK  " + "Time: %6.2f (s)"%(time.time()-t0)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_01", disable=False)
 
