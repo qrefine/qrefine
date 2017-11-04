@@ -27,6 +27,7 @@ ligand_cif_file_name = None
   .help = This restraints file will be used to get the formal \
     charge of the ligand.
   .style = file_type:cif input_file
+  .multiple = True
 list_charges = False
   .type = bool
 assert_correct_chain_terminii = True
@@ -78,12 +79,13 @@ def run(args, log):
   del sys.argv[1:]
   cc = charges.charges_class(
     params.model_file_name,
-    ligand_file_names=[params.ligand_cif_file_name],
-    list_charges=params.list_charges,
-    assert_correct_chain_terminii=params.assert_correct_chain_terminii,
+    ligand_cif_file_names=params.ligand_cif_file_name,
     verbose=params.verbose,
   )
-  rc = cc.get_total_charge()
+  rc = cc.get_total_charge(
+    list_charges=params.list_charges,
+    assert_correct_chain_terminii=params.assert_correct_chain_terminii,
+  )
   if(params.verbose): 
     print >> log, rc
     print >> log, "Time: %6.4f" % (time.time() - t0)
