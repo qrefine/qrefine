@@ -136,8 +136,10 @@ class fragments(object):
       asc = self.pdb_hierarchy_super.atom_selection_cache()
       if(self.debug):self.pdb_hierarchy_super.write_pdb_file(file_name="super.pdb")
       ## the first one altloc is " ", A B.. altlocs start from 1
-      for altloc in self.pdb_hierarchy_super.altloc_indices().keys()[1:]:
-        sel = asc.selection("altloc %s or altloc ' '"%altloc)
+      altlocs = self.pdb_hierarchy_super.altloc_indices().keys()
+      altlocs.sort()
+      for altloc in altlocs[1:]:
+        sel = asc.selection("altloc '%s' or altloc '' or altloc ' '"%altloc)
         ph_altloc = self.pdb_hierarchy_super.select(sel)
         phs.append(ph_altloc)
         if(self.debug):ph_altloc.write_pdb_file(file_name="super-"+str(altloc)+".pdb")
@@ -383,6 +385,7 @@ def write_mm_charge_file(fragment_extracts, index):
   file_name = None
   if (fragment_extracts.charge_embedding is True):
     altlocs = fragment_extracts.pdb_hierarchy_super.altloc_indices().keys()
+    altlocs.sort()
     non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(~fragment_selection)
     # the pdb has no altlocs
@@ -393,18 +396,19 @@ def write_mm_charge_file(fragment_extracts, index):
     else:
       fragment_altlocs = fragment_extracts.pdb_hierarchy_super.\
                         select(fragment_selection).altloc_indices().keys()
+      fragment_altlocs.sort()
       asc_ph = fragment_extracts.pdb_hierarchy_super.atom_selection_cache()
       asc_non_fragment = non_fragment_hierarchy_super.atom_selection_cache()
       # the fragment has  altlocs
       if (len(fragment_altlocs)==2):
         sel_non_fragment = asc_non_fragment.\
-          selection("altloc %s or altloc ' '"%fragment_altlocs[1])
-        sel_ph = asc_ph.selection("altloc %s or altloc ' '"%fragment_altlocs[1])
+          selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[1])
+        sel_ph = asc_ph.selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[1])
       # the fragment has no altlocs
       else:
         sel_non_fragment = asc_non_fragment.\
-          selection("altloc %s or altloc ' '"%fragment_altlocs[0])
-        sel_ph = asc_ph.selection("altloc %s or altloc ' '"%fragment_altlocs[0])
+          selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[0])
+        sel_ph = asc_ph.selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[0])
       non_fragment_hierarchy = non_fragment_hierarchy_super.select(sel_non_fragment)
       ph = fragment_extracts.pdb_hierarchy_super.select(sel_ph)
     sub_working_folder = fragment_extracts.working_folder + "/" + str(index) + "/"
