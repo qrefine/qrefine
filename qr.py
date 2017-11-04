@@ -50,6 +50,8 @@ max_atoms = 15000
 debug = False
     .type = bool
 cluster{
+  charge_cutoff = 10
+    .type = float
   clustering = False
     .type = bool
   charge_embedding = False
@@ -240,7 +242,8 @@ def create_fragment_manager(
     pdb_hierarchy              = pdb_hierarchy,
     qm_engine_name             = params.qm_engine_name,
     crystal_symmetry           = crystal_symmetry,
-    debug                      = params.debug)
+    debug                      = params.debug,
+    charge_cutoff              = params.cluster.charge_cutoff)
 
 def create_restraints_manager(
       cmdline,

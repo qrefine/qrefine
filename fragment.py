@@ -28,12 +28,14 @@ class fragments(object):
       crystal_symmetry           = None,
       clustering                 = True,
       qm_run                     = True,
-      debug                      = False):
+      debug                      = False,
+      charge_cutoff              = None):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
+    self.charge_cutoff = charge_cutoff
     self.system_size = pdb_hierarchy.atoms_size()
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
@@ -386,6 +388,17 @@ def write_mm_charge_file(fragment_extracts, index):
   if (fragment_extracts.charge_embedding is True):
     altlocs = fragment_extracts.pdb_hierarchy_super.altloc_indices().keys()
     altlocs.sort()
+    if(fragment_extracts.charge_cutoff is not None):
+      if(fragment_extracts.debug):
+        print "charge_cutoff: ",fragment_extracts.charge_cutoff
+      xrs_super = fragment_extracts.pdb_hierarchy_super.extract_xray_structure()
+      non_fragment_selection_super = xrs_super.selection_within(
+        radius=fragment_extracts.charge_cutoff,
+        selection=fragment_selection)
+    else:
+      non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
+                       select(non_fragment_selection_super)
+   
     non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(~fragment_selection)
     # the pdb has no altlocs
@@ -460,4 +473,5 @@ def fragment_extracts(fragments):
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales,
     debug                = fragments.debug,
+    charge_cutoff        = fragments.charge_cutoff,
     super_cell_file      = fragments.super_cell_file)
