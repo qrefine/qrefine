@@ -332,8 +332,8 @@ def calculate_residue_charge(rg,
     for name, atom in atom_dict.items():
       cif_names.add(name)
       total += atom.partial_charge # should use formal charge!!!
-    assert len(cif_names)==len(cif_names.intersection(ag_names))
-    assert len(ag_names)==len(cif_names.intersection(ag_names))
+    #assert len(cif_names)==len(cif_names.intersection(ag_names))
+    #assert len(ag_names)==len(cif_names.intersection(ag_names))
     assert abs(total-int(total))<0.01, 'sum of parial charges fo %s not accurate %f' % (ag.name, total)
     charge = int(total)
     annot = 'non-polymer'
