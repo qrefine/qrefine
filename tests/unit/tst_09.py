@@ -13,11 +13,10 @@ import run_tests
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-def run(prefix = "tst_09"):
+def run(prefix):
   """
   Exercise buffer region of cluster.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"data_files","2lvr.pdb"))
   ph = pdb_inp.construct_hierarchy()
   yoink_utils.write_yoink_infiles("cluster.xml",
@@ -34,7 +33,8 @@ def run(prefix = "tst_09"):
                   [3, 4, 5, 13, 14, 15, 16, 17, 18, 19, 20, 21],
                   [6, 7, 8, 9, 10, 11, 12, 22, 23, 26, 31],
                   [24, 25, 27, 28, 29, 30]]
-  bc_qms = [[1, 2, 3, 4], [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
+  bc_qms = [[1, 2, 3, 4], [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 
+                           18, 19, 20, 21, 22, 23, 24, 25],
             [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31],
             [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
   gn_qms = [[1, 2, 3, 4], [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 18, 19, 22],
@@ -56,8 +56,4 @@ def check_buffer(clusters, qms, pyoink):
   assert approx_equal(qms, qms_calculated)
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_09"
-  run(prefix)
-  print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_09", disable=False)
