@@ -11,6 +11,7 @@ import qrefine.completion as model_completion
 from qrefine.plugin.yoink.pyoink import PYoink
 from qrefine.utils.yoink_utils import write_yoink_infiles
 import completion
+from charges import charges_class
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -28,7 +29,8 @@ class fragments(object):
       crystal_symmetry           = None,
       clustering                 = True,
       qm_run                     = True,
-      debug                      = False):
+      cif_objects                = None,
+      debug                      = False,):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
@@ -40,6 +42,11 @@ class fragments(object):
     self.altloc_method =  altloc_method
     self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
+    #@Nigel
+    raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
+    self.charge_service = charges_class(
+        raw_records           = raw_records,
+        ligand_cif_file_names = cif_objects)
     if(os.path.exists(self.working_folder) is not True):
       os.mkdir(self.working_folder)
     self.backbone_connections = fragment_utils.get_backbone_connections(
@@ -325,14 +332,14 @@ class fragments(object):
         crystal_symmetry=self.super_cell.cs_box)
       if(self.debug):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
           crystal_symmetry=self.super_cell.cs_box)
-      ##TODO: remove if-esle statement
-      ## temprary solution: skip charge calculation for an altloc pdb
-      if(self.pdb_hierarchy_super.altloc_indices().size()>1):
-        charge = 0
-      if(1):
-        from charges import charges_class
-        cc = charges_class(raw_records=raw_records)
-        charge = cc.get_total_charge()
+
+      #from charges import charges_class
+      #cc = charges_class(raw_records=raw_records)
+      #charge = cc.get_total_charge()
+      #@Nigel
+      # may need to update the crystal symmetry
+      self.charge_service.update_pdb_hierarchy(charge_hierarchy)
+      charge = self.charge_service.get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
@@ -418,17 +425,18 @@ def write_mm_charge_file(fragment_extracts, index):
     non_qm_edge_positions = fragment_utils.get_edge_atom_positions(
       ph, non_fragment_hierarchy, charge_embed=True)
     charge_scaling_positions = non_qm_edge_positions
+    #@Nigel
+    # may need to update the crystal symmetry
+    fragment_extracts.charge_service.update_pdb_hierarchy(non_fragment_hierarchy)
     if(fragment_extracts.qm_engine_name == "turbomole"):
       file_name = sub_working_folder + str(index) + "_xyzq_cctbx.dat"
-      write_pdb_hierarchy_xyzq_file(
-        non_fragment_hierarchy,
+      fragment_extracts.charge_service.write_pdb_hierarchy_xyzq_file(
         file_name=file_name,
         exclude_water=False,
         charge_scaling_positions=charge_scaling_positions)
     if(fragment_extracts.qm_engine_name == "terachem"):
       file_name = sub_working_folder + str(index) + "_qxyz_cctbx.dat"
-      write_pdb_hierarchy_qxyz_file(
-        non_fragment_hierarchy,
+      fragment_extracts.charge_service.write_pdb_hierarchy_qxyz_file(
         file_name=file_name,
         exclude_water=False,
         charge_scaling_positions=charge_scaling_positions)
@@ -456,4 +464,5 @@ def fragment_extracts(fragments):
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales,
     debug                = fragments.debug,
+    charge_service       = fragments.charge_service,
     super_cell_file      = fragments.super_cell_file)
