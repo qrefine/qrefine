@@ -18,7 +18,6 @@ def run(prefix = "tst_18"):
       -- using clustering with less clusters vs not using clustering.
       -- using clustering with more clusters vs not using clustering.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   import multiprocessing
   nproc = str(multiprocessing.cpu_count())
   for data_file_prefix in [ "h_altconf_complete", "h_altconf_2_complete"]:
@@ -44,14 +43,6 @@ def run(prefix = "tst_18"):
         for i, diff_i in enumerate(diff):
           print i, diff_i#, g1[i], g2[i]
       assert approx_equal(diff.max(), [0,0,0], [1.0E-3,1.0E-3,1.0E-3])
-  run_tests.clean_up(prefix)
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_18"
-  if(1):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_18", disable=False)

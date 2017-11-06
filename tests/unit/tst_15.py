@@ -11,13 +11,12 @@ from libtbx.test_utils import approx_equal
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-def run(prefix = "tst_15"):
+def run(prefix):
   """
   Exercise gradients match:
     - small vs large box:
       -- using clustering vs not using clustering.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   for restraints in ["cctbx","qm"]:
   #for restraints in ["cctbx",]:
   # XXX qm option is not supposed to work fulfull the test with 2ona_box_S
@@ -66,8 +65,4 @@ def run(prefix = "tst_15"):
           assert approx_equal(g1_norms[i], g2_norms[i], g1_norms[i]*0.2)
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_15"
-  run(prefix)
-  print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_15", disable=False)

@@ -90,11 +90,10 @@ ATOM      1  O   HOHGF 333      15.000   5.000   5.000  1.00137.30           O
 TER
 """
 
-def run(prefix = "tst_14"):
+def run(prefix):
   """
   Exercise supercell.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   of = open("%s.pdb"%prefix,"w")
   print >> of, pdb_str
   of.close()
@@ -124,8 +123,4 @@ def run(prefix = "tst_14"):
     o.ph_super_cell.atoms().extract_xyz())
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_14"
-  run(prefix)
-  print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_14", disable=False)

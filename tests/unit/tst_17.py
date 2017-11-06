@@ -59,7 +59,7 @@ def get_grads(sel_f_str, sel_buffer_str, file_name):
   sel_buffer = asc.selection(sel_buffer_str)
   return es.gradients, sel_f, sel_buffer
 
-def run3():
+def run3(prefix):
   file_name=os.path.join(qr_unit_tests_data,"h_altconf_2.pdb")
 
   s_b_W1_A_str = "altloc A or resseq 95:97"
@@ -122,7 +122,7 @@ def run3():
     for d in diff:
       print d
 
-def run2():
+def run2(prefix):
   file_name=os.path.join(qr_unit_tests_data,"h_altconf.pdb")
 
   s_b_W1_str = "altloc A or resseq 95:97"
@@ -169,7 +169,7 @@ def run2():
     for d in diff:
       print d
 
-def run1():
+def run1(prefix):
   pdb_inp = iotbx.pdb.input(file_name=os.path.join(qr_unit_tests_data,"m.pdb"))
   ph = pdb_inp.construct_hierarchy()
   grm = get_grm(ph=ph, cs=pdb_inp.crystal_symmetry())
@@ -230,14 +230,6 @@ def run1():
 
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_17"
-  run_tests.assert_folder_is_empty(prefix=prefix)
-  if(1):
-    run1()
-    run2()
-    run3()
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run1, prefix="tst_17", disable=False)
+  run_tests.runner(function=run2, prefix="tst_17", disable=False)
+  run_tests.runner(function=run3, prefix="tst_17", disable=False)

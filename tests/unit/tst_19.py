@@ -11,13 +11,12 @@ import libtbx.load_env
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-def run(prefix = "tst_19"):
+def run(prefix):
   """
   Exercise refinement  match:
   -- pdbs with altlocs
       -- using subtract vs using average
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   import multiprocessing
   nproc = str(multiprocessing.cpu_count())
   for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
@@ -38,14 +37,6 @@ def run(prefix = "tst_19"):
                        construct_hierarchy().extract_xray_structure().sites_cart()
       rmsd_diff = sites_cart_average.rms_difference(sites_cart_subtract)
       assert approx_equal(rmsd_diff, 0, 0.1), 'rmsd diff between subtract and average is too large %0.3f' % rmsd_diff
-  run_tests.clean_up(prefix)
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_19"
-  if(1):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_19", disable=False)

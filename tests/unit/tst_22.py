@@ -12,7 +12,6 @@ def run(prefix):
   """
   Make sure 'qr.charges tst_22.pdb' runs without errors (finishes successfully).
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_name = os.path.join(qr_unit_tests_data, "tst_22.pdb")
   cmd = "qr.charges %s verbose=False"%pdb_name
   if(0): print cmd
@@ -22,11 +21,4 @@ def run(prefix):
   assert len(r.stdout_lines)==0, r.stdout_lines
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_22"
-  if(1):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_22", disable=False)

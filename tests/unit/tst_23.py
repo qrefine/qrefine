@@ -1,6 +1,6 @@
 import os, sys
-
 from qrefine.charges import run as get_charge
+import run_tests
 
 pdbs = {
   'ACY' : {
@@ -122,7 +122,6 @@ def run():
                       assert_correct_chain_terminii=False,
                       #verbose=1,
       )
-      print rc,
       ans = None
       level1 = results.get(code, None)
       if level1:
@@ -132,8 +131,7 @@ def run():
             rc,
             ans,
             )
-        print 'OK'
         os.remove(fn)
 
 if __name__=='__main__':
-  run()
+  run_tests.runner(function=run, prefix="tst_23", disable=False)

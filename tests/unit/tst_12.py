@@ -787,7 +787,6 @@ def test_terminal_and_alt_loc(residue):
   f.close()
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
   cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
-  print cmd
   easy_run.call(cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
@@ -860,7 +859,6 @@ def test_capping_of_C_terminal():
     os.path.join(qrefine_d, 'finalise.py'),
     tf,
     )
-  print cmd
   easy_run.call(cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_capping.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
@@ -884,7 +882,6 @@ def test_helix():
     os.path.join(qrefine_d, 'completion.py'),
     tf)
   cmd += ' append_to_end_of_model=0'
-  print cmd
   easy_run.call(cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
@@ -989,7 +986,6 @@ def test_charge_for_charmm_pdbs(only_i=None):
         # disuphide bridge = in 2i1u 2.94 Phenix says yes, Charmm says no
         continue
       pdb_file_path = os.path.join(pdb_dir, pdb_file)
-      print 'pdb_file_path',pdb_file_path
       charge = charges.get_total_charge_from_pdb(pdb_file_path)
       assert charge==charge_dict[pdb_file[:-4]], \
         '%s charge is %d, charmm charge is %d,  no matchy matchy' % (
@@ -1032,13 +1028,11 @@ def test_capping_of_cluster_complete(only_i=None):
         qr_repo_parent,
         cluster_file_path,
         )
-      print cmd
       easy_run.call(cmd)
       result_file = cluster_file_path[:-4] + "_capping.pdb"
       babel_file = os.path.join(babel_dir, cluster_file[:-4] + "_babel.pdb")
       result_size = len(pdb.input(result_file).atoms())
       babel_size =  len(pdb.input(babel_file).atoms())
-      print babel_file,babel_size,result_file,result_size
       assert result_size ==  babel_size,\
         '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
@@ -1050,11 +1044,9 @@ def test_short_gap():
     os.path.join(qrefine_d, 'completion.py'),
     'test_short_gap.pdb',
   )
-  print cmd
   easy_run.call(cmd)
   result_file = "test_short_gap_capping.pdb"
   result_size = len(pdb.input(result_file).atoms())
-  print result_file
   assert result_size==28
 
 def test_original_pdb():
@@ -1071,7 +1063,6 @@ def test_original_pdb():
                                               'charmm_pdbs',
                                               '2ona.pdb')
     )
-  print cmd
   rc = easy_run.go(cmd)
   pdb_inp = pdb.input('test_original_pdb.pdb')
   assert len(pdb_inp.atoms())==49
@@ -1100,7 +1091,6 @@ def _run_go_cmd_on_pdb(code, cmd):
   f.write(pdbs[code])
   f.close()
   cmd += ' %s' % ('test_%s.pdb' % code)
-  print '  ~> %s' % cmd
   rc = easy_run.go(cmd)
   return rc
   
@@ -1113,7 +1103,7 @@ def test_fva():
   assert rc.return_code==0, rc.show_stdout()
   assert 0
 
-def run(prefix = "tst_12", nproc=1):
+def run(prefix, nproc=1):
   """
   Exercise structure preparation including charge, capping, completion
   """
@@ -1156,8 +1146,6 @@ def run(prefix = "tst_12", nproc=1):
       for p in range(j):
         if (i,p) in [(10,60)]: continue # capping and completion of PRO
         argss.append((i,p))
-  passed=0
-  failed=0
   for args, res, errstr in easy_mp.multi_core_run(get_test, argss, nproc):
     if errstr:
       print '-'*80
@@ -1165,21 +1153,7 @@ def run(prefix = "tst_12", nproc=1):
       print 'RESULT - ERROR   : %s %s' % (tests[args[0]][0].func_name, args)
       print errstr
       print '-'*80
-      failed+=1
-    else:
-      print 'RESULT - SUCCESS : %s %s' % (tests[args[0]][0].func_name, args)
-      passed+=1
-  print '\n\tpassed : %d\n\tfailed : %s' % (passed, failed)
-  if failed: return -1
-  return 0
+      assert 0
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_12"
-  if(1):
-    rc = run(prefix)
-    assert rc==0
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_12", disable=False)

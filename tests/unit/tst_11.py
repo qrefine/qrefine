@@ -13,7 +13,7 @@ import run_tests
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-def run(prefix = "tst_11"):
+def run(prefix):
   """
   Exercise structure completion by finalise.py
   """
@@ -91,12 +91,4 @@ def complete_pdbs(expected_list, pdb_dir):
     print "skip"
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_11"
-  run_tests.assert_folder_is_empty(prefix=prefix)
-  if(0):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix="tst_11", disable=True)
