@@ -106,10 +106,10 @@ results = {'ACY':{'ph_7': -1},
                   },
            }
 
-def run():
+def run(prefix):
   for code, item in pdbs.items():
     for action, lines in item.items():
-      print code, action,
+      #print code, action,
       fn = '%s_%s.pdb' % (code, action)
       f=file(fn, 'wb')
       f.write(lines)
