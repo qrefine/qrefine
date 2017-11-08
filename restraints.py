@@ -66,14 +66,9 @@ class from_qm(object):
     if(os.path.exists(self.working_folder) is not True):
       os.mkdir(self.working_folder)
     if(charge is None and clustering is False):
-      #raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-      #cc = charges_class(raw_records=raw_records)
-      #self.charge = cc.get_total_charge()
-      #@Nigel
       raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-      charge_service = charges_class(
-        raw_records           = raw_records,
-        ligand_cif_file_names = cif_objects)
+      charge_service = charges_class(raw_records = raw_records,
+                                     cif_objects = cif_objects)
       self.charge = charge_service.get_total_charge()
     else: self.charge = charge
     self.clustering = clustering
