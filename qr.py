@@ -225,13 +225,14 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
       has_hd             = has_hd)
 
 def create_fragment_manager(
+      cif_objects,
       pdb_hierarchy,
       crystal_symmetry,
       params,
       file_name      = os.path.join("ase","tmp_ase.pdb")):
   if(not params.cluster.clustering): return None
   return fragments(
-    cif_objects                = cmdline.cif_objects,
+    cif_objects                = cif_objects,
     working_folder             = os.path.split(file_name)[0]+ "/",
     clustering_method          = params.cluster.clustering_method,
     altloc_method              = params.cluster.altloc_method,
@@ -364,6 +365,7 @@ def run(cmdline, log):
   fragment_manager = create_fragment_manager(
     params           = params,
     pdb_hierarchy    = model.pdb_hierarchy,
+    cif_objects      = cmdline.cif_objects, 
     crystal_symmetry = cmdline.crystal_symmetry)
   restraints_manager = create_restraints_manager(
     cmdline          = cmdline,
