@@ -896,7 +896,7 @@ def test_helix():
   assert not must_find
   pdb_inp=pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
-  cc.update_pdb_hierarchy(hierarchy)
+  cc.update_pdb_hierarchy(hierarchy, pdb_inp.crystal_symmetry_from_cryst1())
   charge = cc.get_total_charge()
   assert charge==1, 'charge of helix should be one not %s' % charge
 
