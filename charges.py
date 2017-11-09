@@ -75,12 +75,14 @@ class charges_class:
                cif_objects=None,
                verbose=False,
                ):
+    self.verbose=verbose
     assert not (ligand_cif_file_names and cif_objects)
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
                                             cif_objects=cif_objects,
                                            )
+    self.inter_residue_bonds = get_inter_residue_bonds(ppf)
     self.update_pdb_hierarchy(
       ppf.all_chain_proxies.pdb_hierarchy,
       ppf.all_chain_proxies.pdb_inp.crystal_symmetry_from_cryst1(),
@@ -94,10 +96,9 @@ class charges_class:
     if not self.hetero_charges:
       # some defaults
       self.hetero_charges = default_ion_charges
-    self.inter_residue_bonds = get_inter_residue_bonds(ppf)
-    if verbose:
-      for key, item in self.inter_residue_bonds.items():
-        if type(key)!=type(0) and len(key)==2: print key, item
+    #if verbose:
+    #  for key, item in self.inter_residue_bonds.items():
+    #    if type(key)!=type(0) and len(key)==2: print key, item
     # merge atoms from clustering
     self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
       self.pdb_hierarchy,
@@ -203,6 +204,7 @@ class charges_class:
                                inter_residue_bonds=None,
                                verbose=False,
                                ):
+    if self.verbose: verbose=True
     if verbose: print '-'*80
     def _terminal(names, check):
       for name in check:
@@ -246,7 +248,8 @@ class charges_class:
     def c_capping(atom_names):
       rc = _terminal(atom_names, [' HC '])
       return rc
-    def covalent_bond(i_seqs, inter_residue_bonds):
+    def covalent_bond(i_seqs, inter_residue_bonds, verbose=False):
+      #peptide_link_atoms = ['N','C']
       for i_seq in i_seqs:
         if i_seq in inter_residue_bonds:
           return True
@@ -358,12 +361,13 @@ class charges_class:
         annot += 'C-capp. '
       else:
         if verbose: print 'no C term'
-      if covalent_bond(atom_i_seqs, inter_residue_bonds):
+      if covalent_bond(atom_i_seqs, inter_residue_bonds, verbose=verbose):
         diff_hs+=1
         if verbose:
-          print 'covalent_bond',atom_i_seqs, inter_residue_bonds
+          print 'covalent_bond',atom_i_seqs#, inter_residue_bonds
         annot += 'Coval. '
       if hierarchy_utils.is_n_terminal_atom_group(ag):
+        if verbose: print 'subtracting due to N terminal'
         diff_hs-=1
       if verbose:
         print 'residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
@@ -424,6 +428,7 @@ class charges_class:
                                      assert_correct_chain_terminii=True,
                                      verbose=False,
                                      ):
+    if self.verbose: verbose=True
     charge = 0
     charges = []
     annotations = []
