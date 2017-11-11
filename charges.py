@@ -76,6 +76,7 @@ class charges_class:
                verbose=False,
                ):
     self.verbose=verbose
+    self.pdb_filename=pdb_filename
     assert not (ligand_cif_file_names and cif_objects)
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
@@ -402,20 +403,26 @@ class charges_class:
       restraints = _get_restraints_from_resname(ag.resname,
                                                 self.mon_lib_server,
       )
-      ag_names = set()
-      for atom in ag.atoms():
-        ag_names.add(atom.name.strip())
-      atom_dict = restraints.atom_dict()
-      cif_names = set()
-      total = 0
-      for name, atom in atom_dict.items():
-        cif_names.add(name)
-        total += atom.partial_charge # should use formal charge!!!
-      #assert len(cif_names)==len(cif_names.intersection(ag_names))
-      #assert len(ag_names)==len(cif_names.intersection(ag_names))
-      assert abs(total-int(total))<0.01, 'sum of parial charges fo %s not accurate %f' % (ag.name, total)
-      charge = int(total)
-      annot = 'non-polymer'
+      if ag.resname in ['MTN']:
+        from qrefine.utils import electrons
+        charge = electrons.run([self.pdb_filename])
+        annot='non-polymer'
+      else:
+        ag_names = set()
+        for atom in ag.atoms():
+          ag_names.add(atom.name.strip())
+        atom_dict = restraints.atom_dict()
+        cif_names = set()
+        total = 0
+        for name, atom in atom_dict.items():
+          total += atom.partial_charge
+          cif_names.add(name)
+        #assert len(cif_names)==len(cif_names.intersection(ag_names))
+        #assert len(ag_names)==len(cif_names.intersection(ag_names))
+        assert abs(total-int(total))<0.01, \
+          'sum of parial charges fo %s not accurate %f' % (ag.name, total) 
+        charge = int(total) 
+        annot = 'ligand'
     return charge, rc, annot
 
   def calculate_pdb_hierarchy_charge(self,
@@ -454,6 +461,9 @@ class charges_class:
         verbose=verbose,
       )
       annotations.append(annot)
+      if annot=='non-polymer':
+        charge = tmp
+        break
       if check:
         print residue
         key = 'PRO%s' % residue.parent().id
