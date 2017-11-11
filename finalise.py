@@ -116,7 +116,7 @@ def run(pdb_filename,
     hierarchy = pdb_inp.construct_hierarchy()
     ppf = hierarchy_utils.get_processed_pdb(pdb_inp=hierarchy.as_pdb_input())
 
-  if not skip_validation:
+  if not skip_validation and 0:
     initial_model_statistics = mmtbx.model.statistics(
       pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
 
@@ -189,7 +189,7 @@ def run(pdb_filename,
                                   ppf.all_chain_proxies.pdb_hierarchy,
                                   fname)
 
-  if not skip_validation:
+  if not skip_validation and 0:
     final_model_statistics = mmtbx.model.statistics(
       pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
 
