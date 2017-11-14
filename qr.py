@@ -41,7 +41,7 @@ import restraints
 import cluster_restraints
 import results
 from qrefine.super_cell import expand
-from mmtbx import model_statistics
+import mmtbx.model.statistics
 
 master_params_str ="""
 
@@ -329,12 +329,10 @@ def run(cmdline, log):
     # Show full model statistics
     if(0):
       # block this:
-      #AttributeError: 'module' object has no attribute 'geometry
-      sel = ~model.xray_structure.hd_selection()
-      mso = model_statistics.geometry(
-        pdb_hierarchy      = model.pdb_hierarchy.select(sel),
-        restraints_manager = geometry_rmsd_manager.select(sel),
-        molprobity_scores  = True)
+      mso = mmtbx.model.statistics.geometry(
+        pdb_hierarchy               = model.pdb_hierarchy.select(sel),
+        geometry_restraints_manager = geometry_rmsd_manager,
+        use_hydrogens               = False)
       mso.show(lowercase=True, out=log)
     #
     if(params.refine.dry_run): return
