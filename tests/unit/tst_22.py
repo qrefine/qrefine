@@ -21,4 +21,5 @@ def run(prefix):
   assert len(r.stdout_lines)==0, r.stdout_lines
 
 if __name__ == '__main__':
-  run_tests.runner(function=run, prefix="tst_22", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_22", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

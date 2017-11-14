@@ -40,4 +40,5 @@ def run(prefix):
   assert fmodel.r_work() < 0.006
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_00", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_00", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

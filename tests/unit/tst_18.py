@@ -45,4 +45,5 @@ def run(prefix = "tst_18"):
       assert approx_equal(diff.max(), [0,0,0], [1.0E-3,1.0E-3,1.0E-3])
 
 if __name__ == '__main__':
-  run_tests.runner(function=run, prefix="tst_18", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_18", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

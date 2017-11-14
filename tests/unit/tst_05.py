@@ -13,4 +13,5 @@ def run(prefix):
   assert r.stdout_lines == ['Sorry: Too many atoms.']
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_05", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_05", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

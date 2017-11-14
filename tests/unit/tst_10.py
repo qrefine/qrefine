@@ -81,5 +81,6 @@ def run(prefix):
   assert approx_equal(gradients, g, 1.0E-4)
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_10", disable=True)
-  
+  rc = run_tests.runner(function=run, prefix="tst_10", disable=True)
+  assert not rc, 'tst_00 rc: %s' % rc
+

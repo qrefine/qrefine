@@ -84,6 +84,7 @@ def clean_up(prefix,mtz_name = None):
 
 def runner(function, prefix, disable=False):
   assert_folder_is_empty(prefix=prefix)
+  rc = 0
   try:
     if(disable):
       print prefix + ": Skipped (not recommended, enable ASAP or remove!)"
@@ -93,7 +94,9 @@ def runner(function, prefix, disable=False):
       print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   except Exception, e:
     print prefix, str(e)
+    rc=1
   clean_up(prefix)
+  return rc
 
 def run():
   tests = [
@@ -125,10 +128,16 @@ def run():
     rc = easy_run.call("cctbx.python %s"%(
       os.path.join(qr_unit_tests,file_name)))
     if rc: failed+=1
-  assert not failed, 'Failed tests : %d' % failed
+  if failed:
+    print 'Failed tests : %d' % failed
+    return 1
+  return 0
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  run()
+  rc = run()
   print "Total time (all tests): %6.2f"%(time.time()-t0)
-  print "OK"
+  if rc:
+    assert not rc
+  else:
+    print "OK"

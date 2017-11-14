@@ -123,4 +123,5 @@ def qm_opt(cs, ph, file, cluster=False):
   opt.write(file)
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_13", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_13", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

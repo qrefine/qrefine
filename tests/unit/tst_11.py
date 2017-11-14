@@ -91,4 +91,5 @@ def complete_pdbs(expected_list, pdb_dir):
     print "skip"
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_11", disable=True)
+  rc = run_tests.runner(function=run, prefix="tst_11", disable=True)
+  assert not rc, 'tst_00 rc: %s' % rc

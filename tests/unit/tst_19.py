@@ -39,4 +39,5 @@ def run(prefix):
       assert approx_equal(rmsd_diff, 0, 0.1), 'rmsd diff between subtract and average is too large %0.3f' % rmsd_diff
 
 if __name__ == '__main__':
-  run_tests.runner(function=run, prefix="tst_19", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_19", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

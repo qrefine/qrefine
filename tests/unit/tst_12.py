@@ -1156,4 +1156,5 @@ def run(prefix, nproc=1):
       assert 0
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_12", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_12", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

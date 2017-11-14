@@ -230,6 +230,7 @@ def run1(prefix):
 
 
 if __name__ == '__main__':
-  run_tests.runner(function=run1, prefix="tst_17", disable=False)
-  run_tests.runner(function=run2, prefix="tst_17", disable=False)
-  run_tests.runner(function=run3, prefix="tst_17", disable=False)
+  rc = run_tests.runner(function=run1, prefix="tst_17", disable=False)
+  rc += run_tests.runner(function=run2, prefix="tst_17", disable=False)
+  rc += run_tests.runner(function=run3, prefix="tst_17", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc
