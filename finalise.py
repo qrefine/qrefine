@@ -117,7 +117,7 @@ def run(pdb_filename,
     ppf = hierarchy_utils.get_processed_pdb(pdb_inp=hierarchy.as_pdb_input())
 
   if not skip_validation:
-    initial_model_statistics = mmtbx.model.statistics(
+    initial_model_statistics = mmtbx.model.statistics.geometry(
       pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
 
   # should use cctbx
@@ -190,7 +190,7 @@ def run(pdb_filename,
                                   fname)
 
   if not skip_validation:
-    final_model_statistics = mmtbx.model.statistics(
+    final_model_statistics = mmtbx.model.statistics.geometry(
       pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
 
 if __name__=="__main__":
