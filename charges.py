@@ -6,7 +6,7 @@ from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
 from utils import hierarchy_utils
-from iotbx.pdb import amino_acid_codes as acc
+from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -33,12 +33,17 @@ def get_mon_lib_server(ligand_cif_file_names=None):
   mon_lib_server = server.server()
   if ligand_cif_file_names:
     for fn in ligand_cif_file_names:
-      #iotbx.cif.reader(input_string=ligand_cif,
-      #                 cif_object=cif_object,
-      #                 strict=False,
-      #)
       mon_lib_server.process_cif(file_name=fn)
   return mon_lib_server
+
+def get_cif_objects(ligand_cif_file_names=None):
+  cif_objects = []
+  cif_object = None
+  if ligand_cif_file_names:
+    for fn in ligand_cif_file_names:
+      cif_object = iotbx.cif.reader(fn, strict=False).model()
+      cif_objects.append(cif_object)
+  return cif_objects
 
 class chemical_component_class(dict):
   def get_total_charge(self):
@@ -67,16 +72,20 @@ class charges_class:
                raw_records=None,
                pdb_inp=None,
                ligand_cif_file_names=None,
-               #list_charges=False,
+               cif_objects=None,
                verbose=False,
                ):
+    assert not (ligand_cif_file_names and cif_objects)
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
                                             pdb_inp=pdb_inp,
+                                            cif_objects=cif_objects,
                                            )
-    self.update_pdb_hierarchy(ppf.all_chain_proxies.pdb_hierarchy)
+    self.update_pdb_hierarchy(
+      ppf.all_chain_proxies.pdb_hierarchy,
+      ppf.all_chain_proxies.pdb_inp.crystal_symmetry_from_cryst1(),
+    )
     self.pdb_inp = ppf.all_chain_proxies.pdb_inp
-    self.crystal_symmetry = self.pdb_inp.crystal_symmetry_from_cryst1()
     assert self.crystal_symmetry, 'There is no CRYST1 record in the input file'
 
     self.hetero_charges = get_hetero_charges(self.pdb_inp,
@@ -87,18 +96,17 @@ class charges_class:
       self.hetero_charges = default_ion_charges
     self.inter_residue_bonds = get_inter_residue_bonds(ppf)
     if verbose:
-      for key, item in inter_residue_bonds.items():
+      for key, item in self.inter_residue_bonds.items():
         if type(key)!=type(0) and len(key)==2: print key, item
     # merge atoms from clustering
     self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
       self.pdb_hierarchy,
       )
-    # needs hetero_charges?
-    self.mon_lib_server = get_mon_lib_server(
-      ligand_cif_file_names=ligand_cif_file_names)
+    self.mon_lib_server = ppf.mon_lib_srv
 
-  def update_pdb_hierarchy(self, pdb_hierarchy):
+  def update_pdb_hierarchy(self, pdb_hierarchy, crystal_symmetry):
     self.pdb_hierarchy = pdb_hierarchy
+    self.crystal_symmetry = crystal_symmetry
     if hasattr(self, 'pdb_inp'): self.pdb_inp = None
     # merge atoms from clustering
     self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
@@ -290,7 +298,7 @@ class charges_class:
     if verbose:
       print '%s\nstarting charge: %s' % ('*'*80, charge)
     if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
-         ag.resname in acc.three_letter_l_given_three_letter_d
+         ag.resname in aac.three_letter_l_given_three_letter_d
          ):
       if verbose:
         print ag.id_str()
@@ -399,8 +407,8 @@ class charges_class:
       for name, atom in atom_dict.items():
         cif_names.add(name)
         total += atom.partial_charge # should use formal charge!!!
-      assert len(cif_names)==len(cif_names.intersection(ag_names))
-      assert len(ag_names)==len(cif_names.intersection(ag_names))
+      #assert len(cif_names)==len(cif_names.intersection(ag_names))
+      #assert len(ag_names)==len(cif_names.intersection(ag_names))
       assert abs(total-int(total))<0.01, 'sum of parial charges fo %s not accurate %f' % (ag.name, total)
       charge = int(total)
       annot = 'non-polymer'
@@ -487,7 +495,7 @@ def get_aa_charge(code):
   # not sure what to do about novel ligands...
   tmp = charge_per_aa_polymer.get(code, None)
   if tmp: return tmp
-  l_peptide = acc.three_letter_l_given_three_letter_d.get(code, None)
+  l_peptide = aac.three_letter_l_given_three_letter_d.get(code, None)
   cc = chemical_component_class()
   if l_peptide:
     cc.update(get_cif_dictionary(l_peptide))

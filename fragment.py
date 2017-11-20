@@ -43,7 +43,6 @@ class fragments(object):
     self.altloc_method =  altloc_method
     self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
-    #@Nigel
     raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
     self.charge_service = charges_class(
         raw_records           = raw_records,
@@ -336,12 +335,10 @@ class fragments(object):
       if(self.debug):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
           crystal_symmetry=self.super_cell.cs_box)
 
-      #from charges import charges_class
-      #cc = charges_class(raw_records=raw_records)
-      #charge = cc.get_total_charge()
-      #@Nigel
-      # may need to update the crystal symmetry
-      self.charge_service.update_pdb_hierarchy(charge_hierarchy)
+      self.charge_service.update_pdb_hierarchy(
+        charge_hierarchy,
+        self.super_cell.cs_box,
+      )
       charge = self.charge_service.get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
@@ -441,9 +438,10 @@ def write_mm_charge_file(fragment_extracts, index):
     non_qm_edge_positions = fragment_utils.get_edge_atom_positions(
       ph, non_fragment_hierarchy, charge_embed=True)
     charge_scaling_positions = non_qm_edge_positions
-    #@Nigel
-    # may need to update the crystal symmetry
-    fragment_extracts.charge_service.update_pdb_hierarchy(non_fragment_hierarchy)
+    fragment_extracts.charge_service.update_pdb_hierarchy(
+      non_fragment_hierarchy,
+      fragment_extracts.super_cell_cs,
+    )
     if(fragment_extracts.qm_engine_name == "turbomole"):
       file_name = sub_working_folder + str(index) + "_xyzq_cctbx.dat"
       fragment_extracts.charge_service.write_pdb_hierarchy_xyzq_file(

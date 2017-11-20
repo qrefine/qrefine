@@ -233,10 +233,7 @@ def create_fragment_manager(
       file_name      = os.path.join("ase","tmp_ase.pdb")):
   if(not params.cluster.clustering): return None
   return fragments(
-    #@Nigel
-    #TODO
-    # cif_objects      = cmdline.cif_objects,
-    cif_objects                = None,
+    cif_objects                = cmdline.cif_objects,
     working_folder             = os.path.split(file_name)[0]+ "/",
     clustering_method          = params.cluster.clustering_method,
     altloc_method              = params.cluster.altloc_method,
@@ -260,11 +257,9 @@ def create_restraints_manager(
       has_hd             = model.has_hd)
   else:
     assert cmdline.params.restraints == "qm"
+    print cmdline.cif_objects
     restraints_manager = restraints.from_qm(
-      #@Nigel
-      #TODO
-      # cif_objects      = cmdline.cif_objects,
-      cif_objects                = None,
+      cif_objects                = cmdline.cif_objects,
       basis                      = cmdline.params.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
       charge                     = cmdline.params.charge,

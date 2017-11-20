@@ -71,9 +71,8 @@ class from_qm(object):
       #self.charge = cc.get_total_charge()
       #@Nigel
       raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-      charge_service = charges_class(
-        raw_records           = raw_records,
-        ligand_cif_file_names = cif_objects)
+      charge_service = charges_class(raw_records = raw_records,
+                                     cif_objects = cif_objects)
       self.charge = charge_service.get_total_charge()
     else: self.charge = charge
     self.clustering = clustering

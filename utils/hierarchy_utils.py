@@ -122,8 +122,13 @@ def get_pdb_interpretation_params():
 def get_processed_pdb(pdb_filename=None,
                       raw_records=None,
                       pdb_inp=None,
-                      params=None):
+                      params=None,
+                      cif_objects=None,
+                      ):
   mon_lib_srv = monomer_library.server.server()
+  if cif_objects:
+    for cif_object in cif_objects:
+      mon_lib_srv.process_cif_object(cif_object[1])
   ener_lib = monomer_library.server.ener_lib()
   ppf = monomer_library.pdb_interpretation.process(
     mon_lib_srv           = mon_lib_srv,
