@@ -66,8 +66,5 @@ def run(prefix = "tst_15"):
           assert approx_equal(g1_norms[i], g2_norms[i], g1_norms[i]*0.2)
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_15"
-  run(prefix)
-  print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  run_tests.clean_up(prefix)
+  rc = run_tests.runner(function=run, prefix="tst_15", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

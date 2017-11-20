@@ -124,15 +124,5 @@ def qm_opt(cs, ph, file, cluster=False):
   opt.write(file)
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  log = sys.stdout
-  prefix = "tst_13"
-  try:
-    if(1):
-      run(prefix)
-      print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-    else:
-      print prefix + ":  Skipped    "
-  except Exception, e:
-    print prefix, str(e)
-  run_tests.clean_up(prefix)
+  rc = run_tests.runner(function=run, prefix="tst_13", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

@@ -43,11 +43,5 @@ def run(prefix = "tst_16"):
   assert approx_equal(diff.max(), [0,0,0])
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_16"
-  if(1):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  rc = run_tests.runner(function=run, prefix="tst_16", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

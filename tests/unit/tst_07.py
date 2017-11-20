@@ -46,4 +46,5 @@ def run(prefix):
   assert approx_equal(expected_list, interaction_list)
 
 if(__name__ == "__main__"):
-  run_tests.runner(function=run, prefix="tst_07", disable=False)
+  rc = run_tests.runner(function=run, prefix="tst_07", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

@@ -45,4 +45,5 @@ if __name__ == '__main__':
     regression_tests.run(args=sys.argv[1:])
   if(not args.all and not args.unit and not args.reg and not args.pdb):
     print >> log,"Running Q|R unit tests"
-    unit_tests.run()
+    rc = unit_tests.run()
+    assert not rc, 'qr.test rc : %s' % rc

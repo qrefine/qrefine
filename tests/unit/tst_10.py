@@ -82,12 +82,5 @@ def run(prefix = "tst_10"):
   assert approx_equal(gradients, g, 1.0E-4)
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_10"
-  if(0):
-    run(prefix)
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
-  
+  rc = run_tests.runner(function=run, prefix="tst_10", disable=True)
+  assert not rc, 'tst_00 rc: %s' % rc

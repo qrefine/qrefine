@@ -1173,12 +1173,5 @@ def run(prefix = "tst_12", nproc=1):
   return 0
 
 if(__name__ == "__main__"):
-  t0 = time.time()
-  prefix = "tst_12"
-  if(1):
-    rc = run(prefix)
-    assert rc==0
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  rc = run_tests.runner(function=run, prefix="tst_12", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

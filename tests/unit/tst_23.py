@@ -141,4 +141,5 @@ def run():
         os.remove(fn)
 
 if __name__=='__main__':
-  run()
+  rc = run_tests.runner(function=run, prefix="tst_23", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc

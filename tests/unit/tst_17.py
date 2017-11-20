@@ -230,14 +230,7 @@ def run1():
 
 
 if __name__ == '__main__':
-  t0 = time.time()
-  prefix = "tst_17"
-  run_tests.assert_folder_is_empty(prefix=prefix)
-  if(1):
-    run1()
-    run2()
-    run3()
-    print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  else:
-    print prefix + ":  Skipped    "
-  run_tests.clean_up(prefix)
+  rc = run_tests.runner(function=run1, prefix="tst_17", disable=False)
+  rc += run_tests.runner(function=run2, prefix="tst_17", disable=False)
+  rc += run_tests.runner(function=run3, prefix="tst_17", disable=False)
+  assert not rc, 'tst_00 rc: %s' % rc
