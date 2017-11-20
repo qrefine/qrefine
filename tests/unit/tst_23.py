@@ -1,5 +1,5 @@
 import os, sys
-
+import run_tests
 from qrefine.charges import charges_class
 
 def get_charge(fn, assert_correct_chain_terminii=True):
@@ -111,7 +111,7 @@ results = {'ACY':{'ph_7': -1},
                   },
            }
 
-def run():
+def run(prefix):
   for code, item in pdbs.items():
     for action, lines in item.items():
       print code, action,

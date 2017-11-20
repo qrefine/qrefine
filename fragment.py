@@ -30,7 +30,8 @@ class fragments(object):
       clustering                 = True,
       qm_run                     = True,
       cif_objects                = None,
-      debug                      = False,):
+      debug                      = False,
+      charge_cutoff              = None):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
