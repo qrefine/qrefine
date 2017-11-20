@@ -256,11 +256,16 @@ class electron_distribution(dict):
       total+=electrons
     return total*-1
 
-def run(args):
-  print args, len(args)
-  assert len(args) == 1
-  # Read file into pdb_input class
-  inp = iotbx.pdb.input(file_name=args[0])
+def run(pdb_filename=None,
+        raw_records=None,
+        ):
+  if pdb_filename:
+    # Read file into pdb_input class
+    inp = iotbx.pdb.input(file_name=pdb_filename)
+  elif raw_records:
+    inp = iotbx.pdb.input(lines=raw_records, source_info='lines from PDB')
+  else:
+    assert 0
 
   # create a model manager
   model = mmtbx.model.manager(

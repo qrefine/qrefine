@@ -77,6 +77,7 @@ class charges_class:
                ):
     self.verbose=verbose
     self.pdb_filename=pdb_filename
+    self.raw_records=raw_records
     assert not (ligand_cif_file_names and cif_objects)
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             raw_records=raw_records,
@@ -405,7 +406,9 @@ class charges_class:
       )
       if ag.resname in ['MTN']:
         from qrefine.utils import electrons
-        charge = electrons.run([self.pdb_filename])
+        charge = electrons.run(pdb_filename=self.pdb_filename,
+                               raw_records=self.raw_records,
+        )
         annot='non-polymer'
       else:
         ag_names = set()
