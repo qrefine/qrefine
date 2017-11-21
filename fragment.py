@@ -480,4 +480,5 @@ def fragment_extracts(fragments):
     fragment_scales      = fragments.fragment_scales,
     debug                = fragments.debug,
     charge_service       = fragments.charge_service,
+    charge_cutoff        = fragments.charge_cutoff,
     super_cell_file      = fragments.super_cell_file)
