@@ -107,6 +107,24 @@ class charges_class:
       )
     self.mon_lib_server = ppf.mon_lib_srv
 
+  def __repr__(self):
+    outl = 'charges\n'
+    for key, item in self.__dict__.items():
+      if item is None:
+        outl += '  %-20s : %s\n' % (key, item)
+      elif key in ['pdb_filename',
+                 ]:
+        outl += '  %-20s : %s\n' % (key, item)
+      elif key in ['pdb_hierarchy',
+                   ]:
+        outl += '  %-20s : %s\n' % (key, len(item.atoms()))
+      elif key in ['raw_records',
+                   ]:
+        outl += '  %-20s : %s\n' % (key, len(item.splitlines()))
+      else:
+        outl += '  %-20s : %s\n' % (key, str(item))
+    return outl
+
   def update_pdb_hierarchy(self, pdb_hierarchy, crystal_symmetry):
     self.pdb_hierarchy = pdb_hierarchy
     self.crystal_symmetry = crystal_symmetry
@@ -115,6 +133,8 @@ class charges_class:
     self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
       self.pdb_hierarchy,
       )
+    self.pdb_filename = None
+    self.raw_records = None
 
   def get_total_charge(self,
                        list_charges=False,
@@ -406,6 +426,11 @@ class charges_class:
       )
       if ag.resname in ['MTN']:
         from qrefine.utils import electrons
+        if self.pdb_filename is None and self.raw_records is None:
+          self.raw_records = hierarchy_utils.get_raw_records(
+            pdb_hierarchy=self.pdb_hierarchy,
+            crystal_symmetry=self.crystal_symmetry,
+            )
         charge = electrons.run(pdb_filename=self.pdb_filename,
                                raw_records=self.raw_records,
         )
