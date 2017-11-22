@@ -103,14 +103,16 @@ def runner(function, prefix, disable=False):
 def run(nproc=6):
   t0=time.time()
   print 'Running tests on %d processors' % nproc
-  def _run_test(file_name):
-    fn = file_name.split('.')[0]
-    if not os.path.exists(fn):
-      os.mkdir(fn)
-    os.chdir(fn)
+  def _run_test(file_name, in_separate_directory=True):
+    if in_separate_directory:
+      fn = file_name.split('.')[0]
+      if not os.path.exists(fn):
+        os.mkdir(fn)
+      os.chdir(fn)
     rc = easy_run.call("cctbx.python %s"%(
       os.path.join(qr_unit_tests,file_name)))
-    os.chdir('..')
+    if in_separate_directory:
+      os.chdir('..')
     return rc
   tests = [
     "tst_00.py",
@@ -137,12 +139,13 @@ def run(nproc=6):
     "tst_23.py",
   ]
   failed = 0
-  for i, file_name in enumerate(tests): tests[i]=tuple([file_name])
+  in_separate_directory = not(nproc==1)
+  for i, file_name in enumerate(tests): tests[i]=tuple([file_name, in_separate_directory])
   for args, res, err_str in easy_mp.multi_core_run( _run_test,
                                                     tests,
                                                     nproc,
                                                     ):
-    print 'Total time: %0.2f (s)' % (time.time()-t0)
+    print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
     if err_str:
       print 'Error output from %s' % args
       print err_str
