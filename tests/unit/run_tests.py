@@ -7,6 +7,8 @@ import libtbx.load_env
 from libtbx import easy_run
 from scitbx.array_family import flex
 
+from libtbx import easy_mp
+
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
@@ -98,7 +100,18 @@ def runner(function, prefix, disable=False):
   clean_up(prefix)
   return rc
 
-def run():
+def run(nproc=6):
+  t0=time.time()
+  print 'Running tests on %d processors' % nproc
+  def _run_test(file_name):
+    fn = file_name.split('.')[0]
+    if not os.path.exists(fn):
+      os.mkdir(fn)
+    os.chdir(fn)
+    rc = easy_run.call("cctbx.python %s"%(
+      os.path.join(qr_unit_tests,file_name)))
+    os.chdir('..')
+    return rc
   tests = [
     "tst_00.py",
     "tst_01.py",
@@ -124,10 +137,17 @@ def run():
     "tst_23.py",
   ]
   failed = 0
-  for file_name in tests:
-    rc = easy_run.call("cctbx.python %s"%(
-      os.path.join(qr_unit_tests,file_name)))
-    if rc: failed+=1
+  for i, file_name in enumerate(tests): tests[i]=tuple([file_name])
+  for args, res, err_str in easy_mp.multi_core_run( _run_test,
+                                                    tests,
+                                                    nproc,
+                                                    ):
+    print 'Total time: %0.2f (s)' % (time.time()-t0)
+    if err_str:
+      print 'Error output from %s' % args
+      print err_str
+      print '_'*80
+    if res: failed += 1
   if failed:
     print 'Failed tests : %d' % failed
     return 1
@@ -135,7 +155,10 @@ def run():
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  rc = run()
+  args = sys.argv[1:]
+  nproc=1
+  if args: nproc=int(args[0])
+  rc = run(nproc=nproc)
   print "Total time (all tests): %6.2f"%(time.time()-t0)
   if rc:
     assert not rc

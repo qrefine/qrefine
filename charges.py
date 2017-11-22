@@ -6,7 +6,7 @@ from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
 from utils import hierarchy_utils
-from iotbx.pdb import amino_acid_codes as acc
+from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -382,7 +382,7 @@ class charges_class:
         annot += 'C-capp. '
       else:
         if verbose: print 'no C term'
-      if covalent_bond(atom_i_seqs, inter_residue_bonds, verbose=verbose):
+      if covalent_bond(atom_i_seqs, inter_residue_bonds):
         diff_hs+=1
         if verbose:
           print 'covalent_bond',atom_i_seqs#, inter_residue_bonds
@@ -704,7 +704,7 @@ def calculate_residue_charge(rg,
   if verbose:
     print '%s\nstarting charge: %s' % ('*'*80, charge)
   if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
-       ag.resname in acc.three_letter_l_given_three_letter_d
+       ag.resname in aac.three_letter_l_given_three_letter_d
        ):
     if verbose:
       print ag.id_str()
@@ -818,7 +818,7 @@ def calculate_residue_charge(rg,
     annot = 'non-polymer'
   return charge, rc, annot
 
-def _get_restraints_from_resname(resname):
+def _get_restraints_from_resname(resname, mon_lib_server):
   input_resname = resname
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
@@ -942,6 +942,7 @@ def get_charge_from_restraints(resname):
   pass
 
 def get_hetero_charges_DB(pdb_hierarchy):
+  assert 0
   for atom_group in pdb_hierarchy.atom_groups():
     restraints = _get_restraints_from_resname(atom_group.resname)
     if restraints.is_peptide():

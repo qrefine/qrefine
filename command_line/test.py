@@ -27,13 +27,18 @@ if __name__ == '__main__':
                       action='store_true',
                       default=False,
                       help='''run all tests, only run on a HPC cluster''')
+  parser.add_argument('--nproc',
+                      action='store',
+                      default=1,
+                      help='nprocs',
+                      type=int)
   args = parser.parse_args()
   if (args.unit)      :
     print >> log,"Running Q|R unit tests"
-    unit_tests.run()
+    unit_tests.run(nproc=args.nproc)
   if (args.reg):
     print >> log,"Running Q|R regression tests"
-    regression_tests.run()
+    regression_tests.run(nproc=args.nproc)
   if (args.pdb)       :
     print >> log,"Running Q|R pdb tests"
     # swith to acceptance_tests.py
@@ -45,5 +50,5 @@ if __name__ == '__main__':
     regression_tests.run(args=sys.argv[1:])
   if(not args.all and not args.unit and not args.reg and not args.pdb):
     print >> log,"Running Q|R unit tests"
-    rc = unit_tests.run()
+    rc = unit_tests.run(nproc=args.nproc)
     assert not rc, 'qr.test rc : %s' % rc
