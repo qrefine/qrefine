@@ -90,11 +90,10 @@ ATOM      1  O   HOHGF 333      15.000   5.000   5.000  1.00137.30           O
 TER
 """
 
-def run(prefix = "tst_14"):
+def run(prefix):
   """
   Exercise supercell.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   of = open("%s.pdb"%prefix,"w")
   print >> of, pdb_str
   of.close()

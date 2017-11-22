@@ -114,7 +114,7 @@ results = {'ACY':{'ph_7': -1},
 def run(prefix):
   for code, item in pdbs.items():
     for action, lines in item.items():
-      print code, action,
+      #print code, action,
       fn = '%s_%s.pdb' % (code, action)
       f=file(fn, 'wb')
       f.write(lines)
@@ -127,7 +127,6 @@ def run(prefix):
                       assert_correct_chain_terminii=False,
                       #verbose=1,
       )
-      print rc,
       ans = None
       level1 = results.get(code, None)
       if level1:
@@ -137,7 +136,6 @@ def run(prefix):
             rc,
             ans,
             )
-        print 'OK'
         os.remove(fn)
 
 if __name__=='__main__':

@@ -12,7 +12,6 @@ def run(prefix):
   """
   Make sure 'qr.charges tst_22.pdb' runs without errors (finishes successfully).
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_name = os.path.join(qr_unit_tests_data, "tst_22.pdb")
   cmd = "qr.charges %s verbose=False"%pdb_name
   if(0): print cmd

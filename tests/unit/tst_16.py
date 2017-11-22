@@ -11,14 +11,13 @@ import libtbx.load_env
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-def run(prefix = "tst_16"):
+def run(prefix):
   """
   Exercise gradients match:
     - small vs large box:
       -- using clustering vs not using clustering.
   Non-P1 case (P212121)
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   data_file_prefix = "2olx"
   common_args = ["restraints=cctbx", "mode=opt", "nproc=1"]
   r = run_tests.run_cmd(prefix,

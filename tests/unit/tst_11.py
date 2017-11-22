@@ -13,7 +13,7 @@ import run_tests
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-def run(prefix = "tst_11"):
+def run(prefix):
   """
   Exercise structure completion by finalise.py
   """

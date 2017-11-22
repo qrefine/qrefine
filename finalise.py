@@ -211,11 +211,6 @@ if __name__=="__main__":
       remove.append(i)
   remove.reverse()
   for r in remove: del args[r]
-  print '''
-  model/cluster completion'
-    args : %(args)s
-    kwds : %(kwds)s
-  ''' % locals()
   run(*tuple(args), **kwds)
 
 #  args = sys.argv[1:]

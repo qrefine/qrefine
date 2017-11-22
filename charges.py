@@ -603,7 +603,223 @@ def validate_all_atoms(rg):
   validate_hydrogens_atoms(rg)
   return True
 
-def _get_restraints_from_resname(resname, mon_lib_server):
+def calculate_residue_charge(rg,
+                             assert_contains_hydrogens=True,
+                             assert_no_alt_loc=True,
+                             hetero_charges=None,
+                             inter_residue_bonds=None,
+                             verbose=False,
+                             ):
+  if verbose: print '-'*80
+  def _terminal(names, check):
+    for name in check:
+      if name not in names:
+        break
+    else:
+      return True
+    return False
+  def n_terminal(residue_name, atom_names):
+    if residue_name in ["PRO"]:
+      check_names = [[' H2 ',' H3 '],
+                     [' H 1', ' H 2'], # CHARMM...
+                     [' HN1', ' HN2'], # BABEL...
+                     ]
+    else:
+      check_names = [[' H1 ',' H2 ',' H3 '],
+                     ]
+    for check_name in check_names:
+      rc = _terminal(atom_names, check_name)
+      if rc: break
+    return rc
+  def n_capping(residue_name, atom_names):
+    if residue_name in ["PRO"]:
+      check_names = [[' H2 ']]
+    else:
+      check_names = [[' H1 ',' H2 '],
+                     [' H  ',' H2 '], # from finalise
+                     ]
+    for check_name in check_names:
+      rc = _terminal(atom_names, check_name)
+      if rc: break
+    return rc
+  def nh2_terminal(atom_names):
+    return _terminal(atom_names, [' HT1', ' HT2'])
+  def nh3_terminal(atom_names):
+    return _terminal(atom_names, [' HT1', ' HT2', ' HT3'])
+  def c_terminal(atom_names):
+    rc = _terminal(atom_names, [' OXT'])
+    if not rc: rc = _terminal(atom_names, [' OT1', ' OT2'])
+    return rc
+  def c_capping(atom_names):
+    rc = _terminal(atom_names, [' HC '])
+    return rc
+  def covalent_bond(i_seqs, inter_residue_bonds):
+    for i_seq in i_seqs:
+      if i_seq in inter_residue_bonds:
+        return True
+    return False
+  ############
+  max_charge=1
+  if assert_no_alt_loc:
+    if len(rg.atom_groups())>1:
+      raise Sorry("alt locs in %s" % hierarchy_utils.display_residue_group(rg))
+  # ions
+  # needs to be centralised!!!
+  resname = rg.atom_groups()[0].resname
+  if get_class(resname)=="common_element":
+    atom = rg.atoms()[0]
+    if not atom.charge.strip():
+      if hetero_charges:
+        charge = hetero_charges.get( atom.parent().resname.strip(), None)
+        if charge is None:
+          raise Sorry('no charge found in the model file or hetero_charges for "%s"' % atom.quote())
+        else:
+          return charge, charge
+      else:
+        raise Sorry('no charge found in the model file for "%s"' % atom.quote())
+    else:
+      return atom.charge_as_int(), atom.charge_as_int()
+  # others
+  hs=0
+  atom_names = []
+  atom_i_seqs = []
+  for atom in rg.atoms():
+    if verbose: print '...',atom.quote()
+    if atom.element_is_hydrogen(): hs+=1
+    atom_names.append(atom.name)
+    atom_i_seqs.append(atom.i_seq)
+  if verbose: print get_class(resname)
+  if assert_contains_hydrogens:
+    if hs==0:
+      hydrogens = get_aa_polymer_hydrogens(resname)
+      if len(hydrogens)!=0:
+        if verbose:
+          for atom in rg.atoms(): print 'H',atom.quote()
+        raise Sorry("no hydrogens: %s" % hierarchy_utils.display_residue_group(rg))
+  ag = rg.atom_groups()[0]
+  charge = get_aa_charge(ag.resname)
+  rc = get_aa_charge(ag.resname)
+  if ag.resname in ['GLU', 'ASP']:
+    rc=-1 # reporting only
+  annot = ''
+  if verbose:
+    print '%s\nstarting charge: %s' % ('*'*80, charge)
+  if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
+       ag.resname in acc.three_letter_l_given_three_letter_d
+       ):
+    if verbose:
+      print ag.id_str()
+      print 'number of hydrogens',len(get_aa_polymer_hydrogens(ag.resname))
+    poly_hs = len(get_aa_polymer_hydrogens(ag.resname))-2
+    diff_hs = hs-poly_hs
+    if verbose: print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                              poly_hs,
+                                                              diff_hs,
+                                                            )
+    if verbose: print atom_names
+    if n_terminal(ag.resname, atom_names):
+      diff_hs-=1
+      max_charge+=1
+      if verbose:
+        print 'n_terminal'
+        print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                      poly_hs,
+                                                      diff_hs,
+        )
+      annot += 'N-term. '
+    elif nh3_terminal(atom_names):
+      diff_hs-=1
+      max_charge+=1
+      if verbose: print 'nh3_terminal True'
+      annot += 'NH3-term. '
+    elif nh2_terminal(atom_names):
+      diff_hs-=1
+      max_charge+=1
+      if verbose: print 'nh2_terminal True'
+      annot += 'NH2-term. '
+    elif n_capping(ag.resname, atom_names):
+      diff_hs-=1
+      if verbose: print 'n_capping True'
+      annot += 'N-capp. '
+    else:
+      if verbose: print 'no N term'
+    if c_terminal(atom_names):
+      diff_hs-=1
+      max_charge+=1
+      if verbose:
+        print 'c_terminal'
+        print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                      poly_hs,
+                                                      diff_hs,
+                                                    )
+      annot += 'C-term. '
+    elif c_capping(atom_names):
+      diff_hs-=1
+      #max_charge+=1
+      if verbose:
+        print 'c_capping'
+        print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                      poly_hs,
+                                                      diff_hs,
+                                                    )
+      annot += 'C-capp. '
+    else:
+      if verbose: print 'no C term'
+    if covalent_bond(atom_i_seqs, inter_residue_bonds):
+      diff_hs+=1
+      if verbose:
+        print 'covalent_bond',atom_i_seqs, inter_residue_bonds
+      annot += 'Coval. '
+    if hierarchy_utils.is_n_terminal_atom_group(ag):
+      diff_hs-=1
+    if verbose:
+      print 'residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
+        ag.resname,
+        charge,
+        poly_hs,
+        diff_hs,
+        charge+diff_hs,
+        annot,
+      )
+    charge+=diff_hs
+    if charge: verbose=0
+    if verbose:
+      print '  %s charge: %-2s poly_hs: %s diff_hs: %-2s' % (ag.id_str(),
+                                                             charge,
+                                                             poly_hs,
+                                                             diff_hs,
+                                                           )
+    assert abs(charge)<=max_charge, 'residue %s charge %s is greater than %s' % (
+      rg.atoms()[0].quote(),
+      charge,
+      max_charge,
+    )
+    if resname in allowable_amino_acid_charges:
+      assert allowable_amino_acid_charges[resname]-1 <= charge <= allowable_amino_acid_charges[resname]+1, 'resname %s charge %s range %s %s' % (
+        resname,
+        charge,
+        allowable_amino_acid_charges[resname]-1,
+        allowable_amino_acid_charges[resname]+1,
+        )
+  else:
+    restraints = _get_restraints_from_resname(ag.resname)
+    ag_names = set()
+    for atom in ag.atoms():
+      ag_names.add(atom.name.strip())
+    atom_dict = restraints.atom_dict()
+    cif_names = set()
+    total = 0
+    for name, atom in atom_dict.items():
+      cif_names.add(name)
+      total += atom.partial_charge # should use formal charge!!!
+    #assert len(cif_names)==len(cif_names.intersection(ag_names))
+    #assert len(ag_names)==len(cif_names.intersection(ag_names))
+    assert abs(total-int(total))<0.01, 'sum of parial charges fo %s not accurate %f' % (ag.name, total)
+    charge = int(total)
+    annot = 'non-polymer'
+  return charge, rc, annot
+
+def _get_restraints_from_resname(resname):
   input_resname = resname
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:

@@ -64,7 +64,6 @@ def run(prefix):
   """
   compare gradients from entire qm and clustered qm.
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files","helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
