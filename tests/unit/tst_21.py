@@ -2,8 +2,6 @@ import  iotbx.pdb
 import time
 import sys
 import qrefine.completion as completion
-from qrefine.charges import write_pdb_hierarchy_qxyz_file
-from qrefine.charges import write_pdb_hierarchy_xyzq_file
 
 import run_tests
 
@@ -1843,13 +1841,10 @@ TER
 log = sys.stdout
 
 def run(pdb_file, log):
-  pdb_inp = iotbx.pdb.input(pdb_file)
-  ph = pdb_inp.construct_hierarchy()
-  cs = pdb_inp.crystal_symmetry()
-  write_pdb_hierarchy_qxyz_file(
-        ph,
-        file_name="q.xyz",
-        exclude_water=False)
+  from qrefine.charges import charges_class
+  cc = charges_class(pdb_filename=pdb_file)
+  cc.write_pdb_hierarchy_qxyz_file(file_name="q.xyz",
+                                   exclude_water=False)
 
 if (__name__ == "__main__"):
   prefix = 'tst_21'

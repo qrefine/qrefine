@@ -6,9 +6,7 @@ from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
 from utils import hierarchy_utils
-from iotbx.pdb import amino_acid_codes as acc
-
-mon_lib_server = server.server()
+from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
@@ -31,6 +29,22 @@ non_hydrogens_per_aa_polymer = {}
 non_standard_amino_acids = { #"SAR" : None,
                             }
 
+def get_mon_lib_server(ligand_cif_file_names=None):
+  mon_lib_server = server.server()
+  if ligand_cif_file_names:
+    for fn in ligand_cif_file_names:
+      mon_lib_server.process_cif(file_name=fn)
+  return mon_lib_server
+
+def get_cif_objects(ligand_cif_file_names=None):
+  cif_objects = []
+  cif_object = None
+  if ligand_cif_file_names:
+    for fn in ligand_cif_file_names:
+      cif_object = iotbx.cif.reader(fn, strict=False).model()
+      cif_objects.append(cif_object)
+  return cif_objects
+
 class chemical_component_class(dict):
   def get_total_charge(self):
     total = 0
@@ -52,13 +66,479 @@ class chemical_component_class(dict):
         hs.append(atom)
     return hs
 
+class charges_class:
+  def __init__(self,
+               pdb_filename=None,
+               raw_records=None,
+               pdb_inp=None,
+               ligand_cif_file_names=None,
+               cif_objects=None,
+               verbose=False,
+               ):
+    self.verbose=verbose
+    self.pdb_filename=pdb_filename
+    self.raw_records=raw_records
+    assert not (ligand_cif_file_names and cif_objects)
+    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
+                                            raw_records=raw_records,
+                                            pdb_inp=pdb_inp,
+                                            cif_objects=cif_objects,
+                                           )
+    self.inter_residue_bonds = get_inter_residue_bonds(ppf)
+    self.update_pdb_hierarchy(
+      ppf.all_chain_proxies.pdb_hierarchy,
+      ppf.all_chain_proxies.pdb_inp.crystal_symmetry_from_cryst1(),
+    )
+    self.pdb_inp = ppf.all_chain_proxies.pdb_inp
+    assert self.crystal_symmetry, 'There is no CRYST1 record in the input file'
+
+    self.hetero_charges = get_hetero_charges(self.pdb_inp,
+                                             self.pdb_hierarchy,
+    )
+    if not self.hetero_charges:
+      # some defaults
+      self.hetero_charges = default_ion_charges
+    #if verbose:
+    #  for key, item in self.inter_residue_bonds.items():
+    #    if type(key)!=type(0) and len(key)==2: print key, item
+    # merge atoms from clustering
+    self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
+      self.pdb_hierarchy,
+      )
+    self.mon_lib_server = ppf.mon_lib_srv
+
+  def __repr__(self):
+    outl = 'charges\n'
+    for key, item in self.__dict__.items():
+      if item is None:
+        outl += '  %-20s : %s\n' % (key, item)
+      elif key in ['pdb_filename',
+                 ]:
+        outl += '  %-20s : %s\n' % (key, item)
+      elif key in ['pdb_hierarchy',
+                   ]:
+        outl += '  %-20s : %s\n' % (key, len(item.atoms()))
+      elif key in ['raw_records',
+                   ]:
+        outl += '  %-20s : %s\n' % (key, len(item.splitlines()))
+      else:
+        outl += '  %-20s : %s\n' % (key, str(item))
+    return outl
+
+  def update_pdb_hierarchy(self, pdb_hierarchy, crystal_symmetry):
+    self.pdb_hierarchy = pdb_hierarchy
+    self.crystal_symmetry = crystal_symmetry
+    if hasattr(self, 'pdb_inp'): self.pdb_inp = None
+    # merge atoms from clustering
+    self.pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
+      self.pdb_hierarchy,
+      )
+    self.pdb_filename = None
+    self.raw_records = None
+
+  def get_total_charge(self,
+                       list_charges=False,
+                       assert_correct_chain_terminii=True,
+                       check=False,
+                       verbose=False,
+                      ):
+    total_charge = self.calculate_pdb_hierarchy_charge(
+      self.pdb_hierarchy,
+      hetero_charges=self.hetero_charges,
+      inter_residue_bonds=self.inter_residue_bonds,
+      list_charges=list_charges,
+      assert_correct_chain_terminii=assert_correct_chain_terminii,
+      check=check,
+      verbose=verbose,
+    )
+    return total_charge
+
+  def write_pdb_hierarchy_qxyz_file(self,
+                                    file_name="qxyz_cctbx.dat",
+                                    exclude_water=True,
+                                    charge_scaling_positions=None,
+                                    scale=0,
+                                    ):
+    self.write_charge_and_coordinates_from_hierarchy(
+      file_name=file_name,
+      qxyz_order='qxyz',
+      exclude_water=exclude_water,
+      charge_scaling_positions=None,
+      scale=0,
+    )
+
+  def write_charge_and_coordinates_from_hierarchy(self,
+                                                  file_name,
+                                                  qxyz_order='qxyz',
+                                                  exclude_water=True,
+                                                  charge_scaling_positions=None,
+                                                  scale=0,
+                                                  assert_no_alt_loc=False,
+                                                  ):
+    qxyz = None
+    for residue in hierarchy_utils.generate_residue_groups(
+      self.pdb_hierarchy,
+      assert_no_alt_loc=assert_no_alt_loc,
+      exclude_water=exclude_water,
+      ):
+      if qxyz is None:
+        qxyz = get_partial_point_charges(residue,
+                                         self.mon_lib_server,
+                                         hetero_charges=self.hetero_charges)
+      else:
+        qxyz = qxyz + get_partial_point_charges(residue,
+                                                self.mon_lib_server,
+                                                hetero_charges=self.hetero_charges)
+    if qxyz is None: return
+    scale_partial_point_charges(qxyz,charge_scaling_positions, scale=0)
+    qxyz_file = open(file_name,"w+")
+    if qxyz_order=='qxyz': # tetrachem?
+      qxyz_file.write(str(self.pdb_hierarchy.atoms_size())+ "  \n")
+      qxyz_file.write("  \n")
+    elif qxyz_order=='xyzq':
+      pass
+    else:
+      raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
+    outl = ""
+    for i, item in enumerate(qxyz):
+      if item[0]==0 or item[0] is None:
+        outl += ' %s has zero/None partial charge\n' % hierarchy.atoms()[i].quote()
+      if qxyz_order=='qxyz':
+        item_list = item + ["  \n"]
+      elif qxyz_order=='xyzq':
+        item_list = item[1:]+item[0:1] + ["  \n"]
+      else:
+        raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
+      item_string = "  ".join(str(elm) for elm in item_list)
+      qxyz_file.write(item_string)
+    qxyz_file.close()
+
+    if outl:
+      print 'WARNINGS'
+      print outl
+      raise Sorry('point charges are not set.')
+
+  def calculate_residue_charge(self,
+                               rg,
+                               assert_contains_hydrogens=True,
+                               assert_no_alt_loc=True,
+                               hetero_charges=None,
+                               inter_residue_bonds=None,
+                               verbose=False,
+                               ):
+    if self.verbose: verbose=True
+    if verbose: print '-'*80
+    def _terminal(names, check):
+      for name in check:
+        if name not in names:
+          break
+      else:
+        return True
+      return False
+    def n_terminal(residue_name, atom_names):
+      if residue_name in ["PRO"]:
+        check_names = [[' H2 ',' H3 '],
+                       [' H 1', ' H 2'], # CHARMM...
+                       [' HN1', ' HN2'], # BABEL...
+                       ]
+      else:
+        check_names = [[' H1 ',' H2 ',' H3 '],
+                       ]
+      for check_name in check_names:
+        rc = _terminal(atom_names, check_name)
+        if rc: break
+      return rc
+    def n_capping(residue_name, atom_names):
+      if residue_name in ["PRO"]:
+        check_names = [[' H2 ']]
+      else:
+        check_names = [[' H1 ',' H2 '],
+                       [' H  ',' H2 '], # from finalise
+                       ]
+      for check_name in check_names:
+        rc = _terminal(atom_names, check_name)
+        if rc: break
+      return rc
+    def nh2_terminal(atom_names):
+      return _terminal(atom_names, [' HT1', ' HT2'])
+    def nh3_terminal(atom_names):
+      return _terminal(atom_names, [' HT1', ' HT2', ' HT3'])
+    def c_terminal(atom_names):
+      rc = _terminal(atom_names, [' OXT'])
+      if not rc: rc = _terminal(atom_names, [' OT1', ' OT2'])
+      return rc
+    def c_capping(atom_names):
+      rc = _terminal(atom_names, [' HC '])
+      return rc
+    def covalent_bond(i_seqs, inter_residue_bonds, verbose=False):
+      #peptide_link_atoms = ['N','C']
+      for i_seq in i_seqs:
+        if i_seq in inter_residue_bonds:
+          return True
+      return False
+    ############
+    max_charge=1
+    if assert_no_alt_loc:
+      if len(rg.atom_groups())>1:
+        raise Sorry("alt locs in %s" % hierarchy_utils.display_residue_group(rg))
+    # ions
+    # needs to be centralised!!!
+    resname = rg.atom_groups()[0].resname
+    if get_class(resname)=="common_element":
+      atom = rg.atoms()[0]
+      if not atom.charge.strip():
+        if hetero_charges:
+          charge = hetero_charges.get( atom.parent().resname.strip(), None)
+          if charge is None:
+            raise Sorry('no charge found in the model file or hetero_charges for "%s"' % atom.quote())
+          else:
+            return charge, charge
+        else:
+          raise Sorry('no charge found in the model file for "%s"' % atom.quote())
+      else:
+        return atom.charge_as_int(), atom.charge_as_int()
+    # others
+    hs=0
+    atom_names = []
+    atom_i_seqs = []
+    for atom in rg.atoms():
+      if verbose: print '...',atom.quote()
+      if atom.element_is_hydrogen(): hs+=1
+      atom_names.append(atom.name)
+      atom_i_seqs.append(atom.i_seq)
+    if verbose: print get_class(resname)
+    if assert_contains_hydrogens:
+      if hs==0:
+        hydrogens = get_aa_polymer_hydrogens(resname)
+        if len(hydrogens)!=0:
+          if verbose:
+            for atom in rg.atoms(): print 'H',atom.quote()
+          raise Sorry("no hydrogens: %s" % hierarchy_utils.display_residue_group(rg))
+    ag = rg.atom_groups()[0]
+    charge = get_aa_charge(ag.resname)
+    rc = get_aa_charge(ag.resname)
+    if ag.resname in ['GLU', 'ASP']:
+      rc=-1 # reporting only
+    annot = ''
+    if verbose:
+      print '%s\nstarting charge: %s' % ('*'*80, charge)
+    if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
+         ag.resname in aac.three_letter_l_given_three_letter_d
+         ):
+      if verbose:
+        print ag.id_str()
+        print 'number of hydrogens',len(get_aa_polymer_hydrogens(ag.resname))
+      poly_hs = len(get_aa_polymer_hydrogens(ag.resname))-2
+      diff_hs = hs-poly_hs
+      if verbose: print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                                poly_hs,
+                                                                diff_hs,
+                                                              )
+      if verbose: print atom_names
+      if n_terminal(ag.resname, atom_names):
+        diff_hs-=1
+        max_charge+=1
+        if verbose:
+          print 'n_terminal'
+          print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                        poly_hs,
+                                                        diff_hs,
+          )
+        annot += 'N-term. '
+      elif nh3_terminal(atom_names):
+        diff_hs-=1
+        max_charge+=1
+        if verbose: print 'nh3_terminal True'
+        annot += 'NH3-term. '
+      elif nh2_terminal(atom_names):
+        diff_hs-=1
+        max_charge+=1
+        if verbose: print 'nh2_terminal True'
+        annot += 'NH2-term. '
+      elif n_capping(ag.resname, atom_names):
+        diff_hs-=1
+        if verbose: print 'n_capping True'
+        annot += 'N-capp. '
+      else:
+        if verbose: print 'no N term'
+      if c_terminal(atom_names):
+        diff_hs-=1
+        max_charge+=1
+        if verbose:
+          print 'c_terminal'
+          print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                        poly_hs,
+                                                        diff_hs,
+                                                      )
+        annot += 'C-term. '
+      elif c_capping(atom_names):
+        diff_hs-=1
+        #max_charge+=1
+        if verbose:
+          print 'c_capping'
+          print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+                                                        poly_hs,
+                                                        diff_hs,
+                                                      )
+        annot += 'C-capp. '
+      else:
+        if verbose: print 'no C term'
+      if covalent_bond(atom_i_seqs, inter_residue_bonds, verbose=verbose):
+        diff_hs+=1
+        if verbose:
+          print 'covalent_bond',atom_i_seqs#, inter_residue_bonds
+        annot += 'Coval. '
+      if hierarchy_utils.is_n_terminal_atom_group(ag):
+        if verbose: print 'subtracting due to N terminal'
+        diff_hs-=1
+      if verbose:
+        print 'residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
+          ag.resname,
+          charge,
+          poly_hs,
+          diff_hs,
+          charge+diff_hs,
+          annot,
+        )
+      charge+=diff_hs
+      if charge: verbose=0
+      if verbose:
+        print '  %s charge: %-2s poly_hs: %s diff_hs: %-2s' % (ag.id_str(),
+                                                               charge,
+                                                               poly_hs,
+                                                               diff_hs,
+                                                             )
+      assert abs(charge)<=max_charge, 'residue %s charge %s is greater than %s' % (
+        rg.atoms()[0].quote(),
+        charge,
+        max_charge,
+      )
+      if resname in allowable_amino_acid_charges:
+        assert allowable_amino_acid_charges[resname]-1 <= charge <= allowable_amino_acid_charges[resname]+1, 'resname %s charge %s range %s %s' % (
+          resname,
+          charge,
+          allowable_amino_acid_charges[resname]-1,
+          allowable_amino_acid_charges[resname]+1,
+          )
+    else:
+      restraints = _get_restraints_from_resname(ag.resname,
+                                                self.mon_lib_server,
+      )
+      if ag.resname in ['MTN']:
+        from qrefine.utils import electrons
+        if self.pdb_filename is None and self.raw_records is None:
+          self.raw_records = hierarchy_utils.get_raw_records(
+            pdb_hierarchy=self.pdb_hierarchy,
+            crystal_symmetry=self.crystal_symmetry,
+            )
+        charge = electrons.run(pdb_filename=self.pdb_filename,
+                               raw_records=self.raw_records,
+        )
+        annot='non-polymer'
+      else:
+        ag_names = set()
+        for atom in ag.atoms():
+          ag_names.add(atom.name.strip())
+        atom_dict = restraints.atom_dict()
+        cif_names = set()
+        total = 0
+        for name, atom in atom_dict.items():
+          total += atom.partial_charge
+          cif_names.add(name)
+        #assert len(cif_names)==len(cif_names.intersection(ag_names))
+        #assert len(ag_names)==len(cif_names.intersection(ag_names))
+        assert abs(total-int(total))<0.01, \
+          'sum of parial charges fo %s not accurate %f' % (ag.name, total) 
+        charge = int(total) 
+        annot = 'ligand'
+    return charge, rc, annot
+
+  def calculate_pdb_hierarchy_charge(self,
+                                     hierarchy,
+                                     hetero_charges=None,
+                                     inter_residue_bonds=None,
+                                     assert_no_alt_loc=True,
+                                     list_charges=False,
+                                     check=None,
+                                     assert_correct_chain_terminii=True,
+                                     verbose=False,
+                                     ):
+    if self.verbose: verbose=True
+    charge = 0
+    charges = []
+    annotations = []
+    if inter_residue_bonds is None: inter_residue_bonds=[]
+    if assert_no_alt_loc:
+      # see if we can squash into a single conf.
+      hierarchy = hierarchy_utils.attempt_to_squash_alt_loc(hierarchy)
+      if hierarchy is None: raise Sorry('too many alt locs to squash')
+    residue_types = []
+    for residue in hierarchy_utils.generate_residue_groups(
+        hierarchy,
+        assert_no_alt_loc=assert_no_alt_loc,
+        exclude_water=True,
+        ):
+      validate_all_atoms(residue)
+      assert len(residue.atom_groups())==1
+      residue_types.append(get_class(residue.atom_groups()[0].resname))
+      tmp, rc, annot = self.calculate_residue_charge(
+        residue,
+        hetero_charges=hetero_charges,
+        inter_residue_bonds=inter_residue_bonds,
+        assert_no_alt_loc=assert_no_alt_loc,
+        verbose=verbose,
+      )
+      annotations.append(annot)
+      if annot=='non-polymer':
+        charge = tmp
+        break
+      if check:
+        print residue
+        key = 'PRO%s' % residue.parent().id
+        key += '.%s' % residue.resseq.strip()
+        key += '.%s' % residue.atom_groups()[0].resname
+        key = key.replace('HIS', 'HSD')
+        print key
+        print ' CHARMM %f Phenix %f' % (check[key], tmp)
+        if 1:
+          print inter_residue_bonds
+        assert abs(check[key]-tmp)<0.001
+        assert 0
+      if list_charges:
+        outl = residue.id_str()
+        for ag in residue.atom_groups():
+          outl += '%s ' % ag.resname
+        #print 'CHARGE %s %2d (%2d) %s' % (outl, tmp, rc, annot)
+        charges.append([outl, tmp, annot])
+      charge += tmp
+      if verbose: # or display_residue_charges:
+        if tmp:
+          outl = '-'*80
+          outl += '\nNON-ZERO CHARGE current %2d base %2d total %2d' % (tmp,rc,charge)
+          for i, atom in enumerate(residue.atoms()):
+            if i==0:
+              outl += ' "%s"' % (atom.parent().id_str())
+              if tmp!=rc: outl += ' DIFF %2d' % (tmp-rc)
+            assert abs(tmp-rc)<=2, outl
+            outl += "\n%s" % atom.quote()
+          outl += '\n%s' % ('-'*80)
+          print outl
+    # check annotations
+    if residue_types and assert_correct_chain_terminii:
+      assert filter(None, annotations), 'No terminal or capping hydrogens found'
+    if list_charges:
+      #print 'CHARGE',charge
+      charges.append(['Total', charge])
+      return charges
+    return charge
+
 def get_aa_charge(code):
   # get from cache first
   # then look in the chemical components
   # not sure what to do about novel ligands...
   tmp = charge_per_aa_polymer.get(code, None)
   if tmp: return tmp
-  l_peptide = acc.three_letter_l_given_three_letter_d.get(code, None)
+  l_peptide = aac.three_letter_l_given_three_letter_d.get(code, None)
   cc = chemical_component_class()
   if l_peptide:
     cc.update(get_cif_dictionary(l_peptide))
@@ -343,14 +823,16 @@ def _get_restraints_from_resname(resname):
   input_resname = resname
   restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
-    resname = acc.three_letter_l_given_three_letter_d.get(resname, None)
+    resname = aac.three_letter_l_given_three_letter_d.get(resname, None)
     if resname is not None:
       restraints = mon_lib_server.get_comp_comp_id_direct(resname)
   if restraints is None:
     assert restraints, 'no restraints for "%s" found' % input_resname
   return restraints
 
-def get_partial_point_charges(rg, hetero_charges=None):
+def get_partial_point_charges(rg,
+                              mon_lib_server,
+                              hetero_charges=None):
   """
   This function relies only on the residue group and monomer library server
   """
@@ -366,7 +848,7 @@ def get_partial_point_charges(rg, hetero_charges=None):
           }
   tmp = []
   for ag in rg.atom_groups():
-    restraints = _get_restraints_from_resname(ag.resname)
+    restraints = _get_restraints_from_resname(ag.resname, mon_lib_server)
     atom_dict = restraints.atom_dict()
     for atom in ag.atoms():
       # ions
@@ -403,186 +885,6 @@ def get_partial_point_charges(rg, hetero_charges=None):
       tmp.append([cif.partial_charge]+list(atom.xyz))
   return tmp
 
-def calculate_pdb_hierarchy_charge(hierarchy,
-                                   hetero_charges=None,
-                                   inter_residue_bonds=None,
-                                   assert_no_alt_loc=True,
-                                   list_charges=False,
-                                   check=None,
-                                   assert_correct_chain_terminii=True,
-                                   verbose=False,
-                                   ):
-  charge = 0
-  charges = []
-  annotations = []
-  if inter_residue_bonds is None: inter_residue_bonds=[]
-  if assert_no_alt_loc:
-    # see if we can squash into a single conf.
-    hierarchy = hierarchy_utils.attempt_to_squash_alt_loc(hierarchy)
-    if hierarchy is None: raise Sorry('too many alt locs to squash')
-  residue_types = []
-  for residue in hierarchy_utils.generate_residue_groups(
-      hierarchy,
-      assert_no_alt_loc=assert_no_alt_loc,
-      exclude_water=True,
-      ):
-    validate_all_atoms(residue)
-    assert len(residue.atom_groups())==1
-    residue_types.append(get_class(residue.atom_groups()[0].resname))
-    tmp, rc, annot = calculate_residue_charge(
-      residue,
-      hetero_charges=hetero_charges,
-      inter_residue_bonds=inter_residue_bonds,
-      assert_no_alt_loc=assert_no_alt_loc,
-      verbose=verbose,
-    )
-    annotations.append(annot)
-    if check:
-      print residue
-      key = 'PRO%s' % residue.parent().id
-      key += '.%s' % residue.resseq.strip()
-      key += '.%s' % residue.atom_groups()[0].resname
-      key = key.replace('HIS', 'HSD')
-      print key
-      print ' CHARMM %f Phenix %f' % (check[key], tmp)
-      if 1:
-        print inter_residue_bonds
-      assert abs(check[key]-tmp)<0.001
-      assert 0
-    if list_charges:
-      outl = residue.id_str()
-      for ag in residue.atom_groups():
-        outl += '%s ' % ag.resname
-      #print 'CHARGE %s %2d (%2d) %s' % (outl, tmp, rc, annot)
-      charges.append([outl, tmp, annot])
-    charge += tmp
-    if verbose: # or display_residue_charges:
-      if tmp:
-        outl = '-'*80
-        outl += '\nNON-ZERO CHARGE current %2d base %2d total %2d' % (tmp,rc,charge)
-        for i, atom in enumerate(residue.atoms()):
-          if i==0:
-            outl += ' "%s"' % (atom.parent().id_str())
-            if tmp!=rc: outl += ' DIFF %2d' % (tmp-rc)
-          assert abs(tmp-rc)<=2, outl
-          outl += "\n%s" % atom.quote()
-        outl += '\n%s' % ('-'*80)
-        print outl
-  # check annotations
-  if residue_types and assert_correct_chain_terminii:
-    assert filter(None, annotations), 'No terminal or capping hydrogens found'
-  if list_charges:
-    #print 'CHARGE',charge
-    charges.append(['Total', charge])
-    return charges
-  return charge
-
-def get_total_charge_from_pdb(pdb_filename=None,
-                              raw_records=None,
-                              pdb_inp=None,
-                              hetero_charges=None,
-                              inter_residue_bonds=None,
-                              list_charges=False,
-                              assert_correct_chain_terminii=True,
-                              check = None,
-                              verbose=False,
-  ):
-  ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
-                                          raw_records=raw_records,
-                                          pdb_inp=pdb_inp,
-                                      )
-  pdb_inp = ppf.all_chain_proxies.pdb_inp
-  cs = pdb_inp.crystal_symmetry_from_cryst1()
-  assert cs, 'There is no CRYST1 record in the input file'
-  if not hetero_charges:
-    hetero_charges = get_hetero_charges(ppf.all_chain_proxies.pdb_inp,
-                                        ppf.all_chain_proxies.pdb_hierarchy,
-    )
-    if not hetero_charges:
-      # some defaults
-      hetero_charges = default_ion_charges
-  if not inter_residue_bonds:
-    inter_residue_bonds = get_inter_residue_bonds(ppf)
-  if verbose:
-    for key, item in inter_residue_bonds.items():
-      if type(key)!=type(0) and len(key)==2: print key, item
-  pdb_hierarchy = hierarchy_utils.merge_atoms_at_end_to_residues(
-    ppf.all_chain_proxies.pdb_hierarchy,
-    )
-  total_charge = calculate_pdb_hierarchy_charge(
-    pdb_hierarchy, # ppf.all_chain_proxies.pdb_hierarchy,
-    hetero_charges=hetero_charges,
-    inter_residue_bonds=inter_residue_bonds,
-    list_charges=list_charges,
-    assert_correct_chain_terminii=assert_correct_chain_terminii,
-    check=check,
-    verbose=verbose,
-  )
-  return total_charge
-
-def write_charge_and_coordinates_from_hierarchy(hierarchy,
-                                                file_name,
-                                                qxyz_order='qxyz',
-                                                hetero_charges=None,
-                                                exclude_water=True,
-                                                charge_scaling_positions=None,
-                                                assert_no_alt_loc=False,
-                                                scale=0
-                                                ):
-  qxyz = None
-  for residue in hierarchy_utils.generate_residue_groups(hierarchy,
-                                         assert_no_alt_loc=assert_no_alt_loc,
-                                         exclude_water=exclude_water,
-                                        ):
-    if qxyz is None:
-      qxyz = get_partial_point_charges(residue, hetero_charges=hetero_charges)
-    else:
-      qxyz = qxyz + get_partial_point_charges(residue,
-                                              hetero_charges=hetero_charges)
-  if qxyz is None: return
-  scale_partial_point_charges(qxyz,charge_scaling_positions, scale=0)
-  qxyz_file = open(file_name,"w+")
-  if qxyz_order=='qxyz': # tetrachem?
-    qxyz_file.write(str(hierarchy.atoms_size())+ "  \n")
-    qxyz_file.write("  \n")
-  elif qxyz_order=='xyzq':
-    pass
-  else:
-    raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
-  outl = ""
-  for i, item in enumerate(qxyz):
-    if item[0]==0 or item[0] is None:
-      outl += ' %s has zero/None partial charge\n' % hierarchy.atoms()[i].quote()
-    if qxyz_order=='qxyz':
-      item_list = item + ["  \n"]
-    elif qxyz_order=='xyzq':
-      item_list = item[1:]+item[0:1] + ["  \n"]
-    else:
-      raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
-    item_string = "  ".join(str(elm) for elm in item_list)
-    qxyz_file.write(item_string)
-  qxyz_file.close()
-
-  if outl:
-    print 'WARNINGS'
-    print outl
-    raise Sorry('point charges are not set.')
-
-def write_pdb_hierarchy_qxyz_file(hierarchy,
-                                  file_name="qxyz_cctbx.dat",
-                                  hetero_charges=None,
-                                  exclude_water=True,
-                                  charge_scaling_positions=None,
-                                  scale=0,
-                                 ):
-  write_charge_and_coordinates_from_hierarchy(hierarchy,
-                                              file_name=file_name,
-                                              qxyz_order='qxyz',
-                                              hetero_charges=hetero_charges,
-                                              exclude_water=exclude_water,
-                                              charge_scaling_positions=None,
-                                              scale=0,
-                                              )
 
 def write_pdb_hierarchy_xyzq_file(hierarchy,
                                   file_name="xyzq_cctbx.dat",
@@ -689,10 +991,11 @@ def get_inter_residue_bonds(ppf, verbose=False):
   return inter_residue_bonds
 
 def run(pdb_filename,
+        ligand_file_names=None,
         list_charges=False,
         assert_correct_chain_terminii=True,
         verbose=False):
-  #print "run",pdb_filename
+  assert 0
   data = {}
   if os.path.exists(pdb_filename.replace('.pdb', '.psf')):
     f=file(pdb_filename.replace('.pdb', '.psf'), 'rb')
@@ -702,19 +1005,14 @@ def run(pdb_filename,
       tmp = line.split()
       if not tmp: continue
       if tmp[1].find('PRO')==-1: continue
-    #  print line
       key = '.'.join(tmp[1:4])
-     # print key
       data.setdefault(key, 0)
       data[key]+=float(tmp[6])
-    #print data
 
   # needs hetero_charges?
-  if(verbose):
-    print 'list_charges',list_charges
-    print 'verbose     ',verbose
   total_charge = get_total_charge_from_pdb(
     pdb_filename,
+    mon_lib_server,
     list_charges=list_charges,
     assert_correct_chain_terminii=assert_correct_chain_terminii,
     check=None, #data,

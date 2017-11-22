@@ -875,8 +875,9 @@ def test_helix():
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy,
-                                                          verbose=False)
+  from qrefine.charges import charges_class
+  cc = charges_class(tf)
+  charge = cc.get_total_charge()
   assert charge==0, 'charge of helix should be zero not %s' % charge
   cmd = 'iotbx.python %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
@@ -892,8 +893,8 @@ def test_helix():
   assert not must_find
   pdb_inp=pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
-  charge = qrefine.charges.calculate_pdb_hierarchy_charge(hierarchy,
-                                                          verbose=False)
+  cc.update_pdb_hierarchy(hierarchy, pdb_inp.crystal_symmetry_from_cryst1())
+  charge = cc.get_total_charge()
   assert charge==1, 'charge of helix should be one not %s' % charge
 
 def test_charge_for_charmm_pdbs(only_i=None):
@@ -1074,10 +1075,8 @@ def test_10_capping():
   f.write(pdbs['10_capping'])
   f.close()
   from qrefine import charges
-  rc = charges.run('test_10_capping.pdb',
-                   list_charges=True,
-                   )
-  #print '+'*80
+  cc = charges.charges_class('test_10_capping.pdb')
+  rc = cc.get_total_charge(list_charges=True)
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):

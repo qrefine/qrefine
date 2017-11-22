@@ -4,7 +4,7 @@ import os
 import ase.units as ase_units
 import mmtbx.restraints
 from libtbx.utils import Sorry
-from charges import get_total_charge_from_pdb
+from charges import charges_class
 from scitbx.array_family import flex
 from clustering import betweenness_centrality_clustering
 from plugin.ase.mopac_qr import Mopac
@@ -51,15 +51,14 @@ class from_qm(object):
       charge                     = None,
       qm_engine_name             = None,
       file_name                  = "./ase/tmp_ase.pdb",
-      #clustering_method          = betweenness_centrality_clustering,
-      #maxnum_residues_in_cluster = 20,
-      #charge_embedding           = False,
       crystal_symmetry           = None,
       clustering                 = False,
-      #shared_disk                = True,
+#      charge_service             = None,
+      cif_objects                = None,
       basis                      = "sto-3g"):
     self.fragment_extracts  = fragment_extracts
     self.basis = basis
+
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
     self.file_name = file_name
@@ -67,11 +66,16 @@ class from_qm(object):
     if(os.path.exists(self.working_folder) is not True):
       os.mkdir(self.working_folder)
     if(charge is None and clustering is False):
+      #raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
+      #cc = charges_class(raw_records=raw_records)
+      #self.charge = cc.get_total_charge()
+      #@Nigel
       raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-      self.charge = get_total_charge_from_pdb(raw_records=raw_records)
+      charge_service = charges_class(raw_records = raw_records,
+                                     cif_objects = cif_objects)
+      self.charge = charge_service.get_total_charge()
     else: self.charge = charge
     self.clustering = clustering
-    #self.shared_disk = shared_disk
     self.qm_engine = self.create_qm_engine()
     self.system_size = self.pdb_hierarchy.atoms_size()
 
