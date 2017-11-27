@@ -72,7 +72,7 @@ def clean_up(prefix,mtz_name = None):
     'test_point_charges.pdb', 'q.xyz',
     'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb',
     'test_original_pdb_capping.pdb', 'test_short_gap.pdb',
-    'test_short_gap_capping.pdb', 'entire_qm.pdb']
+    'test_short_gap_capping.pdb', 'entire_qm.pdb', 'cluster_qm.pdb']
   files_to_remove2 = [
     'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
     'tst_14_super_sphere.pdb']

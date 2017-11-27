@@ -67,58 +67,55 @@ def run(prefix):
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files","helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
-
+  restraints_entire = generate_restraints(cs, ph, clustering=False)
   ## compare the absolute value of gradients
-  g_entire = qm_gradient(cs, ph, clustering=False)
-  g_cluster = qm_gradient(cs, ph, clustering = True)
+  g_entire = qm_gradient(ph, restraints_entire)
+  restraints_cluster = generate_restraints(cs, ph, clustering=True)
+  g_cluster = qm_gradient(ph, restraints_cluster)
   assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"
-  qm_opt(cs, ph,file_entire_qm,cluster=False)
+  qm_opt(restraints_entire,file_entire_qm)
   file_cluster_qm = "cluster_qm.pdb"
-  qm_opt(cs, ph,file_cluster_qm,cluster = True)
+  qm_opt(restraints_cluster,file_cluster_qm)
   sites_cart_entire_qm = iotbx.pdb.input(file_entire_qm).atoms().extract_xyz()
   sites_cart_cluster_qm = iotbx.pdb.input(file_cluster_qm).atoms().extract_xyz()
   rmsd_diff = sites_cart_entire_qm.rms_difference(sites_cart_cluster_qm)
-  os.system("rm %s %s"%(file_entire_qm, file_cluster_qm))
-  os.system("rm -rf ase")
+  #os.system("rm %s %s"%(file_entire_qm, file_cluster_qm))
+  #os.system("rm -rf ase")
   assert rmsd_diff<0.02
 
-def qm_gradient(cs, ph, clustering=False):
+def generate_restraints(cs, ph, clustering=False):
   fq = from_qm(
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
     crystal_symmetry=cs,
     clustering=clustering)
+  if(clustering):
+    fm = fragments(
+     working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
+     clustering_method          = betweenness_centrality_clustering,
+     maxnum_residues_in_cluster = 8,
+     charge_embedding           = False,
+     pdb_hierarchy              = ph,
+     qm_engine_name             = "mopac",
+     crystal_symmetry           = cs)
+    restraints = from_cluster(
+     restraints_manager = fq,
+     fragment_manager =fm,
+     parallel_params = get_master_phil().extract())
+  else:
+    restraints = fq
+  return restraints
 
-  fm = fragments(
-   working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
-   clustering_method          = betweenness_centrality_clustering,
-   maxnum_residues_in_cluster = 8,
-   charge_embedding           = False,
-   pdb_hierarchy              = ph,
-   qm_engine_name             = "mopac",
-   crystal_symmetry           = cs)
-
-  #pass qm to cluster
-  cluster = from_cluster(
-   restraints_manager = fq,
-   fragment_manager =fm,
-   parallel_params = get_master_phil().extract())
-
+def qm_gradient(ph, restraints):
   sites_cart = ph.atoms().extract_xyz()
-  e,g = cluster.target_and_gradients(sites_cart)
+  e,g = restraints.target_and_gradients(sites_cart)
   return g
 
-def qm_opt(cs, ph, file, cluster=False):
-  fq = from_qm(
-    pdb_hierarchy=ph,
-    qm_engine_name="mopac",
-    crystal_symmetry=cs,
-    clustering=cluster)
-
+def qm_opt(restraints, file):
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
-  opt = lbfgs_gradient(sys, fq)
+  opt = lbfgs_gradient(sys, restraints)
   opt.run(5)
   opt.write(file)
 

@@ -95,7 +95,6 @@ class from_qm(object):
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
-    print "here __call__"
     return self.target_and_gradients(
       sites_cart = fragment_selection_and_sites_cart[1],
       selection  = fragment_selection_and_sites_cart[0],
@@ -107,7 +106,6 @@ class from_qm(object):
       from fragment import charge
       from fragment import write_mm_charge_file
       #
-      print index
       qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=self.fragment_extracts,
                           index=index)
@@ -116,7 +114,6 @@ class from_qm(object):
                                       index=index)
       charge_file =  write_mm_charge_file(fragment_extracts=self.fragment_extracts,
                                       index=index)
-      print charge_file
       gradients_scale = self.fragment_extracts.fragment_scales[index]
     else:
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
