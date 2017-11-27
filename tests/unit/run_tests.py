@@ -6,7 +6,6 @@ import iotbx.pdb
 import libtbx.load_env
 from libtbx import easy_run
 from scitbx.array_family import flex
-
 from libtbx import easy_mp
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
@@ -94,8 +93,8 @@ def runner(function, prefix, disable=False):
       t0 = time.time()
       function(prefix = prefix)
       print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  except Exception, e:
-    print prefix, str(e)
+  except Exception as e:
+    print prefix, "FAILED", str(e)
     rc=1
   clean_up(prefix)
   return rc
@@ -140,12 +139,13 @@ def run(nproc=6):
   ]
   failed = 0
   in_separate_directory = not(nproc==1)
-  for i, file_name in enumerate(tests): tests[i]=tuple([file_name, in_separate_directory])
+  for i, file_name in enumerate(tests):
+    tests[i]=tuple([file_name, in_separate_directory])
   for args, res, err_str in easy_mp.multi_core_run( _run_test,
                                                     tests,
                                                     nproc,
                                                     ):
-    print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
+    #print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
     if err_str:
       print 'Error output from %s' % args
       print err_str

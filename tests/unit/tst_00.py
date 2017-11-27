@@ -19,8 +19,7 @@ def run(prefix):
   d = flex.sqrt((xrs_good.sites_cart() - xrs_poor.sites_cart()).dot())
   assert flex.mean(d) > 0.10
   d = flex.sqrt((xrs_good.sites_cart() - xrs_refined.sites_cart()).dot())
-  assert flex.mean(d) < 0.02, 'Mean difference %0.3f is greater than 0.02' % (
-    flex.mean(d))
+  assert flex.mean(d) < 0.05
   # Check R-factors
   r_start, r_final = None,None
   ofo = open("%s.log"%prefix,"r")
@@ -29,15 +28,16 @@ def run(prefix):
       r_start = float(l.split()[2])
     if(l.strip().startswith("Best r_work:")):
       r_final = float(l.split()[2])
-  assert r_start > 0.1, r_start
-  assert r_final < 0.006
+  assert r_start > 0.1
+  assert r_final < 0.04
   # Make sure output model actually corresponds to reported R-factor
   fmodel = mmtbx.f_model.manager(
     f_obs          = f_obs,
     r_free_flags   = r_free_flags,
     xray_structure = xrs_refined)
   fmodel.update_all_scales()
-  assert fmodel.r_work() < 0.006
+  assert fmodel.r_work() < 0.04
+  assert abs(r_final-fmodel.r_work())<0.0005, abs(r_final-fmodel.r_work())
 
 if(__name__ == "__main__"):
   rc = run_tests.runner(function=run, prefix="tst_00", disable=False)
