@@ -1,6 +1,5 @@
 # Quantum Refinement Module
 
-[![Build Status](https://travis-ci.org/qrefine/qrefine.svg?branch=master)](https://travis-ci.org/qrefine/qrefine)
 
 Quantum Chemistry can improve bio-macromolecular structures,
 especially when only low-resolution data derived from crystallographic
@@ -20,10 +19,19 @@ have developed a new fragmentation approach for achieving a
 quantum-refinement of bio-macromolecules.
 
 ### Citations:
-Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
-Q|R: Quantum-based Refinement , Acta Crystallographica
-Section D (2017) D73, 45-52. DOI: 10.1107/S2059798316019847
 
+Zheng, M., Moriarty, N.W., Xu, Y., Reimers, J.R., Afonine, P.V. & Waller, M.P. 
+Solving the scalability issue in quantum-based refinement: Q|R#1
+(2017). Acta Cryst. D73, 
+DOI: 10.1107/S2059798317016746
+
+Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
+Q|R: Quantum-based Refinement , 
+(2017) Acta Cryst. D73, 45-52.
+DOI: 10.1107/S2059798316019847
+
+
+#### Clustering
 Min Zheng, Mark P. Waller, Toward more efficient density-based
 adaptive QM/MM methods, Int J. Quant. Chem (2017) e25336 DOI:
 qua.25336
