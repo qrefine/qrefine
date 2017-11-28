@@ -7,6 +7,7 @@ import libtbx.load_env
 from libtbx import easy_run
 from scitbx.array_family import flex
 from libtbx import easy_mp
+import traceback
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -95,6 +96,7 @@ def runner(function, prefix, disable=False):
       print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   except Exception as e:
     print prefix, "FAILED", str(e)
+    traceback.print_exc()
     rc=1
   clean_up(prefix)
   return rc

@@ -120,5 +120,7 @@ def qm_opt(restraints, file):
   opt.write(file)
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_13", disable=False)
+  disable = False
+  if(os.environ.get("MOPAC_COMMAND") is None): disable = True
+  rc = run_tests.runner(function=run, prefix="tst_13", disable=disable)
   assert not rc, 'tst_00 rc: %s' % rc
