@@ -51,7 +51,7 @@ class expand(object):
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
     if(self.ph_p1 is None or sites_cart is not None):
       self.ph_p1 = self.pdb_hierarchy.expand_to_p1(
-        crystal_symmetry = self.cs_p1)
+        crystal_symmetry = self.crystal_symmetry)
     self._build_super_cell()
     # Box is needed for selection criteria to not select periodically
     box = uctbx.non_crystallographic_unit_cell_with_the_sites_in_its_center(
