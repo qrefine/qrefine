@@ -409,7 +409,21 @@ def iterate_over_threes(hierarchy,
     if use_capping_hydrogens:
       for i in range(len(three)):
         rg = get_residue_group(three[i])
-        add_cys_hg_to_residue_group(rg)
+        sgs = []
+        for atom in rg.atoms():
+          if atom.name.strip()=='SG' and atom.parent().resname=='CYS':
+            sgs.append(atom.i_seq)
+        assert len(sgs) in [0, 1]
+        sg_bonds = []
+        if sgs:
+          for bond in geometry_restraints_manager.get_all_bond_proxies():
+            if not hasattr(bond, 'get_proxies_with_origin_id'): continue
+            for p in bond.get_proxies_with_origin_id():
+              assert p.origin_id==0
+              if sgs[0] in p.i_seqs:
+                sg_bonds.append(p.i_seqs)
+        if len(sg_bonds)==1:
+          add_cys_hg_to_residue_group(rg)
     # check if N-term residue - FVA
     n_term_done = False
     if three[0].resname in ['FVA',
