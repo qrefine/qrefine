@@ -607,6 +607,7 @@ ATOM         HC  THR A  53     -12.515   7.072   1.010  1.00 37.53           H
 TER
   ''',
   'cys_hg_capping' : '''
+CRYST1   20.038   14.618   20.320  90.00  90.00  90.00 P 1
 ATOM    660  N   CYS A  44     -13.948  11.544   0.019  1.00 43.55           N
 ATOM    661  CA  CYS A  44     -13.878  12.244  -1.255  1.00 43.52           C
 ATOM    662  C   CYS A  44     -14.755  11.508  -2.256  1.00 30.63           C
@@ -1107,13 +1108,13 @@ def run(prefix, nproc=1):
   Exercise structure preparation including charge, capping, completion
   """
   tests = [
+    [test_cys_hg_capping, 1],
     #[test_fva, 1],
     [test_original_pdb, 1],
     [test_short_gap, 1],
     [test_helix, 1],
     [test_capping_of_C_terminal, 1],
     [test_10_capping, 1],
-    [test_cys_hg_capping, 1],
   ]
   junk = [
     [test_GLY_terminal_and_alt_loc, 1],
