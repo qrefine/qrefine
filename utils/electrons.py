@@ -256,8 +256,18 @@ class electron_distribution(dict):
       total+=electrons
     return total*-1
 
+  def get_charged_atoms(self):
+    rc = []
+    atoms = self.hierarchy.atoms()
+    for key, electrons in self.items():
+      if type(key)==type(tuple([])): continue
+      if electrons:
+        rc.append([ atoms[key],electrons])
+    return rc
+
 def run(pdb_filename=None,
         raw_records=None,
+        return_formal_charges=False,
         ):
   if pdb_filename:
     # Read file into pdb_input class
@@ -282,6 +292,7 @@ def run(pdb_filename=None,
   print 'total_charge',total_charge
   print 'time %0.1f' % (time.time()-t0)
   rc = atom_valences.validate_atomic_formal_charges()
+  if return_formal_charges: return atom_valences
   return total_charge
 
   # get number of atoms in the input model

@@ -314,17 +314,17 @@ def _add_hydrogens_to_atom_group_using_bad(ag,
   rc = []
   if ag.get_atom(atom_name.strip()): return []
   if type(bond_atom)==type(''):
-    ba = ag.get_atom(bond_atom)
+    ba = ag.get_atom(bond_atom.strip())
     #print bond_atom,ba.quote()
     if ba is None: return
   else: ba = bond_atom
   if type(angle_atom)==type(''):
-    aa = ag.get_atom(angle_atom)
+    aa = ag.get_atom(angle_atom.strip())
     #print angle_atom,aa.quote()
     if aa is None: return
   else: aa = angle_atom
   if type(dihedral_atom)==type(''):
-    da = ag.get_atom(dihedral_atom)
+    da = ag.get_atom(dihedral_atom.strip())
     #print dihedral_atom, da.quote()
     if da is None: return
   else: da = dihedral_atom
@@ -542,6 +542,42 @@ def iterate_using_original(hierarchy,
       pass
   return additional_hydrogens
 
+def use_electrons_to_add_hdyrogens(hierarchy,
+                                   geometry_restraints_manager,
+                                   use_capping_hydrogens=False,
+                                   append_to_end_of_model=False,
+                                   ):
+  #if not use_capping_hydrogens: return
+  from qrefine.utils import electrons
+  rc=[]
+  raw_records = hierarchy_utils.get_raw_records(
+    pdb_hierarchy=hierarchy,
+    crystal_symmetry=geometry_restraints_manager.crystal_symmetry,
+  )
+  charges = electrons.run(pdb_filename=None,
+                          raw_records=raw_records,
+                          return_formal_charges=True,
+  )
+  charged_atoms = charges.get_charged_atoms()
+  for atom, electrons in charged_atoms:
+    if get_class(atom.parent().resname) in ['common_amino_acid',
+                                            ]:
+      continue
+    atom = hierarchy.atoms()[atom.i_seq]
+    rc = _add_hydrogens_to_atom_group_using_bad(
+      atom.parent(),
+      ' HG ',
+      'H',
+      atom.name.strip(),
+      'C4',
+      'C3',
+      1.,
+      120.,
+      160.,
+      append_to_end_of_model=append_to_end_of_model,
+    )
+  return rc
+
 def add_terminal_hydrogens(
     hierarchy,
     geometry_restraints_manager,
@@ -570,6 +606,21 @@ def add_terminal_hydrogens(
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
     )
+
+  # add hydrogens to non-protein
+  non_protein = False
+  for atom_group in hierarchy.atom_groups():
+    if get_class(atom_group.resname) not in ['common_amino_acid']:
+      non_protein=True
+      break
+  if non_protein:
+    rc = use_electrons_to_add_hdyrogens(
+      hierarchy,
+      geometry_restraints_manager,
+      use_capping_hydrogens=use_capping_hydrogens,
+      append_to_end_of_model=append_to_end_of_model,
+    )
+    if rc: additional_hydrogens += rc
 
   if append_to_end_of_model and additional_hydrogens:
     tmp = []
