@@ -566,7 +566,7 @@ def use_electrons_to_add_hdyrogens(hierarchy,
     atom = hierarchy.atoms()[atom.i_seq]
     rc = _add_hydrogens_to_atom_group_using_bad(
       atom.parent(),
-      ' HG ',
+      ' H1 ',
       'H',
       atom.name.strip(),
       'C4',
