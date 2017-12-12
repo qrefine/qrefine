@@ -68,7 +68,7 @@ cluster{
 
 restraints = cctbx *qm
 .type = choice(multi=False)
-qm_engine_name = *mopac terachem turbomole pyscf
+qm_engine_name = *mopac terachem turbomole pyscf orca gaussian
 .type = choice(multi=False)
 charge= None
 .type = int
