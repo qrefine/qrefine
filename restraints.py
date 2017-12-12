@@ -11,6 +11,7 @@ from plugin.ase.mopac_qr import Mopac
 from plugin.ase.pyscf_qr import Pyscf
 from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
+from plugin.ase.orca_qr import Orca
 
 class from_cctbx(object):
   def __init__(self, processed_pdb_file, has_hd, fragment_extracts=None,
@@ -90,6 +91,8 @@ class from_qm(object):
       calculator = Mopac()
     elif(self.qm_engine_name == "pyscf"):
       calculator = Pyscf()
+    elif(self.qm_engine_name == "orca"):
+      calculator = Orca()
     else:
       raise Sorry("qm_calculator needs to be specified.")
     return calculator
