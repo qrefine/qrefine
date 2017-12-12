@@ -547,7 +547,7 @@ def use_electrons_to_add_hdyrogens(hierarchy,
                                    use_capping_hydrogens=False,
                                    append_to_end_of_model=False,
                                    ):
-  #if not use_capping_hydrogens: return
+  if not use_capping_hydrogens: return
   from qrefine.utils import electrons
   rc=[]
   raw_records = hierarchy_utils.get_raw_records(
@@ -620,7 +620,7 @@ def add_terminal_hydrogens(
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
     )
-    if rc: additional_hydrogens += rc
+    if rc: additional_hydrogens += [rc]
 
   if append_to_end_of_model and additional_hydrogens:
     tmp = []
