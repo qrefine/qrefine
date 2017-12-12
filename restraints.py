@@ -12,6 +12,7 @@ from plugin.ase.pyscf_qr import Pyscf
 from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
 from plugin.ase.orca_qr import Orca
+from plugin.ase.gaussian_qr import Gaussian
 
 class from_cctbx(object):
   def __init__(self, processed_pdb_file, has_hd, fragment_extracts=None,
@@ -93,6 +94,8 @@ class from_qm(object):
       calculator = Pyscf()
     elif(self.qm_engine_name == "orca"):
       calculator = Orca()
+    elif(self.qm_engine_name == "gaussian"):
+      calculator = Gaussian()  
     else:
       raise Sorry("qm_calculator needs to be specified.")
     return calculator
