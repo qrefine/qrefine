@@ -40,14 +40,23 @@ class from_cluster(object):
                           selection=selection_fragment, index=index)
     if(self.parallel_params.nproc is None):
       self.parallel_params.nproc = Auto
-    energy_gradients = parallel_map(
-      func                       = self.restraints_manager,  
-      iterable                   = selection_and_sites_cart,
-      method                     = self.parallel_params.method,
-      preserve_exception_message = True,
-      processes                  = self.parallel_params.nproc,
-      qsub_command               = self.parallel_params.qsub_command,
-      use_manager                = True)
+    ncount=0
+    energy_gradients=None
+    while(ncount<5 and energy_gradients is None):
+      try:
+        energy_gradients = parallel_map(
+          func                       = self.restraints_manager,  
+          iterable                   = selection_and_sites_cart,
+          method                     = self.parallel_params.method,
+          preserve_exception_message = True,
+          processes                  = self.parallel_params.nproc,
+          qsub_command               = self.parallel_params.qsub_command,
+          use_manager                = True)
+      except:
+        ncount=ncount+1
+        energy_gradients=None
+        print "check independent QM jobs"
+        print "try another single point calculation"
     target=0
     gradients=flex.vec3_double(system_size)
     for index, item in enumerate(energy_gradients):

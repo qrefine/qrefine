@@ -123,7 +123,7 @@ refine {
 }
 
 parallel_params {
-method = *multiprocessing pbs sge lsf threading
+method = *multiprocessing slurm pbs sge lsf threading
 .type = choice(multi=False)
 nproc = None
 .type = int

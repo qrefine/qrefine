@@ -163,8 +163,8 @@ class charges_class:
       file_name=file_name,
       qxyz_order='qxyz',
       exclude_water=exclude_water,
-      charge_scaling_positions=None,
-      scale=0,
+      charge_scaling_positions=charge_scaling_positions,
+      scale=scale,
     )
 
   def write_charge_and_coordinates_from_hierarchy(self,
@@ -897,8 +897,8 @@ def write_pdb_hierarchy_xyzq_file(hierarchy,
                                               qxyz_order='xyzq',
                                               hetero_charges=hetero_charges,
                                               exclude_water=exclude_water,
-                                              charge_scaling_positions=None,
-                                              scale=0,
+                                              charge_scaling_positions=charge_scaling_positions,
+                                              scale=scale,
                                               )
 def scale_partial_point_charges(qxyz,
                                 charge_scaling_positions=None,
