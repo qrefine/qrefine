@@ -37,7 +37,7 @@ class fragments(object):
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
-    self.charge_cutoff = charge_cutoff
+    self.charge_cutoff = 8 #charge_cutoff fixed as 8 for testing
     self.system_size = pdb_hierarchy.atoms_size()
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
@@ -401,6 +401,7 @@ def write_mm_charge_file(fragment_extracts, index):
         selection=fragment_selection)
       non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(non_fragment_selection_super)
+      non_fragment_hierarchy_super = non_fragment_hierarchy_super&~fragment_selection
     else:
       non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(~fragment_selection)
