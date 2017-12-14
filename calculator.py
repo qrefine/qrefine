@@ -65,7 +65,6 @@ class weights(object):
     self.restraints_weight_scales.append(self.restraints_weight_scale)
 
   def compute_weight(self, fmodel, rm):
-    print "here compute_weight"
     if(self.weight_was_provided): return
     random.seed(1)
     flex.set_random_seed(1)
@@ -169,7 +168,6 @@ class sites(calculator):
     self.x_target_functor = self.fmodel.target_functor()
 
   def calculate_weight(self):
-    print "here calculate_weight"
     self.weights.compute_weight(
       fmodel = self.fmodel,
       rm     = self.restraints_manager)

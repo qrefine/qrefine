@@ -1,5 +1,6 @@
 from __future__ import division
 
+import os
 from libtbx import Auto
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
@@ -52,7 +53,8 @@ class from_cluster(object):
           processes                  = self.parallel_params.nproc,
           qsub_command               = self.parallel_params.qsub_command,
           use_manager                = True)
-      except:
+      except Exception as e:
+        os.command("cp -r ase ase_error")
         ncount=ncount+1
         energy_gradients=None
         print "check independent QM jobs"

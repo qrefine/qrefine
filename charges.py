@@ -201,8 +201,9 @@ class charges_class:
       raise Sorry('invalid qxyz_order parameter "%s"' % qxyz_order)
     outl = ""
     for i, item in enumerate(qxyz):
-      if item[0]==0 or item[0] is None:
-        outl += ' %s has zero/None partial charge\n' % hierarchy.atoms()[i].quote()
+      if item[0] is None: ## point charge may be set as zero
+#      if item[0]==0 or item[0] is None:
+        outl += ' %s has zero/None partial charge\n' % self.pdb_hierarchy.atoms()[i].quote()
       if qxyz_order=='qxyz':
         item_list = item + ["  \n"]
       elif qxyz_order=='xyzq':
