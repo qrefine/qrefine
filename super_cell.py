@@ -15,8 +15,10 @@ mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
 class expand(object):
-  def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15):
+  def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15,
+               create_restraints_manager=True):
     # fixed members
+    self.create_restraints_manager = create_restraints_manager
     self.crystal_symmetry = crystal_symmetry
     self.select_within_radius = select_within_radius
     self.cs_p1 = crystal.symmetry(self.crystal_symmetry.unit_cell(), "P1")
@@ -38,7 +40,8 @@ class expand(object):
     self.update_super_cell(sites_cart)
     self._select_within()
     self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
-    self.update_super_sphere_geometry_restraints_manager()
+    if(self.create_restraints_manager):
+      self.update_super_sphere_geometry_restraints_manager()
     return self
 
   def update_xyz(self, sites_cart=None):
