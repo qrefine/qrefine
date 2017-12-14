@@ -401,9 +401,6 @@ def write_mm_charge_file(fragment_extracts, index):
         selection=fragment_selection)
     else:
       non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
-                       select(non_fragment_selection_super)
-   
-    non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(~fragment_selection)
     # the pdb has no altlocs
     if (len(altlocs)==1):
