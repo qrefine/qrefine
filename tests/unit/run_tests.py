@@ -101,7 +101,11 @@ def runner(function, prefix, disable=False):
   clean_up(prefix)
   return rc
 
-def run(nproc=6):
+def run(nproc=6, only_i=None):
+  try:
+    only_i=int(only_i)
+    nproc=1
+  except: only_i=None
   t0=time.time()
   print 'Running tests on %d processors' % nproc
   def _run_test(file_name, in_separate_directory=True):
@@ -138,16 +142,28 @@ def run(nproc=6):
     "tst_21.py",
     "tst_22.py",
     "tst_23.py",
+    'tst_24.py',
   ]
   failed = 0
   in_separate_directory = not(nproc==1)
+  remove=[]
   for i, file_name in enumerate(tests):
+    if only_i is not None:
+      j = file_name[4:6]
+      if int(j)!=only_i:
+        remove.append(i)
+        continue
+      print 'adding',file_name
     tests[i]=tuple([file_name, in_separate_directory])
+  if remove:
+    remove.reverse()
+    for r in remove: del tests[r]
+    print tests
   for args, res, err_str in easy_mp.multi_core_run( _run_test,
                                                     tests,
                                                     nproc,
                                                     ):
-    #print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
+    print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
     if err_str:
       print 'Error output from %s' % args
       print err_str

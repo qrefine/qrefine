@@ -22,6 +22,16 @@ legend = """\
 Cluster a system into many small pieces
 """
 
+def print_time(s):
+  outl = ''
+  secs=None
+  if s>60:
+    secs = s%60
+    s = s//60
+  if secs:
+    return '%02dm:%0.1fs' % (int(s), secs)
+  return '%0.1fs' % s
+
 def run(pdb_file, log):
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
@@ -51,7 +61,8 @@ def run(pdb_file, log):
       qm_engine.run_qr(atoms,charge=qm_charge, pointcharges=None,
           coordinates=qm_pdb_file[:-4]+".xyz", define_str=None)
       energy = qm_engine.energy_free #*unit_convert
-      print >> log, " frag:", i, "  energy:", energy 
+      print >> log, " frag:", i, "  energy:", energy, ' time:', print_time(time.time()-t0)
+      time.sleep(10)
 
 
 if (__name__ == "__main__"):
@@ -59,4 +70,4 @@ if (__name__ == "__main__"):
   args = sys.argv[1:]
   del sys.argv[1:]
   run(args[0], log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
+  print >> log, "Time: %s" % print_time(time.time() - t0)

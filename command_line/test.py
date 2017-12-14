@@ -32,6 +32,11 @@ if __name__ == '__main__':
                       default=1,
                       help='nprocs',
                       type=int)
+  parser.add_argument('--only',
+                      action='store',
+                      default=None,
+                      help='only this test',
+                      type=int)
   args = parser.parse_args()
   if (args.unit)      :
     print >> log,"Running Q|R unit tests"
@@ -50,5 +55,5 @@ if __name__ == '__main__':
     regression_tests.run(args=sys.argv[1:])
   if(not args.all and not args.unit and not args.reg and not args.pdb):
     print >> log,"Running Q|R unit tests"
-    rc = unit_tests.run(nproc=args.nproc)
+    rc = unit_tests.run(nproc=args.nproc, only_i=args.only)
     assert not rc, 'qr.test rc : %s' % rc
