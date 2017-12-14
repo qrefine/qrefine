@@ -399,9 +399,9 @@ def write_mm_charge_file(fragment_extracts, index):
       non_fragment_selection_super = xrs_super.selection_within(
         radius=fragment_extracts.charge_cutoff,
         selection=fragment_selection)
+      non_fragment_selection_super = non_fragment_selection_super&~fragment_selection
       non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(non_fragment_selection_super)
-      non_fragment_hierarchy_super = non_fragment_hierarchy_super&~fragment_selection
     else:
       non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(~fragment_selection)

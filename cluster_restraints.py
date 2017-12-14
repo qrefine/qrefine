@@ -54,7 +54,7 @@ class from_cluster(object):
           qsub_command               = self.parallel_params.qsub_command,
           use_manager                = True)
       except Exception as e:
-        os.command("cp -r ase ase_error")
+        os.system("cp -r ase ase_error")
         ncount=ncount+1
         energy_gradients=None
         print "check independent QM jobs"
