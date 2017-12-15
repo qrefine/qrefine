@@ -126,6 +126,10 @@ def run(pdb_filename,
     hierarchy = remove_alternative_locations(
       ppf.all_chain_proxies.pdb_hierarchy
     )
+
+  ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(
+    ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
+  ppf.all_chain_proxies.pdb_hierarchy.remove_residue_groups_with_atoms_on_special_positions_selective(ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
   if 0:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename, # uses to get output filename

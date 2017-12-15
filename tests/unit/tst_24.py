@@ -42,7 +42,7 @@ def run(prefix):
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.finalise action=capping %s' % fn
-  print cmd
+  if 0: print cmd
   easy_run.go(cmd)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
   f=file(fnc, 'rb')

@@ -202,7 +202,6 @@ class charges_class:
     outl = ""
     for i, item in enumerate(qxyz):
       if item[0] is None: ## point charge may be set as zero
-#      if item[0]==0 or item[0] is None:
         outl += ' %s has zero/None partial charge\n' % self.pdb_hierarchy.atoms()[i].quote()
       if qxyz_order=='qxyz':
         item_list = item + ["  \n"]
