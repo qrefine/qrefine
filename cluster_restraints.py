@@ -46,7 +46,7 @@ class from_cluster(object):
     while(ncount<5 and energy_gradients is None):
       try:
         energy_gradients = parallel_map(
-          func                       = self.restraints_manager,  
+          func                       = self.restraints_manager,
           iterable                   = selection_and_sites_cart,
           method                     = self.parallel_params.method,
           preserve_exception_message = True,

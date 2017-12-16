@@ -359,7 +359,7 @@ def refine(fmodel,
       results      = results)
   print >> results.log, "At end of further refinement:"
   results.show(prefix="  ")
-    
+
 
 def opt(fmodel,
         params,

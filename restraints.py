@@ -95,7 +95,7 @@ class from_qm(object):
     elif(self.qm_engine_name == "orca"):
       calculator = Orca()
     elif(self.qm_engine_name == "gaussian"):
-      calculator = Gaussian()  
+      calculator = Gaussian()
     else:
       raise Sorry("qm_calculator needs to be specified.")
     return calculator

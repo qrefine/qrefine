@@ -140,7 +140,7 @@ class electron_distribution(dict):
         return False
       if self.properties.get_lone_pairs(other.element):
         #self[other.i_seq]+=2
-        if verbose: print 'hydrogen-X lone pair TRUE' 
+        if verbose: print 'hydrogen-X lone pair TRUE'
         return True
       return None
     ###

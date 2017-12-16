@@ -1093,7 +1093,7 @@ def _run_go_cmd_on_pdb(code, cmd):
   cmd += ' %s' % ('test_%s.pdb' % code)
   rc = easy_run.go(cmd)
   return rc
-  
+
 def test_cys_hg_capping():
   rc = _run_go_cmd_on_pdb('cys_hg_capping', 'qr.finalise action=capping')
   assert rc.return_code==0, rc.show_stdout()

@@ -27,7 +27,7 @@ def run(pdb_file, log,  maxnum_residues_in_cluster=15):
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
     qm_run=False)# not run qm_calculation, just the clustering result
   print >> log, "Residue indices for each cluster:\n", fq.clusters
-  
+
 
 if (__name__ == "__main__"):
   t0 = time.time()

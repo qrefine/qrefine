@@ -712,7 +712,7 @@ def _eta_peptide_h(hierarchy,
           atom_name,
           'H',
           'N',
-          previous_c, #'CA', 
+          previous_c, #'CA',
           previous_o, #'CB',
           1.,
           120.,
@@ -1002,7 +1002,7 @@ def run(pdb_filename=None,
     ppf.all_chain_proxies.pdb_hierarchy,
     ppf.geometry_restraints_manager(),
     use_capping_hydrogens=use_capping_hydrogens,
-    append_to_end_of_model=append_to_end_of_model, # needed for clustering 
+    append_to_end_of_model=append_to_end_of_model, # needed for clustering
                                                    # code and Molprobity
     pdb_filename=pdb_filename,   # used just for naming of debug output
     pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why?

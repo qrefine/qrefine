@@ -447,8 +447,8 @@ class charges_class:
         #assert len(cif_names)==len(cif_names.intersection(ag_names))
         #assert len(ag_names)==len(cif_names.intersection(ag_names))
         assert abs(total-int(total))<0.01, \
-          'sum of parial charges fo %s not accurate %f' % (ag.name, total) 
-        charge = int(total) 
+          'sum of parial charges fo %s not accurate %f' % (ag.name, total)
+        charge = int(total)
         annot = 'ligand'
     return charge, rc, annot
 

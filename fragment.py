@@ -1,6 +1,6 @@
 import os
 import time
-import itertools 
+import itertools
 import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
@@ -58,9 +58,9 @@ class fragments(object):
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
     self.pdb_hierarchy_super = self.super_cell.ph_super_sphere
-    ## write super_cell.pdb as the reference for capping 
+    ## write super_cell.pdb as the reference for capping
     self.super_cell_file = "super_cell.pdb"
-    self.super_cell.ph_super_cell.write_pdb_file(file_name=self.super_cell_file) 
+    self.super_cell.ph_super_cell.write_pdb_file(file_name=self.super_cell_file)
     if(1):
       self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
                            if atom.pdb_label_columns()[4]!=" "]
@@ -71,7 +71,7 @@ class fragments(object):
       #t0 = time.time()
       self.set_up_cluster_qm()
       #print "time taken for interaction graph",(time.time() - t0)
-  
+
   def get_altloc_molecular_indices(self):
     self.altloc_molecular_indices=[]
     index = 0
@@ -80,7 +80,7 @@ class fragments(object):
         index +=1
         if(residue_group.have_conformers()):
           self.altloc_molecular_indices.append(index)
-    
+
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
       ## update the selection of super_cell_sphere, and its
@@ -257,7 +257,7 @@ class fragments(object):
     frequency_overlap_atoms =  {x:overlap_atoms.count(x) for x in overlap_atoms}#{atom_index,frequency}
     for i_cluster, clusters in overlap_clusters.items():
       ## reset the fragment scale for the ith fragment in ph[0]
-      for index, atom in enumerate([i for i in self.fragment_super_atoms[i_cluster] 
+      for index, atom in enumerate([i for i in self.fragment_super_atoms[i_cluster]
                                        if i <= self.system_size]):
           if(atom in self.cluster_atoms[i_cluster] and
              atom in frequency_overlap_atoms.keys() and
@@ -272,10 +272,10 @@ class fragments(object):
                 and not self.bond_with_altloc(atom)):
              scale_list.append(1.0/frequency_overlap_atoms[atom])
            else: scale_list.append(1.0)
-         self.cluster_atoms.append(clusters[index]) 
+         self.cluster_atoms.append(clusters[index])
          self.fragment_super_atoms.append(fragment_super)
          self.fragment_scales.append(scale_list)
-             
+
   def bond_with_altloc(self, atom_index):
     ph_atoms = list(self.pdb_hierarchy.atoms())
     ph_atom = ph_atoms[atom_index-1]
@@ -288,7 +288,7 @@ class fragments(object):
       ##TODO
       ##check bond, better from bond topology
     return bond
-    
+
   def atoms_overlap(self, cluster_atoms_in_phs, i_cluster, j_ph):
     overlap_atoms_in_one_cluster = set(cluster_atoms_in_phs[0][i_cluster]) & \
                                    set(cluster_atoms_in_phs[j_ph][i_cluster])
@@ -374,9 +374,9 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
                       crystal_symmetry=fragment_extracts.super_cell_cs,
                       model_completion=False,
-                      original_pdb_filename=fragment_extracts.super_cell_file) 
+                      original_pdb_filename=fragment_extracts.super_cell_file)
   ##for debugging
-  if(fragment_extracts.debug):  
+  if(fragment_extracts.debug):
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.super_cell_cs)
@@ -456,7 +456,7 @@ def write_mm_charge_file(fragment_extracts, index):
         exclude_water=False,
         charge_scaling_positions=charge_scaling_positions)
     if(file_name is None):
-      raise Sorry("There is no point charge file") 
+      raise Sorry("There is no point charge file")
     file_name = os.path.abspath(file_name)
   return file_name
 

@@ -62,7 +62,7 @@ cluster{
     .type = int
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
-  altloc_method = *subtract average 
+  altloc_method = *subtract average
     .type = choice(multi=False)
 }
 
@@ -366,7 +366,7 @@ def run(cmdline, log):
   fragment_manager = create_fragment_manager(
     params           = params,
     pdb_hierarchy    = model.pdb_hierarchy,
-    cif_objects      = cmdline.cif_objects, 
+    cif_objects      = cmdline.cif_objects,
     crystal_symmetry = cmdline.crystal_symmetry)
   restraints_manager = create_restraints_manager(
     cmdline          = cmdline,
