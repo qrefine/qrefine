@@ -10,9 +10,65 @@ import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
 import iotbx.pdb.utils
+from libtbx import group_args
+import mmtbx.model
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
+
+def create_super_sphere(pdb_hierarchy, crystal_symmetry, select_within_radius):
+  pdb_str = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
+  pdb_inp = iotbx.pdb.input(
+    source_info = "pdb_hierarchy",
+    lines       = flex.split_lines(pdb_str))
+  p = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  p.pdb_interpretation.nonbonded_distance_cutoff = select_within_radius
+  m = mmtbx.model.manager(
+    model_input               = pdb_inp,
+    pdb_interpretation_params = p,
+    log                       = null_out())
+  grm = m.get_restraints_manager()
+  c = iotbx.pdb.hierarchy.chain(id = "SS")
+  r = grm.geometry.pair_proxies().nonbonded_proxies.\
+    get_symmetry_interacting_indices_unique(
+      sites_cart = pdb_hierarchy.atoms().extract_xyz())
+  fm = crystal_symmetry.unit_cell().fractionalization_matrix()
+  om = crystal_symmetry.unit_cell().orthogonalization_matrix()
+  selection = r.keys()
+  for rg in pdb_hierarchy.residue_groups():
+    keep=False
+    for i in rg.atoms().extract_i_seq():
+      if(i in selection):
+        keep=True
+        break
+    if(keep):
+      ops = r[i]
+      for op in ops:
+        rg_ = rg.detached_copy()
+        xyz = rg_.atoms().extract_xyz()
+        new_xyz = flex.vec3_double()
+        for xyz_ in xyz:
+          t1 = fm*flex.vec3_double([xyz_])
+          t2 = op*t1[0]
+          t3 = om*flex.vec3_double([t2])
+          new_xyz.append(t3[0])
+        rg_.atoms().set_xyz(new_xyz)
+        rg_.link_to_previous=True
+        c.append_residue_group(rg_)
+  resseq = 0
+  for rg in c.residue_groups():
+    rg.resseq = "%4d" % resseq
+    resseq+=1
+  super_sphere_hierarchy = pdb_hierarchy.deep_copy()
+  assert len(super_sphere_hierarchy.models())==1
+  super_sphere_hierarchy.models()[0].append_chain(c)
+  box = uctbx.non_crystallographic_unit_cell_with_the_sites_in_its_center(
+    sites_cart   = super_sphere_hierarchy.atoms().extract_xyz(),
+    buffer_layer = 10)
+  cs_super_sphere = box.crystal_symmetry()
+  return group_args(
+    hierarchy         = super_sphere_hierarchy,
+    crystal_symmetry = cs_super_sphere)
 
 class expand(object):
   def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15,
@@ -37,33 +93,22 @@ class expand(object):
     self.update()
 
   def update(self, sites_cart=None):
-    self.update_super_cell(sites_cart)
-    self._select_within()
-    self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
+    if(sites_cart is not None):
+      self.pdb_hierarchy.atoms().set_xyz(sites_cart)
+    o = create_super_sphere(
+      pdb_hierarchy        = self.pdb_hierarchy,
+      crystal_symmetry     = self.crystal_symmetry,
+      select_within_radius = self.select_within_radius)
+    self.ph_super_sphere = o.hierarchy
+    self.ph_super_cell = self.ph_super_sphere.deep_copy() # nonsense, we don't have super-cell anymore
+    self.cs_box = o.crystal_symmetry
     if(self.create_restraints_manager):
       self.update_super_sphere_geometry_restraints_manager()
     return self
 
   def update_xyz(self, sites_cart=None):
-    self.update_super_cell(sites_cart)
-    self.ph_super_sphere = self.ph_super_cell.select(self.selection_keep)
+    self.update(sites_cart=sites_cart)
     return self
-
-  def update_super_cell(self, sites_cart):
-    if(sites_cart is not None):
-      self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    if(self.ph_p1 is None or sites_cart is not None):
-      self.ph_p1 = self.pdb_hierarchy.expand_to_p1(
-        crystal_symmetry = self.crystal_symmetry)
-    self._build_super_cell()
-    # Box is needed for selection criteria to not select periodically
-    box = uctbx.non_crystallographic_unit_cell_with_the_sites_in_its_center(
-      sites_cart   = self.ph_super_cell.atoms().extract_xyz(),
-      buffer_layer = 10)
-    self.cs_box = box.crystal_symmetry()
-    self.xrs_super = self.ph_super_cell.extract_xray_structure(
-      crystal_symmetry = self.cs_box)
-    #
 
   def update_super_sphere_geometry_restraints_manager(self):
     # XXX Unify with process_model_file of qr.py
@@ -76,9 +121,8 @@ class expand(object):
       ener_lib                 = ener_lib,
       params                   = params,
       pdb_hierarchy            = self.ph_super_sphere,
-      #pdb_inp                  = self.ph_super_sphere.as_pdb_input(), # XXX Does this loose precision?
       strict_conflict_handling = False,
-      crystal_symmetry         = self.cs_box, #XXX I hope this is correct
+      crystal_symmetry         = self.cs_box,
       force_symmetry           = True,
       log                      = null_out())
     xrs = processed_pdb_file.xray_structure()
@@ -94,66 +138,3 @@ class expand(object):
   def write_super_cell_selected_in_sphere(self, file_name="super_sphere.pdb"):
     self.ph_super_sphere.write_pdb_file(file_name = file_name,
       crystal_symmetry = self.cs_p1)
-
-  def write_super_cell(self, file_name="super.pdb"):
-    self.ph_super_cell.write_pdb_file(file_name=file_name)
-
-  def write_p1(self, file_name="p1.pdb"):
-    self.ph_p1.write_pdb_file(
-      file_name        = file_name,
-      crystal_symmetry = self.cs_p1)
-
-  def _build_super_cell(self):
-    om = self.cs_p1.unit_cell().orthogonalization_matrix()
-    fm = self.cs_p1.unit_cell().fractionalization_matrix()
-    #
-    r = iotbx.pdb.hierarchy.root()
-    m = iotbx.pdb.hierarchy.model()
-    chains = list(self.ph_p1.chains())
-    #
-    original_chain_ids = set([c.id for c in self.pdb_hierarchy.chains()])
-    all_ci = set(iotbx.pdb.utils.all_chain_ids())
-    available_ci = list(all_ci.difference(original_chain_ids))
-    taken_ci = []
-    # make sure original chains come first
-    for chain in chains:
-      m.append_chain(chain.detached_copy())
-    #
-    for x in [-1, 0, 1]:
-      for y in [-1, 0, 1]:
-        for z in [-1, 0, 1]:
-          if([x,y,z]==[0,0,0]): continue # skip original chains
-          for chain in chains:
-            c_ = chain.detached_copy()
-            sites_frac = fm*(c_.atoms().extract_xyz())
-            sites_cart = om*(sites_frac+[x,y,z])
-            c_.atoms().set_xyz(sites_cart)
-            new_ci = None
-            for ci in available_ci:
-              if(not ci in taken_ci):
-                new_ci = ci
-                taken_ci.append(new_ci)
-                break
-            assert new_ci is not None
-            c_.id = new_ci
-            m.append_chain(c_)
-    r.append_model(m)
-    self.ph_super_cell = r
-    self.ph_super_cell.atoms().reset_i_seq()
-
-  def _select_within(self):
-    #
-    sel_model_orig = self.ph_super_cell.atom_selection_cache().selection(
-      string = self.sel_str_focus)
-    selection = self.xrs_super.selection_within(radius=self.select_within_radius,
-      selection=sel_model_orig)
-    #
-    self.selection_keep = flex.size_t()
-    for rg in self.ph_super_cell.residue_groups():
-      keep=True
-      sel = rg.atoms().extract_i_seq()
-      for i in sel:
-        if(not selection[i]):
-          keep=False
-          break
-      if(keep): self.selection_keep.extend(sel)

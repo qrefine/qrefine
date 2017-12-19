@@ -81,7 +81,9 @@ def clean_up(prefix,mtz_name = None):
   for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
     try: os.remove(f)
     except: pass
-  try: shutil.rmtree('ase')
+  try:
+    shutil.rmtree('ase')
+    shutil.rmtree('ase_error')
   except: pass
 
 def runner(function, prefix, disable=False):
