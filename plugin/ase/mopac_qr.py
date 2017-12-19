@@ -41,10 +41,13 @@ class Mopac(Calculator):
             self.float_params[key] = None
 
         # set initial values
+        functional = 'PM7'
+        env = os.environ.get('MOPAC_FUNCTIONAL', None)
+        if env: functional = env
         self.set(restart=0,
                  spin=0,
                  OPT=False,
-                 functional='PM7',
+                 functional=functional,
                  job_type='  1SCF GRADIENTS AUX(0,PRECISION=9) ',
                  RELSCF= None)
         # set user values
