@@ -93,7 +93,6 @@ class Mopac(Calculator):
         """
         Writes the files that have to be written each timestep
         """
-
         # start the input
         mopac_input = ''
 
@@ -158,16 +157,17 @@ class Mopac(Calculator):
         import subprocess, shlex
         from threading import Timer
 
-        def run_tiemout(cmd, timeout_sec):
-                proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-                kill_proc = lambda p: p.kill()
-                timer = Timer(timeout_sec, kill_proc, [proc])
-                try:
-                        timer.start()
-                        stdout,stderr = proc.communicate()
-                finally:
-                        timer.cancel()
+        def run_timeout(cmd, timeout_sec):
+          proc = subprocess.Popen(shlex.split(cmd),
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+          kill_proc = lambda p: p.kill()
+          timer = Timer(timeout_sec, kill_proc, [proc])
+          try:
+            timer.start()
+            stdout,stderr = proc.communicate()
+          finally:
+            timer.cancel()
 
         """
         Writes input in label.mop
@@ -181,10 +181,10 @@ class Mopac(Calculator):
 
         command = self.get_command()
         if command is None:
-            raise RuntimeError('MOPAC command not specified')
+          raise RuntimeError('MOPAC command not specified')
 
         command_exc= "  ".join([command , finput])
-        run_tiemout(command_exc ,72000)# 20hours
+        run_timeout(command_exc ,72000)# 20hours
 #        exitcode = os.system('%s %s' % (command, finput)+ '  > /dev/null 2>&1    ')
 
 #        if exitcode != 0:

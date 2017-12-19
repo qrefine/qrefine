@@ -86,8 +86,11 @@ class from_qm(object):
       calculator = Turbomole()
     elif(self.qm_engine_name == "terachem"):
       ### if TeraChem has problem reading pdb file, update TeraChem version.
-      calculator = TeraChem( gpus="4",basis=self.basis,dftd="yes",
-                      watcheindiis="yes", scf="diis+a")#
+      calculator = TeraChem(gpus="4",
+                            basis=self.basis,
+                            dftd="yes",
+                            watcheindiis="yes",
+                            scf="diis+a")
     elif(self.qm_engine_name == "mopac"):
       calculator = Mopac()
     elif(self.qm_engine_name == "pyscf"):

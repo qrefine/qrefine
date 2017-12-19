@@ -258,7 +258,6 @@ def create_restraints_manager(
       has_hd             = model.has_hd)
   else:
     assert cmdline.params.restraints == "qm"
-    print cmdline.cif_objects
     restraints_manager = restraints.from_qm(
       cif_objects                = cmdline.cif_objects,
       basis                      = cmdline.params.basis,
