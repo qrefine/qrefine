@@ -13,11 +13,24 @@ from ase.calculators.general import Calculator
 import copy
 
 key_parameters = {'seed': 1351351,
-                  'multibasis': 'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd lanl2dz_ecp\nZn lanl2dz_ecp\nMg lanl2dz_ecp',
-                  'maxit': 200, 'gpumem': 512, 'gpus': None, 'basis': None, 'coordinates': None, 'charge': None,
-                  'method': None, 'dftd': None, 'run': None, 'pointcharges': None, 'threall': 1.0e-12, 'scf': 'diis',
+                  'multibasis': '''Se lanl2dz_ecp
+Cl lanl2dz_ecp
+Cd lanl2dz_ecp
+Zn lanl2dz_ecp
+Mg lanl2dz_ecp''',
+                  'maxit': 200,
+                  'gpumem': 512,
+                  'gpus': None,
+                  'basis': None,
+                  'coordinates': None,
+                  'charge': None,
+                  'method': None,
+                  'dftd': None,
+                  'run': None,
+                  'pointcharges': None,
+                  'threall': 1.0e-12,
+                  'scf': 'diis',
                   'watcheindiis': 'no'}
-
 
 class Orca(Calculator):
     name = 'Orca'
@@ -140,7 +153,7 @@ class Orca(Calculator):
         energy *= (Hartree) / (kcal / mol)
         return energy
 
-    def read_forces(self, fname, atoms):
+  def read_forces(self, fname, atoms):
         """
         Reads the FORCES from the output file
         search string: (Gradient units are Hartree/Bohr)
@@ -170,7 +183,7 @@ class Orca(Calculator):
         print forces
         return forces
 
-    def atoms_are_equal(self, atoms_new):
+  def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
         comparison of atoms to self.atoms using tolerances to account
         for float/double differences and float math.
@@ -199,14 +212,14 @@ class Orca(Calculator):
         # passed all tests
         return True
 
-    def update(self, atoms_new):
+  def update(self, atoms_new):
         if not self.atoms_are_equal(atoms_new):
             self.atoms = atoms_new.copy()
             self.run_qr()
 
-    def set_atoms(self, atoms):
+  def set_atoms(self, atoms):
         self.atoms = atoms
 
-    def set(self, **kwargs):
+  def set(self, **kwargs):
         for key, value in kwargs.items():
             self.key_parameters[str(key)] = value

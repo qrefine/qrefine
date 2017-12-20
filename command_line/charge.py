@@ -30,6 +30,8 @@ ligand_cif_file_name = None
   .multiple = True
 list_charges = False
   .type = bool
+electrons = False
+  .type = bool
 assert_correct_chain_terminii = True
   .type = bool
 verbose = False
@@ -80,6 +82,7 @@ def run(args, log):
   cc = charges.charges_class(
     params.model_file_name,
     ligand_cif_file_names=params.ligand_cif_file_name,
+    electrons=params.electrons,
     verbose=params.verbose,
   )
   rc = cc.get_total_charge(

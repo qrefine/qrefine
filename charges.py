@@ -73,6 +73,7 @@ class charges_class:
                pdb_inp=None,
                ligand_cif_file_names=None,
                cif_objects=None,
+               electrons=False, # hidden
                verbose=False,
                ):
     self.verbose=verbose
@@ -106,6 +107,8 @@ class charges_class:
       self.pdb_hierarchy,
       )
     self.mon_lib_server = ppf.mon_lib_srv
+
+    self.electrons = electrons
 
   def __repr__(self):
     outl = 'charges\n'
@@ -142,6 +145,19 @@ class charges_class:
                        check=False,
                        verbose=False,
                       ):
+    if self.electrons:
+      from qrefine.utils import electrons
+      if self.pdb_filename is None and self.raw_records is None:
+        self.raw_records = hierarchy_utils.get_raw_records(
+          pdb_hierarchy=self.pdb_hierarchy,
+          crystal_symmetry=self.crystal_symmetry,
+        )
+      charge = electrons.run(pdb_filename=self.pdb_filename,
+                             raw_records=self.raw_records,
+      )
+      print 'electrons charge',charge
+      return charge
+    assert 0
     total_charge = self.calculate_pdb_hierarchy_charge(
       self.pdb_hierarchy,
       hetero_charges=self.hetero_charges,

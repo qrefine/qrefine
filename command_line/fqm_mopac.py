@@ -12,6 +12,7 @@ from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
 from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
 from qrefine.plugin.ase.mopac_qr import Mopac
+from qrefine.plugin.ase.orca_qr import Orca
 from qrefine.restraints import ase_atoms_from_pdb_hierarchy
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -42,6 +43,7 @@ def get_qm_energy(qm_engine, fragments_extracted, index):
     atoms = ase_atoms_from_pdb_hierarchy(ph)
     qm_engine.label = qm_pdb_file[:-4]
     print 'LABEL',qm_engine.label
+    print 'qm_charge',qm_charge
     qm_engine.run_qr(atoms,
                      charge=qm_charge,
                      pointcharges=None,
@@ -94,7 +96,7 @@ def run(pdb_file, log):
       crystal_symmetry=cs,
       charge_embedding=True,
       debug=False,
-      qm_engine_name="mopac")
+      qm_engine_name="orca")
     print >> log, '\n\tfragmenting took %0.1f\n' % (time.time()-t0)
     print >> log, "Residue indices for each cluster:\n", fq.clusters
     fq_ext = fragment_extracts(fq)
@@ -108,7 +110,7 @@ def run(pdb_file, log):
   #
   # get QM engine
   #
-  qm_engine = Mopac()
+  qm_engine = Orca()
   if 0:
     #
     # use parallel_map
@@ -121,7 +123,7 @@ def run(pdb_file, log):
                  processes=6,
     )
     print rc
-  elif 1:
+  elif 0:
     #
     # use multi_core_run
     #
@@ -150,7 +152,8 @@ def run(pdb_file, log):
     #
     # serial
     #
-    for i in xrange(len(fq.clusters)):
+    #for i in xrange(len(fq.clusters)):
+    for i in range(len(fq_ext.fragment_selections)):
       # add capping for the cluster and buffer
       print >> log, "capping frag:", i
       energy = get_qm_energy(qm_engine, fq_ext, i)
