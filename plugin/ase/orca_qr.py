@@ -98,6 +98,7 @@ class Orca(Calculator):
         # set the input file name
         self.atoms = atoms
         self.coordinates = coordinates
+        self.key_parameters['charge'] = charge
         finput = self.label + '.inp'
         foutput = self.label + '.out'
         self.write_input(finput, self.atoms)
