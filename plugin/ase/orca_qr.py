@@ -153,7 +153,7 @@ class Orca(Calculator):
         energy *= (Hartree) / (kcal / mol)
         return energy
 
-  def read_forces(self, fname, atoms):
+    def read_forces(self, fname, atoms):
         """
         Reads the FORCES from the output file
         search string: (Gradient units are Hartree/Bohr)
@@ -183,7 +183,7 @@ class Orca(Calculator):
         print forces
         return forces
 
-  def atoms_are_equal(self, atoms_new):
+    def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
         comparison of atoms to self.atoms using tolerances to account
         for float/double differences and float math.
@@ -212,14 +212,14 @@ class Orca(Calculator):
         # passed all tests
         return True
 
-  def update(self, atoms_new):
+    def update(self, atoms_new):
         if not self.atoms_are_equal(atoms_new):
             self.atoms = atoms_new.copy()
             self.run_qr()
 
-  def set_atoms(self, atoms):
+    def set_atoms(self, atoms):
         self.atoms = atoms
 
-  def set(self, **kwargs):
+    def set(self, **kwargs):
         for key, value in kwargs.items():
             self.key_parameters[str(key)] = value
