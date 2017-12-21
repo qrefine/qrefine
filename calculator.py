@@ -151,7 +151,8 @@ class sites(calculator):
   def __init__(self,
                fmodel=None,
                restraints_manager=None,
-               weights=None):
+               weights=None,
+               dump_gradients=None):
     adopt_init_args(self, locals())
     self.x = None
     self.x_target_functor = None
@@ -199,6 +200,12 @@ class sites(calculator):
       self.weights.restraints_weight*rt*self.weights.restraints_weight_scale
     g = dg*self.weights.data_weight + \
       self.weights.restraints_weight*rg*self.weights.restraints_weight_scale
+    if(self.dump_gradients is not None):
+      from libtbx import easy_pickle
+      easy_pickle.dump(self.dump_gradients+"_dg", dg.as_double())
+      easy_pickle.dump(self.dump_gradients+"_rg", rg.as_double())
+      easy_pickle.dump(self.dump_gradients+"_g", g.as_double())
+      STOP()
     return t, g.as_double()
 
 class adp(calculator):

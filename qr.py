@@ -280,7 +280,8 @@ def create_calculator(weights, fmodel, params, restraints_manager):
       return calculator.sites(
         fmodel             = fmodel,
         restraints_manager = restraints_manager,
-        weights            = weights)
+        weights            = weights,
+        dump_gradients     = params.dump_gradients)
     else:
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
