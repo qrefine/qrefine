@@ -104,7 +104,7 @@ ATOM         HC  GLU A  66      25.150  31.981  -1.494  1.00 32.90           H
 }
 
 results = {'ACY':{'ph_7': -1},
-           'GLU':{'polymer'  : -1,
+           'GLU':{'polymer'  : -3,
                   'terminii' : -1,
                   'capping'  : -1,
                   'mixed'    : -2,
@@ -140,4 +140,4 @@ def run(prefix):
 
 if __name__=='__main__':
   rc = run_tests.runner(function=run, prefix="tst_23", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+  assert not rc, 'tst_23 rc: %s' % rc

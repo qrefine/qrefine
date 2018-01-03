@@ -73,7 +73,7 @@ class charges_class:
                pdb_inp=None,
                ligand_cif_file_names=None,
                cif_objects=None,
-               electrons=False, # hidden
+               electrons=True, # hidden
                verbose=False,
                ):
     self.verbose=verbose
@@ -155,7 +155,6 @@ class charges_class:
       charge = electrons.run(pdb_filename=self.pdb_filename,
                              raw_records=self.raw_records,
       )
-      print 'electrons charge',charge
       return charge
     assert 0
     total_charge = self.calculate_pdb_hierarchy_charge(

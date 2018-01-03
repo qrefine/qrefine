@@ -278,8 +278,12 @@ def run(pdb_filename=None,
     assert 0
 
   # create a model manager
+  import StringIO
+  log = StringIO.StringIO()
   model = mmtbx.model.manager(
-      model_input = inp)
+    model_input = inp,
+    log = log,
+  )
   # get xray structure
   xrs = model.get_xray_structure()
   grm = model.get_restraints_manager()
@@ -287,10 +291,10 @@ def run(pdb_filename=None,
   atom_valences = electron_distribution(model.get_hierarchy(), # needs to be altloc free
                                         model.get_restraints_manager().geometry,
                                         )
-  print atom_valences
+  #print atom_valences
   total_charge = atom_valences.get_total_charge()
-  print 'total_charge',total_charge
-  print 'time %0.1f' % (time.time()-t0)
+  #print 'total_charge',total_charge
+  #print 'time %0.1f' % (time.time()-t0)
   rc = atom_valences.validate_atomic_formal_charges()
   if return_formal_charges: return atom_valences
   return total_charge
