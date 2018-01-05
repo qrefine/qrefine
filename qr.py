@@ -50,7 +50,7 @@ max_atoms = 15000
 debug = False
     .type = bool
 cluster{
-  charge_cutoff = 10
+  charge_cutoff = 8.0
     .type = float
   clustering = False
     .type = bool

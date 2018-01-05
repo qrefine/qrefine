@@ -57,6 +57,7 @@ class from_cluster(object):
         os.system("cp -r ase ase_error")
         ncount=ncount+1
         energy_gradients=None
+        print "the error is ", e
         print "check independent QM jobs"
         print "try another single point calculation"
     target=0

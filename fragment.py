@@ -31,13 +31,13 @@ class fragments(object):
       qm_run                     = True,
       cif_objects                = None,
       debug                      = False,
-      charge_cutoff              = None):
+      charge_cutoff              = 8.0):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
-    self.charge_cutoff = 8 #charge_cutoff fixed as 8 for testing
+    self.charge_cutoff = charge_cutoff 
     self.system_size = pdb_hierarchy.atoms_size()
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
