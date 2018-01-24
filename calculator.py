@@ -10,14 +10,13 @@ from cctbx import xray
 from libtbx import adopt_init_args
 from scitbx.array_family import flex
 
-def get_bonds_angles_rmsd(restraints_manager, xrs):
+def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
   energies_sites = \
     restraints_manager.select(~hd_sel).energies_sites(
       sites_cart        = xrs.sites_cart().select(~hd_sel),
       compute_gradients = False)
-  b_mean = energies_sites.bond_deviations()[2]
-  return b_mean
+  return energies_sites.bond_deviations()[2]
 
 class weights(object):
   def __init__(self,
@@ -31,6 +30,8 @@ class weights(object):
     else:
       self.weight_was_provided = False
     self.restraints_weight_scales = flex.double([self.restraints_weight_scale])
+    self.r_frees = []
+    self.r_works = []
 
   def scale_restraints_weight(self):
     if(self.weight_was_provided): return
@@ -40,24 +41,34 @@ class weights(object):
         self,
         fmodel,
         geometry_rmsd_manager,
-        max_bond_rmsd):
+        max_bond_rmsd,
+        scale):
     adjusted = None
     if(self.weight_was_provided): return adjusted
     rw = fmodel.r_work()
     rf = fmodel.r_free()
-    cctbx_rm_bonds_rmsd = get_bonds_angles_rmsd(
+    cctbx_rm_bonds_rmsd = get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = fmodel.xray_structure)
-    r_work_and_r_free_are_ok = (rf>rw and abs(rf-rw)*100.<5.)
-    if(cctbx_rm_bonds_rmsd<0.01 and r_work_and_r_free_are_ok):
-      self.restraints_weight_scale /= 2.
-      adjusted=True
-    if(not r_work_and_r_free_are_ok):
-      self.restraints_weight_scale *= 2.
-      adjusted=True
-    if(not adjusted and cctbx_rm_bonds_rmsd>max_bond_rmsd):
-      self.restraints_weight_scale *= 2.
-      adjusted=True
+    ####
+    adjusted = False
+    if(cctbx_rm_bonds_rmsd>max_bond_rmsd):
+      self.restraints_weight_scale *= scale
+      adjusted = True
+    if(not adjusted and rf<rw):
+      self.restraints_weight_scale /= scale
+      adjusted = True
+    if(not adjusted and cctbx_rm_bonds_rmsd<max_bond_rmsd and rf>rw and
+       abs(rf-rw)*100.<5.):
+      self.restraints_weight_scale /= scale
+      adjusted = True
+    if(not adjusted and cctbx_rm_bonds_rmsd<max_bond_rmsd and rf>rw and
+       abs(rf-rw)*100.>5.):
+      self.restraints_weight_scale *= scale
+      adjusted = True
+    ####
+    self.r_frees.append(round(rf,4))
+    self.r_works.append(round(rw,4))
     return adjusted
 
   def add_restraints_weight_scale_to_restraints_weight_scales(self):
@@ -122,9 +133,11 @@ class sites_opt(calculator):
     self.restraints_manager = restraints_manager
     self.x = None
     self.fmodel = fmodel
+    self.not_hd_selection = None # XXX UGLY
     self.initialize(fmodel = self.fmodel)
 
   def initialize(self, fmodel=None):
+    self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
     self.x = self.fmodel.xray_structure.sites_cart().as_double()
 
   def update(self, x):
@@ -156,9 +169,11 @@ class sites(calculator):
     adopt_init_args(self, locals())
     self.x = None
     self.x_target_functor = None
+    self.not_hd_selection = None # XXX UGLY
     self.initialize(fmodel = self.fmodel)
 
   def initialize(self, fmodel=None):
+    self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
     assert fmodel is not None
     self.fmodel = fmodel
     self.fmodel.xray_structure.scatterers().flags_set_grads(state=False)

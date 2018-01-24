@@ -323,7 +323,7 @@ def run(cmdline, log):
     geometry_rmsd_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd).geometry_restraints_manager
-    cctbx_rm_bonds_rmsd = calculator.get_bonds_angles_rmsd(
+    cctbx_rm_bonds_rmsd = calculator.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = fmodel.xray_structure)
     # Show full model statistics

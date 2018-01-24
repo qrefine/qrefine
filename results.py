@@ -27,6 +27,7 @@ class manager(object):
     self.states.add(sites_cart = xrs.sites_cart())
     self.max_bond_rmsd = max_bond_rmsd
     self.max_r_work_r_free_gap = max_r_work_r_free_gap
+    # Collectables
     self.r_works = flex.double()
     self.r_frees = flex.double()
     self.bs   = flex.double()
@@ -37,6 +38,13 @@ class manager(object):
     self.xrss.append(xrs.deep_copy_scatterers())
     self.restraints_weight_scales = flex.double([restraints_weight_scale])
     self.n_fev = 0
+
+  def reset_custom(self):
+    self.r_works = flex.double()
+    self.r_frees = flex.double()
+    self.bs   = flex.double()
+    self.xrss = []
+    self.restraints_weight_scales = flex.double()
 
   def update(self, r_work=None, r_free=None, b=None, xrs=None,
              restraints_weight_scale=None, n_fev=None):
@@ -107,7 +115,7 @@ class manager(object):
     self.pdb_hierarchy.adopt_xray_structure(xrs_best)
 
   def show(self, prefix):
-    fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws: %4.1f n_fev: %d"
+    fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws: %6.3f n_fev: %d"
     i = self.r_works.size()-1
     print >> self.log, fmt%(prefix, i, self.r_works[-1], self.r_frees[-1],
       self.r_frees[-1]-self.r_works[-1], self.bs[-1],
