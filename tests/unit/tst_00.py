@@ -24,7 +24,7 @@ def run(prefix):
   r_start, r_final = None,None
   ofo = open("%s.log"%prefix,"r")
   for l in ofo.readlines():
-    if(l.strip().startswith("0 Rw:")):
+    if(l.strip().endswith("n_fev: 0")):
       r_start = float(l.split()[2])
     if(l.strip().startswith("Best r_work:")):
       r_final = float(l.split()[2])

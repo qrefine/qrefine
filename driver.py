@@ -282,9 +282,12 @@ def refine(fmodel,
       for mc in xrange(params.refine.number_of_macro_cycles):
         minimized = run_minimize(calculator=calculator, params=params,
           results=results, geometry_rmsd_manager=geometry_rmsd_manager)
-        calculator.reset_fmodel(fmodel = fmodel)
-        calculator.update_fmodel()
-        n_fev += minimized.number_of_function_and_gradients_evaluations
+        if(minimized is not None):
+          calculator.reset_fmodel(fmodel = fmodel)
+          calculator.update_fmodel()
+          n_fev += minimized.number_of_function_and_gradients_evaluations
+          break
+      if(minimized is not None): continue
       # collect
       run_collect(
         n_fev                 = n_fev,
@@ -359,9 +362,12 @@ def refine(fmodel,
     for mc in xrange(params.refine.number_of_macro_cycles):
       minimized = run_minimize(calculator=calculator, params=params,
         results=results, geometry_rmsd_manager=geometry_rmsd_manager)
-      calculator.reset_fmodel(fmodel = fmodel)
-      calculator.update_fmodel()
-      n_fev += minimized.number_of_function_and_gradients_evaluations
+      if(minimized is not None):
+        calculator.reset_fmodel(fmodel = fmodel)
+        calculator.update_fmodel()
+        n_fev += minimized.number_of_function_and_gradients_evaluations
+        break
+    if(minimized is not None): continue
     run_collect(
       n_fev                 = n_fev,
       results               = results,
