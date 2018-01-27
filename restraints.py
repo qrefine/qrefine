@@ -133,13 +133,28 @@ class from_qm(object):
       charge_file = None
       selection =flex.bool(self.system_size, True)
       gradients_scale = [1.0]*self.system_size
-    define_str = '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'\
-    + str(qm_charge)\
-    + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
+    #
+    # need to get commands for QM programs from local machine so queue machines
+    # know where to look.
+    #
+    define_str=''
+    command = None
+    if (self.qm_engine_name == 'terachem'):
+      define_str = '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'\
+      + str(qm_charge)\
+      + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
+    elif (self.qm_engine_name == 'mopac'):
+      command = self.qm_engine.get_command()
+    else:
+      assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
     self.qm_engine.label = qm_pdb_file[:-4]
-    self.qm_engine.run_qr(atoms,charge=qm_charge, pointcharges=charge_file,
-          coordinates=qm_pdb_file[:-4]+".xyz", define_str=define_str)
+    self.qm_engine.run_qr(atoms,
+                          charge=qm_charge,
+                          pointcharges=charge_file,
+                          coordinates=qm_pdb_file[:-4]+".xyz",
+                          command=command,
+                          define_str=define_str)
     unit_convert = ase_units.mol/ase_units.kcal
     energy = self.qm_engine.energy_free*unit_convert
     ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert

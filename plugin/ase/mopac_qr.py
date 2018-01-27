@@ -16,7 +16,7 @@ from ase.units import kcal, mol
 from ase.calculators.general import Calculator
 
 str_keys = ['functional', 'job_type', 'command']
-int_keys = ['restart', 'spin','charge']
+int_keys = ['restart', 'spin', 'charge']
 bool_keys = ['OPT']
 float_keys = ['RELSCF']
 
@@ -114,6 +114,8 @@ class Mopac(Calculator):
         charge=self.int_params['charge']
         mopac_input += 'CHARGE= ' + str(charge)+'  '
 
+        # threads should be specified by user
+        mopac_input += ' THREADS=1'
 
         #write spin
         spin = self.int_params['spin']
