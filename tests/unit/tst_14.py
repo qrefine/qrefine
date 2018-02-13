@@ -50,8 +50,11 @@ def run(prefix):
   #
   sites_cart_super_sphere_answer = iotbx.pdb.input(source_info=None,
     lines=pdb_str_super_sphere_answer).atoms().extract_xyz()
-  assert approx_equal(sites_cart_super_sphere_answer,
-    o.ph_super_sphere.atoms().extract_xyz())
+  super_sphere_answer = list(sites_cart_super_sphere_answer.as_double())
+  super_sphere = list(o.ph_super_sphere.atoms().extract_xyz().as_double())
+  super_sphere_answer.sort()
+  super_sphere.sort()
+  assert approx_equal(super_sphere_answer,super_sphere)
 
 if(__name__ == "__main__"):
   rc = run_tests.runner(function=run, prefix="tst_14", disable=False)
