@@ -20,12 +20,12 @@ class from_cluster(object):
     ##geometry_restraints_manager get updated when a new clustering is executing.
     ## just update the xyz of pdb_hierarchy_super_sphere
     self.fragment_manager.pdb_hierarchy_super = self.fragment_manager.\
-      super_cell.update_xyz(sites_cart=sites_cart).ph_super_sphere
+      expansion.update_xyz(sites_cart=sites_cart).ph_super_sphere
     sites_cart = self.fragment_manager.pdb_hierarchy_super.atoms().extract_xyz()
     #
     self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
       file_name=self.restraints_manager.file_name,
-      crystal_symmetry=self.fragment_manager.super_cell.cs_box)
+      crystal_symmetry=self.fragment_manager.expansion.cs_box)
     fragment_extracts_obj = fragment_extracts(self.fragment_manager)
     # super_sphere_geometry_restraints_manager will cause qusb submits
     # a single job instead of batch jobs

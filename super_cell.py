@@ -16,7 +16,8 @@ import mmtbx.model
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
-def create_super_sphere(pdb_hierarchy, crystal_symmetry, select_within_radius):
+def create_super_sphere(pdb_hierarchy, crystal_symmetry,
+                        select_within_radius, r=None):
   pdb_str = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
   pdb_inp = iotbx.pdb.input(
     source_info = "pdb_hierarchy",
@@ -29,9 +30,10 @@ def create_super_sphere(pdb_hierarchy, crystal_symmetry, select_within_radius):
     log                       = null_out())
   grm = m.get_restraints_manager()
   c = iotbx.pdb.hierarchy.chain(id = "SS")
-  r = grm.geometry.pair_proxies().nonbonded_proxies.\
-    get_symmetry_interacting_indices_unique(
-      sites_cart = pdb_hierarchy.atoms().extract_xyz())
+  if(r is None):
+    r = grm.geometry.pair_proxies().nonbonded_proxies.\
+      get_symmetry_interacting_indices_unique(
+        sites_cart = pdb_hierarchy.atoms().extract_xyz())
   fm = crystal_symmetry.unit_cell().fractionalization_matrix()
   om = crystal_symmetry.unit_cell().orthogonalization_matrix()
   selection = r.keys()
@@ -67,8 +69,9 @@ def create_super_sphere(pdb_hierarchy, crystal_symmetry, select_within_radius):
     buffer_layer = 10)
   cs_super_sphere = box.crystal_symmetry()
   return group_args(
-    hierarchy         = super_sphere_hierarchy,
-    crystal_symmetry = cs_super_sphere)
+    hierarchy        = super_sphere_hierarchy,
+    crystal_symmetry = cs_super_sphere,
+    selection_r                = r)
 
 class expand(object):
   def __init__(self, pdb_hierarchy, crystal_symmetry, select_within_radius=15,
@@ -92,22 +95,25 @@ class expand(object):
     #
     self.update()
 
-  def update(self, sites_cart=None):
+  def update(self, sites_cart=None, selection_r=None):
     if(sites_cart is not None):
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
     o = create_super_sphere(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
-      select_within_radius = self.select_within_radius)
+      select_within_radius = self.select_within_radius,
+      r                    = selection_r)
     self.ph_super_sphere = o.hierarchy
     self.ph_super_cell = self.ph_super_sphere.deep_copy() # nonsense, we don't have super-cell anymore
     self.cs_box = o.crystal_symmetry
+    self.selection_r = o.selection_r
     if(self.create_restraints_manager):
       self.update_super_sphere_geometry_restraints_manager()
     return self
 
   def update_xyz(self, sites_cart=None):
-    self.update(sites_cart=sites_cart)
+    # keep the selection of super_sphere, update its coordinates
+    self.update(sites_cart=sites_cart, selection_r=self.selection_r)
     return self
 
   def update_super_sphere_geometry_restraints_manager(self):

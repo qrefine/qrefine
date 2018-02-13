@@ -69,7 +69,7 @@ def clean_up(prefix,mtz_name = None):
     'c_terminal_capping.pdb', 'c_terminal_capping_capping.pdb', 'cluster.xml',
     'helix.pdb', 'helix_complete.pdb', 'helix_readyset_input.pdb', 'qmmm.xml',
     'test_10_capping.pdb', 'test_cys_hg_capping.pdb',
-    'test_point_charges.pdb', 'q.xyz',
+    'test_point_charges.pdb', 'q.xyz', "expansion.pdb",
     'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb',
     'test_original_pdb_capping.pdb', 'test_short_gap.pdb',
     'test_short_gap_capping.pdb', 'entire_qm.pdb', 'cluster_qm.pdb']

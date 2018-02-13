@@ -53,14 +53,14 @@ class fragments(object):
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
     self.get_altloc_molecular_indices()
-    self.super_cell = expand(
+    self.expansion = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = 10.0)
-    self.pdb_hierarchy_super = self.super_cell.ph_super_sphere
-    ## write super_cell.pdb as the reference for capping
-    self.super_cell_file = "super_cell.pdb"
-    self.super_cell.ph_super_cell.write_pdb_file(file_name=self.super_cell_file)
+    self.pdb_hierarchy_super = self.expansion.ph_super_sphere
+    ## write expansion.pdb as the reference for capping
+    self.expansion_file = "expansion.pdb"
+    self.expansion.write_super_cell_selected_in_sphere(file_name=self.expansion_file)
     if(1):
       self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
                            if atom.pdb_label_columns()[4]!=" "]
@@ -83,9 +83,9 @@ class fragments(object):
 
   def set_up_cluster_qm(self, sites_cart=None):
     if(sites_cart is not None):
-      ## update the selection of super_cell_sphere, and its
+      ## update the selection of expansion_sphere, and its
       ## geometry_restraints_manager and pdb_hierarchy
-      self.pdb_hierarchy_super = self.super_cell.update(
+      self.pdb_hierarchy_super = self.expansion.update(
         sites_cart=sites_cart).ph_super_sphere
     ###get clusters and their buffer regions using yoink and graph clustering.
     try:
@@ -326,19 +326,19 @@ class fragments(object):
       if(self.debug):
         fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"-origin-cs.pdb")
         fragment_super_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
-          crystal_symmetry=self.super_cell.cs_box)
+          crystal_symmetry=self.expansion.cs_box)
       charge_hierarchy = completion.run(pdb_hierarchy=fragment_super_hierarchy,
-                      crystal_symmetry=self.super_cell.cs_box,
+                      crystal_symmetry=self.expansion.cs_box,
                       model_completion=False,
-                      original_pdb_filename=self.super_cell_file)
+                      original_pdb_filename=self.expansion_file)
       raw_records = charge_hierarchy.as_pdb_string(
-        crystal_symmetry=self.super_cell.cs_box)
+        crystal_symmetry=self.expansion.cs_box)
       if(self.debug):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
-          crystal_symmetry=self.super_cell.cs_box)
+          crystal_symmetry=self.expansion.cs_box)
 
       self.charge_service.update_pdb_hierarchy(
         charge_hierarchy,
-        self.super_cell.cs_box,
+        self.expansion.cs_box,
       )
       charge = self.charge_service.get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
@@ -353,10 +353,10 @@ class fragments(object):
       self.buffer_selections.append(buffer_selection)
       if(self.debug):
         fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
-          crystal_symmetry=self.super_cell.cs_box)
+          crystal_symmetry=self.expansion.cs_box)
         cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
         cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
-          crystal_symmetry=self.super_cell.cs_box)
+          crystal_symmetry=self.expansion.cs_box)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
@@ -370,16 +370,16 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   if(fragment_extracts.debug):  ## for degugging
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
-      crystal_symmetry=fragment_extracts.super_cell_cs)
+      crystal_symmetry=fragment_extracts.expansion_cs)
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
-                      crystal_symmetry=fragment_extracts.super_cell_cs,
+                      crystal_symmetry=fragment_extracts.expansion_cs,
                       model_completion=False,
-                      original_pdb_filename=fragment_extracts.super_cell_file)
+                      original_pdb_filename=fragment_extracts.expansion_file)
   ##for debugging
   if(fragment_extracts.debug):
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
-      crystal_symmetry=fragment_extracts.super_cell_cs)
+      crystal_symmetry=fragment_extracts.expansion_cs)
     ph.write_pdb_file(file_name=complete_qm_pdb_file)
   return os.path.abspath(complete_qm_pdb_file), ph
 
@@ -435,13 +435,13 @@ def write_mm_charge_file(fragment_extracts, index):
     non_fragment_pdb_file = sub_working_folder + str(index) + "_mm.pdb"
     non_fragment_hierarchy.write_pdb_file(
       file_name=non_fragment_pdb_file,
-      crystal_symmetry=fragment_extracts.super_cell_cs)
+      crystal_symmetry=fragment_extracts.expansion_cs)
     non_qm_edge_positions = fragment_utils.get_edge_atom_positions(
       ph, non_fragment_hierarchy, charge_embed=True)
     charge_scaling_positions = non_qm_edge_positions
     fragment_extracts.charge_service.update_pdb_hierarchy(
       non_fragment_hierarchy,
-      fragment_extracts.super_cell_cs,
+      fragment_extracts.expansion_cs,
     )
     if(fragment_extracts.qm_engine_name == "turbomole"):
       file_name = sub_working_folder + str(index) + "_xyzq_cctbx.dat"
@@ -466,7 +466,7 @@ def fragment_extracts(fragments):
     fragment_selections  = fragments.fragment_selections,
     fragment_super_selections=fragments.fragment_super_selections,
     super_sphere_geometry_restraints_manager= \
-          fragments.super_cell.super_sphere_geometry_restraints_manager,
+          fragments.expansion.super_sphere_geometry_restraints_manager,
     working_folder       = fragments.working_folder,
     fragment_super_atoms = fragments.fragment_super_atoms,
     cluster_atoms        = fragments.cluster_atoms,
@@ -475,10 +475,10 @@ def fragment_extracts(fragments):
     crystal_symmetry     = fragments.crystal_symmetry,
     pdb_hierarchy        = fragments.pdb_hierarchy,
     pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
-    super_cell_cs        = fragments.super_cell.cs_box,
+    expansion_cs        = fragments.expansion.cs_box,
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales,
     debug                = fragments.debug,
     charge_service       = fragments.charge_service,
     charge_cutoff        = fragments.charge_cutoff,
-    super_cell_file      = fragments.super_cell_file)
+    expansion_file      = fragments.expansion_file)
