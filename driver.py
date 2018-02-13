@@ -287,7 +287,7 @@ def refine(fmodel,
           calculator.update_fmodel()
           n_fev += minimized.number_of_function_and_gradients_evaluations
           break
-      if(minimized is not None): continue
+      if(minimized is None): continue
       # collect
       run_collect(
         n_fev                 = n_fev,
@@ -367,7 +367,7 @@ def refine(fmodel,
         calculator.update_fmodel()
         n_fev += minimized.number_of_function_and_gradients_evaluations
         break
-    if(minimized is not None): continue
+    if(minimized is None): continue
     run_collect(
       n_fev                 = n_fev,
       results               = results,
