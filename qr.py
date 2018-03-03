@@ -88,6 +88,8 @@ refine {
     .type = int
   number_of_weight_search_cycles=50
     .type = int
+  number_of_refine_cycles=5
+    .type = int
   number_of_micro_cycles=50
     .type = int
   data_weight=None

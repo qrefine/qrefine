@@ -105,17 +105,17 @@ class minimizer(object):
         ignore_line_search_failed_step_at_lower_bound=True,
         ignore_line_search_failed_maxfev=True))
 
-  def callback_after_step(self, minimizer):
-    if(self.geometry_rmsd_manager is not None):
-      s = self.calculator.not_hd_selection
-      energies_sites = \
-        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
-          sites_cart        = flex.vec3_double(self.x).select(s),
-          compute_gradients = False)
-      b_mean = energies_sites.bond_deviations()[2]
-      #print b_mean
-      if(b_mean>0.03 and self.counter>5):
-        return True
+#  def callback_after_step(self, minimizer):
+#    if(self.geometry_rmsd_manager is not None):
+#      s = self.calculator.not_hd_selection
+#      energies_sites = \
+#        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
+#          sites_cart        = flex.vec3_double(self.x).select(s),
+#          compute_gradients = False)
+#      b_mean = energies_sites.bond_deviations()[2]
+#      #print b_mean
+#      if(b_mean>0.03 and self.counter>5):
+#        return True
 
   def compute_functional_and_gradients(self):
     self.counter+=1
@@ -345,7 +345,8 @@ def refine(fmodel,
     results.show(prefix="  ")
     print >> results.log, "Start further refinement:"
     refine_cycle_start = 1
-  for refine_cycle in xrange(refine_cycle_start, 5+refine_cycle_start):
+  for refine_cycle in xrange(refine_cycle_start, 
+                      params.refine.number_of_refine_cycles+refine_cycle_start):
     calculator.reset_fmodel(fmodel=fmodel)
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
