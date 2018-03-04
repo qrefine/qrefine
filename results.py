@@ -40,11 +40,12 @@ class manager(object):
     self.n_fev = 0
 
   def reset_custom(self):
-    self.r_works = flex.double()
-    self.r_frees = flex.double()
-    self.bs   = flex.double()
-    self.xrss = []
-    self.restraints_weight_scales = flex.double()
+    # the first model is the initial input model
+    self.r_works = self.r_works[0:1]
+    self.r_frees = self.r_frees[0:1]
+    self.bs   = self.bs[0:1]
+    self.xrss = self.xrss[0:1]
+    self.restraints_weight_scales = self.restraints_weight_scales[0:1]
 
   def update(self, r_work=None, r_free=None, b=None, xrs=None,
              restraints_weight_scale=None, n_fev=None):

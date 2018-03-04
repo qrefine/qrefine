@@ -98,7 +98,7 @@ refine {
     .type = int
   line_search = True
     .type = bool
-  stpmax = 1.e9
+  stpmax = 3
     .type = float
   gradient_only = False
     .type = bool
