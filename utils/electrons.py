@@ -144,7 +144,8 @@ class electron_distribution(dict):
         return True
       return None
     ###
-    xrs = self.hierarchy.extract_xray_structure()
+    xrs = self.hierarchy.extract_xray_structure(
+      crystal_symmetry=self.grm.crystal_symmetry)
     simple, asu = self.grm.get_all_bond_proxies(sites_cart=xrs.sites_cart())
     # need to filter out H-bonds and metal coordination ...
     for bp in simple:
