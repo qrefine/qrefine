@@ -477,7 +477,7 @@ def iterate_using_original(hierarchy,
                            append_to_end_of_model=False,
                            ):
   slots=[]
-  start=12
+  start=18
   assert len(original_hierarchy.models())==1
   assert len(hierarchy.models())==1
   for chain in original_hierarchy.chains():

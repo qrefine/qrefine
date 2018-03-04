@@ -48,13 +48,10 @@ def run(prefix):
   f=file(fnc, 'rb')
   lines = f.read()
   f.close()
-  if lines.find(' H1 ')>-1:
-    rc = 0
-  else:
-    rc = 1
+  assert lines.find(' H1 ')>-1
   os.remove(fn)
   os.remove(fnc)
-  return rc
+  return 0
 
 if __name__=='__main__':
   rc = run_tests.runner(function=run, prefix="tst_24", disable=False)
