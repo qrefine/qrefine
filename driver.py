@@ -105,17 +105,16 @@ class minimizer(object):
         ignore_line_search_failed_step_at_lower_bound=True,
         ignore_line_search_failed_maxfev=True))
 
-#  def callback_after_step(self, minimizer):
-#    if(self.geometry_rmsd_manager is not None):
-#      s = self.calculator.not_hd_selection
-#      energies_sites = \
-#        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
-#          sites_cart        = flex.vec3_double(self.x).select(s),
-#          compute_gradients = False)
-#      b_mean = energies_sites.bond_deviations()[2]
-#      #print b_mean
-#      if(b_mean>0.03 and self.counter>5):
-#        return True
+  def callback_after_step(self, minimizer):
+    if(self.geometry_rmsd_manager is not None):
+      s = self.calculator.not_hd_selection
+      energies_sites = \
+        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
+          sites_cart        = flex.vec3_double(self.x).select(s),
+          compute_gradients = False)
+      b_mean = energies_sites.bond_deviations()[2]
+      if(b_mean>0.03 and self.counter-3>5):
+        return True
 
   def compute_functional_and_gradients(self):
     self.counter+=1
