@@ -144,7 +144,6 @@ def run(nproc=6, only_i=None):
     "tst_21.py",
     "tst_22.py",
     "tst_23.py",
-    'tst_24.py',
     'tst_25.py',
   ]
   failed = 0
