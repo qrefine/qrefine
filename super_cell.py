@@ -22,15 +22,17 @@ def create_super_sphere(pdb_hierarchy, crystal_symmetry,
     #  get_symmetry_interacting_indices_unique(
     #    sites_cart = pdb_hierarchy.atoms().extract_xyz())
     #
-    xrs = pdb_hierarchy.extract_xray_structure(crystal_symmetry=crystal_symmetry)
+    sites_cart = pdb_hierarchy.atoms().extract_xyz()
+    sst = crystal_symmetry.special_position_settings().site_symmetry_table(
+      sites_cart = sites_cart)
     r = {}
     from cctbx import crystal
     cutoff = select_within_radius+1 # +1 is nonbonded buffer
     conn_asu_mappings = crystal_symmetry.special_position_settings().\
       asu_mappings(buffer_thickness=cutoff)
     conn_asu_mappings.process_sites_cart(
-      original_sites      = xrs.sites_cart(),
-      site_symmetry_table = xrs.site_symmetry_table())
+      original_sites      = sites_cart,
+      site_symmetry_table = sst)
     conn_pair_asu_table = crystal.pair_asu_table(
         asu_mappings=conn_asu_mappings)
     conn_pair_asu_table.add_all_pairs(
