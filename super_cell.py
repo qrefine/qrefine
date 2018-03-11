@@ -1,6 +1,5 @@
 import iotbx.pdb
 from scitbx.array_family import flex
-import string
 from cctbx import uctbx
 from cctbx import crystal
 from libtbx.utils import null_out
@@ -9,31 +8,45 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
-import iotbx.pdb.utils
 from libtbx import group_args
-import mmtbx.model
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
 def create_super_sphere(pdb_hierarchy, crystal_symmetry,
                         select_within_radius, r=None):
-  pdb_str = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-  pdb_inp = iotbx.pdb.input(
-    source_info = "pdb_hierarchy",
-    lines       = flex.split_lines(pdb_str))
-  p = mmtbx.model.manager.get_default_pdb_interpretation_params()
-  p.pdb_interpretation.nonbonded_distance_cutoff = select_within_radius
-  m = mmtbx.model.manager(
-    model_input               = pdb_inp,
-    pdb_interpretation_params = p,
-    log                       = null_out())
-  grm = m.get_restraints_manager()
-  c = iotbx.pdb.hierarchy.chain(id = "SS")
   if(r is None):
-    r = grm.geometry.pair_proxies().nonbonded_proxies.\
-      get_symmetry_interacting_indices_unique(
-        sites_cart = pdb_hierarchy.atoms().extract_xyz())
+    # This is equivalent to (but much faster):
+    #
+    #r = grm.geometry.pair_proxies().nonbonded_proxies.\
+    #  get_symmetry_interacting_indices_unique(
+    #    sites_cart = pdb_hierarchy.atoms().extract_xyz())
+    #
+    xrs = pdb_hierarchy.extract_xray_structure(crystal_symmetry=crystal_symmetry)
+    r = {}
+    from cctbx import crystal
+    cutoff = select_within_radius+1 # +1 is nonbonded buffer
+    conn_asu_mappings = crystal_symmetry.special_position_settings().\
+      asu_mappings(buffer_thickness=cutoff)
+    conn_asu_mappings.process_sites_cart(
+      original_sites      = xrs.sites_cart(),
+      site_symmetry_table = xrs.site_symmetry_table())
+    conn_pair_asu_table = crystal.pair_asu_table(
+        asu_mappings=conn_asu_mappings)
+    conn_pair_asu_table.add_all_pairs(
+        distance_cutoff=cutoff)
+    pair_generator = crystal.neighbors_fast_pair_generator(
+       conn_asu_mappings,
+       distance_cutoff=cutoff)
+    for pair in pair_generator:
+      rt_mx_i = conn_asu_mappings.get_rt_mx_i(pair)
+      rt_mx_j = conn_asu_mappings.get_rt_mx_j(pair)
+      rt_mx_ji = rt_mx_i.inverse().multiply(rt_mx_j)
+      if str(rt_mx_ji)=="x,y,z": continue
+      r.setdefault(pair.j_seq, []).append(rt_mx_ji)
+    for k,v in zip(r.keys(), r.values()): # remove duplicates!
+      r[k] = list(set(v))
+  c = iotbx.pdb.hierarchy.chain(id = "SS")
   fm = crystal_symmetry.unit_cell().fractionalization_matrix()
   om = crystal_symmetry.unit_cell().orthogonalization_matrix()
   selection = r.keys()
@@ -108,7 +121,7 @@ class expand(object):
     self.cs_box = o.crystal_symmetry
     self.selection_r = o.selection_r
     if(self.create_restraints_manager):
-      self.update_super_sphere_geometry_restraints_manager()
+      if(selection_r is None): self.update_super_sphere_geometry_restraints_manager()
     return self
 
   def update_xyz(self, sites_cart=None):
