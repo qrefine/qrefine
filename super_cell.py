@@ -87,6 +87,7 @@ def create_super_sphere(pdb_hierarchy,
   super_sphere_hierarchy = pdb_hierarchy.deep_copy()
   #
   all_chains = iotbx.pdb.utils.all_chain_ids()
+  all_chains = [chid.strip() for chid in all_chains]
   for cid in list(set([i.id for i in pdb_hierarchy.chains()])):
     all_chains.remove(cid)
   all_chains = iter(all_chains)
@@ -153,7 +154,6 @@ def create_super_sphere(pdb_hierarchy,
       n_linked, rgj = grow_chain(residue_groups_j, chunk, ci)
       if(n_linked==1):
         ci = get_atom(atoms=rgj.atoms(), name="C")
-    print len(chunk)
     c = iotbx.pdb.hierarchy.chain(id = all_chains.next())
     for i, rg in enumerate(chunk):
       rg.resseq = "%4d" % i
