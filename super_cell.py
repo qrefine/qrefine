@@ -9,12 +9,18 @@ import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
 from libtbx import group_args
+import math
+import iotbx.pdb.utils
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
 
-def create_super_sphere(pdb_hierarchy, crystal_symmetry,
-                        select_within_radius, r=None):
+def create_super_sphere(pdb_hierarchy,
+                        crystal_symmetry,
+                        select_within_radius,
+                        link_min=1.0,
+                        link_max=2.0,
+                        r=None):
   if(r is None):
     # This is equivalent to (but much faster):
     #
@@ -76,9 +82,84 @@ def create_super_sphere(pdb_hierarchy, crystal_symmetry,
   for rg in c.residue_groups():
     rg.resseq = "%4d" % resseq
     resseq+=1
+  # Now we need to re-order residues and group by chains so that they can be
+  # linked by pdb interpretation.
   super_sphere_hierarchy = pdb_hierarchy.deep_copy()
-  assert len(super_sphere_hierarchy.models())==1
-  super_sphere_hierarchy.models()[0].append_chain(c)
+  #
+  all_chains = iotbx.pdb.utils.all_chain_ids()
+  for cid in list(set([i.id for i in pdb_hierarchy.chains()])):
+    all_chains.remove(cid)
+  all_chains = iter(all_chains)
+  #
+  def get_atom(atoms, name):
+    for a in atoms:
+      if(a.name.strip().lower()==name.strip().lower()):
+        return a.xyz
+  residue_groups_i = list(c.residue_groups())
+  residue_groups_j = list(c.residue_groups())
+  #
+  def dist(r1,r2):
+    return math.sqrt((r1[0]-r2[0])**2+(r1[1]-r2[1])**2+(r1[2]-r2[2])**2)
+  #
+  def grow_chain(residue_groups_j, chunk, ci):
+    n_linked = 0
+    for rgj in residue_groups_j:
+      nj = get_atom(atoms=rgj.atoms(), name="N")
+      if(nj is None): continue
+      d_ci_nj = dist(ci,nj)
+      if(d_ci_nj<link_max and d_ci_nj>link_min):
+        n_linked += 1
+        chunk.append(rgj)
+        residue_groups_j.remove(rgj)
+        break
+    return n_linked, rgj
+  # Find all isolated single residues, and also save starters
+  starters = []
+  for rgi in residue_groups_i:
+    ci = get_atom(atoms=rgi.atoms(), name="C")
+    ni = get_atom(atoms=rgi.atoms(), name="N")
+    if(ci is None or ni is None): # collect non-proteins
+      c = iotbx.pdb.hierarchy.chain(id = all_chains.next())
+      c.append_residue_group(rgi)
+      super_sphere_hierarchy.models()[0].append_chain(c)
+      continue
+    c_linked = 0
+    n_linked = 0
+    for rgj in residue_groups_j:
+      cj = get_atom(atoms=rgj.atoms(), name="C")
+      nj = get_atom(atoms=rgj.atoms(), name="N")
+      if(cj is None or nj is None): continue
+      d_ci_nj = dist(ci,nj)
+      d_ni_cj = dist(ni,cj)
+      if(d_ci_nj<link_max and d_ci_nj>link_min):
+        n_linked += 1
+      if(d_ni_cj<link_max and d_ni_cj>link_min):
+        c_linked += 1
+    assert c_linked in [1, 0], c_linked # Either linked or not!
+    assert n_linked in [1, 0], n_linked # Either linked or not!
+    if(c_linked==0 and n_linked==0): # isolated single residue
+      c = iotbx.pdb.hierarchy.chain(id = all_chains.next())
+      rgi.link_to_previous=True
+      c.append_residue_group(rgi)
+      super_sphere_hierarchy.models()[0].append_chain(c)
+    elif(c_linked==0): # collect c-terminal residues
+      starters.append(rgi)
+  # Grow continuous chains from remaining residues starting from c-terminals
+  for rgi in starters:
+    ci = get_atom(atoms=rgi.atoms(), name="C")
+    chunk = [rgi]
+    n_linked=1
+    while n_linked==1:
+      n_linked, rgj = grow_chain(residue_groups_j, chunk, ci)
+      if(n_linked==1):
+        ci = get_atom(atoms=rgj.atoms(), name="C")
+    print len(chunk)
+    c = iotbx.pdb.hierarchy.chain(id = all_chains.next())
+    for i, rg in enumerate(chunk):
+      rg.resseq = "%4d" % i
+      c.append_residue_group(rg)
+    super_sphere_hierarchy.models()[0].append_chain(c)
+  #
   box = uctbx.non_crystallographic_unit_cell_with_the_sites_in_its_center(
     sites_cart   = super_sphere_hierarchy.atoms().extract_xyz(),
     buffer_layer = 10)
