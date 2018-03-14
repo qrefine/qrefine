@@ -94,11 +94,7 @@ def run(args, log):
     print >> log, "Time: %6.4f" % (time.time() - t0)
   if(params.list_charges):
     print >> log, 'Charges:'
-    for charge in rc:
-      if len(charge)==3:
-        print >> log, '%s %2d %s' % (charge[0],charge[1],charge[2])
-      else:
-        print >> log, '%s' % charge
+    print >> log, rc
     print >> log, "Time: %6.4f" % (time.time() - t0)
 
 

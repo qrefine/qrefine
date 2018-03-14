@@ -154,6 +154,8 @@ class charges_class:
         )
       charge = electrons.run(pdb_filename=self.pdb_filename,
                              raw_records=self.raw_records,
+                             return_formal_charges=list_charges,
+                             verbose=verbose,
       )
       return charge
     assert 0

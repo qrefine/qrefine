@@ -47,5 +47,5 @@ def run(prefix):
 
 if(__name__ == "__main__"):
   rc = run_tests.runner(function=run, prefix="tst_01", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+  assert not rc, 'tst_01 rc: %s' % rc
 

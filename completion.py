@@ -559,11 +559,20 @@ def use_electrons_to_add_hdyrogens(hierarchy,
                           return_formal_charges=True,
   )
   charged_atoms = charges.get_charged_atoms()
+  remove=[]
   for atom, electrons in charged_atoms:
+    atom_group = atom.parent()
+    #if atom_group.resname=='CYS' and atom.name==' SG ':
+    #  if electrons==-1 and atom_group.get_atom('HG'):
+    #    remove.append(atom_group.get_atom('HG'))
+    if atom.element_is_hydrogen() and electrons==1:
+      #print 'REMOVING', atom.quote()
+      remove.append(atom)
     if get_class(atom.parent().resname) in ['common_amino_acid',
                                             ]:
       continue
     atom = hierarchy.atoms()[atom.i_seq]
+    # this does not even work
     rc = _add_hydrogens_to_atom_group_using_bad(
       atom.parent(),
       ' H1 ',
@@ -576,6 +585,19 @@ def use_electrons_to_add_hdyrogens(hierarchy,
       160.,
       append_to_end_of_model=append_to_end_of_model,
     )
+  def _atom_i_seq(a1, a2):
+    if a1.i_seq<a2.i_seq: return -1
+    return 1
+  if remove:
+    remove.sort(_atom_i_seq)
+    remove.reverse()
+    for atom in remove:
+      # this is a kludge
+      name = atom.name
+      atom = hierarchy.atoms()[atom.i_seq]
+      atom_group = atom.parent()
+      atom = atom_group.get_atom(name.strip())
+      atom_group.remove_atom(atom)
   return rc
 
 def add_terminal_hydrogens(
@@ -613,7 +635,7 @@ def add_terminal_hydrogens(
     if get_class(atom_group.resname) not in ['common_amino_acid']:
       non_protein=True
       break
-  if non_protein:
+  if non_protein or 1:
     rc = use_electrons_to_add_hdyrogens(
       hierarchy,
       geometry_restraints_manager,
@@ -1020,8 +1042,9 @@ def run(pdb_filename=None,
   return ppf.all_chain_proxies.pdb_hierarchy
 
 def display_hierarchy_atoms(hierarchy, n=5):
-  #print '-'*80
+  print '-'*80
   for i, atom in enumerate(hierarchy.atoms()):
+    print atom.quote()
     if i>n: break
 
 if __name__=="__main__":
