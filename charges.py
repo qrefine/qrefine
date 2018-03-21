@@ -193,19 +193,26 @@ class charges_class:
                                                   assert_no_alt_loc=False,
                                                   ):
     qxyz = None
+    atoms = self.pdb_hierarchy.atoms()
+    count = 0
     for residue in hierarchy_utils.generate_residue_groups(
       self.pdb_hierarchy,
       assert_no_alt_loc=assert_no_alt_loc,
       exclude_water=exclude_water,
       ):
+      count += len(residue.atoms())
       if qxyz is None:
         qxyz = get_partial_point_charges(residue,
                                          self.mon_lib_server,
                                          hetero_charges=self.hetero_charges)
       else:
-        qxyz = qxyz + get_partial_point_charges(residue,
-                                                self.mon_lib_server,
-                                                hetero_charges=self.hetero_charges)
+        qxyz = qxyz + get_partial_point_charges(
+          residue,
+          self.mon_lib_server,
+          hetero_charges=self.hetero_charges)
+      outl = ''
+      for atom in residue.atoms(): outl += '%s\n' % atom.format_atom_record()
+      assert len(qxyz)==count, 'mismatch in charge list\n %s' % outl
     if qxyz is None: return
     scale_partial_point_charges(qxyz,charge_scaling_positions, scale=0)
     qxyz_file = open(file_name,"w+")
