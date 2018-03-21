@@ -890,7 +890,7 @@ def get_partial_point_charges(rg,
             raise Sorry('no charge found in the model file for "%s"' % atom.quote())
         else:
           tmp.append([atom.charge_as_int()]+list(atom.xyz))
-          continue
+        continue
       # other atoms
       cif = atom_dict.get(atom.name.strip(), None)
       if cif is None:
