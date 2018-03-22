@@ -39,7 +39,7 @@ def run(prefix):
   cmd = 'qr.finalise %s action="capping"' % (fn)
   if 0: print cmd
   rc = easy_run.go(cmd)
-  #os.remove(fn)
+  os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
   f=file(fnc, 'rb')
   lines=f.read()
@@ -50,7 +50,7 @@ def run(prefix):
   if 0: print cmd
   rc = easy_run.go(cmd)
   assert 'Charge: 0' in rc.stdout_lines
-  #os.remove(fnc)
+  os.remove(fnc)
   return rc
 
 

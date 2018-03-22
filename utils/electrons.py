@@ -60,7 +60,7 @@ class electron_distribution(dict):
     for atom in hierarchy.atoms():
       e = self.properties.get_valence(atom.element)
       assert e is not None, ' element %s not found' % atom.element
-      self[atom.i_seq]   = e
+      self[atom.i_seq] = e
     self.form_bonds()
 
   def __repr__(self):
@@ -97,6 +97,16 @@ class electron_distribution(dict):
       if self.properties.get_lone_pairs(self.atoms[i_seq].element):
         electrons+=2
     dict.__setitem__(self, i_seq, electrons)
+
+  def _add_electron_to_bond(self, i_seqs):
+    if 0:
+      atoms = self.hierarchy.atoms()
+      print i_seqs, atoms[i_seqs[0]].quote(), atoms[i_seqs[1]].quote()
+      print self
+    self[i_seqs]+=1
+    self[i_seqs[0]]-=1
+    self[i_seqs[1]]-=1
+    if 0: print self
 
   def form_bonds(self, extend_based_on_proximity=False, verbose=False):
     if self.verbose or verbose: verbose=1
@@ -190,7 +200,6 @@ class electron_distribution(dict):
     # look for metal coordination
     metal_coordination = []
     for bp in simple:
-      if verbose: print 'metal',self
       assert bp.i_seqs not in self
       i_seq, j_seq = bp.i_seqs
       assert i_seq in self
@@ -206,9 +215,9 @@ class electron_distribution(dict):
         #elif self.properties.is_metal(atom2.element):
         #  self[i_seq]-=1
         self[bp.i_seqs]+=1
+        if verbose: print 'metal',self
     # look for single (non-metal) bonds
     for bp in simple:
-      if verbose: print 'single',self
       if is_metal(atoms[bp.i_seqs[0]], atoms[bp.i_seqs[1]]): continue
       assert bp.i_seqs not in self
       i_seq, j_seq = bp.i_seqs
@@ -226,22 +235,19 @@ class electron_distribution(dict):
           continue
       self[bp.i_seqs]=0
       if _can_denote_electron_to_covalent_bond(i_seq, j_seq):
-        self[bp.i_seqs]+=1
-        self[i_seq]-=1
-        self[j_seq]-=1
+        self._add_electron_to_bond(bp.i_seqs)
+        if verbose: print 'single: %s-%s\n%s' % (atoms[i_seq].quote(), atoms[j_seq].quote(),self)
     # look for double bonds
     for bp in generate_bonds_from_simple(simple,
                                          sort_on_lone_pairs=True,
                                          ):
       if bp.i_seqs not in self: continue
-      if verbose: print 'double',self
       i_seq, j_seq = bp.i_seqs
       assert i_seq in self
       assert j_seq in self
       while self[i_seq]>0 and self[j_seq]>0:
-        self[bp.i_seqs]+=1
-        self[i_seq]-=1
-        self[j_seq]-=1
+        self._add_electron_to_bond(bp.i_seqs)
+        if verbose: print 'double',self
         if verbose: print 'bonding 2',atoms[i_seq].quote(), atoms[j_seq].quote()
     # look for hyper-valance bonds
     for bp in simple:
