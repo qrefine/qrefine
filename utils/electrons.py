@@ -259,9 +259,7 @@ class electron_distribution(dict):
       while _can_denote_electron_to_covalent_bond(i_seq,
                                                   j_seq,
                                                   verbose=verbose):
-        self[bp.i_seqs]+=1
-        self[i_seq]-=1
-        self[j_seq]-=1
+        self._add_electron_to_bond(bp.i_seqs)
     # remove HG on sulfur bridge
     self.check_sulfur_bridge()
 
