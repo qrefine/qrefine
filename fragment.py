@@ -333,14 +333,16 @@ class fragments(object):
                       original_pdb_filename=self.expansion_file)
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.expansion.cs_box)
-      if(self.debug):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
+      if(1):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
           crystal_symmetry=self.expansion.cs_box)
 
       self.charge_service.update_pdb_hierarchy(
         charge_hierarchy,
         self.expansion.cs_box,
       )
-      charge = self.charge_service.get_total_charge()
+      #TODO: do not why self.charge_service could not right charge 
+      #charge = self.charge_service.get_total_charge()
+      charge = charges_class(pdb_filename=str(i)+"_capping.pdb").get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
