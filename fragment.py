@@ -343,6 +343,8 @@ class fragments(object):
       #TODO: do not why self.charge_service could not right charge 
       #charge = self.charge_service.get_total_charge()
       charge = charges_class(pdb_filename=str(i)+"_capping.pdb").get_total_charge()
+      #the capping pdb file causes problem for tests, remove it
+      os.remove(str(i)+"_capping.pdb")  
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)

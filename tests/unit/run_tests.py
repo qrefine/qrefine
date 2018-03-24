@@ -75,7 +75,7 @@ def clean_up(prefix,mtz_name = None):
     'test_short_gap_capping.pdb', 'entire_qm.pdb', 'cluster_qm.pdb']
   files_to_remove2 = [
     'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
-    'tst_14_super_sphere.pdb']
+    'tst_14_super_sphere.pdb','test_zn_his_charge.pdb']
   files_to_remove3 = ['cluster_false.pkl', 'cluster_true.pkl']
   files_to_remove4 = ['A.pdb', 'B.pdb', 'W.pdb']
   for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
