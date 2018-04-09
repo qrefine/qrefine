@@ -101,9 +101,16 @@ class minimizer(object):
       termination_params=scitbx.lbfgs.termination_parameters(
         max_iterations=max_iterations),
       exception_handling_params=scitbx.lbfgs.exception_handling_parameters(
+        #ignore_line_search_failed_rounding_errors=True,
+        #ignore_line_search_failed_step_at_lower_bound=True,
+        #ignore_line_search_failed_maxfev=True
         ignore_line_search_failed_rounding_errors=True,
         ignore_line_search_failed_step_at_lower_bound=True,
-        ignore_line_search_failed_maxfev=True))
+        ignore_line_search_failed_step_at_upper_bound=True,
+        ignore_line_search_failed_maxfev=True,
+        ignore_line_search_failed_xtol=True,
+        ignore_search_direction_not_descent=True
+        ))
 
   def callback_after_step(self, minimizer):
     if(self.geometry_rmsd_manager is not None):
@@ -344,7 +351,7 @@ def refine(fmodel,
     results.show(prefix="  ")
     print >> results.log, "Start further refinement:"
     refine_cycle_start = 1
-  for refine_cycle in xrange(refine_cycle_start, 
+  for refine_cycle in xrange(refine_cycle_start,
                       params.refine.number_of_refine_cycles+refine_cycle_start):
     calculator.reset_fmodel(fmodel=fmodel)
     if(clustering):

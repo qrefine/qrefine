@@ -266,7 +266,7 @@ class Mopac(Calculator):
                     gline = lines[i + j + 1]
                     pre_force=gline[49:62]
                     if(infinite_force in pre_force):
-                        forces[j/3, j%3] =999999999.9999
+                        forces[int(j/3), int(j%3)] =999999999.9999
                     else:
                         forces[int(j/3), int(j%3)] = float(pre_force)
                 break
