@@ -32,12 +32,20 @@ DOI: 10.1107/S2059798316019847
 
 
 #### Clustering
+
+Min Zheng, Mark P. Waller, Yoink: An interaction‐based partitioning API,
+Journal of Computational Chemistry 2018, 39, 799–806 
+
 Min Zheng, Mark P. Waller, Toward more efficient density-based
 adaptive QM/MM methods, Int J. Quant. Chem (2017) e25336 DOI:
 qua.25336
 
 Min Zheng, Mark P. Waller, Adaptive QM/MM Methods, WIREs
 Comput. Mol. Sci. (2016) DOI: 10.1002/wcms.1255
+
+Mark P. Waller, Sadhana Kumbhar, Jack Yang,
+A Density‐Based Adaptive Quantum Mechanical/Molecular Mechanical Method
+ChemPhysChem 2014, 15, 3218 – 3225. 
 
 ### Quickstart
 
