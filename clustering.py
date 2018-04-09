@@ -6,7 +6,8 @@ from libtbx.utils import Sorry
 
 class girvan_nweman_clustering(object):
 
-  def __init__(self, interaction_list,maxnum_residues_in_cluster=15,size = None):
+  def __init__(self, interaction_list,maxnum_residues_in_cluster=15, 
+                     size = None):
         self.interaction_list = interaction_list
         self.size = size
         self.maxnum_residues_in_cluster = maxnum_residues_in_cluster
