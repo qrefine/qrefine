@@ -1,7 +1,7 @@
 from __future__ import division
 from boost_adaptbx import graph
 from boost_adaptbx.graph import clustering_algorithm
-from graph import connected_component_algorithm as cca
+from boost_adaptbx.graph import connected_component_algorithm as cca
 from libtbx.utils import Sorry
 
 class girvan_nweman_clustering(object):
