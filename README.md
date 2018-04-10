@@ -23,12 +23,12 @@ quantum-refinement of bio-macromolecules.
 Zheng, M., Moriarty, N.W., Xu, Y., Reimers, J.R., Afonine, P.V. & Waller, M.P. 
 Solving the scalability issue in quantum-based refinement: Q|R#1
 (2017). Acta Cryst. D73, 
-DOI: [10.1107/S2059798317016746] (http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
+DOI: [10.1107/S2059798317016746](http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
 
 Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
 Q|R: Quantum-based Refinement , 
 (2017) Acta Cryst. D73, 45-52.
-DOI: 10.1107/S2059798316019847
+DOI: [10.1107/S2059798316019847](http://scripts.iucr.org/cgi-bin/paper?S2059798316019847)
 
 
 #### Clustering
@@ -128,6 +128,7 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 * [Malgorzata Biczysko](https://github.com/biczysko)
 * [Xu Yanting](https://github.com/yanting0928)
 * [Zhang Hongli](https://github.com/zhangholly)
+* [Lum Wang](https://github.com/Mooooony)
 
 
 
