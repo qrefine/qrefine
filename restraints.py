@@ -57,8 +57,11 @@ class from_qm(object):
       clustering                 = False,
 #      charge_service             = None,
       cif_objects                = None,
-      basis                      = "sto-3g"):
+      method                     = 'rhf',
+      basis                      = "sto-3g",
+  ):
     self.fragment_extracts  = fragment_extracts
+    self.method = method
     self.basis = basis
 
     self.pdb_hierarchy = pdb_hierarchy
@@ -102,6 +105,24 @@ class from_qm(object):
       calculator = Gaussian()
     else:
       raise Sorry("qm_calculator needs to be specified.")
+    #
+    # set to appropriate values
+    #
+    for attr in ['charge',
+                 'basis',
+                 'method',
+                 ]:
+      value = getattr(self, attr, None)
+      func = getattr(calculator, 'set_%s' % attr, None)
+      action=False
+      if func is not None:
+        if value is not None:
+          print '  Setting %s to %s' % (attr, value)
+          func(value)
+          action=True
+      if not action:
+        if value and not func:
+          print '  No function available to set %s of %s' % (attr, value)
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
@@ -144,9 +165,12 @@ class from_qm(object):
       define_str = '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'\
       + str(qm_charge)\
       + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
+      define_str=''
     elif (self.qm_engine_name == 'mopac'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'gaussian'):
+      command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'orca'):
       command = self.qm_engine.get_command()
     else:
       assert 0

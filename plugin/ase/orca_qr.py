@@ -35,8 +35,19 @@ Mg lanl2dz_ecp''',
 class Orca(Calculator):
     name = 'Orca'
 
-    def __init__(self, label='ase_plugin', orca_file=False, gpus='1    1', basis='6-31g', coordinates='tmp_ase.pdb',
-                 charge='0', method='rhf', dftd='yes', run='gradient', atoms=None, **kwargs):
+    def __init__(self,
+                 label='ase_plugin',
+                 orca_file=False,
+                 gpus='1    1',
+                 basis='6-31g',
+                 coordinates='tmp_ase.pdb',
+                 charge='0',
+                 method='rhf',
+                 dftd='yes',
+                 run='gradient',
+                 atoms=None,
+                 command=None,
+                 **kwargs):
         self.orca_file = orca_file
         coordinates = os.path.dirname(label) + "/" + coordinates
         self.coordinates = coordinates
@@ -59,6 +70,8 @@ class Orca(Calculator):
         self.forces = None
         self.stress = None
 
+        self.command = command
+
     def write_input(self, fname, atoms):
         key_parameters = self.key_parameters
         print "atoms are",atoms
@@ -74,7 +87,7 @@ class Orca(Calculator):
             #XY
             finput.write("! " + self.key_parameters['method'] + " " + self.key_parameters['basis']+ " EnGrad" + "\n" )
             finput.write(" \n")
-            finput.write("* xyz " + self.key_parameters['charge'] + " 1" +"\n")
+            finput.write("* xyz %s 1\n" % self.key_parameters['charge'])
             for index in range(len(atoms)):
                 #finput.write(atom.symbol + " " + atom.position[0] + " " + atom.position[1] +" " + atom.position[2])
                 finput.write(str(atoms.get_chemical_symbols()[index]) +  " "
@@ -97,11 +110,22 @@ class Orca(Calculator):
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
-        if ('Orca_COMMAND' in os.environ):
-            command = os.environ['Orca_COMMAND']
+        if self.command is not None:
+          command = self.command
+        elif ('ORCA_COMMAND' in os.environ):
+          command = os.environ['ORCA_COMMAND']
+        elif ('Orca_COMMAND' in os.environ):
+          command = os.environ['Orca_COMMAND']
         return command
 
-    def run_qr(self,atoms,define_str,coordinates,charge,pointcharges):
+    def run_qr(self,
+               atoms,
+               define_str,
+               coordinates,
+               charge,
+               pointcharges,
+               command=None,
+        ):
         import subprocess
         """
         Writes input in label.mop
@@ -122,6 +146,9 @@ class Orca(Calculator):
         if command is None:
             raise RuntimeError('Orca command not specified')
         print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
+
+        # dry_run
+        if 0: assert 0
 
         exitcode = os.system('%s %s' % (command, finput) + '  >     ' + foutput + '  2>&1')
         if exitcode != 0:
@@ -223,3 +250,13 @@ class Orca(Calculator):
     def set(self, **kwargs):
         for key, value in kwargs.items():
             self.key_parameters[str(key)] = value
+
+    # Q|R requirements
+    def set_charge(self, charge):
+      self.key_parameters['charge'] = charge
+
+    def set_basis(self, basis):
+      self.key_parameters['basis'] = basis
+
+    def set_method(self, method):
+      self.key_parameters['method'] = method
