@@ -163,36 +163,6 @@ def create_fmodel(cmdline, log):
   log.flush()
   return fmodel
 
-#def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
-#  params = monomer_library.pdb_interpretation.master_params.extract()
-#  params.use_neutron_distances = True
-#  params.restraints_library.cdl = False
-#  params.sort_atoms = False
-#  processed_pdb_files_srv = mmtbx.utils.process_pdb_file_srv(
-#    pdb_interpretation_params = params,
-#    stop_for_unknowns         = True,
-#    log                       = null_out(),
-#    crystal_symmetry          = crystal_symmetry,
-#    cif_objects               = cif_objects,
-#    use_neutron_distances     = True)
-#  processed_pdb_file, junk = processed_pdb_files_srv.\
-#    process_pdb_files(pdb_file_names = [pdb_file_name])
-#  xray_structure = processed_pdb_file.xray_structure()
-#  sctr_keys = \
-#    xray_structure.scattering_type_registry().type_count_dict().keys()
-#  has_hd = "H" in sctr_keys or "D" in sctr_keys
-#  pdb_hierarchy = processed_pdb_file.all_chain_proxies.pdb_hierarchy
-#  #super_cell = expand( # XXX needs to be optional?
-#  #  pdb_hierarchy        = pdb_hierarchy,
-#  #  crystal_symmetry     = crystal_symmetry,
-#  #   select_within_radius = 15) # XXX needs to be a parameter?
-#  return group_args(
-#    processed_pdb_file = processed_pdb_file,
-#    pdb_hierarchy      = pdb_hierarchy,
-#    xray_structure     = xray_structure,
-#    #super_cell         = super_cell,
-#    has_hd             = has_hd)
-
 def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   import iotbx.pdb
   import mmtbx
@@ -225,7 +195,8 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   return group_args(
       processed_pdb_file = processed_pdb_file,
       pdb_hierarchy      = ph,
-       xray_structure    = xrs,
+      xray_structure     = xrs,
+      cif_objects        = cif_objects,
       has_hd             = has_hd)
 
 def create_fragment_manager(
@@ -250,24 +221,24 @@ def create_fragment_manager(
     charge_cutoff              = params.cluster.charge_cutoff)
 
 def create_restraints_manager(
-      cmdline,
+      params,
       model,
       fragment_manager=None):
-  if(cmdline.params.restraints == "cctbx"):
+  if(params.restraints == "cctbx"):
     assert model.processed_pdb_file is not None
     restraints_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd)
   else:
-    assert cmdline.params.restraints == "qm"
+    assert params.restraints == "qm"
     restraints_manager = restraints.from_qm(
-      cif_objects                = cmdline.cif_objects,
-      basis                      = cmdline.params.basis,
+      cif_objects                = model.cif_objects,
+      basis                      = params.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
-      charge                     = cmdline.params.charge,
-      qm_engine_name             = cmdline.params.qm_engine_name,
-      crystal_symmetry           = cmdline.crystal_symmetry,
-      clustering                 = cmdline.params.cluster.clustering)
+      charge                     = params.charge,
+      qm_engine_name             = params.qm_engine_name,
+      crystal_symmetry           = model.xray_structure.crystal_symmetry(),
+      clustering                 = params.cluster.clustering)
   return restraints_manager
 
 def create_calculator(weights, fmodel, params, restraints_manager):
@@ -295,17 +266,12 @@ def create_calculator(weights, fmodel, params, restraints_manager):
       restraints_manager = restraints_manager,
       weights            = weights)
 
-def run(cmdline, log):
-  params = cmdline.params
-  model = process_model_file(
-    pdb_file_name    = cmdline.pdb_file_names[0],
-    cif_objects      = cmdline.cif_objects,
-    crystal_symmetry = cmdline.crystal_symmetry)
+def run(model, fmodel, params, rst_file, prefix, log):
   if(params.cluster.clustering):
     params.refine.gradient_only = True
     print >> log, " params.gradient_only", params.refine.gradient_only
   # RESTART
-  if(os.path.isfile(str(cmdline.params.rst_file))):
+  if(os.path.isfile(str(rst_file))):
     print >> log, "restart info is loaded from %s" % cmdline.params.rst_file
     rst_data = easy_pickle.load(cmdline.params.rst_file)
     fmodel = rst_data["fmodel"]
@@ -314,28 +280,18 @@ def run(cmdline, log):
     weights = rst_data["weights"]
     geometry_rmsd_manager = rst_data["geometry_rmsd_manager"]
     start_fmodel = rst_data["rst_fmodel"]
-    start_ph = cmdline.pdb_hierarchy.deep_copy().adopt_xray_structure(
+    start_ph = model.pdb_hierarchy.deep_copy().adopt_xray_structure(
       start_fmodel.xray_structure)
   else:
     weights = None
-    if (cmdline.pdb_hierarchy.atoms().size() > params.max_atoms):
+    if (model.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")
-    cmdline.working_phil.show(out=log, prefix="   ")
-    fmodel = create_fmodel(cmdline=cmdline, log=log)
     geometry_rmsd_manager = restraints.from_cctbx(
       processed_pdb_file = model.processed_pdb_file,
       has_hd             = model.has_hd).geometry_restraints_manager
     cctbx_rm_bonds_rmsd = calculator.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = fmodel.xray_structure)
-    # Show full model statistics
-    if(0):
-      # block this:
-      mso = mmtbx.model.statistics.geometry(
-        pdb_hierarchy               = model.pdb_hierarchy.select(sel),
-        geometry_restraints_manager = geometry_rmsd_manager,
-        use_hydrogens               = False)
-      mso.show(lowercase=True, out=log)
     #
     if(params.refine.dry_run): return
     #
@@ -346,14 +302,13 @@ def run(cmdline, log):
       xrs                     = fmodel.xray_structure,
       max_bond_rmsd           = params.refine.max_bond_rmsd,
       max_r_work_r_free_gap   = params.refine.max_r_work_r_free_gap,
-      pdb_hierarchy           = cmdline.pdb_hierarchy,
+      pdb_hierarchy           = model.pdb_hierarchy,
       mode                    = params.refine.mode,
       log                     = log,
       restraints_weight_scale = params.refine.restraints_weight_scale)
     if(params.rst_file is None):
       if(params.output_file_name_prefix is None):
-        params.output_file_name_prefix = \
-          os.path.basename(cmdline.pdb_file_names[0])[:-4]
+        params.output_file_name_prefix = prefix
       if(os.path.exists(params.output_folder_name) is False):
         os.mkdir(params.output_folder_name)
       params.rst_file = params.output_folder_name + "/" + \
@@ -368,10 +323,10 @@ def run(cmdline, log):
   fragment_manager = create_fragment_manager(
     params           = params,
     pdb_hierarchy    = model.pdb_hierarchy,
-    cif_objects      = cmdline.cif_objects,
-    crystal_symmetry = cmdline.crystal_symmetry)
+    cif_objects      = model.cif_objects,
+    crystal_symmetry = model.xray_structure.crystal_symmetry())
   restraints_manager = create_restraints_manager(
-    cmdline          = cmdline,
+    params           = params,
     model            = model)
   if(fragment_manager is not None):
     cluster_restraints_manager = cluster_restraints.from_cluster(
@@ -401,7 +356,7 @@ def run(cmdline, log):
       calculator            = calculator_manager,
       results               = results_manager)
   xrs_best = results_manager.finalize(
-    input_file_name_prefix  = os.path.basename(cmdline.pdb_file_names[0])[:-4],
+    input_file_name_prefix  = prefix,
     output_file_name_prefix = params.output_file_name_prefix,
     output_folder_name      = params.output_folder_name)
 

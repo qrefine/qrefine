@@ -27,6 +27,8 @@ class convergence(object):
 
   def is_converged(self, fmodel, bond_rmsd=None, restraints_weight_scale=None):
     #
+    if not self.use_convergence_test: return False
+    #
     rw = fmodel.r_work()
     rf = fmodel.r_free()
     gap = rf-rw
@@ -61,6 +63,7 @@ class convergence(object):
     else: return False and self.use_convergence_test
 
   def is_geometry_converged(self, sites_cart):
+    if not self.use_convergence_test: return False
     rmsd_diff=self.sites_cart_start.rms_difference(sites_cart)
     if(rmsd_diff<self.rmsd_tolerance):
       return True

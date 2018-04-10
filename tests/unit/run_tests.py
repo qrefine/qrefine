@@ -45,10 +45,10 @@ def setup_helix_example(pdb_name = "m00_good.pdb",
 def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
             mtz_name = "m00_good.mtz"):
   test_folder_name = prefix
-  cmd = ["cctbx.python",
-        os.path.join(qrefine,"qr.py"),
-        mtz_name,
-        os.path.join(qr_unit_tests_data,pdb_name)]
+  cmd = [
+    "qr.refine",
+    mtz_name,
+    os.path.join(qr_unit_tests_data,pdb_name)]
   for arg in args:
     cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
