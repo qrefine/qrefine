@@ -237,7 +237,7 @@ def create_restraints_manager(
     assert params.restraints == "qm"
     restraints_manager = restraints.from_qm(
       cif_objects                = model.cif_objects,
-      basis                      = params.basis,
+      basis                      = params.quantum.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
       charge                     = params.quantum.charge,
       qm_engine_name             = params.quantum.engine_name,
