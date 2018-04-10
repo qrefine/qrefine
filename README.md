@@ -84,7 +84,7 @@ modules directory. The above command will clone it from *GitHub*.
  cd tests
  qr.test
 ```
-If any of the tests fail, please raise and issue here: [issue tracker](https://github.com/qrefine/qr-core/issues)
+If any of the tests fail, please raise and issue here: [issue tracker](https://github.com/qrefine/qrefine/issues)
 
 ### Run Example 
 
