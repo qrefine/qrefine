@@ -165,6 +165,8 @@ class Gaussian(FileIOCalculator):
 
         if command: self.command = command
 
+    def get_command(self): return self.command
+
     def set(self, **kwargs):
         changed_parameters = FileIOCalculator.set(self, **kwargs)
         if changed_parameters:
@@ -329,3 +331,13 @@ class Gaussian(FileIOCalculator):
         print "forces are ",self.results['forces']
         self.forces=self.results['forces']
         self.energy_free = self.results['energy']
+
+    # Q|R requirements
+    def set_charge(self, charge):
+      self.parameters['charge'] = charge
+
+    def set_basis(self, basis):
+      self.parameters['basis'] = basis
+
+    def set_method(self, method):
+      self.parameters['method'] = method

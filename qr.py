@@ -272,7 +272,17 @@ def create_calculator(weights, params, restraints_manager, fmodel=None,
       restraints_manager = restraints_manager,
       weights            = weights)
 
+def validate(model, fmodel, params, rst_file, prefix, log):
+  if params.quantum.engine_name=='mopac':
+    if params.quantum.basis:
+      print '  Because engine is %s basis set %s ignored' % (
+        params.quantum.engine_name,
+        params.quantum.basis,
+        )
+      params.quantum.basis = ''
+
 def run(model, fmodel, params, rst_file, prefix, log):
+  validate(model, fmodel, params, rst_file, prefix, log)
   if(params.cluster.clustering):
     params.refine.gradient_only = True
     print >> log, " params.gradient_only", params.refine.gradient_only
