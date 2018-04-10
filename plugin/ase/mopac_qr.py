@@ -332,3 +332,10 @@ class Mopac(Calculator):
               self.float_params[key] = kwargs[key]
         self.atoms = atoms_new.copy()
         self.run()
+
+    # Q|R requirements
+    def set_charge(self, charge):
+      self.int_params['charge'] = charge
+
+    def set_method(self, method):
+      self.str_params['functional'] = method

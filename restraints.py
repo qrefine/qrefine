@@ -122,7 +122,7 @@ class from_qm(object):
           action=True
       if not action:
         if value and not func:
-          print '  No function available to set %s of %s' % (attr, value)
+          print '  No function available to set %s to %s' % (attr, value)
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
