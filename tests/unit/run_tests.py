@@ -149,6 +149,7 @@ def run(nproc=6, only_i=None):
     'tst_27.py',
     'tst_28.py',
     'tst_29.py',
+    'tst_30.py',
   ]
   failed = 0
   in_separate_directory = not(nproc==1)
