@@ -183,7 +183,7 @@ class fragments(object):
         fragment_super_atoms_in_ph = []
         for molecules in molecules_in_fragments:
           pyoink.input_file = self.qmmm_file_name
-          pyoink.update(molecules)
+          pyoink.update(list(molecules))
           atoms_in_one_fragment, junk = pyoink.get_qm_indices()
           atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
                                                      atoms_in_one_fragment, ph)
