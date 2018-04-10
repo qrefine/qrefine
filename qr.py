@@ -241,7 +241,8 @@ def create_restraints_manager(
       clustering                 = params.cluster.clustering)
   return restraints_manager
 
-def create_calculator(weights, fmodel, params, restraints_manager):
+def create_calculator(weights, params, restraints_manager, fmodel=None, 
+                      model=None):
   if(weights is None):
     weights = calculator.weights(
       shake_sites             = params.refine.shake_sites ,
@@ -258,7 +259,7 @@ def create_calculator(weights, fmodel, params, restraints_manager):
     else:
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
-        fmodel             = fmodel,
+        xray_structure     = model.xray_structure,
         dump_gradients     = params.dump_gradients)
   if(params.refine.refine_adp):
     return calculator.adp(
@@ -291,15 +292,18 @@ def run(model, fmodel, params, rst_file, prefix, log):
       has_hd             = model.has_hd).geometry_restraints_manager
     cctbx_rm_bonds_rmsd = calculator.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
-      xrs                = fmodel.xray_structure)
+      xrs                = model.xray_structure)
     #
     if(params.refine.dry_run): return
     #
+    r_work, r_free = None, None
+    if(fmodel is not None):
+      r_work, r_free = fmodel.r_work(), fmodel.r_free()
     results_manager = results.manager(
-      r_work                  = fmodel.r_work(),
-      r_free                  = fmodel.r_free(),
+      r_work                  = r_work,
+      r_free                  = r_free,
       b                       = cctbx_rm_bonds_rmsd,
-      xrs                     = fmodel.xray_structure,
+      xrs                     = model.xray_structure,
       max_bond_rmsd           = params.refine.max_bond_rmsd,
       max_r_work_r_free_gap   = params.refine.max_r_work_r_free_gap,
       pdb_hierarchy           = model.pdb_hierarchy,
@@ -339,6 +343,7 @@ def run(model, fmodel, params, rst_file, prefix, log):
   calculator_manager = create_calculator(
     weights            = weights,
     fmodel             = start_fmodel,
+    model              = model,
     params             = params,
     restraints_manager = rm)
   if(params.refine.mode == "refine"):
@@ -351,7 +356,7 @@ def run(model, fmodel, params, rst_file, prefix, log):
   else:
     driver.opt(
       params                = params,
-      fmodel                = fmodel,
+      xray_structure        = model.xray_structure,
       geometry_rmsd_manager = geometry_rmsd_manager,
       calculator            = calculator_manager,
       results               = results_manager)

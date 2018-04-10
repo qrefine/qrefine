@@ -14,9 +14,10 @@ def selxrs(xrss, s):
   return tmp[:]
 
 class manager(object):
-  def __init__(self, r_work, r_free, b, xrs, max_bond_rmsd,
+  def __init__(self, b, xrs, max_bond_rmsd,
                      restraints_weight_scale, max_r_work_r_free_gap,
-                     pdb_hierarchy, mode, log):
+                     pdb_hierarchy, mode, log, r_work=None, r_free=None):
+    assert [r_work, r_free].count(None) in [0,2]
     self.mode = mode
     self.log = log
     self.pdb_hierarchy = pdb_hierarchy
@@ -32,8 +33,9 @@ class manager(object):
     self.r_frees = flex.double()
     self.bs   = flex.double()
     self.xrss = []
-    self.r_works.append(r_work)
-    self.r_frees.append(r_free)
+    if([r_work, r_free].count(None) == 0):
+      self.r_works.append(r_work)
+      self.r_frees.append(r_free)
     self.bs.append(b)
     self.xrss.append(xrs.deep_copy_scatterers())
     self.restraints_weight_scales = flex.double([restraints_weight_scale])
@@ -116,11 +118,17 @@ class manager(object):
     self.pdb_hierarchy.adopt_xray_structure(xrs_best)
 
   def show(self, prefix):
-    fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws: %6.3f n_fev: %d"
-    i = self.r_works.size()-1
-    print >> self.log, fmt%(prefix, i, self.r_works[-1], self.r_frees[-1],
-      self.r_frees[-1]-self.r_works[-1], self.bs[-1],
-      self.restraints_weight_scales[-1], self.n_fev)
+    if(self.r_works.size()>0):
+      fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws: %6.3f n_fev: %d"
+      i = self.r_works.size()-1
+      print >> self.log, fmt%(prefix, i, self.r_works[-1], self.r_frees[-1],
+        self.r_frees[-1]-self.r_works[-1], self.bs[-1],
+        self.restraints_weight_scales[-1], self.n_fev)
+    else:
+      fmt="%s %3d rmsd(b): %7.4f rws: %6.3f n_fev: %d"
+      i = self.bs.size()-1
+      print >> self.log, fmt%(prefix, i, self.bs[-1],
+        self.restraints_weight_scales[-1], self.n_fev)
     self.log.flush()
 
   def write_final_pdb_files(self, output_file_name, output_folder_name):

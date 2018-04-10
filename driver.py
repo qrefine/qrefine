@@ -11,9 +11,13 @@ from libtbx.utils import Sorry
 from libtbx import group_args
 
 class convergence(object):
-  def __init__(self, fmodel, params):
-    self.r_start = fmodel.r_work()
-    self.sites_cart_start = fmodel.xray_structure.sites_cart()
+  def __init__(self, params, fmodel=None, xray_structure=None):
+    self.r_start=None
+    if(fmodel is not None):
+      self.r_start = fmodel.r_work()
+      self.sites_cart_start = fmodel.xray_structure.sites_cart()
+    else:
+      self.sites_cart_start = xray_structure.sites_cart()
     self.r_tolerance=params.refine.r_tolerance
     self.max_bond_rmsd=params.refine.max_bond_rmsd
     self.rmsd_tolerance=params.refine.rmsd_tolerance
@@ -104,9 +108,6 @@ class minimizer(object):
       termination_params=scitbx.lbfgs.termination_parameters(
         max_iterations=max_iterations),
       exception_handling_params=scitbx.lbfgs.exception_handling_parameters(
-        #ignore_line_search_failed_rounding_errors=True,
-        #ignore_line_search_failed_step_at_lower_bound=True,
-        #ignore_line_search_failed_maxfev=True
         ignore_line_search_failed_rounding_errors=True,
         ignore_line_search_failed_step_at_lower_bound=True,
         ignore_line_search_failed_step_at_upper_bound=True,
@@ -166,19 +167,22 @@ class clustering_update(object):
       self.pre_sites_cart = sites_cart
 
 class restart_data(object):
-  def __init__(self, fmodel, geometry_rmsd_manager):
+  def __init__(self, geometry_rmsd_manager, fmodel=None, xray_structure=None):
+    assert [xray_structure, fmodel].count(None) == 1
     rst_data = {}
-    rst_data["fmodel"] = fmodel
+    if(fmodel is not None): rst_data["fmodel"] = fmodel
+    else:                   rst_data["xrs"] = xray_structure
     rst_data["geometry_rmsd_manager"] = geometry_rmsd_manager
     self.rst_data = rst_data
 
   def write_rst_file(self, rst_file, weight_cycle = None, refine_cycle = None,
                      micro_cycle = None, fmodel = None, weights = None,
-                     conv_test = None, results = None):
+                     conv_test = None, results = None, xray_structure = None):
     self.rst_data["weight_cycle"] = weight_cycle
     self.rst_data["refine_cycle"] = refine_cycle
     self.rst_data["micro_cycle"] = micro_cycle
     self.rst_data["rst_fmodel"] = fmodel
+    self.rst_data["rst_xray_structure"] = xray_structure
     self.rst_data["weights"] = weights
     self.rst_data["conv_test"] = conv_test
     self.rst_data["results"] = results
@@ -406,22 +410,22 @@ def refine(fmodel,
   print >> results.log, "At end of further refinement:"
   results.show(prefix="  ")
 
-def opt(fmodel,
+def opt(xray_structure,
         params,
         results,
         calculator,
         geometry_rmsd_manager):
   rst_file = params.rst_file
-  rst_data = restart_data(fmodel, geometry_rmsd_manager)
+  rst_data = restart_data(xray_structure, geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
     with open(rst_file, 'rb') as handle:
       rst_file_data = pickle.load(handle)
       micro_cycle_start = rst_file_data["micro_cycle"]
       print >> results.log, "\n***********************************************************"
-      print >> results.log, "restarts from micro_cycle: %d"%( micro_cycle_start)
+      print >> results.log, "restarts from micro_cycle: %d"%(micro_cycle_start)
       print >> results.log, "***********************************************************\n"
       ## check the restart fmodel
-      fmodel = calculator.fmodel
+      xray_structure = calculator.xray_structure
   else:
     micro_cycle_start = 1
   try:
@@ -430,39 +434,41 @@ def opt(fmodel,
     clustering = False
   if(clustering):
     cluster_qm_update = clustering_update(
-      calculator.fmodel.xray_structure.sites_cart(), results.log, \
+      calculator.xray_structure.sites_cart(), results.log, \
       params.rmsd_tolerance * 100)
     print >> results.log, "\ninteracting pairs number:  ",\
       calculator.restraints_manager.fragments.interacting_pairs
   results.show(prefix="start")
-  for micro_cycle in xrange(micro_cycle_start, params.refine.number_of_micro_cycles+micro_cycle_start):
+  for micro_cycle in xrange(micro_cycle_start, 
+                        params.refine.number_of_micro_cycles+micro_cycle_start):
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
-    conv_test = convergence(fmodel=calculator.fmodel, params=params)
-    rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle, fmodel=fmodel,
+    conv_test = convergence(
+      xray_structure=calculator.xray_structure, params=params)
+    rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle, 
+      xray_structure=xray_structure,
       results=results)
-    minimized = minimizer(calculator = calculator,
-                          stpmax = params.refine.stpmax,
-                          gradient_only = params.refine.gradient_only,
-                          line_search = params.refine.line_search,
-                          max_iterations = params.refine.max_iterations)
+    minimized = minimizer(
+      calculator     = calculator,
+      stpmax         = params.refine.stpmax,
+      gradient_only  = params.refine.gradient_only,
+      line_search    = params.refine.line_search,
+      max_iterations = params.refine.max_iterations)
     calculator.update_fmodel_opt()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
-      xrs                = fmodel.xray_structure)
+      xrs                = xray_structure)
     results.update(
-      r_work = fmodel.r_work(),
-      r_free = fmodel.r_free(),
       b      = cctbx_rm_bonds_rmsd,
-      xrs    = fmodel.xray_structure,
+      xrs    = xray_structure,
       n_fev  = minimized.number_of_function_and_gradients_evaluations)
     results.write_pdb_file(
       output_folder_name = params.output_folder_name,
       output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
     results.show(prefix="micro_cycle")
     if(conv_test.is_geometry_converged(
-       sites_cart = fmodel.xray_structure.sites_cart())):
+       sites_cart = xray_structure.sites_cart())):
       print >> results.log, " Convergence at micro_cycle:", micro_cycle
       break
-  rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1, fmodel=fmodel,
-        results=results)
+  rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1, 
+    xray_structure=xray_structure, results=results)

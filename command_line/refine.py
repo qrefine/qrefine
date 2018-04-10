@@ -76,7 +76,8 @@ def run(args, log):
     if(params.refine.update_all_scales):
       fmodel.update_all_scales(remove_outliers=False)
       fmodel.show(show_header=False, show_approx=False)
-  print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free())
+    print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), 
+      fmodel.r_free())
   log.flush()
   qr.run(
     model    = model, 

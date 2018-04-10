@@ -106,39 +106,47 @@ class weights(object):
 
 class calculator(object):
   def __init__(self,
-               fmodel,
+               fmodel=None,
+               xray_structure=None,
                restraints_weight_scale = 1.0):
-    self.fmodel = fmodel
+    assert [fmodel, xray_structure].count(None)==1
+    self.fmodel=None
+    self.xray_structure=None
+    if(fmodel is not None):
+      self.fmodel = fmodel
+    if(xray_structure is not None):
+      self.xray_structure = xray_structure
     self.restraints_weight_scale = restraints_weight_scale
 
-  #def update_restraints_weight_scale(self, restraints_weight_scale):
-  #  self.restraints_weight_scale = restraints_weight_scale
-
   def update_fmodel(self):
-    self.fmodel.xray_structure.tidy_us()
-    self.fmodel.xray_structure.apply_symmetry_sites()
-    self.fmodel.update_xray_structure(
-      xray_structure = self.fmodel.xray_structure,
-      update_f_calc  = True,
-      update_f_mask  = True)
-    self.fmodel.update_all_scales(remove_outliers=False)
+    if(self.fmodel is not None):
+      self.fmodel.xray_structure.tidy_us()
+      self.fmodel.xray_structure.apply_symmetry_sites()
+      self.fmodel.update_xray_structure(
+        xray_structure = self.fmodel.xray_structure,
+        update_f_calc  = True,
+        update_f_mask  = True)
+      self.fmodel.update_all_scales(remove_outliers=False)
+    else:
+      self.xray_structure.tidy_us()
+      self.xray_structure.apply_symmetry_sites()
 
   def target_and_gradients(self):
     f, g = self.target_and_gradients(x = self.x)
     return f, g.as_double()
 
 class sites_opt(calculator):
-  def __init__(self, restraints_manager, fmodel, dump_gradients):
+  def __init__(self, restraints_manager, xray_structure, dump_gradients):
     self.dump_gradients = dump_gradients
     self.restraints_manager = restraints_manager
     self.x = None
-    self.fmodel = fmodel
+    self.xray_structure = xray_structure
     self.not_hd_selection = None # XXX UGLY
-    self.initialize(fmodel = self.fmodel)
+    self.initialize(xray_structure = self.xray_structure)
 
-  def initialize(self, fmodel=None):
-    self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
-    self.x = self.fmodel.xray_structure.sites_cart().as_double()
+  def initialize(self, xray_structure=None):
+    self.not_hd_selection = ~self.xray_structure.hd_selection() # XXX UGLY
+    self.x = self.xray_structure.sites_cart().as_double()
 
   def update(self, x):
     self.x = x
@@ -154,11 +162,8 @@ class sites_opt(calculator):
     return f, g.as_double()
 
   def update_fmodel_opt(self):
-    self.fmodel.xray_structure.set_sites_cart(
+    self.xray_structure.set_sites_cart(
       sites_cart = flex.vec3_double(self.x))
-    self.fmodel.update_xray_structure(
-      xray_structure = self.fmodel.xray_structure,
-      update_f_calc  = True)
 
 class sites(calculator):
   def __init__(self,
