@@ -341,3 +341,9 @@ class Gaussian(FileIOCalculator):
 
     def set_method(self, method):
       self.parameters['method'] = method
+
+    def set_memory(self, memory):
+      self.parameters['mem'] = memory
+
+    def set_nproc(self, nproc):
+      self.parameters['nprocshared'] = nproc

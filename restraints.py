@@ -57,12 +57,17 @@ class from_qm(object):
       clustering                 = False,
 #      charge_service             = None,
       cif_objects                = None,
+      # change to quantum phil scope !!!!
       method                     = 'rhf',
       basis                      = "sto-3g",
+      memory                     = None,
+      nproc                      = None,
   ):
     self.fragment_extracts  = fragment_extracts
     self.method = method
     self.basis = basis
+    self.memory = memory
+    self.nproc = nproc
 
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
@@ -111,6 +116,8 @@ class from_qm(object):
     for attr in ['charge',
                  'basis',
                  'method',
+                 'memory',
+                 'nproc',
                  ]:
       value = getattr(self, attr, None)
       func = getattr(calculator, 'set_%s' % attr, None)

@@ -77,6 +77,10 @@ quantum {
     .type = str
   method = 'hf'
     .type = str
+  memory = None
+    .type = str
+  nproc = None
+    .type = int
 }
 
 refine {
@@ -242,6 +246,8 @@ def create_restraints_manager(
       pdb_hierarchy              = model.pdb_hierarchy,
       charge                     = params.quantum.charge,
       qm_engine_name             = params.quantum.engine_name,
+      memory                     = params.quantum.memory,
+      nproc                      = params.quantum.nproc,
       crystal_symmetry           = model.xray_structure.crystal_symmetry(),
       clustering                 = params.cluster.clustering)
   return restraints_manager
