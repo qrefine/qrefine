@@ -23,7 +23,7 @@ quantum-refinement of bio-macromolecules.
 Zheng, M., Moriarty, N.W., Xu, Y., Reimers, J.R., Afonine, P.V. & Waller, M.P. 
 Solving the scalability issue in quantum-based refinement: Q|R#1
 (2017). Acta Cryst. D73, 
-DOI: 10.1107/S2059798317016746
+DOI: [10.1107/S2059798317016746] (http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
 
 Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
 Q|R: Quantum-based Refinement , 
@@ -80,6 +80,8 @@ modules directory. The above command will clone it from *GitHub*.
  ### Run Tests 
 
 ``` 
+ mkdir tests
+ cd tests
  qr.test
 ```
 If any of the tests fail, please raise and issue here: [issue tracker](https://github.com/qrefine/qr-core/issues)
@@ -114,7 +116,7 @@ If you run into any trouble please ask for help:
 
 ### Contact us 
 
-The best way to get a hold of us is via the  [issue tracker](https://github.com/qrefine/qr-core/issues)
+The best way to get a hold of us is by sending us an email: qrefine@googlegroups.com
 
 
 ### Developers
@@ -123,5 +125,10 @@ The best way to get a hold of us is via the  [issue tracker](https://github.com/
 * [Pavel Afonine](https://github.com/pafonine)
 * [Mark Waller](https://github.com/mpwaller)
 * [Nigel Moriarty](https://github.com/nwmoriarty)
+* [Malgorzata Biczysko](https://github.com/biczysko)
+* [Xu Yanting](https://github.com/yanting0928)
+* [Zhang Hongli](https://github.com/zhangholly)
+
+
 
 
