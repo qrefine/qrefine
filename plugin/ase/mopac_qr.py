@@ -23,7 +23,10 @@ float_keys = ['RELSCF']
 
 class Mopac(Calculator):
     name = 'MOPAC'
-    def __init__(self, label='ase', **kwargs):
+    def __init__(self,
+                 label='ase',
+                 command=None,
+                 **kwargs):
         # define parameter fields
         self.str_params = {}
         self.int_params = {}
@@ -53,7 +56,6 @@ class Mopac(Calculator):
         # set user values
         self.set(**kwargs)
 
-
         # save label
         self.label = label
 
@@ -68,6 +70,10 @@ class Mopac(Calculator):
 
         # initialize the results
         self.occupations = None
+
+        # command
+        self.command = None
+        if command: self.command = command
 
     def set(self, **kwargs):
         """
@@ -152,11 +158,16 @@ class Mopac(Calculator):
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
-        if self.str_params['command'] is not None:
-            command = self.str_params['command']
+        if self.command:
+          command = self.command
+        elif self.str_params['command'] is not None:
+          command = self.str_params['command']
         elif ('MOPAC_COMMAND' in os.environ):
-            command = os.environ['MOPAC_COMMAND']
+          command = os.environ['MOPAC_COMMAND']
         return command
+
+    def set_command(self, command):
+      self.command = command
 
     def run(self):
         import subprocess, shlex

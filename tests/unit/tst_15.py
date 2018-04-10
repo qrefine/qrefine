@@ -23,8 +23,11 @@ def run(prefix):
   # XXX qm option is currently suspected to be broken for 2ona_box_L
     for data_file_prefix in ["2ona_box_L", "2ona_box_S"]:
       if(restraints is "qm" and data_file_prefix is "2ona_box_S"): continue
-      common_args = ["restraints=%s"%restraints, "mode=opt", "nproc=1",
-                     "qm_engine_name=mopac","two_buffers=true"]
+      common_args = ["restraints=%s"%restraints,
+                     "mode=opt",
+                     "nproc=1",
+                     "quantum.engine_name=mopac",
+                     "two_buffers=true"]
       args = common_args+["clustering=false","dump_gradients=cluster_false.pkl"]
       r = run_tests.run_cmd(prefix,
         args     = args,

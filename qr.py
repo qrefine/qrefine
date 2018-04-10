@@ -67,13 +67,17 @@ cluster{
 }
 
 restraints = cctbx *qm
-.type = choice(multi=False)
-qm_engine_name = *mopac terachem turbomole pyscf orca gaussian
-.type = choice(multi=False)
-charge= None
-.type = int
-basis = "sto-3g"
-.type = str
+  .type = choice(multi=False)
+quantum {
+  engine_name = *mopac terachem turbomole pyscf orca gaussian
+    .type = choice(multi=False)
+  charge= None
+    .type = int
+  basis = 'sto-3g'
+    .type = str
+  method = 'hf'
+    .type = str
+}
 
 refine {
   dry_run=False
@@ -124,23 +128,23 @@ refine {
     .type = float
 }
 
-parallel_params {
-method = *multiprocessing slurm pbs sge lsf threading
-.type = choice(multi=False)
-nproc = None
-.type = int
-qsub_command = None
-.type = str
+parallel {
+  method = *multiprocessing slurm pbs sge lsf threading
+    .type = choice(multi=False)
+  nproc = None
+    .type = int
+  qsub_command = None
+    .type = str
 }
 
 output_file_name_prefix = None
-.type = str
+  .type = str
 output_folder_name = "pdb"
-.type = str
+  .type = str
 shared_disk = True
-.type = bool
+  .type = bool
 rst_file = None
-.type = str
+  .type = str
 
 dump_gradients=None
   .type = str
@@ -215,7 +219,7 @@ def create_fragment_manager(
     charge_embedding           = params.cluster.charge_embedding,
     two_buffers                = params.cluster.two_buffers,
     pdb_hierarchy              = pdb_hierarchy,
-    qm_engine_name             = params.qm_engine_name,
+    qm_engine_name             = params.quantum.engine_name,
     crystal_symmetry           = crystal_symmetry,
     debug                      = params.debug,
     charge_cutoff              = params.cluster.charge_cutoff)
@@ -235,8 +239,8 @@ def create_restraints_manager(
       cif_objects                = model.cif_objects,
       basis                      = params.basis,
       pdb_hierarchy              = model.pdb_hierarchy,
-      charge                     = params.charge,
-      qm_engine_name             = params.qm_engine_name,
+      charge                     = params.quantum.charge,
+      qm_engine_name             = params.quantum.engine_name,
       crystal_symmetry           = model.xray_structure.crystal_symmetry(),
       clustering                 = params.cluster.clustering)
   return restraints_manager
@@ -336,7 +340,7 @@ def run(model, fmodel, params, rst_file, prefix, log):
     cluster_restraints_manager = cluster_restraints.from_cluster(
       restraints_manager = restraints_manager,
       fragment_manager   = fragment_manager,
-      parallel_params    = params.parallel_params)
+      parallel_params    = params.parallel)
   rm = restraints_manager
   if(fragment_manager is not None):
     rm = cluster_restraints_manager

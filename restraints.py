@@ -79,6 +79,7 @@ class from_qm(object):
     else: self.charge = charge
     self.clustering = clustering
     self.qm_engine = self.create_qm_engine()
+    self.qm_engine.command = self.qm_engine.get_command()
     self.system_size = self.pdb_hierarchy.atoms_size()
 
   def create_qm_engine(self):
@@ -145,6 +146,8 @@ class from_qm(object):
       + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
     elif (self.qm_engine_name == 'mopac'):
       command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'gaussian'):
+      command = self.qm_engine.get_command()
     else:
       assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
@@ -153,12 +156,14 @@ class from_qm(object):
                           charge=qm_charge,
                           pointcharges=charge_file,
                           coordinates=qm_pdb_file[:-4]+".xyz",
-                          command=command,
-                          define_str=define_str)
+                          command=command,       # 
+                          define_str=define_str, # for Terachem
+      )
     unit_convert = ase_units.mol/ase_units.kcal
     energy = self.qm_engine.energy_free*unit_convert
     ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
-    gradients = ase_gradients[:selection.count(True)]#remove capping and neibouring buffer
+    # remove capping and neibouring buffer
+    gradients = ase_gradients[:selection.count(True)]
     gradients =  flex.vec3_double(gradients)
     ## TODO
     ## unchange the altloc gradient, averagely scale the non-altloc gradient

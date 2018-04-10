@@ -117,9 +117,18 @@ class Gaussian(FileIOCalculator):
                           'basis': 'sto-3g',
                           'force': 'force'}
 
-    def __init__(self, restart=None, ignore_bad_restart_file=False,
-                 label='ase/tmp_ase', atoms=None, scratch=None, ioplist=list(),
-                 basisfile=None, extra=None, addsec=None, **kwargs):
+    def __init__(self,
+                 restart=None,
+                 ignore_bad_restart_file=False,
+                 label='ase/tmp_ase',
+                 atoms=None,
+                 scratch=None,
+                 ioplist=list(),
+                 basisfile=None,
+                 extra=None,
+                 addsec=None,
+                 command=None,
+                 **kwargs):
 
         """Constructs a Gaussian-calculator object.
 
@@ -128,17 +137,21 @@ class Gaussian(FileIOCalculator):
 
         """
 
-        FileIOCalculator.__init__(self, restart, ignore_bad_restart_file,
-                                  label, atoms, **kwargs)
+        FileIOCalculator.__init__(self,
+                                  restart,
+                                  ignore_bad_restart_file,
+                                  label,
+                                  atoms,
+                                  **kwargs)
 
         if restart is not None:
-            try:
-                self.read(restart)
-            except ReadError:
-                if ignore_bad_restart_file:
-                    self.reset()
-                else:
-                    raise
+          try:
+            self.read(restart)
+          except ReadError:
+            if ignore_bad_restart_file:
+              self.reset()
+            else:
+              raise
 
         self.ioplist = ioplist
         self.scratch = scratch
@@ -149,6 +162,8 @@ class Gaussian(FileIOCalculator):
         self.addsec = addsec
         self.forces = None
         self.energy_free = None
+
+        if command: self.command = command
 
     def set(self, **kwargs):
         changed_parameters = FileIOCalculator.set(self, **kwargs)
