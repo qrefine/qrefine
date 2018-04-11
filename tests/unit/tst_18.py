@@ -22,7 +22,7 @@ def run(prefix = "tst_18"):
   nproc = str(multiprocessing.cpu_count())
   for data_file_prefix in [ "h_altconf_complete", "h_altconf_2_complete"]:
     for maxnum in ["15", "2"]:
-      common_args = ["restraints=cctbx", "mode=opt", "nproc="+nproc] +\
+      common_args = ["restraints=cctbx", "mode=opt", "parallel.nproc="+nproc] +\
                 ["altloc_method=subtract","maxnum_residues_in_cluster="+maxnum]
       r = run_tests.run_cmd(prefix,
         args     = common_args+["clustering=true",

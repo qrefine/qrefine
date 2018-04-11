@@ -19,7 +19,7 @@ def run(prefix):
   Non-P1 case (P212121)
   """
   data_file_prefix = "2olx"
-  common_args = ["restraints=cctbx", "mode=opt", "nproc=1"]
+  common_args = ["restraints=cctbx", "mode=opt", "parallel.nproc=1"]
   r = run_tests.run_cmd(prefix,
     args     = common_args+["clustering=true",
                             "dump_gradients=cluster_true.pkl"],
