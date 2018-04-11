@@ -286,6 +286,9 @@ def validate(model, fmodel, params, rst_file, prefix, log):
         params.quantum.basis,
         )
       params.quantum.basis = ''
+    if params.quantum.method=='hf': # default
+      print '  Default method set as PM7'
+      params.quantum.method='PM7'
 
 def run(model, fmodel, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)
