@@ -182,7 +182,7 @@ class from_qm(object):
     else:
       assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
-    self.qm_engine.label = qm_pdb_file[:-4]
+    self.qm_engine.set_label(qm_pdb_file[:-4])
     self.qm_engine.run_qr(atoms,
                           charge=qm_charge,
                           pointcharges=charge_file,
