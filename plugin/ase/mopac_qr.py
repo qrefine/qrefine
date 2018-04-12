@@ -339,3 +339,6 @@ class Mopac(Calculator):
 
     def set_method(self, method):
       self.str_params['functional'] = method
+
+    def set_label(self, label):
+      self.label = label

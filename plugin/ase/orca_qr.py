@@ -260,3 +260,6 @@ class Orca(Calculator):
 
     def set_method(self, method):
       self.key_parameters['method'] = method
+
+    def set_label(self, label):
+      self.label = label
