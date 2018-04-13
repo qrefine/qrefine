@@ -9,6 +9,8 @@ import random
 from cctbx import xray
 from libtbx import adopt_init_args
 from scitbx.array_family import flex
+import cctbx.maptbx.real_space_refinement_simple
+import scitbx.lbfgs
 
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
@@ -131,10 +133,6 @@ class calculator(object):
       self.xray_structure.tidy_us()
       self.xray_structure.apply_symmetry_sites()
 
-  def target_and_gradients(self):
-    f, g = self.target_and_gradients(x = self.x)
-    return f, g.as_double()
-
 class sites_opt(calculator):
   def __init__(self, restraints_manager, xray_structure, dump_gradients):
     self.dump_gradients = dump_gradients
@@ -161,7 +159,7 @@ class sites_opt(calculator):
       STOP()
     return f, g.as_double()
 
-  def update_fmodel_opt(self):
+  def update_xray_structure(self):
     self.xray_structure.set_sites_cart(
       sites_cart = flex.vec3_double(self.x))
 
@@ -276,3 +274,86 @@ class adp(calculator):
     f = tgx.target_work()
     g = tgx.gradients_wrt_atomic_parameters(u_iso=True)
     return f, g
+    
+class sites_real_space(object):
+  def __init__(self,
+               xray_structure=None,
+               map_data=None,
+               restraints_manager=None,
+               max_iterations=100):
+    adopt_init_args(self, locals())
+    self.unit_cell = self.xray_structure.unit_cell()
+    self.weight = 1#None
+    self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
+      max_iterations = max_iterations)
+    self.lbfgs_exception_handling_params = scitbx.lbfgs.\
+      exception_handling_parameters(
+        ignore_line_search_failed_step_at_lower_bound = True,
+        ignore_line_search_failed_step_at_upper_bound = True,
+        ignore_line_search_failed_maxfev              = True)
+    
+  def run(self):
+    rm = self.restraints_manager#.geometry_restraints_manager
+    refined = cctbx.maptbx.real_space_refinement_simple.lbfgs(
+      gradients_method                = "tricubic",
+      unit_cell                       = self.unit_cell,
+      sites_cart                      = self.xray_structure.sites_cart(),
+      density_map                     = self.map_data,
+      geometry_restraints_manager     = rm,
+      real_space_target_weight        = self.weight,
+      real_space_gradients_delta      = 0.25,
+      lbfgs_termination_params        = self.lbfgs_termination_params,
+      lbfgs_exception_handling_params = self.lbfgs_exception_handling_params,
+      #states_collector                = self.states_accumulator
+      )
+
+  #def initialize(self, fmodel=None):
+  #  self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
+  #  assert fmodel is not None
+  #  self.fmodel = fmodel
+  #  self.fmodel.xray_structure.scatterers().flags_set_grads(state=False)
+  #  xray.set_scatterer_grad_flags(
+  #    scatterers = self.fmodel.xray_structure.scatterers(),
+  #    site       = True)
+  #  self.x = self.fmodel.xray_structure.sites_cart().as_double()
+  #  self.x_target_functor = self.fmodel.target_functor()
+  #
+  #def calculate_weight(self):
+  #  self.weights.compute_weight(
+  #    fmodel = self.fmodel,
+  #    rm     = self.restraints_manager)
+  #
+  #def reset_fmodel(self, fmodel=None):
+  #  if(fmodel is not None):
+  #    self.initialize(fmodel=fmodel)
+  #    self.fmodel = fmodel
+  #    self.update_fmodel()
+  #
+  #def update_restraints_weight_scale(self, restraints_weight_scale):
+  #  self.weights.restraints_weight_scale = restraints_weight_scale
+  #
+  #def update(self, x):
+  #  self.x = flex.vec3_double(x)
+  #  self.fmodel.xray_structure.set_sites_cart(sites_cart = self.x)
+  #  self.fmodel.update_xray_structure(
+  #    xray_structure = self.fmodel.xray_structure,
+  #    update_f_calc  = True)
+  #
+  #def target_and_gradients(self, x):
+  #  self.update(x = x)
+  #  rt, rg = self.restraints_manager.target_and_gradients(sites_cart = self.x)
+  #  tgx = self.x_target_functor(compute_gradients=True)
+  #  dt = tgx.target_work()
+  #  dg = flex.vec3_double(tgx.\
+  #    gradients_wrt_atomic_parameters(site=True).packed())
+  #  t = dt*self.weights.data_weight + \
+  #    self.weights.restraints_weight*rt*self.weights.restraints_weight_scale
+  #  g = dg*self.weights.data_weight + \
+  #    self.weights.restraints_weight*rg*self.weights.restraints_weight_scale
+  #  if(self.dump_gradients is not None):
+  #    from libtbx import easy_pickle
+  #    easy_pickle.dump(self.dump_gradients+"_dg", dg.as_double())
+  #    easy_pickle.dump(self.dump_gradients+"_rg", rg.as_double())
+  #    easy_pickle.dump(self.dump_gradients+"_g", g.as_double())
+  #    STOP()
+  #  return t, g.as_double()

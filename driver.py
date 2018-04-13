@@ -454,7 +454,7 @@ def opt(xray_structure,
       gradient_only  = params.refine.gradient_only,
       line_search    = params.refine.line_search,
       max_iterations = params.refine.max_iterations)
-    calculator.update_fmodel_opt()
+    calculator.update_xray_structure()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = xray_structure)

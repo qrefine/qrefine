@@ -13,7 +13,8 @@ import math
 import iotbx.pdb.utils
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
-ener_lib    = mmtbx.monomer_library.server.ener_lib()
+ener_lib    = mmtbx.monomer_library.server.ener_lib(
+  use_neutron_distances = True)
 
 def create_super_sphere(pdb_hierarchy,
                         crystal_symmetry,

@@ -13,24 +13,26 @@ from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
 from plugin.ase.orca_qr import Orca
 from plugin.ase.gaussian_qr import Gaussian
+from libtbx import group_args
 
 class from_cctbx(object):
-  def __init__(self, processed_pdb_file, has_hd, fragment_extracts=None,
+  def __init__(self, restraints_manager, fragment_extracts=None,
               file_name="./ase/tmp_ase.pdb"):
-    geometry = processed_pdb_file.geometry_restraints_manager(
-      show_energies                = False,
-      assume_hydrogens_all_missing = not has_hd,
-      plain_pairs_radius           = 5.0)
-    self.geometry_restraints_manager = mmtbx.restraints.manager(
-       geometry = geometry, normalization = False)
+    self.geometry_restraints_manager = restraints_manager
     self.file_name = file_name
     self.fragment_extracts = fragment_extracts
 
-  def __call__(self,selection_and_sites_cart):
+  def __call__(self, selection_and_sites_cart):
     return self.target_and_gradients(
       sites_cart = selection_and_sites_cart[1],
       selection  = selection_and_sites_cart[0],
       index      = selection_and_sites_cart[2])
+      
+  def energies_sites(self, sites_cart, compute_gradients=True):
+    tg = self.target_and_gradients(sites_cart=sites_cart)
+    return group_args(
+      target    = tg[0],
+      gradients = tg[1])
 
   def target_and_gradients(self, sites_cart, selection=None, index=None):
     if(selection is not None): ### clustering

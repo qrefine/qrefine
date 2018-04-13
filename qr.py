@@ -173,39 +173,24 @@ def create_fmodel(cmdline, log):
 
 def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   import iotbx.pdb
-  import mmtbx
-  import mmtbx.monomer_library.server
-  import mmtbx.monomer_library.pdb_interpretation
-  import mmtbx.restraints
-  from mmtbx import monomer_library
-
-  mon_lib_srv = mmtbx.monomer_library.server.server()
-  ener_lib    = mmtbx.monomer_library.server.ener_lib()
-  params = mmtbx.monomer_library.pdb_interpretation.master_params.extract()
-  params.use_neutron_distances = True
-  params.restraints_library.cdl = False
-  params.sort_atoms = False
-
+  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.use_neutron_distances = True
+  params.pdb_interpretation.restraints_library.cdl = False
+  params.pdb_interpretation.sort_atoms = False
   pdb_inp = iotbx.pdb.input(file_name=pdb_file_name)
-  ph = iotbx.pdb.input(file_name=pdb_file_name).construct_hierarchy()
-  processed_pdb_file = mmtbx.monomer_library.pdb_interpretation.process(
-       mon_lib_srv              = mon_lib_srv,
-       ener_lib                 = ener_lib,
-       params                   = params,
-       pdb_hierarchy            = ph,
-       strict_conflict_handling = False,
-       crystal_symmetry         = pdb_inp.crystal_symmetry(), #XXX I hope this is correct
-       force_symmetry           = True,
-       log                      = null_out())
-  xrs = processed_pdb_file.xray_structure()
-  sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
-  has_hd = "H" in sctr_keys or "D" in sctr_keys
+  model = mmtbx.model.manager(
+    model_input               = pdb_inp,
+    crystal_symmetry          = crystal_symmetry,
+    restraint_objects         = cif_objects,
+    process_input             = True,
+    pdb_interpretation_params = params,
+    log                       = null_out())
+  model.setup_restraints_manager(grm_normalization=False)
   return group_args(
-      processed_pdb_file = processed_pdb_file,
-      pdb_hierarchy      = ph,
-      xray_structure     = xrs,
-      cif_objects        = cif_objects,
-      has_hd             = has_hd)
+    model              = model,
+    pdb_hierarchy      = model.get_hierarchy(),
+    xray_structure     = model.get_xray_structure(),
+    cif_objects        = cif_objects)
 
 def create_fragment_manager(
       cif_objects,
@@ -233,10 +218,8 @@ def create_restraints_manager(
       model,
       fragment_manager=None):
   if(params.restraints == "cctbx"):
-    assert model.processed_pdb_file is not None
     restraints_manager = restraints.from_cctbx(
-      processed_pdb_file = model.processed_pdb_file,
-      has_hd             = model.has_hd)
+      restraints_manager = model.model.get_restraints_manager())
   else:
     assert params.restraints == "qm"
     restraints_manager = restraints.from_qm(
@@ -281,16 +264,16 @@ def create_calculator(weights, params, restraints_manager, fmodel=None,
 def validate(model, fmodel, params, rst_file, prefix, log):
   if params.quantum.engine_name=='mopac':
     if params.quantum.basis:
-      print '  Because engine is %s basis set %s ignored' % (
+      print >> log, '  Because engine is %s basis set %s ignored' % (
         params.quantum.engine_name,
         params.quantum.basis,
         )
       params.quantum.basis = ''
     if params.quantum.method=='hf': # default
-      print '  Default method set as PM7'
+      print >> log, '  Default method set as PM7'
       params.quantum.method='PM7'
 
-def run(model, fmodel, params, rst_file, prefix, log):
+def run(model, fmodel, map_data, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)
   if(params.cluster.clustering):
     params.refine.gradient_only = True
@@ -312,8 +295,8 @@ def run(model, fmodel, params, rst_file, prefix, log):
     if (model.pdb_hierarchy.atoms().size() > params.max_atoms):
       raise Sorry("Too many atoms.")
     geometry_rmsd_manager = restraints.from_cctbx(
-      processed_pdb_file = model.processed_pdb_file,
-      has_hd             = model.has_hd).geometry_restraints_manager
+      restraints_manager = model.model.get_restraints_manager(),
+      ).geometry_restraints_manager
     cctbx_rm_bonds_rmsd = calculator.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = model.xray_structure)
@@ -356,38 +339,46 @@ def run(model, fmodel, params, rst_file, prefix, log):
   restraints_manager = create_restraints_manager(
     params           = params,
     model            = model)
-  if(fragment_manager is not None):
-    cluster_restraints_manager = cluster_restraints.from_cluster(
-      restraints_manager = restraints_manager,
-      fragment_manager   = fragment_manager,
-      parallel_params    = params.parallel)
-  rm = restraints_manager
-  if(fragment_manager is not None):
-    rm = cluster_restraints_manager
-  calculator_manager = create_calculator(
-    weights            = weights,
-    fmodel             = start_fmodel,
-    model              = model,
-    params             = params,
-    restraints_manager = rm)
-  if(params.refine.mode == "refine"):
-    driver.refine(
-      params                = params,
-      fmodel                = fmodel,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      calculator            = calculator_manager,
-      results               = results_manager)
+  if(map_data is not None):
+    O = calculator.sites_real_space(
+      xray_structure     = model.xray_structure,
+      map_data           = map_data,
+      restraints_manager = restraints_manager,#.geometry_restraints_manager.geometry,
+      max_iterations     = 100)
+    O.run()
   else:
-    driver.opt(
-      params                = params,
-      xray_structure        = model.xray_structure,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      calculator            = calculator_manager,
-      results               = results_manager)
-  xrs_best = results_manager.finalize(
-    input_file_name_prefix  = prefix,
-    output_file_name_prefix = params.output_file_name_prefix,
-    output_folder_name      = params.output_folder_name)
+    if(fragment_manager is not None):
+      cluster_restraints_manager = cluster_restraints.from_cluster(
+        restraints_manager = restraints_manager,
+        fragment_manager   = fragment_manager,
+        parallel_params    = params.parallel)
+    rm = restraints_manager
+    if(fragment_manager is not None):
+      rm = cluster_restraints_manager
+    calculator_manager = create_calculator(
+      weights            = weights,
+      fmodel             = start_fmodel,
+      model              = model,
+      params             = params,
+      restraints_manager = rm)
+    if(params.refine.mode == "refine"):
+      driver.refine(
+        params                = params,
+        fmodel                = fmodel,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        calculator            = calculator_manager,
+        results               = results_manager)
+    else:
+      driver.opt(
+        params                = params,
+        xray_structure        = model.xray_structure,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        calculator            = calculator_manager,
+        results               = results_manager)
+    xrs_best = results_manager.finalize(
+      input_file_name_prefix  = prefix,
+      output_file_name_prefix = params.output_file_name_prefix,
+      output_folder_name      = params.output_folder_name)
 
 if (__name__ == "__main__"):
   t0 = time.time()

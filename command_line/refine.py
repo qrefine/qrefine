@@ -11,6 +11,7 @@ from qrefine import qr
 from mmtbx import utils
 from iotbx import reflection_file_utils
 from cStringIO import StringIO
+from libtbx import group_args
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -41,13 +42,13 @@ def reflection_file_server(crystal_symmetry, reflection_files):
 
 def run(args, log):
   print >> log,"Running refinement"
-  print_legend_and_usage(log)
   cmdline = mmtbx.utils.process_command_line_args(
     args          = args,
     master_params = get_master_phil())
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
   # Read atomic model
+  # XXX This is not Oleg's model !!!
   model = qr.process_model_file(
     pdb_file_name    = cmdline.pdb_file_names[0], 
     cif_objects      = cmdline.cif_objects, 
@@ -78,10 +79,29 @@ def run(args, log):
       fmodel.show(show_header=False, show_approx=False)
     print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), 
       fmodel.r_free())
+  # Read map 
+  map_data = None
+  if(cmdline.ccp4_map is not None):
+    import iotbx.map_and_model
+    inp = iotbx.map_and_model.input(
+      map_data = cmdline.ccp4_map.map_data(),
+      model    = model.model)
+    # XXX Pure nonsense!
+    model = inp.model()
+    model = group_args(
+      model              = model,
+      processed_pdb_file = model._processed_pdb_file, # This must go, use model!
+      pdb_hierarchy      = model.get_hierarchy(),     # This must go, use model!
+      xray_structure     = model.get_xray_structure(),# This must go, use model!
+      cif_objects        = model._restraint_objects,  # This must go, use model!
+      has_hd             = model.has_hd) 
+    map_data = inp.map_data()
+  #
   log.flush()
   qr.run(
-    model    = model, 
-    fmodel   = fmodel, 
+    model    = model, # XXX This is not mmtbx.model.manager !!! (see above).
+    fmodel   = fmodel,
+    map_data = map_data,
     params   = params, 
     rst_file = params.rst_file, 
     prefix   = os.path.basename(cmdline.pdb_file_names[0])[:-4],
