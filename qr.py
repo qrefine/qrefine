@@ -339,7 +339,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   restraints_manager = create_restraints_manager(
     params           = params,
     model            = model)
-  if(map_data is not None):
+  if(map_data is not None and params.refine.mode == "refine"):
     O = calculator.sites_real_space(
       xray_structure     = model.xray_structure,
       map_data           = map_data,

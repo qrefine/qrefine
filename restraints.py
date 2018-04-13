@@ -139,6 +139,12 @@ class from_qm(object):
       sites_cart = fragment_selection_and_sites_cart[1],
       selection  = fragment_selection_and_sites_cart[0],
       index      = fragment_selection_and_sites_cart[2])
+      
+  def energies_sites(self, sites_cart, compute_gradients=True):
+    tg = self.target_and_gradients(sites_cart=sites_cart)
+    return group_args(
+      target    = tg[0],
+      gradients = tg[1])
 
   def target_and_gradients(self,sites_cart, selection=None, index=None):
     if(self.clustering):
