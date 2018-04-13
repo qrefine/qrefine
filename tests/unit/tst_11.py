@@ -22,7 +22,7 @@ def run(prefix):
   for filename in os.listdir(pdb_dir_cluster):
     if filename.endswith('.pdb'):
       filename = filename.replace('_refine_001','')
-      if filename not in skip:
+      if filename not in skip.skip:
         expected_list_cluster.append(os.path.splitext(filename)[0])
   expected_list_p1 =  ["5e61",
                        "5e5v",
@@ -77,7 +77,7 @@ def complete_pdbs(expected_list, pdb_dir):
   if 1: #(input_var == "Y") or 1:
     print '"%s"' % pdb_dir
     no_error_list = batch_run_finalise.run(pdb_dir,
-                                           nproc=6,
+                                           nproc=1,
                                            #only_code='1il5',
     )
     print no_error_list
@@ -91,5 +91,5 @@ def complete_pdbs(expected_list, pdb_dir):
     print "skip"
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_11", disable=True)
+  rc = run_tests.runner(function=run, prefix="tst_11", disable=False)
   assert not rc, 'tst_00 rc: %s' % rc

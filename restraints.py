@@ -126,7 +126,7 @@ class from_qm(object):
       action=False
       if func is not None:
         if value is not None:
-          print '  Setting %s to %s' % (attr, value)
+          #print '  Setting %s to %s' % (attr, value)
           func(value)
           action=True
       if not action:

@@ -2,7 +2,9 @@ import os, sys, shutil
 from libtbx import easy_run
 from multiprocessing import Pool
 from StringIO import StringIO
+import libtbx.load_env
 
+qrefine_path = libtbx.env.find_in_repositories("qrefine")
 pdb_dir='./tmp'
 
 results = {}
@@ -17,10 +19,12 @@ def callback(args):
 
 def generate_test_pdb_filenames(d):
   for filename in os.listdir(d):
+    print d, filename
     if not filename.endswith(".pdb"): continue
     #if len(filename.split('.'))!=2: continue
     #if len(filename.split('.')[0])!=4: continue
-    tf = "%s.pdb" % filename[:4]
+    tf = "%s.pdb" % filename[:-4]
+    print tf
     shutil.copyfile(os.path.join(d, filename), tf)
     if tf in skip:
       print '\n\tSKIPPING %s\n' % tf
@@ -28,11 +32,11 @@ def generate_test_pdb_filenames(d):
     yield tf
 
 def _process_pdb_filename(pdb_file):
+  print '_process_pdb_filename',pdb_file
   complete_file=pdb_file[:-4]+"_complete.pdb"
   rc=0
-  if ( pdb_file.endswith("pdb")  and not os.path.exists(complete_file) ):
-    cmd = "phenix.python %s/qr-core/finalise.py %s | tee %s" % (
-      os.environ['QR_REPO_PARENT'],
+  if ( pdb_file.endswith("pdb") and not os.path.exists(complete_file) ):
+    cmd = "qr.finalise %s | tee %s" % (
       pdb_file,
       pdb_file.replace('.pdb', ".log"),
       )
@@ -41,6 +45,7 @@ def _process_pdb_filename(pdb_file):
     err = StringIO()
     ero.show_stderr(out=err)
     rc = err.getvalue()
+    if rc=='': rc=0
   return rc, pdb_file
 
 def run(folder,
@@ -48,7 +53,6 @@ def run(folder,
         only_code=None,
       ):
   filenames = os.listdir(os.getcwd())
-  #assert not filenames, 'script must be run in a empty directory'
   try: nproc=int(nproc)
   except: nproc=1
   pool = None
@@ -58,7 +62,7 @@ def run(folder,
     print pdb_file
     if only_code is not None and only_code!=pdb_file.split('.')[0]: continue
     if nproc==1:
-      rc = _process_pdb_filename(pdb_file)
+      rc, pdb_file = _process_pdb_filename(pdb_file)
       print 'rc',rc
       assert rc==0, 'return code != 0'
     else:
@@ -67,6 +71,7 @@ def run(folder,
         [pdb_file],
         callback=callback,
         )
+    #break
   if pool:
     pool.close()
     pool.join()

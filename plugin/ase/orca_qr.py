@@ -86,6 +86,8 @@ class Orca(Calculator):
             finput = open(fname, "w")
             #XY
             finput.write("! " + self.key_parameters['method'] + " " + self.key_parameters['basis']+ " EnGrad" + "\n" )
+            if 'memory' in self.key_parameters:
+              finput.write('%%MaxCore %s\n' % self.key_parameters['memory'])
             finput.write(" \n")
             finput.write("* xyz %s 1\n" % self.key_parameters['charge'])
             for index in range(len(atoms)):
@@ -263,3 +265,7 @@ class Orca(Calculator):
 
     def set_label(self, label):
       self.label = label
+
+    def set_memory(self, memory):
+      self.key_parameters['memory'] = memory
+

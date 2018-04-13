@@ -131,7 +131,7 @@ def run(nproc=6, only_i=None):
     "tst_08.py",
     "tst_09.py",
     "tst_10.py",
-    "tst_11.py",
+    #"tst_11.py",
     "tst_12.py",
     "tst_13.py",
     "tst_14.py",

@@ -42,6 +42,7 @@ import cluster_restraints
 import results
 from qrefine.super_cell import expand
 import mmtbx.model.statistics
+from libtbx import Auto
 
 master_params_str ="""
 
@@ -73,10 +74,11 @@ quantum {
     .type = choice(multi=False)
   charge= None
     .type = int
-  basis = 'sto-3g'
+  basis = Auto
     .type = str
-  method = 'hf'
+  method = Auto
     .type = str
+    .help = Defaults to HF for all but MOPAC (PM7)
   memory = None
     .type = str
   nproc = None
@@ -262,6 +264,25 @@ def create_calculator(weights, params, restraints_manager, fmodel=None,
       weights            = weights)
 
 def validate(model, fmodel, params, rst_file, prefix, log):
+  # set defaults
+  outl = ''
+  if params.quantum.engine_name=='mopac':
+    if params.quantum.method==Auto:
+      params.quantum.method='PM7'
+      outl += '  Setting QM method to PM7\n'
+    if params.quantum.basis==Auto:
+      params.quantum.basis=''
+  else:
+    if params.quantum.method==Auto:
+      params.quantum.method='HF'
+      outl += '  Setting QM method to HF\n'
+    if params.quantum.basis==Auto:
+      params.quantum.basis='STO-3G'
+      outl += '  Setting QM basis to STO-3G\n'
+  if outl:
+    print >> log, '\nSetting QM defaults'
+    print >> log, outl
+
   if params.quantum.engine_name=='mopac':
     if params.quantum.basis:
       print >> log, '  Because engine is %s basis set %s ignored' % (
