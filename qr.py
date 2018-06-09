@@ -237,7 +237,7 @@ def create_restraints_manager(
       clustering                 = params.cluster.clustering)
   return restraints_manager
 
-def create_calculator(weights, params, restraints_manager, fmodel=None, 
+def create_calculator(weights, params, restraints_manager, fmodel=None,
                       model=None):
   if(weights is None):
     weights = calculator.weights(
@@ -301,8 +301,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print >> log, " params.gradient_only", params.refine.gradient_only
   # RESTART
   if(os.path.isfile(str(rst_file))):
-    print >> log, "restart info is loaded from %s" % cmdline.params.rst_file
-    rst_data = easy_pickle.load(cmdline.params.rst_file)
+    print >> log, "restart info is loaded from %s" % params.rst_file
+    rst_data = easy_pickle.load(params.rst_file)
     fmodel = rst_data["fmodel"]
     results_manager = rst_data["results"]
     results_manager.log = log
