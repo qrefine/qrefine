@@ -226,7 +226,8 @@ def refine(fmodel,
            geometry_rmsd_manager):
   if(not params.refine.refine_sites): return
   rst_file = params.rst_file
-  rst_data = restart_data(fmodel, geometry_rmsd_manager)
+  rst_data = restart_data(fmodel=fmodel,
+    geometry_rmsd_manager=geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
     with open(rst_file, 'rb') as handle:
       rst_file_data = pickle.load(handle)
@@ -439,13 +440,13 @@ def opt(xray_structure,
     print >> results.log, "\ninteracting pairs number:  ",\
       calculator.restraints_manager.fragments.interacting_pairs
   results.show(prefix="start")
-  for micro_cycle in xrange(micro_cycle_start, 
+  for micro_cycle in xrange(micro_cycle_start,
                         params.refine.number_of_micro_cycles+micro_cycle_start):
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
     conv_test = convergence(
       xray_structure=calculator.xray_structure, params=params)
-    rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle, 
+    rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle,
       xray_structure=xray_structure,
       results=results)
     minimized = minimizer(
@@ -470,5 +471,5 @@ def opt(xray_structure,
        sites_cart = xray_structure.sites_cart())):
       print >> results.log, " Convergence at micro_cycle:", micro_cycle
       break
-  rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1, 
+  rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,
     xray_structure=xray_structure, results=results)
