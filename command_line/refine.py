@@ -32,7 +32,7 @@ def print_legend_and_usage(log):
   print >> log, legend
   print >> log, "-"*79
   print >> log, get_master_phil().show()
-  
+
 def reflection_file_server(crystal_symmetry, reflection_files):
   return reflection_file_utils.reflection_file_server(
     crystal_symmetry=crystal_symmetry,
@@ -51,9 +51,10 @@ def run(args, log):
     return
   # Read atomic model
   # XXX This is not Oleg's model !!!
+  # need to validate the input args
   model = qr.process_model_file(
-    pdb_file_name    = cmdline.pdb_file_names[0], 
-    cif_objects      = cmdline.cif_objects, 
+    pdb_file_name    = cmdline.pdb_file_names[0],
+    cif_objects      = cmdline.cif_objects,
     crystal_symmetry = cmdline.crystal_symmetry)
   # Read reflection data
   fmodel = None
@@ -79,9 +80,9 @@ def run(args, log):
     if(params.refine.update_all_scales):
       fmodel.update_all_scales(remove_outliers=False)
       fmodel.show(show_header=False, show_approx=False)
-    print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), 
+    print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
       fmodel.r_free())
-  # Read map 
+  # Read map
   map_data = None
   if(cmdline.ccp4_map is not None):
     import iotbx.map_and_model
@@ -96,7 +97,7 @@ def run(args, log):
       pdb_hierarchy      = model.get_hierarchy(),     # This must go, use model!
       xray_structure     = model.get_xray_structure(),# This must go, use model!
       cif_objects        = model._restraint_objects,  # This must go, use model!
-      has_hd             = model.has_hd) 
+      has_hd             = model.has_hd)
     map_data = inp.map_data()
   #
   log.flush()
@@ -104,8 +105,8 @@ def run(args, log):
     model    = model, # XXX This is not mmtbx.model.manager !!! (see above).
     fmodel   = fmodel,
     map_data = map_data,
-    params   = params, 
-    rst_file = params.rst_file, 
+    params   = params,
+    rst_file = params.rst_file,
     prefix   = os.path.basename(cmdline.pdb_file_names[0])[:-4],
     log      = log)
 

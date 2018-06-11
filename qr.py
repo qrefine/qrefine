@@ -405,6 +405,13 @@ if (__name__ == "__main__"):
   t0 = time.time()
   log = sys.stdout
   args = sys.argv[1:]
+  print >> log, '_'*80
+  print >> log, 'Command line arguments'
+  outl = '  '
+  for arg in args:
+    outl += '"%s"' % arg
+  print >> log, '%s\n' % outl
+  print >> log, '_'*80
   cmdline = mmtbx.command_line.load_model_and_data(
       args          = args,
       master_phil   = get_master_phil(),

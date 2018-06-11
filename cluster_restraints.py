@@ -54,12 +54,20 @@ class from_cluster(object):
           qsub_command               = self.parallel_params.qsub_command,
           use_manager                = True)
       except Exception as e:
-        os.system("cp -r ase ase_error")
+        import shutil
+        if os.path.exists('ase_error'):
+          shutil.rmtree('ase_error')
+        try:
+          shutil.copytree('ase', 'ase_error')
+        # Directories are the same
+        except shutil.Error as e:
+          print('Directory not copied. Error: %s' % e)
+        # Any error saying that the directory doesn't exist
+        except OSError as e:
+          print('Directory not copied. Error: %s' % e)
         ncount=ncount+1
         energy_gradients=None
-        print "the error is ", e
         print "check independent QM jobs"
-        print "try another single point calculation"
     target=0
     gradients=flex.vec3_double(system_size)
     for index, item in enumerate(energy_gradients):

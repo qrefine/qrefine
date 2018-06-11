@@ -266,7 +266,7 @@ def refine(fmodel,
     fmodel = calculator.fmodel.deep_copy()
   else:
     print >> results.log, "Optimal weight search:"
-    fmodel_copy = fmodel.deep_copy()
+    fmodel_copy = calculator.fmodel.deep_copy()
     for weight_cycle in xrange(weight_cycle_start,
                                params.refine.number_of_weight_search_cycles+1):
       if((weight_cycle!=1 and weight_cycle==weight_cycle_start)):
