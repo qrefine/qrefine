@@ -4,15 +4,19 @@ import os, sys
 results = {}
 
 def process_file(filename):
-  #print 'process_file',filename
+  print 'process_file',filename
   f=file(filename, 'rb')
-  lines = f.readlines()
+  lines = f.read()
   f.close()
   done=False
-  for line in lines:
+  for line in lines.splitlines():
     pass #rint line
     if line.find('***  Starting incremental Fock matrix formation  ***')>-1:
       done='Starting SCF'
+    elif line.find('TOTAL RUN TIME:')>-1:
+      done='FINISHED'
+    elif line.find('== MOPAC DONE ==')>-1:
+      done=line
   print line
   return done
 
@@ -54,7 +58,7 @@ def run(cwd=None):
     if os.path.basename(root)=='pdb':
       check_output_pdbs(root)
 
-  for key, item in results.items():
+  for key, item in sorted(results.items()):
     print key, item
 
 if __name__=='__main__':
