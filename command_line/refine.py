@@ -47,6 +47,8 @@ def run(args, log):
     master_params = get_master_phil())
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
+  if(len(args)==0):
+    return
   # Read atomic model
   # XXX This is not Oleg's model !!!
   model = qr.process_model_file(
