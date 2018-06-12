@@ -95,8 +95,9 @@ def run(cwd=None):
         if key=='refine': refine_dates.append(os.stat(f).st_mtime)
     else:
       print '  %s : "%s"' % (key, item)
-  if max(weight_dates)>min(refine_dates):
-    print '\n\n. *** refine output models are older than weight models ***\n\n'
+  if weight_dates and refine_dates:
+    if max(weight_dates)>min(refine_dates):
+      print '\n\n. *** refine output models are older than weight models ***\n\n'
 
 if __name__=='__main__':
   run(*tuple(sys.argv[1:]))
