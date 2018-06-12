@@ -131,7 +131,7 @@ class Orca(Calculator):
         import subprocess
         """
         Writes input in label.mop
-        Runs TeraChem
+        Runs ORCA
         Reads Version, Energy and Forces
         """
         # set the input file name
@@ -177,7 +177,7 @@ class Orca(Calculator):
                 words = line.split()
                 energy = float(words[4])
         if energy is None:
-            raise RuntimeError('TeraChem: could not find total energy')
+            raise RuntimeError('ORCA: could not find total energy')
         print energy
         energy *= (Hartree) / (kcal / mol)
         return energy
