@@ -1,5 +1,10 @@
 from __future__ import print_function
-"""This module defines an ASE interface to Turbomole
+"""This module defines a QR-specific ASE interface to Turbomole
+
+command line define:
+ set "basis=cefine" -> set "method=<cefine command>" 
+eg: qr.refine [...] quatum.method='cefine -func pbe0 -fon -bas minix -ri -noopt -d3 ' quantum.basis='cefine'
+
 
 http://www.turbomole.com/
 """
@@ -12,21 +17,38 @@ from ase.units import Hartree, Bohr
 from ase.io import read, write
 from ase.calculators.general import Calculator
 from subprocess import Popen, PIPE, STDOUT
+import copy
+
+key_parameters = {'maxit': 200}
+#                   'basis': None,
+#                   'coordinates': None,
+#                   'charge': None,
+#                   'method': None,
+#                   'dftd': None,
+#                   'pointcharges': None,}
 
 class Turbomole(Calculator):
     def __init__(self, label='turbomole',
                  calculate_energy='ridft',
                  calculate_forces='rdgrad',
+                 charge='0',
+                 method='b-p',
+                 basis='def2-SV(P)',
                  define_str =   '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'+str(0)+'\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* ',
                  post_HF=False,
                  pointcharges = None):
+
         self.label = label
         self.converged = False
-        self.define_str=define_str
          # set calculators for energy and forces
         self.calculate_energy = calculate_energy
         self.calculate_forces = calculate_forces
 
+        self.key_parameters = copy.deepcopy(key_parameters)
+        self.key_parameters['basis'] = basis
+        self.key_parameters['method'] = method
+        self.key_parameters['charge'] = charge
+        self.command = calculate_energy
         # turbomole has no stress
         self.stress = np.empty(6)
 
@@ -49,53 +71,6 @@ class Turbomole(Calculator):
         for a, Z in enumerate(self.numbers):
             self.species.append(Z)
         self.converged = False
-
-    def run(self):
-        working_dir = os.getcwd()
-        if self.pointcharges is not None:
-          self.pointcharges = os.path.abspath(self.pointcharges)
-        if not  os.path.isdir(self.label):
-          os.mkdir(self.label)
-        turbomole_dir = self.label
-        os.chdir(turbomole_dir)
-        self.set_atoms(self.atoms)
-        try:
-            if self.pointcharges is not None:
-              f = open(self.pointcharges, "r")
-              point_charges = f.readlines()
-              f.close()
-              f = open("control", "r")
-              contents = f.readlines()
-              f.close()
-              contents = contents[:-1] + ['$point_charges\n'] + point_charges +[contents[-1]]
-              f = open("control", "w")
-              f.writelines( contents )
-              f.close()
-
-            command = self.calculate_energy + ' > ASE.TM.energy.out'
-            proc = Popen([command], shell=True, stderr=PIPE)
-            error = proc.communicate()[1]
-            if 'abnormally' in error:
-                raise OSError(error)
-            # check for convergence of dscf cycle
-            if os.path.isfile('dscf_problem'):
-                print('Turbomole scf energy calculation did not converge')
-                raise RuntimeError(
-                'Please run Turbomole define and come thereafter back')
-            # read energy
-            self.read_energy()
-            # calculate forces
-            command = self.calculate_forces + ' > ASE.TM.forces.out'
-            proc = Popen([command], shell=True, stderr=PIPE)
-            error = proc.communicate()[1]
-            if 'abnormally' in error:
-                raise OSError(error)
-            # read forces
-            self.read_forces()
-        except OSError as e:
-            print('Execution failed:', e, file=sys.stderr)
-            sys.exit(1)
-        os.chdir(working_dir)
 
     def execute(self, command):
 
@@ -187,12 +162,25 @@ class Turbomole(Calculator):
 #                return
         # performs an update of the atoms
         write('coord', atoms)
-        # Run define
-        p = Popen('define', stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout = p.communicate(input=self.define_str)
+
+        if not self.key_parameters["basis"] == 'cefine':
+            string='\n\na coord\n*\nno\nb all '+self.key_parameters['basis']+'\n*\neht\n\n'+str(self.key_parameters['charge'])+'\n\nscf\niter\n'+str(self.key_parameters['maxit'])+'\n\ncc\nmemory\n1000\n*\ndft\non\nfunc\n'+self.key_parameters['method']+'\n*\nri\non\nm\n3000\n*\n*' 
+            self.define_str = string
+            with open('def.inp', 'w') as f:
+                f.write(self.define_str)
+            command = 'define < def.inp > define.out'
+        else:
+            self.define_str = self.key_parameters['method']+'-chrg '+str(self.key_parameters['charge'])
+            command = self.define_str+' > cefine.out'
+            
+        # run define
+        proc = Popen([command], shell=True, stderr=PIPE)
+        error = proc.communicate()[1]
+        if 'abnormally' in error:
+            raise OSError(error)
         Calculator.set_atoms(self, atoms)
         # energy and forces must be re-calculated
-        self.update_energy = True
+        self.update_energy = True  
         self.update_forces = True
 
 
@@ -212,6 +200,8 @@ class Turbomole(Calculator):
                 if self.post_HF:
                     energy_tmp += float(line.split()[4])
         # update energy units
+        # print("E(TM): "+str(energy_tmp)) #debug
+        self.e_au=energy_tmp
         self.e_total = energy_tmp * Hartree/(kcal / mol)
         self.energy_free = self.e_total
 
@@ -240,6 +230,8 @@ class Turbomole(Calculator):
         # read gradients
         for i in range(iline, nline):
             line = lines[i].replace('D', 'E')
+            if "***" in line:  # is this a real thing?
+                 raise RuntimeError('Please check TURBOMOLE gradients')  
             tmp = np.array([[float(f) for f in line.split()[0:3]]])
             forces = np.concatenate((forces, tmp))
         # Note the '-' sign for turbomole, to get forces
@@ -259,4 +251,104 @@ class Turbomole(Calculator):
     def update(self, atoms_new):
         if not self.atoms_are_equal(atoms_new):
             self.atoms = atoms_new.copy()
-            self.run()
+            self.qr_run()
+
+    def get_command(self):
+        """Return command string if program installed, otherwise None.  """
+        command = None
+        if self.command is not None:
+          command = self.command
+        elif ('TM_COMMAND' in os.environ):
+          command = os.environ['TM_COMMAND']
+        return command
+
+    # Q|R requirements
+    def set_charge(self, charge):
+      self.key_parameters['charge'] = charge
+
+    def set_basis(self, basis):
+      self.key_parameters['basis'] = basis
+
+    def set_method(self, method):
+      self.key_parameters['method'] = method
+
+    def set_label(self, label):
+      self.label = label
+
+    def set(self, **kwargs):
+        for key, value in kwargs.items():
+           if key in key_parameters:
+                self.key_parameters[str(key)]=value
+
+    def run_qr(self,
+               atoms,
+               define_str,
+               coordinates,
+               charge,
+               pointcharges,
+               command=None):
+        import subprocess
+        self.atoms = atoms
+        self.key_parameters['charge'] = charge
+        
+        self.coordinates = coordinates
+        working_dir = os.getcwd()
+        if self.pointcharges is not None:
+          self.pointcharges = os.path.abspath(self.pointcharges)
+        if not  os.path.isdir(self.label):
+          os.mkdir(self.label)
+        turbomole_dir = self.label
+        os.chdir(turbomole_dir)
+        self.set_atoms(self.atoms)
+        try:
+            if self.pointcharges is not None:
+              f = open(self.pointcharges, "r")
+              point_charges = f.readlines()
+              f.close()
+              f = open("control", "r")
+              contents = f.readlines()
+              f.close()
+              contents = contents[:-1] + ['$point_charges\n'] + point_charges +[contents[-1]]
+              f = open("control", "w")
+              f.writelines( contents )
+              f.close()
+           
+            command = self.calculate_energy + ' > ASE.TM.energy.out'
+            print(command) #debug
+            proc = subprocess.Popen([command], shell=True, stderr=PIPE)
+            error = proc.communicate()[1]
+            proc.wait()
+            exitcode = proc.returncode
+        
+            
+            if exitcode != 0:
+                print(str(exitcode))
+                raise RuntimeError('Turbomole exited with error code')
+            if 'abnormally' in error:
+                raise OSError(error)
+            # check for convergence of dscf cycle
+            if os.path.isfile('dscf_problem'):
+                print('Turbomole scf energy calculation did not converge')
+                raise RuntimeError(
+                'Please run Turbomole define and come thereafter back')
+            # read energy
+            self.read_energy()
+            print(self.label+':  '+str(self.e_au)) #debug
+
+            # calculate forces
+            command = self.calculate_forces + ' > ASE.TM.forces.out'
+            proc = subprocess.Popen([command], shell=True, stderr=PIPE)
+            error = proc.communicate()[1]
+            proc.wait()
+            exitcode = proc.returncode
+            if exitcode != 0:
+                print(str(exitcode))
+                raise RuntimeError('Turbomole exited with error code')
+            if 'abnormally' in error:
+                raise OSError(error)
+            # read forces
+            self.read_forces()
+        except OSError as e:
+            print('Execution failed:', e, file=sys.stderr)
+            sys.exit(1)
+        os.chdir(working_dir)

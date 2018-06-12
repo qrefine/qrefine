@@ -177,15 +177,14 @@ class from_qm(object):
     define_str=''
     command = None
     if (self.qm_engine_name == 'terachem'):
-      define_str = '\n\na coord\n*\nno\nb all def-SV(P)\n*\neht\n\n'\
-      + str(qm_charge)\
-      + '\n\nscf\niter\n300\n\ncc\nmemory\n4000\n*\ndft\non\nfunc\nb-p\n*\nri\non\nm\n1000\n*\n* '
-      define_str=''
+       print "terachem is not updated to the new API"
     elif (self.qm_engine_name == 'mopac'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'gaussian'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'orca'):
+      command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'turbomole'):
       command = self.qm_engine.get_command()
     else:
       assert 0
