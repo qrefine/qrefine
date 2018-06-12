@@ -2,6 +2,7 @@ from __future__ import division
 
 import os
 from libtbx import Auto
+from libtbx.utils import Sorry
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
@@ -68,6 +69,8 @@ class from_cluster(object):
         ncount=ncount+1
         energy_gradients=None
         print "check independent QM jobs"
+        print e
+        raise Sorry('process finished with error: %s' % e)
     target=0
     gradients=flex.vec3_double(system_size)
     for index, item in enumerate(energy_gradients):
