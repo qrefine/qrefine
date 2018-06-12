@@ -1,5 +1,10 @@
 from __future__ import print_function
-"""This module defines an ASE interface to Turbomole
+"""This module defines a QR-specific ASE interface to Turbomole
+
+command line define:
+ set "basis=cefine" -> set "method=<cefine command>" 
+eg: qr.refine [...] quatum.method='cefine -func pbe0 -fon -bas minix -ri -noopt -d3 ' quantum.basis='cefine'
+
 
 http://www.turbomole.com/
 """
@@ -165,7 +170,7 @@ class Turbomole(Calculator):
                 f.write(self.define_str)
             command = 'define < def.inp > define.out'
         else:
-            self.define_str = self.key_parameters['method']
+            self.define_str = self.key_parameters['method']+'-chrg '+str(self.key_parameters['charge'])
             command = self.define_str+' > cefine.out'
             
         # run define
@@ -225,6 +230,8 @@ class Turbomole(Calculator):
         # read gradients
         for i in range(iline, nline):
             line = lines[i].replace('D', 'E')
+            if "***" in line:  # is this a real thing?
+                 raise RuntimeError('Please check TURBOMOLE gradients')  
             tmp = np.array([[float(f) for f in line.split()[0:3]]])
             forces = np.concatenate((forces, tmp))
         # Note the '-' sign for turbomole, to get forces
