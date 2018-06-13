@@ -361,12 +361,19 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     params           = params,
     model            = model)
   if(map_data is not None and params.refine.mode == "refine"):
+    model.model.geometry_statistics().show()
     O = calculator.sites_real_space(
-      xray_structure     = model.xray_structure,
-      map_data           = map_data,
-      restraints_manager = restraints_manager,#.geometry_restraints_manager.geometry,
-      max_iterations     = 100)
-    O.run()
+      model                   = model.model,
+      geometry_rmsd_manager   = geometry_rmsd_manager,
+      max_bond_rmsd           = params.refine.max_bond_rmsd,
+      map_data                = map_data,
+      restraints_manager      = restraints_manager,
+      max_iterations          = 100)
+    model = O.run()
+    of=open("real_space_refined.pdb", "w")
+    print >> of, model.model_as_pdb(output_cs = True)
+    of.close()
+    model.geometry_statistics().show()
   else:
     if(fragment_manager is not None):
       cluster_restraints_manager = cluster_restraints.from_cluster(

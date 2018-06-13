@@ -27,7 +27,11 @@ class from_cctbx(object):
       sites_cart = selection_and_sites_cart[1],
       selection  = selection_and_sites_cart[0],
       index      = selection_and_sites_cart[2])
-      
+
+  def select(self, selection):
+    grm = self.geometry_restraints_manager.select(selection = selection)
+    return from_cctbx(restraints_manager = grm)
+
   def energies_sites(self, sites_cart, compute_gradients=True):
     tg = self.target_and_gradients(sites_cart=sites_cart)
     return group_args(
@@ -139,7 +143,7 @@ class from_qm(object):
       sites_cart = fragment_selection_and_sites_cart[1],
       selection  = fragment_selection_and_sites_cart[0],
       index      = fragment_selection_and_sites_cart[2])
-      
+
   def energies_sites(self, sites_cart, compute_gradients=True):
     tg = self.target_and_gradients(sites_cart=sites_cart)
     return group_args(
@@ -194,7 +198,7 @@ class from_qm(object):
                           charge=qm_charge,
                           pointcharges=charge_file,
                           coordinates=qm_pdb_file[:-4]+".xyz",
-                          command=command,       # 
+                          command=command,       #
                           define_str=define_str, # for Terachem
       )
     unit_convert = ase_units.mol/ase_units.kcal

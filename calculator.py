@@ -11,6 +11,7 @@ from libtbx import adopt_init_args
 from scitbx.array_family import flex
 import cctbx.maptbx.real_space_refinement_simple
 import scitbx.lbfgs
+from libtbx import group_args
 
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
@@ -274,16 +275,17 @@ class adp(calculator):
     f = tgx.target_work()
     g = tgx.gradients_wrt_atomic_parameters(u_iso=True)
     return f, g
-    
+
 class sites_real_space(object):
   def __init__(self,
-               xray_structure=None,
+               model,
+               geometry_rmsd_manager,
+               max_bond_rmsd,
                map_data=None,
                restraints_manager=None,
-               max_iterations=100):
+               max_iterations=50):
     adopt_init_args(self, locals())
-    self.unit_cell = self.xray_structure.unit_cell()
-    self.weight = 1 #None
+    self.weight = 1.
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = max_iterations)
     self.lbfgs_exception_handling_params = scitbx.lbfgs.\
@@ -291,16 +293,48 @@ class sites_real_space(object):
         ignore_line_search_failed_step_at_lower_bound = True,
         ignore_line_search_failed_step_at_upper_bound = True,
         ignore_line_search_failed_maxfev              = True)
-    
+    self.sites_cart_refined = None
+    self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
+      restraints_manager = self.geometry_rmsd_manager.geometry,
+      xrs                = self.model.get_xray_structure())
+
   def run(self):
-    rm = self.restraints_manager
+    weights = flex.double()
+    rmsd = self.cctbx_rm_bonds_rmsd
+    while True:
+      weights.append(self.weight)
+      w_prev = self.weight
+      rmsd_prev = rmsd
+      self.run_one()
+      rmsd = self.cctbx_rm_bonds_rmsd
+      print rmsd, w_prev,
+      if(rmsd < self.max_bond_rmsd):
+        self.weight = self.weight*2
+      else:
+        self.weight = self.weight/2
+        if(self.weight in weights):
+          print self.weight
+          break
+      print self.weight
+    print "FINAL (rmsd, self.weight):", rmsd_prev, self.weight
+    return self.run_one()
+
+  def run_one(self):
+    model = self.model.deep_copy()
+    xrs = model.get_xray_structure()
+    uc = xrs.crystal_symmetry().unit_cell()
     refined = cctbx.maptbx.real_space_refinement_simple.lbfgs(
+      unit_cell                       = uc,
       gradients_method                = "tricubic",
-      unit_cell                       = self.unit_cell,
-      sites_cart                      = self.xray_structure.sites_cart(),
+      sites_cart                      = xrs.sites_cart(),
       density_map                     = self.map_data,
-      geometry_restraints_manager     = rm,
+      geometry_restraints_manager     = self.restraints_manager,
       real_space_target_weight        = self.weight,
       real_space_gradients_delta      = 0.25,
       lbfgs_termination_params        = self.lbfgs_termination_params,
       lbfgs_exception_handling_params = self.lbfgs_exception_handling_params)
+    model.set_sites_cart(sites_cart=refined.sites_cart)
+    self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
+      restraints_manager = self.geometry_rmsd_manager.geometry,
+      xrs                = model.get_xray_structure())
+    return model
