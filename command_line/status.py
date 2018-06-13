@@ -49,15 +49,16 @@ def check_output_pdbs(d):
       results['refined'].append(os.path.join(d, filename))
 
 
-def show_item(files):
-  def _cmp_mtime(f1, f2):
-    if os.stat(f1).st_mtime<os.stat(f2).st_mtime:
-      return -1
-    return 1
+def _cmp_mtime(f1, f2):
+  if os.stat(f1).st_mtime<os.stat(f2).st_mtime:
+    return -1
+  return 1
 
+def show_item(files):
   files.sort(_cmp_mtime)
   for f in files:
-    print '  %s : %s' % (f, time.asctime(time.localtime(os.stat(f).st_mtime)))
+    print '  %s : %s' % (f.replace(os.getcwd(), '.'),
+                         time.asctime(time.localtime(os.stat(f).st_mtime)))
 
 def run(cwd=None):
   if cwd is None:
@@ -86,6 +87,7 @@ def run(cwd=None):
   print
   weight_dates = []
   refine_dates = []
+  ase_files = []
   for key, item in sorted(results.items()):
     if key in ['weight', 'refine', 'refined']:
       print key

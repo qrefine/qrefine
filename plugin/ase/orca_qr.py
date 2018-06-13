@@ -74,7 +74,6 @@ class Orca(Calculator):
 
     def write_input(self, fname, atoms):
         key_parameters = self.key_parameters
-        print "atoms are",atoms
         if self.orca_file == True:
             pass
         # print "use the existing orca input file"
@@ -178,7 +177,6 @@ class Orca(Calculator):
                 energy = float(words[4])
         if energy is None:
             raise RuntimeError('ORCA: could not find total energy')
-        print energy
         energy *= (Hartree) / (kcal / mol)
         return energy
 
@@ -201,7 +199,6 @@ class Orca(Calculator):
                     atom_force = []
                     gline = lines[i + j + 3]
                     pre_force = gline.split()[-3:]
-                    print pre_force
                     for each_force in pre_force:
                         if infinite_force in each_force:
                             each_force = 999999999.9999
@@ -209,7 +206,6 @@ class Orca(Calculator):
                     forces[j] = atom_force
                 break
         forces *= -(Hartree / Bohr) / (kcal / mol)
-        print forces
         return forces
 
     def atoms_are_equal(self, atoms_new):

@@ -63,7 +63,7 @@ cluster{
     .type = int
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
-  altloc_method = *subtract average
+  altloc_method = *average subtract
     .type = choice(multi=False)
 }
 
