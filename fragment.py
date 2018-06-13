@@ -15,6 +15,29 @@ from charges import charges_class
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
+def check_atoms_integrity(atoms, verbose=False):
+  rc = {}
+  for atom in atoms:
+    resid = atom.parent().parent().id_str()
+    rc.setdefault(resid, [])
+    if atom.name in [' CA ', ' CB ']:
+      if atom.quote().find('GLY')==-1:
+        rc[resid].append(atom.quote())
+  for key, item in rc.items():
+    if verbose: print key, item
+    assert len(item) in [0,2], 'error in cluster %s %s' % (key, item)
+
+def check_selection_integrity(atoms, indices, verbose=False):
+  selection = []
+  for j in indices:
+    atom = atoms[j-1]
+    if verbose: print atom.quote()
+    selection.append(atom)
+  check_atoms_integrity(selection, verbose=verbose)
+
+def check_hierarchy(hierarchy, verbose=False):
+  check_atoms_integrity(hierarchy.atoms(), verbose=verbose)
+
 class fragments(object):
 
   def __init__(self,
@@ -37,7 +60,7 @@ class fragments(object):
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
-    self.charge_cutoff = charge_cutoff 
+    self.charge_cutoff = charge_cutoff
     self.system_size = pdb_hierarchy.atoms_size()
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
@@ -162,8 +185,10 @@ class fragments(object):
       cluster_atoms_in_ph = []
       fragment_super_atoms_in_ph = []
       ## write yoink input file to get fragment
-      write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
-                          ph, self.yoink_dat_path)
+      write_yoink_infiles(self.cluster_file_name,
+                          self.qmmm_file_name,
+                          ph,
+                          self.yoink_dat_path)
       molecules_in_fragments = []
       for i in range(len(clusters)):
         pyoink.input_file = self.qmmm_file_name
@@ -179,6 +204,9 @@ class fragments(object):
         molecules_in_fragments.append(molecules_in_one_fragment)
         if(0):
           print i, "atoms in cluster: ", atoms_in_one_cluster
+        if True:
+          atoms = self.pdb_hierarchy_super.atoms()
+          check_selection_integrity(atoms, atoms_in_one_cluster)
       if(self.two_buffers):## define a second buffer layer
         fragment_super_atoms_in_ph = []
         for molecules in molecules_in_fragments:
@@ -220,17 +248,23 @@ class fragments(object):
             if(empty_overlap_cluster):continue
             else:
             # two same non-altloc clusters, the overlap is a cluster
-            # two different altloc clusters, the overlap is part of a residue, even an atom
-            # the cluster overlap will cause troubles for QM calculation, expecially when it is an atom
+            # two different altloc clusters, the overlap is part of a residue,
+            # even an atom
+            # the cluster overlap will cause troubles for QM calculation,
+            # expecially when it is an atom
+              atoms = self.pdb_hierarchy_super.atoms()
               overlap_atoms_in_one_fragment = self.atoms_overlap(
-                                  fragment_super_atoms_in_phs, i_cluster, j_ph)
+                                  fragment_super_atoms_in_phs,
+                                  i_cluster,
+                                  j_ph)
+              check_selection_integrity(atoms, overlap_atoms_in_one_fragment)
               self.cluster_atoms.append(list(overlap_atoms_in_one_cluster))
               self.fragment_super_atoms.append(list(overlap_atoms_in_one_fragment))
               scale_list = [-1.0]*sum(i <= self.system_size
                                       for i in overlap_atoms_in_one_fragment)
               self.fragment_scales.append(scale_list)
           ##average the contributions from overlap
-          if(self.altloc_method=="average"):
+          elif(self.altloc_method=="average"):
             # different fragments for different altloc clusters
             if(empty_overlap_cluster):
               self.collect_cluster_and_fragment(cluster_atoms_in_phs,
@@ -318,11 +352,14 @@ class fragments(object):
     self.buffer_selections = []
     for i in range(len(self.fragment_super_atoms)):
       fragment_selection = pdb_hierarchy_select(
-          self.pdb_hierarchy.atoms_size(), self.fragment_super_atoms[i])
+          self.pdb_hierarchy.atoms_size(),
+          self.fragment_super_atoms[i])
       ## QM part is fragment_super
       fragment_super_selection = pdb_hierarchy_select(
-        self.pdb_hierarchy_super.atoms_size(), self.fragment_super_atoms[i])
-      fragment_super_hierarchy = self.pdb_hierarchy_super.select(fragment_super_selection)
+        self.pdb_hierarchy_super.atoms_size(),
+        self.fragment_super_atoms[i])
+      fragment_super_hierarchy = self.pdb_hierarchy_super.select(
+        fragment_super_selection)
       if(self.debug):
         fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"-origin-cs.pdb")
         fragment_super_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
@@ -333,18 +370,18 @@ class fragments(object):
                       original_pdb_filename=self.expansion_file)
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.expansion.cs_box)
-      if(1):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping.pdb",
+      if(1):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping_tmp.pdb",
           crystal_symmetry=self.expansion.cs_box)
 
       self.charge_service.update_pdb_hierarchy(
         charge_hierarchy,
         self.expansion.cs_box,
       )
-      #TODO: do not why self.charge_service could not right charge 
+      #TODO: do not why self.charge_service could not right charge
       #charge = self.charge_service.get_total_charge()
-      charge = charges_class(pdb_filename=str(i)+"_capping.pdb").get_total_charge()
+      charge = charges_class(pdb_filename=str(i)+"_capping_tmp.pdb").get_total_charge()
       #the capping pdb file causes problem for tests, remove it
-      os.remove(str(i)+"_capping.pdb")  
+      os.remove(str(i)+"_capping_tmp.pdb")
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
@@ -361,6 +398,7 @@ class fragments(object):
         cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
         cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
           crystal_symmetry=self.expansion.cs_box)
+      check_hierarchy(fragment_super_hierarchy)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
@@ -384,7 +422,8 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.expansion_cs)
-    ph.write_pdb_file(file_name=complete_qm_pdb_file)
+    ph.write_pdb_file(file_name=complete_qm_pdb_file,
+                      crystal_symmetry=fragment_extracts.expansion_cs)
   return os.path.abspath(complete_qm_pdb_file), ph
 
 def charge(fragment_extracts, index):

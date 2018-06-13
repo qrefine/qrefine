@@ -96,10 +96,17 @@ def run(cwd=None):
         if key=='weight': weight_dates.append(os.stat(f).st_mtime)
         if key=='refine': refine_dates.append(os.stat(f).st_mtime)
     else:
-      print '  %s : "%s"' % (key, item)
+      ase_files.append(key)
+  ase_files.sort(_cmp_mtime)
+  if ase_files: print 'ase'
+  for key in ase_files:
+    print '  %s - %s : "%s"' % (key.replace(os.getcwd(),'.'),
+                              time.asctime(time.localtime(os.stat(key).st_mtime)),
+                              results[key],
+                              )
   if weight_dates and refine_dates:
     if max(weight_dates)>min(refine_dates):
-      print '\n\n. *** refine output models are older than weight models ***\n\n'
+      print '\n\n  *** refine output models are older than weight models ***\n\n'
 
 if __name__=='__main__':
   run(*tuple(sys.argv[1:]))

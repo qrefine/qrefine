@@ -186,7 +186,7 @@ class Gaussian(FileIOCalculator):
     def write_input(self, atoms, properties=None, system_changes=None):
         """Writes the input file"""
         FileIOCalculator.write_input(self, atoms, properties, system_changes)
-        print "The NUMBER OF ATOMS IS:",len(atoms)
+        #print "The NUMBER OF ATOMS IS:",len(atoms)
         magmoms = atoms.get_initial_magnetic_moments().tolist()
         self.parameters.initial_magmoms = magmoms
         self.parameters.write(self.label + '.ase')
@@ -324,11 +324,11 @@ class Gaussian(FileIOCalculator):
         return self.read_output(self.label + '.log', 'version')
 
     def run_qr(self, atoms_new, **kwargs):
-        print "atoms new",len(atoms_new)
+        #print "atoms new",len(atoms_new)
         self.atoms=atoms_new
         self.set(**kwargs)
         self.calculate(atoms=atoms_new)
-        print "forces are ",self.results['forces']
+        #print "forces are ",self.results['forces']
         self.forces=self.results['forces']
         self.energy_free = self.results['energy']
 
