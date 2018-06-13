@@ -83,6 +83,10 @@ quantum {
     .type = str
   nproc = None
     .type = int
+  qm_addon = *None gcp dftd3
+    .type = choice(multi=False)
+  qm_addon_method = None
+    .type = str
 }
 
 refine {
@@ -231,6 +235,8 @@ def create_restraints_manager(
       pdb_hierarchy              = model.pdb_hierarchy,
       charge                     = params.quantum.charge,
       qm_engine_name             = params.quantum.engine_name,
+      qm_addon                   = params.quantum.qm_addon,
+      qm_addon_method            = params.quantum.qm_addon_method,
       memory                     = params.quantum.memory,
       nproc                      = params.quantum.nproc,
       crystal_symmetry           = model.xray_structure.crystal_symmetry(),

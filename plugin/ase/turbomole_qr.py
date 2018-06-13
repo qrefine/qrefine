@@ -247,6 +247,17 @@ class Turbomole(Calculator):
                 return True
         return False
 
+    def set_modules(self):
+        with open('control', 'r') as out:
+            for line in out:
+                if '$rij' in line:
+                    self.calculate_energy='ridft'
+                    self.calculate_forces='rdgrad'
+                    break
+                else:
+                    self.calculate_energy='dscf'
+                    self.calculate_forces='grad'
+
 
     def update(self, atoms_new):
         if not self.atoms_are_equal(atoms_new):
@@ -312,7 +323,8 @@ class Turbomole(Calculator):
               f = open("control", "w")
               f.writelines( contents )
               f.close()
-           
+
+            self.set_modules() # ridft or dscf  
             command = self.calculate_energy + ' > ASE.TM.energy.out'
             print(command) #debug
             proc = subprocess.Popen([command], shell=True, stderr=PIPE)
