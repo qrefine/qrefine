@@ -112,7 +112,7 @@ def read_dftd3(outfile,atoms):
 
 def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
     # change to work directory (location of current coordinates)
-    # wdir = os.chdir(wdir)+os.path.dirname(label)
+    cwd = os.getcwd()
     wdir = os.path.join(os.getcwd(),label)
     print 'toolbox label', label
     print 'toolbix workdir', wdir
@@ -128,4 +128,5 @@ def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
     else:
        raise RuntimeError('invalid qm_addon')
 
+    os.chdir(cwd)
     return energy, gradient 
