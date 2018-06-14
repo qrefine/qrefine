@@ -301,13 +301,14 @@ class sites_real_space(object):
   def run(self):
     weights = flex.double()
     rmsd = self.cctbx_rm_bonds_rmsd
+    print "Initial weight:", self.weight
     while True:
       weights.append(self.weight)
       w_prev = self.weight
       rmsd_prev = rmsd
       self.run_one()
       rmsd = self.cctbx_rm_bonds_rmsd
-      print rmsd, w_prev,
+      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd),
       if(rmsd < self.max_bond_rmsd):
         self.weight = self.weight*2
       else:
@@ -315,8 +316,8 @@ class sites_real_space(object):
         if(self.weight in weights):
           print self.weight
           break
-      print self.weight
-    print "FINAL (rmsd, self.weight):", rmsd_prev, self.weight
+      print "New weight to try: %8.4f"%self.weight
+    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
     return self.run_one()
 
   def run_one(self):
