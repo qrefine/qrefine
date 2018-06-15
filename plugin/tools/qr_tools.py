@@ -115,10 +115,15 @@ def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
     # change to work directory (location of current coordinates)
     cwd = os.getcwd()
     wdir = os.path.join(os.getcwd(),label)
-    print 'toolbox label', label
-    print 'toolbix workdir', wdir
+    # print 'toolbox label', label
+    # print 'toolbix workdir', wdir
+    if not os.path.exists(wdir):
+        os.mkdir(wdir)
     os.chdir(wdir)
-    print 'toolbox CDW',os.getcwd()
+    # print 'toolbox label', label
+    # print 'toolbox workdir', wdir
+    # os.chdir(wdir)
+    # print 'toolbox CDW',os.getcwd()
     
     # select helper (for now just gcp)
     # return E/G in kcal/mol/Angstrom

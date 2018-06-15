@@ -200,16 +200,18 @@ class from_qm(object):
     atoms = ase_atoms_from_pdb_hierarchy(ph)
     unit_convert = ase_units.mol/ase_units.kcal
     self.qm_engine.set_label(qm_pdb_file[:-4])
-    self.qm_engine.run_qr(atoms,
-                          charge=qm_charge,
-                          pointcharges=charge_file,
-                          coordinates=qm_pdb_file[:-4]+".xyz",
-                          command=command,       #
-                          define_str=define_str, # for Turbomole
-      )
+    cwd = os.getcwd()
+    # self.qm_engine.run_qr(atoms,
+    #                       charge=qm_charge,
+    #                       pointcharges=charge_file,
+    #                       coordinates=qm_pdb_file[:-4]+".xyz",
+    #                       command=command,       #
+    #                       define_str=define_str, # for Turbomole
+    #   )
+    os.chdir(cwd)
     if self.qm_addon != 'None':
-      if self.qm_engine_name == 'orca':
-        raise RuntimeError('no qm_toobox support for ORCA')
+      # if self.qm_engine_name == 'orca':
+      #   raise RuntimeError('no qm_toobox support for ORCA')
         # reason being that ORCA is not executed in the individual folder but on
         # level higher.
       tool_e,tool_g= qr_tools.qm_toolbox(atoms,
