@@ -95,7 +95,8 @@ def read_dftd3(outfile,atoms):
                 sline = lines[i].split()
                 energy = float(sline[3])
 
-    with open('dftd3_gradient','r'):
+    with open('dftd3_gradient','r') as out:
+        lines = out.readlines()
         for  j in range(nats):
             nline= lines[j]
             tmp = np.array([[float(f) for f in nline.split()[:3]]])
