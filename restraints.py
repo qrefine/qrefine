@@ -201,13 +201,13 @@ class from_qm(object):
     unit_convert = ase_units.mol/ase_units.kcal
     self.qm_engine.set_label(qm_pdb_file[:-4])
     cwd = os.getcwd()
-    # self.qm_engine.run_qr(atoms,
-    #                       charge=qm_charge,
-    #                       pointcharges=charge_file,
-    #                       coordinates=qm_pdb_file[:-4]+".xyz",
-    #                       command=command,       #
-    #                       define_str=define_str, # for Turbomole
-    #   )
+    self.qm_engine.run_qr(atoms,
+                          charge=qm_charge,
+                          pointcharges=charge_file,
+                          coordinates=qm_pdb_file[:-4]+".xyz",
+                          command=command,       #
+                          define_str=define_str, # for Turbomole
+      )
     os.chdir(cwd)
     if self.qm_addon != 'None':
       # if self.qm_engine_name == 'orca':
