@@ -15,7 +15,7 @@ key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd 
 
 class TeraChem(Calculator):
     name = 'TeraChem'
-    def __init__(self, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='yes',run='gradient',atoms=None, **kwargs):
+    def __init__(self,command=None, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='yes',run='gradient',atoms=None, **kwargs):
         self.terachem_file=terachem_file
         coordinates=os.path.dirname(label)+"/"+ coordinates
         self.coordinates=coordinates
@@ -27,6 +27,7 @@ class TeraChem(Calculator):
         self.key_parameters['method']=method
         self.key_parameters['dftd']=dftd
         self.key_parameters['run']=run
+        self.command=command
         # save label
         self.label = label
         #set atoms
