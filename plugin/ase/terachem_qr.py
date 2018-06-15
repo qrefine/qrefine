@@ -15,7 +15,7 @@ key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd 
 
 class TeraChem(Calculator):
     name = 'TeraChem'
-    def __init__(self, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='yes',run='gradient',atoms=None, **kwargs):
+    def __init__(self,command=None, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='yes',run='gradient',atoms=None, **kwargs):
         self.terachem_file=terachem_file
         coordinates=os.path.dirname(label)+"/"+ coordinates
         self.coordinates=coordinates
@@ -27,6 +27,7 @@ class TeraChem(Calculator):
         self.key_parameters['method']=method
         self.key_parameters['dftd']=dftd
         self.key_parameters['run']=run
+        self.command=command
         # save label
         self.label = label
         #set atoms
@@ -62,6 +63,7 @@ class TeraChem(Calculator):
                   key_parameters["guess"] =  key_parameters["scrdir"]+"/c0"
                 else:
                   key_parameters["guess"] = None
+                key_parameters["guess"] = None # possibly remove in the future
                 for key, value in key_parameters.iteritems():
                         if(value!=None):
                                 if  not isinstance(value, str):
@@ -106,7 +108,7 @@ class TeraChem(Calculator):
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         process.wait()
         exitcode = process.returncode
-        print exitcode
+        # print exitcode
         if exitcode != 0:
             raise RuntimeError('TeraChem exited with error code')
         energy = self.read_energy(foutput)
@@ -201,6 +203,17 @@ class TeraChem(Calculator):
         for key, value in kwargs.items():
            if key in key_parameters:
                 self.key_parameters[str(key)]=value
+
+    def set_label(self,label):
+        self.label = label
+
+    def get_command(self):
+        command = None
+        if self.command is not None:
+            command = self.command
+        elif ('TERACHEM_COMMAND' in os.environ):
+            command = os.environ['TERACHEM_COMMAND']
+        return command
 
     def run_qr(self, atoms_new, **kwargs):
         self.atoms=atoms_new

@@ -13,6 +13,7 @@ from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
 from plugin.ase.orca_qr import Orca
 from plugin.ase.gaussian_qr import Gaussian
+from plugin.tools import qr_tools
 from libtbx import group_args
 
 class from_cctbx(object):
@@ -58,6 +59,8 @@ class from_qm(object):
       pdb_hierarchy              = None,
       charge                     = None,
       qm_engine_name             = None,
+      qm_addon                   = None,
+      qm_addon_method            = None,
       file_name                  = "./ase/tmp_ase.pdb",
       crystal_symmetry           = None,
       clustering                 = False,
@@ -74,6 +77,8 @@ class from_qm(object):
     self.basis = basis
     self.memory = memory
     self.nproc = nproc
+    self.qm_addon = qm_addon
+    self.qm_addon_method = qm_addon_method
 
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
@@ -181,7 +186,7 @@ class from_qm(object):
     define_str=''
     command = None
     if (self.qm_engine_name == 'terachem'):
-       print "terachem is not updated to the new API"
+      command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'mopac'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'gaussian'):
@@ -193,17 +198,35 @@ class from_qm(object):
     else:
       assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
+    unit_convert = ase_units.mol/ase_units.kcal
     self.qm_engine.set_label(qm_pdb_file[:-4])
+    cwd = os.getcwd()
     self.qm_engine.run_qr(atoms,
                           charge=qm_charge,
                           pointcharges=charge_file,
                           coordinates=qm_pdb_file[:-4]+".xyz",
                           command=command,       #
-                          define_str=define_str, # for Terachem
+                          define_str=define_str, # for Turbomole
       )
-    unit_convert = ase_units.mol/ase_units.kcal
-    energy = self.qm_engine.energy_free*unit_convert
-    ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
+    os.chdir(cwd)
+    if self.qm_addon != 'None':
+      # if self.qm_engine_name == 'orca':
+      #   raise RuntimeError('no qm_toobox support for ORCA')
+        # reason being that ORCA is not executed in the individual folder but on
+        # level higher.
+      tool_e,tool_g= qr_tools.qm_toolbox(atoms,
+                              charge=qm_charge,
+                              pointcharges=charge_file,
+                              label=qm_pdb_file[:-4],
+                              addon=self.qm_addon,addon_method=self.qm_addon_method)
+      energy = (self.qm_engine.energy_free+tool_e)*unit_convert
+      ase_gradients = (tool_g-self.qm_engine.forces)*unit_convert
+      # ase_gradients+= unit_convert*tool_g
+    else:                        
+      energy = self.qm_engine.energy_free*unit_convert
+      ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert 
+    # print 'E',energy
+    # print 'G',ase_gradients
     # remove capping and neibouring buffer
     gradients = ase_gradients[:selection.count(True)]
     gradients =  flex.vec3_double(gradients)

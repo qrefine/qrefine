@@ -83,6 +83,10 @@ quantum {
     .type = str
   nproc = None
     .type = int
+  qm_addon = *None gcp dftd3
+    .type = choice(multi=False)
+  qm_addon_method = None
+    .type = str
 }
 
 refine {
@@ -231,6 +235,8 @@ def create_restraints_manager(
       pdb_hierarchy              = model.pdb_hierarchy,
       charge                     = params.quantum.charge,
       qm_engine_name             = params.quantum.engine_name,
+      qm_addon                   = params.quantum.qm_addon,
+      qm_addon_method            = params.quantum.qm_addon_method,
       memory                     = params.quantum.memory,
       nproc                      = params.quantum.nproc,
       crystal_symmetry           = model.xray_structure.crystal_symmetry(),
@@ -343,8 +349,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         params.output_file_name_prefix = prefix
       if(os.path.exists(params.output_folder_name) is False):
         os.mkdir(params.output_folder_name)
-      params.rst_file = params.output_folder_name + "/" + \
-        params.output_file_name_prefix + ".rst.pickle"
+      params.rst_file = os.path.abspath(params.output_folder_name + "/" + \
+        params.output_file_name_prefix + ".rst.pickle")
     if os.path.isfile(params.rst_file):
       os.remove(params.rst_file)
     print >> log, "\n***********************************************************"
