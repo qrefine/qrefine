@@ -63,6 +63,7 @@ class TeraChem(Calculator):
                   key_parameters["guess"] =  key_parameters["scrdir"]+"/c0"
                 else:
                   key_parameters["guess"] = None
+                key_parameters["guess"] = None # possibly remove in the future
                 for key, value in key_parameters.iteritems():
                         if(value!=None):
                                 if  not isinstance(value, str):
@@ -107,7 +108,7 @@ class TeraChem(Calculator):
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         process.wait()
         exitcode = process.returncode
-        print exitcode
+        # print exitcode
         if exitcode != 0:
             raise RuntimeError('TeraChem exited with error code')
         energy = self.read_energy(foutput)

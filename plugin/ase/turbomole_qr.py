@@ -152,14 +152,6 @@ class Turbomole(Calculator):
           'control']:
                 if os.path.exists(f):
                         os.remove(f)
-#        if self.atoms == atoms:
-#            if (self.updated and os.path.isfile('coord')):
-#                self.updated = False
-#                a = read('coord').get_positions()
-#                if np.allclose(a, atoms.get_positions(), rtol=0, atol=1e-13):
-#                    return
-#            else:
-#                return
         # performs an update of the atoms
         write('coord', atoms)
 
