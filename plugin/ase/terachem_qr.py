@@ -202,6 +202,17 @@ class TeraChem(Calculator):
            if key in key_parameters:
                 self.key_parameters[str(key)]=value
 
+    def set_label(self,label):
+        self.label = label
+
+    def get_command(self):
+        command = None
+        if self.command is not None:
+            command = self.command
+        elif ('TERACHEM_COMMAND' in os.environ):
+            command = os.environ['TERACHEM_COMMAND']
+        return command
+
     def run_qr(self, atoms_new, **kwargs):
         self.atoms=atoms_new
         self.set(**kwargs)

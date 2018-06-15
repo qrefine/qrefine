@@ -186,7 +186,7 @@ class from_qm(object):
     define_str=''
     command = None
     if (self.qm_engine_name == 'terachem'):
-       print "terachem is not updated to the new API"
+      command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'mopac'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'gaussian'):

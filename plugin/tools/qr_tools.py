@@ -36,7 +36,7 @@ def run_gcp(atoms,level):
             'HF/def2-TZVP', 'DFT/def2-TZVP', 'HF/631Gd', 'DFT/631Gd',
             'HF/def2-TZVP', 'DFT/def2-TZVP', 'HF/cc-pVDZ', 'DFT/cc-pVDZ',
             'HF/aug-cc-pVDZ', 'DFT/aug-cc-pVDZ', 'DFT/SV(P/h,c)', 'DFT/LANL',
-            'DFT/pobTZVP', 'TPSS/def2-SVP', 'PW6B95/def2-SVP', 'hf3c', 'pbeh3c']
+            'DFT/pobTZVP', 'TPSS/def2-SVP', 'PW6B95/def2-SVP', 'hf3c', 'pbeh3c','hf/631g']
     avail = [f.lower() for f in avail]
     if level.lower() not in avail:
             raise RuntimeError("""%s. gCP level not avaiable:  %r""" % (level.upper(), avail))
