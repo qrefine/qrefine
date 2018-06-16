@@ -197,6 +197,8 @@ class from_qm(object):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'turbomole'):
       command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'ani'):
+      command = self.qm_engine.get_command()
     else:
       assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
