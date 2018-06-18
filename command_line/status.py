@@ -47,7 +47,9 @@ def check_output_pdbs(d):
     elif filename.find('refined.pdb')>-1:
       results.setdefault('refined', [])
       results['refined'].append(os.path.join(d, filename))
-
+    elif filename.find('rst.pickle')>-1:
+      results.setdefault('restart', None)
+      results['restart']=os.path.join(d, filename)
 
 def _cmp_mtime(f1, f2):
   if os.stat(f1).st_mtime<os.stat(f2).st_mtime:
@@ -89,6 +91,10 @@ def run(cwd=None):
   refine_dates = []
   ase_files = []
   for key, item in sorted(results.items()):
+    if key in ['restart']:
+      print key
+      show_item([item])
+      continue
     if key in ['weight', 'refine', 'refined']:
       print key
       show_item(item)
@@ -97,8 +103,8 @@ def run(cwd=None):
         if key=='refine': refine_dates.append(os.stat(f).st_mtime)
     else:
       ase_files.append(key)
-  ase_files.sort(_cmp_mtime)
   if ase_files: print 'ase'
+  ase_files.sort(_cmp_mtime)
   for key in ase_files:
     print '  %s - %s : "%s"' % (key.replace(os.getcwd(),'.'),
                               time.asctime(time.localtime(os.stat(key).st_mtime)),
