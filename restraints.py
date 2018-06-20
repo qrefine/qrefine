@@ -13,6 +13,7 @@ from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
 from plugin.ase.orca_qr import Orca
 from plugin.ase.gaussian_qr import Gaussian
+from plugin.ase.ani_qr import Ani
 from plugin.tools import qr_tools
 from libtbx import group_args
 
