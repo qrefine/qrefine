@@ -2,7 +2,7 @@
 import os
 import sys
 #Set this path to fit your personal installation
-sys.path.append('/home/USER/qr_ani/old/ASE_ANI/lib')
+#sys.path.append('/home/USER/qr_ani/old/ASE_ANI/lib')
 from ase_interface import ANI
 from libtbx import easy_run
 import numpy as np
