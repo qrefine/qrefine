@@ -120,6 +120,7 @@ class from_qm(object):
     elif(self.qm_engine_name == "gaussian"):
       calculator = Gaussian()
     elif(self.qm_engine_name == "ani"):
+      from plugin.ase.ani_qr import Ani 
       calculator = Ani()
     else:
       raise Sorry("qm_calculator needs to be specified.")
