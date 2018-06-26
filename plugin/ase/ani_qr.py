@@ -1,26 +1,10 @@
-# Import pyNeuroChem
 import os
 import sys
 from ani.ase_interface import ANI
-from libtbx import easy_run
 import numpy as np
-import  ase
-import time
-import subprocess
-from ase import units
-from ase.io import read, write
-from ase.optimize import BFGS, LBFGS
 from ase.calculators.general import Calculator
-from libtbx import easy_run
 
-# Set required files for pyNeuroChem
-#anipath  = '/home/jujuman/Dropbox/ChemSciencePaper.AER/ANI-c08e-ntwk'
-#cnstfile = anipath + '/rHCNO-4.6A_16-3.1A_a4-8.params'
-#saefile  = anipath + '/sae_6-31gd.dat'
-#nnfdir   = anipath + '/networks/'
 
-# Construct pyNeuroChem class
-#nc = pync.molecule(cnstfile, saefile, nnfdir, 0)
 
 class Ani(Calculator):
     def __init__(self,label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
@@ -30,6 +14,7 @@ class Ani(Calculator):
         self.atoms = atoms
         self.energy_free = None
         self.forces = []
+	self.ani = ANI()
 
     def run_qr(self,atoms,coordinates,charge,pointcharges,command=None,define_str=None):
         print " RUNNING ANI"
@@ -40,7 +25,7 @@ class Ani(Calculator):
  	self.command=command
 	self.define_str=define_str
 	mol = atoms
-	mol.set_calculator(ANI())
+	mol.set_calculator(self.ani)
 	print(mol)
 	energy = mol.get_potential_energy()
 	force = mol.get_forces()
