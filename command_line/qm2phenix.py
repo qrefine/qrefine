@@ -56,7 +56,7 @@ def main(input_filename, master):
     for atom, new in zip(hierarchy.atoms(), coords[i]):
       print atom.quote(), atom.xyz, new
       atom.xyz = new
-    output_filename='%s_%02d.pdb' % (os.path.splitext(input_filename)[0], i+1)
+    output_filename='%s_%05d.pdb' % (os.path.splitext(input_filename)[0], i+1)
     print output_filename
     hierarchy.write_pdb_file(output_filename)
 

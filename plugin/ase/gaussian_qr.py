@@ -347,3 +347,11 @@ class Gaussian(FileIOCalculator):
 
     def set_nproc(self, nproc):
       self.parameters['nprocshared'] = nproc
+
+if __name__ == '__main__':
+  import sys
+  label = sys.argv[1]
+  label = label.replace('.log', '')
+  p = Gaussian(label=label)
+  print p
+  p.read_results()
