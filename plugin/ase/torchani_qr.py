@@ -1,4 +1,3 @@
-# DO NOT PUT THIS ON QREFINE UNTILL WE HAVE APPROVAL from XIANG GAO and ADRIAN ROITBERG.
 import os
 import numpy as np
 import torch
