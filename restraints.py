@@ -122,6 +122,9 @@ class from_qm(object):
     elif(self.qm_engine_name == "ani"):
       from plugin.ase.ani_qr import Ani 
       calculator = Ani()
+    elif(self.qm_engine_name == "torchani"):
+      from plugin.ase.torchani_qr import TorchAni
+      calculator = TorchAni()
     else:
       raise Sorry("qm_calculator needs to be specified.")
     #
@@ -199,6 +202,8 @@ class from_qm(object):
     elif (self.qm_engine_name == 'turbomole'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'ani'):
+      command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'torchani'):
       command = self.qm_engine.get_command()
     else:
       assert 0
