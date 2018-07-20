@@ -225,7 +225,7 @@ class from_qm(object):
     else:                        
       energy = self.qm_engine.energy_free*unit_convert
       ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert 
-    # remove capping and neibouring buffer
+    # remove capping and neigbouring buffer
     gradients = ase_gradients[:selection.count(True)]
     gradients =  flex.vec3_double(gradients)
     ## TODO
