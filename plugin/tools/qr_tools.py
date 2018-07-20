@@ -75,9 +75,9 @@ def read_gcp(outfile,atoms):
     return energy,gradient
 
 def run_dftd3(atoms,level):
-    write('dftd3_tmp.xyz', atoms)
+    write('dftd3_tmp.tmol', atoms,format='turbomole') # the odd ASE XYZ format does not work
     outfile='dftd3.out'
-    exe='dftd3 dftd3_tmp.xyz -grad -v -func '+level+' > '+outfile
+    exe='dftd3 dftd3_tmp.tmol -grad -func '+level+' > '+outfile
     run_command(command=exe)
     return read_dftd3(outfile,atoms)
 
