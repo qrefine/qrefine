@@ -39,7 +39,8 @@ def run_gcp(atoms,level):
             'DFT/pobTZVP', 'TPSS/def2-SVP', 'PW6B95/def2-SVP', 'hf3c', 'pbeh3c','hf/631g']
     avail = [f.lower() for f in avail]
     if level.lower() not in avail:
-            raise RuntimeError("""%s. gCP level not avaiable:  %r""" % (level.upper(), avail))
+             print "Warning: selected gCP level not standard! Beware of what you are doing!" # during development times
+           # raise RuntimeError("""%s. gCP level not avaiable:  %r""" % (level.upper(), avail))
     exe='gcp gcp_tmp.xyz -grad -v -l '+level+' > '+outfile
     run_command(command=exe)
     return read_gcp(outfile,atoms)
@@ -74,9 +75,9 @@ def read_gcp(outfile,atoms):
     return energy,gradient
 
 def run_dftd3(atoms,level):
-    write('dftd3_tmp.xyz', atoms)
+    write('dftd3_tmp.tmol', atoms,format='turbomole') # the odd ASE XYZ format does not work
     outfile='dftd3.out'
-    exe='dftd3 dftd3_tmp.xyz -grad -v -func '+level+' > '+outfile
+    exe='dftd3 dftd3_tmp.tmol -grad -func '+level+' > '+outfile
     run_command(command=exe)
     return read_dftd3(outfile,atoms)
 
@@ -112,20 +113,19 @@ def read_dftd3(outfile,atoms):
     return energy,gradient
 
 def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
+
+    # mandatory selection of qm_addon_method
+    if addon_method is None:
+       raise RuntimeError('missing: qm_addon_method !')
+
     # change to work directory (location of current coordinates)
     cwd = os.getcwd()
     wdir = os.path.join(os.getcwd(),label)
-    # print 'toolbox label', label
-    # print 'toolbix workdir', wdir
     if not os.path.exists(wdir):
         os.mkdir(wdir)
     os.chdir(wdir)
-    # print 'toolbox label', label
-    # print 'toolbox workdir', wdir
-    # os.chdir(wdir)
-    # print 'toolbox CDW',os.getcwd()
     
-    # select helper (for now just gcp)
+    # select helper program 
     # return E/G in kcal/mol/Angstrom
     if 'gcp' in addon.lower():
         energy,gradient=run_gcp(atoms,addon_method)

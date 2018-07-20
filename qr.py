@@ -83,7 +83,7 @@ quantum {
     .type = str
   nproc = None
     .type = int
-  qm_addon = *None gcp dftd3
+  qm_addon = gcp dftd3
     .type = choice(multi=False)
   qm_addon_method = None
     .type = str

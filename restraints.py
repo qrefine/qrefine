@@ -219,11 +219,7 @@ class from_qm(object):
                           define_str=define_str, # for Turbomole
       )
     os.chdir(cwd)
-    if self.qm_addon != 'None':
-      # if self.qm_engine_name == 'orca':
-      #   raise RuntimeError('no qm_toobox support for ORCA')
-        # reason being that ORCA is not executed in the individual folder but on
-        # level higher.
+    if self.qm_addon is not None:
       tool_e,tool_g= qr_tools.qm_toolbox(atoms,
                               charge=qm_charge,
                               pointcharges=charge_file,
@@ -231,13 +227,10 @@ class from_qm(object):
                               addon=self.qm_addon,addon_method=self.qm_addon_method)
       energy = (self.qm_engine.energy_free+tool_e)*unit_convert
       ase_gradients = (tool_g-self.qm_engine.forces)*unit_convert
-      # ase_gradients+= unit_convert*tool_g
     else:                        
       energy = self.qm_engine.energy_free*unit_convert
       ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert 
-    # print 'E',energy
-    # print 'G',ase_gradients
-    # remove capping and neibouring buffer
+    # remove capping and neigbouring buffer
     gradients = ase_gradients[:selection.count(True)]
     gradients =  flex.vec3_double(gradients)
     ## TODO

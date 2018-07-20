@@ -3,7 +3,7 @@ from __future__ import print_function
 
 command line define:
  set "basis=cefine" -> set "method=<cefine command>" 
-eg: qr.refine [...] quatum.method='cefine -func pbe0 -fon -bas minix -ri -noopt -d3 ' quantum.basis='cefine'
+eg: qr.refine [...] quantum.method='cefine -func pbe0 -fon -bas minix -ri -noopt -d3 ' quantum.basis='cefine'
 
 
 http://www.turbomole.com/
