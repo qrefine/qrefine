@@ -113,6 +113,31 @@ If tests run successfully, then try and run an example:
  qr.refine --example
 ```
 
+### adding dispersion or BSSE (gCP) correction to arbitrary methods
+Sometimes quantum chemistry programs do not, or insufficiently, provide the D3 dispersion or the gCP BSSE correction. This can be remedied with the following interface:
+
+Examples:
+
+adds "-D3(BJ)" to B3LYP calculations. Functional needs to parametrized and "-bj or -zero" needs to be specified:
+```
+qr.refine [usual options] quantum.qm_addon=dftd3 quantum.qm_addon_method="b3-lyp -bj"
+```
+
+adds "gCP correction for HF/6-31G" to any QM results. Basis sets needs to parametrized. Will output an error if a basis is not available (overview of parameter sets available if calling "gcp -h"):
+```
+qr.refine [usual options] quantum.qm_addon=gcp quantum.qm_addon_method="hf/631g"
+```
+
+The *dftd3* and *gcp* programs needed to be installed and can be obtained from Prof. Grimme [homepage](https://www.chemie.uni-bonn.de/pctc/mulliken-center/software)
+The gCP and D3 corrections are described herein:
+
+H. Kruse,S. Grimme J. Chem. Phys. 136 , 154101 (2012) 
+DOI: [10.1063/1.3700154](https://doi.org/10.1063/1.3700154)
+
+S. Grimme, J. Antony, S. Ehrlich, H. Krieg J. Chem. Phys. 132, 154104 (2010);
+DOI: [10.1063/1.3382344](https://doi.org/10.1063/1.3382344)
+
+
 ### Help 
 
 If you run into any trouble please ask for help:
