@@ -160,6 +160,7 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 * [Xu Yanting](https://github.com/yanting0928)
 * [Zhang Hongli](https://github.com/zhangholly)
 * [Lum Wang](https://github.com/Mooooony)
+* [Holger Kruse](https://github.com/hokru)
 
 
 

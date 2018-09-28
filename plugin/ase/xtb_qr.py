@@ -1,7 +1,6 @@
 """
   based on ASE script for Mopac and then for orca.
 
-
 """
 import os
 import string
@@ -116,7 +115,8 @@ class GFNxTB(Calculator):
         calc_dir = os.path.join(working_dir,self.label)
         os.chdir(calc_dir)
         self.coordinates = 'xtb_tmp.xyz'
-        print 'current work dir ',os.getcwd()
+        # debug statements
+        # print 'current work dir ',os.getcwd()
         # print('coords:',coordinates)
         self.write_input(self.atoms)
 
@@ -126,12 +126,16 @@ class GFNxTB(Calculator):
         if command is None:
             raise RuntimeError('$XTBHOME not set')
 
+        for f in [
+          'energy',
+          'gradients']:
+        if os.path.exists(f):
+            os.remove(f)
         self.run_command(command)
             
         self.read_energy()
         self.read_forces()
         self.energy_zero= self.energy_free
-        # print 'debug xtb energy:',self.energy_zero
         os.chdir(working_dir)
 
     def read_energy(self):
@@ -148,7 +152,6 @@ class GFNxTB(Calculator):
             else:
                 energy_tmp = float(line.split()[1])
         # update energy units
-        # print("E(TM): "+str(energy_tmp)) #debug
         self.e_au=energy_tmp
         self.e_total = energy_tmp * Hartree/(kcal / mol)
         self.energy_free = self.e_total
@@ -170,7 +173,7 @@ class GFNxTB(Calculator):
                 iline = i
 
         if iline < 0:
-            raise RuntimeError('Please check TURBOMOLE gradients')
+            raise RuntimeError('Please check xTB gradients')
 
         # next line
         iline += len(self.atoms) + 1

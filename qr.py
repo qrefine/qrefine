@@ -240,7 +240,7 @@ def create_restraints_manager(
       memory                     = params.quantum.memory,
       nproc                      = params.quantum.nproc,
       crystal_symmetry           = model.xray_structure.crystal_symmetry(),
-      clustering                  = params.cluster.clustering)
+      clustering                 = params.cluster.clustering)
   return restraints_manager
 
 def create_calculator(weights, params, restraints_manager, fmodel=None,
