@@ -70,7 +70,7 @@ cluster{
 restraints = cctbx *qm
   .type = choice(multi=False)
 quantum {
-  engine_name = *mopac ani torchani terachem turbomole pyscf orca gaussian
+  engine_name = *mopac ani torchani terachem turbomole pyscf orca gaussian xtb
     .type = choice(multi=False)
   charge= None
     .type = int
@@ -240,7 +240,7 @@ def create_restraints_manager(
       memory                     = params.quantum.memory,
       nproc                      = params.quantum.nproc,
       crystal_symmetry           = model.xray_structure.crystal_symmetry(),
-      clustering                 = params.cluster.clustering)
+      clustering                  = params.cluster.clustering)
   return restraints_manager
 
 def create_calculator(weights, params, restraints_manager, fmodel=None,
@@ -299,6 +299,13 @@ def validate(model, fmodel, params, rst_file, prefix, log):
     if params.quantum.method=='hf': # default
       print >> log, '  Default method set as PM7'
       params.quantum.method='PM7'
+  if params.quantum.engine_name=='xtb':
+    if params.quantum.method==Auto:
+      params.quantum.method=' -gfn2'
+      print >> log, '  Default method for xtb is %s' % (
+          params.quantum.method,
+          )
+      params.quantum.basis = ''
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)
