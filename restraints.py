@@ -13,6 +13,7 @@ from plugin.ase.terachem_qr import TeraChem
 from plugin.ase.turbomole_qr import Turbomole
 from plugin.ase.orca_qr import Orca
 from plugin.ase.gaussian_qr import Gaussian
+from plugin.ase.xtb_qr import GFNxTB
 from plugin.tools import qr_tools
 from libtbx import group_args
 
@@ -125,6 +126,8 @@ class from_qm(object):
     elif(self.qm_engine_name == "torchani"):
       from plugin.ase.torchani_qr import TorchAni
       calculator = TorchAni()
+    elif(self.qm_engine_name == "xtb"):
+      calculator = GFNxTB()
     else:
       raise Sorry("qm_calculator needs to be specified.")
     #
@@ -204,6 +207,8 @@ class from_qm(object):
     elif (self.qm_engine_name == 'ani'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'torchani'):
+      command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'xtb'):
       command = self.qm_engine.get_command()
     else:
       assert 0
