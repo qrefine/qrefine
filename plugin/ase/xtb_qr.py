@@ -126,11 +126,9 @@ class GFNxTB(Calculator):
         if command is None:
             raise RuntimeError('$XTBHOME not set')
 
-        for f in [
-          'energy',
-          'gradients']:
-        if os.path.exists(f):
-            os.remove(f)
+        for f in ['energy','gradients']:
+            if os.path.exists(f):
+                os.remove(f)
         self.run_command(command)
             
         self.read_energy()

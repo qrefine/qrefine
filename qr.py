@@ -278,6 +278,13 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       outl += '  Setting QM method to PM7\n'
     if params.quantum.basis==Auto:
       params.quantum.basis=''
+  if params.quantum.engine_name=='xtb':
+    if params.quantum.method==Auto:
+      params.quantum.method=' -gfn2'
+      print >> log, '  Default method for xtb is %s' % (
+          params.quantum.method,
+          )
+      params.quantum.basis = ''
   else:
     if params.quantum.method==Auto:
       params.quantum.method='HF'
@@ -299,13 +306,7 @@ def validate(model, fmodel, params, rst_file, prefix, log):
     if params.quantum.method=='hf': # default
       print >> log, '  Default method set as PM7'
       params.quantum.method='PM7'
-  if params.quantum.engine_name=='xtb':
-    if params.quantum.method==Auto:
-      params.quantum.method=' -gfn2'
-      print >> log, '  Default method for xtb is %s' % (
-          params.quantum.method,
-          )
-      params.quantum.basis = ''
+  
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)
