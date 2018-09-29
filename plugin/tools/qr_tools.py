@@ -127,10 +127,17 @@ def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
     
     # select helper program 
     # return E/G in kcal/mol/Angstrom
-    if 'gcp' in addon.lower():
+    if 'gcp-d3' in addon.lower():
+        print
+        egcp,ggcp=run_gcp(atoms,addon_method.split("+")[0])
+        ed3,gd3=run_dftd3(atoms,addon_method.split("+")[1])
+        energy=egcp+ed3
+        gradient=ggcp+gd3
+    elif 'gcp' in addon.lower():
         energy,gradient=run_gcp(atoms,addon_method)
     elif 'dftd3' in addon.lower():
         energy,gradient=run_dftd3(atoms,addon_method)
+    
     else:
        raise RuntimeError('invalid qm_addon')
 
