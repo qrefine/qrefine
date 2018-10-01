@@ -132,10 +132,12 @@ class GFNxTB(Calculator):
           self.set_pointcharges()
 
         command = self.get_command()
-        # nproc=self.key_parameters['nproc']
-        # if nproc is not None:
-        #     OMP="export $OMP_NUM_THREADS="+str(nproc)+' ;'
-        command=command +str(self.coordinates)+' -chrg '+str(self.key_parameters['charge'])+' -grad '+str(method)+' > xtb.out'
+        nproc=self.key_parameters['nproc']
+        # following expects bash-like behaviour. Default for Popen is /bin/sh !
+        OMP=''
+        if int(nproc)>1:
+            OMP="export OMP_NUM_THREADS="+str(nproc)+' ;'
+        command=OMP+command +str(self.coordinates)+' -chrg '+str(self.key_parameters['charge'])+' -grad '+str(method)+' > xtb.out'
         if command is None:
             raise RuntimeError('$XTBHOME not set')
 
@@ -222,5 +224,5 @@ class GFNxTB(Calculator):
     def set_label(self, label):
       self.label = label
 
-    # def set_nproc(self, nproc):
-    #   self.key_parameters['nproc'] = str(nproc)
+    def set_nproc(self, nproc):
+      self.key_parameters['nproc'] = str(nproc)
