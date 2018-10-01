@@ -28,6 +28,7 @@ class GFNxTB(Calculator):
                  charge='0',
                  version=2,
                  method='-gfn2',
+                 nproc='1',
                  atoms=None,
                  command=None,
                  pointcharges=None,
@@ -39,6 +40,7 @@ class GFNxTB(Calculator):
         self.key_parameters['coordinates'] = coordinates
         self.key_parameters['charge'] = charge
         self.key_parameters['method'] = method
+        self.key_parameters['nproc'] = nproc
         self.version=version
         # save label
         self.label = label
@@ -109,8 +111,7 @@ class GFNxTB(Calculator):
         self.coordinates = coordinates
         self.key_parameters['charge'] = charge
         foutput = self.label + '.out'
-        #point charges
-        self.pointcharges=pointcharges
+
         
         self.coordinates = coordinates
         working_dir = os.getcwd()
@@ -123,12 +124,17 @@ class GFNxTB(Calculator):
         # print 'current work dir ',os.getcwd()
         # print('coords:',coordinates)
         self.write_input(self.atoms)
-
+        
+        #point charges
+        self.pointcharges=pointcharges
         if self.pointcharges is not None:
           self.pointcharges = os.path.abspath(self.pointcharges)
           self.set_pointcharges()
 
         command = self.get_command()
+        # nproc=self.key_parameters['nproc']
+        # if nproc is not None:
+        #     OMP="export $OMP_NUM_THREADS="+str(nproc)+' ;'
         command=command +str(self.coordinates)+' -chrg '+str(self.key_parameters['charge'])+' -grad '+str(method)+' > xtb.out'
         if command is None:
             raise RuntimeError('$XTBHOME not set')
@@ -216,3 +222,5 @@ class GFNxTB(Calculator):
     def set_label(self, label):
       self.label = label
 
+    # def set_nproc(self, nproc):
+    #   self.key_parameters['nproc'] = str(nproc)
