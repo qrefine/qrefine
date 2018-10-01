@@ -254,7 +254,9 @@ def refine(fmodel,
     cluster_qm_update = clustering_update(
       pre_sites_cart = calculator.fmodel.xray_structure.sites_cart(),
       log            = results.log,
-      rmsd_tolerance = params.refine.rmsd_tolerance * 100)
+      rmsd_tolerance = params.refine.rmsd_tolerance * 100,
+      verbose=params.debug,
+      )
     print >> results.log, "\ninteracting pairs number:  ", \
       calculator.restraints_manager.fragments.interacting_pairs
   weight_cycle = weight_cycle_start
@@ -271,14 +273,16 @@ def refine(fmodel,
                                params.refine.number_of_weight_search_cycles+1):
       if((weight_cycle!=1 and weight_cycle==weight_cycle_start)):
         fmodel = calculator.fmodel.deep_copy()
+        if params.debug: print '>>> Using calculator fmodel'
       else:
         fmodel = fmodel_copy.deep_copy()
+        if params.debug: print '>>> Using fmodel_copy fmodel'
       calculator.reset_fmodel(fmodel = fmodel)
       if(clustering):
         cluster_qm_update.re_clustering(calculator)
       # Calculate weight
       try:
-        calculator.calculate_weight()
+        calculator.calculate_weight(verbose=params.debug)
       except Exception as e:
         print >> results.log, e
         raise Sorry("Failed to get weight")

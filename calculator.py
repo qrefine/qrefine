@@ -78,7 +78,7 @@ class weights(object):
     if(self.weight_was_provided): return
     self.restraints_weight_scales.append(self.restraints_weight_scale)
 
-  def compute_weight(self, fmodel, rm):
+  def compute_weight(self, fmodel, rm, verbose=False):
     if(self.weight_was_provided): return
     random.seed(1)
     flex.set_random_seed(1)
@@ -95,6 +95,7 @@ class weights(object):
     tc, gc = rm.target_and_gradients(sites_cart=xrs.sites_cart())
     x = gc.norm()
     y = gx.norm()
+    if verbose: print '>>> gradient norms c,x %0.2f %0.2f' % (x, y)
     # filter out large contributions
     gx_d = flex.sqrt(gx.dot())
     sel = gx_d>flex.mean(gx_d)*6
@@ -106,6 +107,7 @@ class weights(object):
     ################
     if(y != 0.0): self.data_weight = x/y
     else:         self.data_weight = 1.0 # ad hoc default fallback
+    if verbose: print '>>> data_weight %0.2f' % self.data_weight
 
 class calculator(object):
   def __init__(self,
@@ -187,10 +189,11 @@ class sites(calculator):
     self.x = self.fmodel.xray_structure.sites_cart().as_double()
     self.x_target_functor = self.fmodel.target_functor()
 
-  def calculate_weight(self):
+  def calculate_weight(self, verbose=False):
     self.weights.compute_weight(
-      fmodel = self.fmodel,
-      rm     = self.restraints_manager)
+      fmodel  = self.fmodel,
+      rm      = self.restraints_manager,
+      verbose = verbose)
 
   def reset_fmodel(self, fmodel=None):
     if(fmodel is not None):
