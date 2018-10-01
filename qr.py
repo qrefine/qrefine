@@ -74,8 +74,10 @@ quantum {
     .type = choice(multi=False)
   charge= None
     .type = int
+    .help = The formal charge of the entire molecule
   basis = Auto
     .type = str
+    .help = Defaults to
   method = Auto
     .type = str
     .help = Defaults to HF for all but MOPAC (PM7)
@@ -306,7 +308,7 @@ def validate(model, fmodel, params, rst_file, prefix, log):
     if params.quantum.method=='hf': # default
       print >> log, '  Default method set as PM7'
       params.quantum.method='PM7'
-  
+
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)

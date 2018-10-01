@@ -135,15 +135,17 @@ class manager(object):
     if(os.path.exists(output_folder_name) is False):
       os.mkdir(output_folder_name)
     self.pdb_hierarchy.write_pdb_file(
-      file_name        = "%s/%s"%(output_folder_name, output_file_name),
+      file_name        = "%s" % os.path.join(output_folder_name, output_file_name),
       crystal_symmetry = self.crystal_symmetry)
     self.states.write(
-      file_name = "%s/%s"%(
-        output_folder_name, output_file_name+"_all_states.pdb"))
+      file_name = "%s"%os.path.join(output_folder_name,
+                                    output_file_name+"_all_states.pdb"))
 
   def write_pdb_file(self, output_file_name, output_folder_name):
     self.pdb_hierarchy.write_pdb_file(
-      file_name = "%s/%s"%(output_folder_name, output_file_name))
+      file_name = "%s" % os.path.join(output_folder_name, output_file_name),
+      crystal_symmetry = self.crystal_symmetry,
+      )
 
   def finalize(self,
                input_file_name_prefix,
