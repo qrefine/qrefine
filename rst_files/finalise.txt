@@ -7,66 +7,12 @@ Generating a QM complete model
 Overview
 --------
 
-A
+A program to
 
 Running the program
 -------------------
 
-``phenix.polder`` can be executed via the GUI, or the command line::
-
-  % phenix.polder model.pdb data.mtz selection='chain B and resseq 3'
-
-This command calculates an omit map of residue 3 in chain B. Common file
-formats are supported (.pdb and .cif for models; .mtz, .hkl files for data).
-The syntax for the `selections <atom_selections.html>`_ is the same as used
-by other phenix tools.
-
-The output of ``phenix.polder`` consists of a single MTZ file, named
-``polder_map_coeffs.mtz`` by default. This file will contain amplitudes and phases
-for two maps:
-
-  - **mFo-DFc_polder:** map coefficients of polder omit map
-  - **mFo-DFc_omit:** map coefficients for omit map where bulk solvent floods into
-    omitted region. It is equivalent to remove the selection from the model and
-    to calculate a difference map. This map can be used for comparison with the
-    polder map.
-
-To load the maps manually in Coot, choose the "Open MTZ, mmCIF, fcf or phs..."
-option and activate the "Is a Difference Map" option in the window which opens
-after choosing the filename
-
-What if no ligand has been modeled yet?
----------------------------------------
-
-To compute a polder map, the ligand has to be present in the model.
-To calculate a difference map excluding locally the bulk solvent around a
-density peak, use the compute_box option of polder, which has a separate
-`documentation page <polder_box.html>`_ .
-
-
-Other options
--------------
-
-There are several other programs in Phenix for calculating omit maps.
-
-  - `phenix.composite_omit_map <composite_omit_map.html>`_ can produce
-    relatively bias-free maps by computing a number of omit maps covering
-    specific regions, and then combining the areas around the omitted regions.
-    Default options allows the bulk solvent mask to extend into the omitted
-    region
-  - `phenix.refine <refinement.html>`_ can be used to manually generate omit
-    maps for a smaller selection of the model by specifying the
-    ``omit_selection`` keyword.  The single-omit mode of the composite omit
-    map program is equivalent to this.
-  - `phenix.maps <maps.html>`_ can generate simple omit maps without refinement.
-
-
-Reference
-----------
-
-D. Liebschner, P. V. Afonine, N. W. Moriarty, B. K. Poon, O. V. Sobolev,
-T. C. Terwilliger and P. D. Adams, Polder maps: Improving OMIT maps by
-excluding bulk-solvent, submitted
+``qr.finalise`` can be executed
 
 
 List of all available keywords

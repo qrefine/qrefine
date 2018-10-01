@@ -17,18 +17,22 @@ model_file_name = None
   .type = path
   .short_caption = Model file
   .multiple = False
-  .help = Model file name
+  .help = Model file name to use as input for obtaining a complete model
   .style = file_type:pdb bold input_file
 action = *model_completion capping
   .type = choice
-  .help = The type of hydrogen addition requested
+  .help = The type of hydrogen addition requested. Model completion will \
+          complete side-chains and terminii. Capping with add enough hydrogens \
+          to create a stable molecule for QM convergence.
 keep_alt_loc = True
   .type = bool
-  .help = Retain alt loc
+  .help = Retain alt loc. This is not a useful option and not tested well.
 skip_validation = False
   .type = bool
+  .help = Don't perform the validation of the charge after finalisation.
 calculate_charge = False
   .type = bool
+  .help = Will calculate total charge of molecule.
 """
 
 def master_params():
