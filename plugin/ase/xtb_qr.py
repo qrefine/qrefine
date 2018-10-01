@@ -30,9 +30,11 @@ class GFNxTB(Calculator):
                  method='-gfn2',
                  atoms=None,
                  command=None,
+                 pointcharges=None,
                  **kwargs):
 
         self.coordinates = coordinates
+        self.pointcharges = pointcharges
         self.key_parameters = copy.deepcopy(key_parameters)
         self.key_parameters['coordinates'] = coordinates
         self.key_parameters['charge'] = charge
@@ -107,6 +109,8 @@ class GFNxTB(Calculator):
         self.coordinates = coordinates
         self.key_parameters['charge'] = charge
         foutput = self.label + '.out'
+        #point charges
+        self.pointcharges=pointcharges
         
         self.coordinates = coordinates
         working_dir = os.getcwd()
@@ -120,6 +124,9 @@ class GFNxTB(Calculator):
         # print('coords:',coordinates)
         self.write_input(self.atoms)
 
+        if self.pointcharges is not None:
+          self.pointcharges = os.path.abspath(self.pointcharges)
+          self.set_pointcharges()
 
         command = self.get_command()
         command=command +str(self.coordinates)+' -chrg '+str(self.key_parameters['charge'])+' -grad '+str(method)+' > xtb.out'
@@ -186,10 +193,13 @@ class GFNxTB(Calculator):
         self.forces = (-np.delete(forces, np.s_[0:1], axis=0)) * (Hartree / Bohr)/(kcal / mol)
 
     def set_pointcharges(self):
-        if self.pointcharges is not None:
-              f = open(self.pointcharges, "r")
-              point_charges = f.readlines()
-              f.close()
+        f = open(self.pointcharges, "r")
+        pchrg = f.readlines()
+        f.close()
+        f = open("pcharge","w")
+        f.writelines(pchrg[0])
+        f.writelines(pchrg[2:])
+        f.close()
             
 
     def set(self, **kwargs):

@@ -221,6 +221,7 @@ class from_qm(object):
     #DEBUGGING distance check
     print ''
     print '*distance check before QM calc*'
+    thr=0.6
     for i in range(0,len(atoms)-1):
       for j in range(i,len(atoms)):
           if i==j: continue
@@ -228,8 +229,8 @@ class from_qm(object):
           y=atoms[i].position[1]-atoms[j].position[1]
           z=atoms[i].position[2]-atoms[j].position[2]
           dist=math.sqrt(x*x+y*y+z*z)
-          if(dist<=1.0):
-            print 'WARNING: atoms ', i,j,' are closer than 1.0 A -> ',dist
+          if(dist<=thr):
+            print 'WARNING: atoms ', i,j,' are closer than', thr,' A -> ',dist
     self.qm_engine.run_qr(atoms,
                           charge=qm_charge,
                           pointcharges=charge_file,
