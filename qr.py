@@ -48,21 +48,27 @@ master_params_str ="""
 
 max_atoms = 15000
   .type = int
+  .help = maximum number of atoms
 debug = False
     .type = bool
 cluster{
   charge_cutoff = 8.0
     .type = float
+    .help = distance for point charge cutoff
   clustering = False
     .type = bool
+    .help = enable/disable clustering
   charge_embedding = False
     .type = bool
+    .help = point charge embedding
   two_buffers = False
     .type = bool
   maxnum_residues_in_cluster = 15
     .type = int
+    .help = maximum number of residues in a cluster
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
+    .help = type of clustering algorithm
   altloc_method = *average subtract
     .type = choice(multi=False)
 }
@@ -72,40 +78,48 @@ restraints = cctbx *qm
 quantum {
   engine_name = *mopac ani torchani terachem turbomole pyscf orca gaussian xtb
     .type = choice(multi=False)
+    .help = choose the QM program
   charge= None
     .type = int
     .help = The formal charge of the entire molecule
   basis = Auto
     .type = str
-    .help = Defaults to
+    .help = pre-defined defaults
   method = Auto
     .type = str
-    .help = Defaults to HF for all but MOPAC (PM7)
+    .help = Defaults to HF for all but MOPAC (PM7) and xTB (GFN2)
   memory = None
     .type = str
+    .help = memory for the QM program
   nproc = None
     .type = int
+    .help = number of parallel processes for the QM program
   qm_addon = gcp dftd3 gcp-d3
     .type = choice(multi=False)
+    .help = allows additional calcuations of the gCP and/or DFT-D3 corrections using their stand-alone programs
   qm_addon_method = None
     .type = str
+    .help = specifies flags for the qm_addon. See manual for details.
 }
 
 refine {
   dry_run=False
     .type = bool
+    .help = do not perform calculations, only setup steps
   sf_algorithm = *direct fft
     .type = choice(multi=False)
   refinement_target_name = *ml ls_wunit_k1
     .type = choice
   mode = opt *refine
     .type = choice(multi=False)
+    .help = choose between refinement and geometry optimization
   number_of_macro_cycles=1
     .type = int
   number_of_weight_search_cycles=50
     .type = int
   number_of_refine_cycles=5
     .type = int
+    .help = maximum number of refinement cycles
   number_of_micro_cycles=50
     .type = int
   data_weight=None
@@ -143,10 +157,13 @@ refine {
 parallel {
   method = *multiprocessing slurm pbs sge lsf threading
     .type = choice(multi=False)
+    .help = type of parallel mode
   nproc = None
     .type = int
+    .help = number of threads or jobs
   qsub_command = None
     .type = str
+    .help = submission command for the queing system
 }
 
 output_file_name_prefix = None
