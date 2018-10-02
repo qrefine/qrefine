@@ -395,9 +395,7 @@ def refine(fmodel,
       geometry_rmsd_manager = geometry_rmsd_manager)
     results.write_pdb_file(
       output_folder_name = params.output_folder_name,
-      output_file_name   = str(refine_cycle)+"_refine_cycle.pdb",
-      crystal_symmetry = self.crystal_symmetry,
-      )
+      output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
     results.show(prefix="  ")
     if(conv_test.is_converged(fmodel=fmodel)):
       break
