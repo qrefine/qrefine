@@ -28,15 +28,19 @@ class GFNxTB(Calculator):
                  charge='0',
                  version=2,
                  method='-gfn2',
+                 nproc='1',
                  atoms=None,
                  command=None,
+                 pointcharges=None,
                  **kwargs):
 
         self.coordinates = coordinates
+        self.pointcharges = pointcharges
         self.key_parameters = copy.deepcopy(key_parameters)
         self.key_parameters['coordinates'] = coordinates
         self.key_parameters['charge'] = charge
         self.key_parameters['method'] = method
+        self.key_parameters['nproc'] = nproc
         self.version=version
         # save label
         self.label = label
@@ -71,22 +75,30 @@ class GFNxTB(Calculator):
         atoms = copy.deepcopy(self.atoms)
         write(self.coordinates, atoms)
         fname=self.coordinates #+'/xtb_tmp.xyz'
-        finput = open(fname, "w")
+        finput = open(fname, "w")        
+        symbols = atoms.get_chemical_symbols()
+        coordinates = atoms.get_positions()
         finput.write(" %s \n \n" % len(atoms))
-        for index in range(len(atoms)):
-            finput.write(str(atoms.get_chemical_symbols()[index]) +  " "
-                            + str(atoms[index].position[0])+  " "
-                            + str(atoms[index].position[1])+  " "
-                            + str(atoms[index].position[2])+ "\n" )
+        for i in range(len(atoms)):
+            finput.write('%-10s' % symbols[i])
+            for j in range(3):
+                finput.write('%20.10f' % coordinates[i, j])
+            finput.write('\n')
+        # finput.write(" %s \n \n" % len(atoms))
+        # for index in range(len(atoms)):
+        #     finput.write(str(atoms.get_chemical_symbols()[index]) +  " "
+        #                     + str(atoms[index].position[0])+  " "
+        #                     + str(atoms[index].position[1])+  " "
+        #                     + str(atoms[index].position[2])+ "\n" )
         finput.close()
 
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
-        if self.command is not None:
-          command = self.command
-        elif ('XTBHOME' in os.environ):
+        if ('XTBHOME' in os.environ):
           command = os.environ['XTBHOME']+'/xtb '
+        if command is None:
+            raise RuntimeError('$XTBHOME not set')
         return command
 
     def run_qr(self,
@@ -107,30 +119,47 @@ class GFNxTB(Calculator):
         self.coordinates = coordinates
         self.key_parameters['charge'] = charge
         foutput = self.label + '.out'
-        
-        self.coordinates = coordinates
+
+        # directory
         working_dir = os.getcwd()
         if not  os.path.isdir(self.label):
           os.mkdir(self.label)
         calc_dir = os.path.join(working_dir,self.label)
         os.chdir(calc_dir)
         self.coordinates = 'xtb_tmp.xyz'
+
         # debug statements
         # print 'current work dir ',os.getcwd()
         # print('coords:',coordinates)
         self.write_input(self.atoms)
+        
+        #point charges
+        self.pointcharges=pointcharges
+        if self.pointcharges is not None:
+          self.pointcharges = os.path.abspath(self.pointcharges)
+          self.set_pointcharges()
 
 
-        command = self.get_command()
-        command=command +str(self.coordinates)+' -chrg '+str(self.key_parameters['charge'])+' -grad '+str(method)+' > xtb.out'
-        if command is None:
-            raise RuntimeError('$XTBHOME not set')
+        binary = self.get_command()
+        nproc=self.key_parameters['nproc']
+        # following expects bash-like behaviour. Default for Popen is /bin/sh !
+        OMP=''
+        if int(nproc)>1:
+            OMP="export OMP_NUM_THREADS="+str(nproc)+' ;'
 
+        command='%s %s %s -chrg %s -grad %s > xtb.out' % (
+                OMP,
+                binary,
+                str(self.coordinates),
+                str(self.key_parameters["charge"]),
+                str(method) )
+
+        #clean up
         for f in ['energy','gradients']:
             if os.path.exists(f):
                 os.remove(f)
         self.run_command(command)
-            
+
         self.read_energy()
         self.read_forces()
         self.energy_zero= self.energy_free
@@ -186,10 +215,13 @@ class GFNxTB(Calculator):
         self.forces = (-np.delete(forces, np.s_[0:1], axis=0)) * (Hartree / Bohr)/(kcal / mol)
 
     def set_pointcharges(self):
-        if self.pointcharges is not None:
-              f = open(self.pointcharges, "r")
-              point_charges = f.readlines()
-              f.close()
+        f = open(self.pointcharges, "r")
+        pchrg = f.readlines()
+        f.close()
+        f = open("pcharge","w")
+        f.writelines(pchrg[0])
+        f.writelines(pchrg[2:])
+        f.close()
             
 
     def set(self, **kwargs):
@@ -206,3 +238,5 @@ class GFNxTB(Calculator):
     def set_label(self, label):
       self.label = label
 
+    def set_nproc(self, nproc):
+      self.key_parameters['nproc'] = str(nproc)

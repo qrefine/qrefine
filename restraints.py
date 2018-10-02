@@ -16,6 +16,7 @@ from plugin.ase.gaussian_qr import Gaussian
 from plugin.ase.xtb_qr import GFNxTB
 from plugin.tools import qr_tools
 from libtbx import group_args
+import math
 
 class from_cctbx(object):
   def __init__(self, restraints_manager, fragment_extracts=None,
@@ -216,6 +217,20 @@ class from_qm(object):
     unit_convert = ase_units.mol/ase_units.kcal
     self.qm_engine.set_label(qm_pdb_file[:-4])
     cwd = os.getcwd()
+
+    #FOR DEBUGGING distance check
+    # print ''
+    # print '*distance check before QM calc*'
+    # thr=0.6
+    # for i in range(0,len(atoms)-1):
+    #   for j in range(i,len(atoms)):
+    #       if i==j: continue
+    #       x=atoms[i].position[0]-atoms[j].position[0]
+    #       y=atoms[i].position[1]-atoms[j].position[1]
+    #       z=atoms[i].position[2]-atoms[j].position[2]
+    #       dist=math.sqrt(x*x+y*y+z*z)
+    #       if(dist<=thr):
+    #         print 'WARNING: atoms ', i,j,' are closer than', thr,' A -> ',dist
     self.qm_engine.run_qr(atoms,
                           charge=qm_charge,
                           pointcharges=charge_file,

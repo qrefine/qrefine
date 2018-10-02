@@ -866,6 +866,8 @@ def get_partial_point_charges(rg,
              'HG13':'HG11',
              ' HD3':' HD1',
              ' HE3':' HE1',
+             ' HT1':' HA1', #TODO check!
+             ' HT2':' HA2', #TODO check!
              }
   misc = {' OXT' : ' O  ',
           }
@@ -893,6 +895,7 @@ def get_partial_point_charges(rg,
         continue
       # other atoms
       cif = atom_dict.get(atom.name.strip(), None)
+      # print 'cif',atom.name.strip(),cif #debug
       if cif is None:
         if atom.name in [" H1 ", " H2 ", " H3 "]: # needs calculating...
           tmp.append([0.26]+list(atom.xyz))
@@ -904,6 +907,7 @@ def get_partial_point_charges(rg,
         elif atom.name.find("'")>-1:
           name = atom.name.replace("'", "*")
           cif = atom_dict.get(name.strip(), None)
+      # print 'cif-fixed',atom.name.strip(),cif #debug
       assert cif, "%s" % atom_dict
       tmp.append([cif.partial_charge]+list(atom.xyz))
   return tmp
