@@ -12,6 +12,8 @@ from mmtbx import utils
 from iotbx import reflection_file_utils
 from cStringIO import StringIO
 from libtbx import group_args
+from libtbx.utils import Sorry
+from scitbx.array_family import flex
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -71,7 +73,8 @@ def run(args, log):
     r_free_flags = determine_data_and_flags_result.r_free_flags
     test_flag_value = determine_data_and_flags_result.test_flag_value
     if(r_free_flags is None):
-      r_free_flags=f_obs.array(data=flex.bool(f_obs.data().size(), False))
+      r_free_flags=f_obs.generate_r_free_flags()
+      print >> log, "WARNING: no free-R flags available in inputs. "
     fmodel = mmtbx.f_model.manager(
       f_obs          = f_obs,
       r_free_flags   = r_free_flags,
@@ -82,6 +85,10 @@ def run(args, log):
       fmodel.show(show_header=False, show_approx=False)
     print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
       fmodel.r_free())
+  else:
+    if(params.refine.mode=="refine"):
+      raise Sorry(
+        "Refinement requested (refine.mode==refine) but no data provided.")
   # Read map
   map_data = None
   if(cmdline.ccp4_map is not None):
