@@ -27,6 +27,10 @@ In principle, ``qr.refine`` only needs a data file (e.g. mtz) and a model (e.g. 
 
 Sensible default options are selected.
 
+QM interface
+============
+`List of QM interfaces <qm_interfaces.html>`_
+
 Literature
 ==========
 

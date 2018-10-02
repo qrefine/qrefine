@@ -1,0 +1,72 @@
+QM program interfaces
+=====================
+
+The interfaces to the QM programs are
+
+
+TeraChem
+--------
+engine_name
+    terachem
+
+requirements
+    set ``TERACHEM_HOME`` to the installation directory.
+
+Notes::
+
+    The default runs a HF-D3(BJ)/6-31G calculation.
+
+Gaussian
+--------
+engine_name
+    gaussian
+
+Notes::
+
+    The default runs...
+
+Turbomole
+---------
+engine_name
+    turbomole
+
+requirements
+    same as for turbomole itself
+
+Notes::
+
+  The default runs BP86/def2-SV(P) calculations.
+  only RI-J calculations.
+  quantum.method sets the DFT functional.
+  quantum.basis sets the AO basis set.
+
+MOPAC
+-----
+engine_name
+    mopac
+
+requirements
+    set ``MOPAC_HOME`` to the installation directory.
+
+Notes::
+
+    default runs PM7
+
+GFN-xTB
+-------
+engine_name
+    xtb
+
+requirements
+    set ``XTBHOME`` to the installation directory.
+
+Notes::
+
+    The default runs GFN2-xTB (-gfn2 option)
+
+example using non-default GFN1-xTB::
+
+    qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method=-gfn1
+
+ANI/TORCH-ANI
+-------------
