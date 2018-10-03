@@ -7,12 +7,13 @@ Generating a QM complete model
 Overview
 --------
 
-A program to
+A program to complete a model ready for Q|R refinement. This includes hydrogens,
+terminal oxygens and side-chains.
 
 Running the program
 -------------------
 
-``qr.finalise`` can be executed
+``qr.finalise`` can be executed on a PDB model file.
 
 
 List of all available keywords
