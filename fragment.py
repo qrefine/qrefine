@@ -492,7 +492,7 @@ def write_mm_charge_file(fragment_extracts, index):
         file_name=file_name,
         exclude_water=False,
         charge_scaling_positions=charge_scaling_positions)
-    if(fragment_extracts.qm_engine_name in ["terachem","xtb"]):
+    if(fragment_extracts.qm_engine_name in ["terachem","xtb",'mopac']):
       file_name = sub_working_folder + str(index) + "_qxyz_cctbx.dat"
       fragment_extracts.charge_service.write_pdb_hierarchy_qxyz_file(
         file_name=file_name,

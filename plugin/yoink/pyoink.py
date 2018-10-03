@@ -10,12 +10,14 @@ try:
   import jpype
 except ImportError, e:
   print str(e)
-  pass
+  jpype = None
 #  raise Sorry(str(e))
 
 class PYoink(object):
 
   def __init__(self, yoink_jar_path, yoink_dat_path=None, input_file=None,out_file=None,system=None):
+    if jpype is None:
+      raise Sorry('module jpype not loaded. Failed to load with the following:\n\n%s\n' % e)
     if not jpype.isJVMStarted():
       startJVM(getDefaultJVMPath(), "-Djava.class.path="+yoink_jar_path)
     Yoink=JClass("org.wallerlab.yoink.Yoink")

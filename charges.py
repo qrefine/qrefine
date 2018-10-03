@@ -16,6 +16,7 @@ default_ion_charges = {
   "CD" : 2,
   "ZN" : 2,
   'MG' : 2,
+  'CU' : 2,
   }
 allowable_amino_acid_charges = {
   "ARG" : 1,
@@ -860,6 +861,7 @@ def get_partial_point_charges(rg,
   This function relies only on the residue group and monomer library server
   """
   #assert 0
+  # need to handle HT1, HT2 and HXT
   v2_to_3 = {' HA3':' HA1',
              ' HB3':' HB1',
              ' HG3':' HG1',
@@ -900,6 +902,9 @@ def get_partial_point_charges(rg,
         if atom.name in [" H1 ", " H2 ", " H3 "]: # needs calculating...
           tmp.append([0.26]+list(atom.xyz))
           continue
+        elif atom.name in [' HXT']: # zero charges for fake atoms
+          tmp.append([0.00]+list(atom.xyz))
+          continue
         if atom.name in v2_to_3:
           cif = atom_dict.get(v2_to_3[atom.name].strip())
         elif atom.name in misc:
@@ -911,7 +916,6 @@ def get_partial_point_charges(rg,
       assert cif, "%s" % atom_dict
       tmp.append([cif.partial_charge]+list(atom.xyz))
   return tmp
-
 
 def write_pdb_hierarchy_xyzq_file(hierarchy,
                                   file_name="xyzq_cctbx.dat",

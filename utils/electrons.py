@@ -13,11 +13,16 @@ atom_database = {'H' : {'valence' : 1},
                  #
                  'P' : {'valence' : 3, 'lone pairs' : 1},
                  'S' : {'valence' : 2, 'lone pairs' : 2},
-                 #'CL': {'valence' : 1},
+                 'Cl': {'valence' : 1},
+                 'Cu' : {'valence' : -2,
+                         #'charge' : 2,
+                         'metal' : True},
                  'Zn' : {'valence' : -2,
                          #'charge' : 2,
                          'metal' : True},
                  }
+# via attila
+atom_database['Cu'] = {'valence': 1, 'lone pairs': 1}
 
 class atom_property(dict):
   def __init__(self):

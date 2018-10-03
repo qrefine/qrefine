@@ -158,12 +158,15 @@ parallel {
   method = *multiprocessing slurm pbs sge lsf threading
     .type = choice(multi=False)
     .help = type of parallel mode
+            and efficient method of processes on the current computer. The others \
+            are queueing protocols with the expection of threading which is not a \
+            safe choice.
   nproc = None
     .type = int
-    .help = number of threads or jobs
+    .help = Number of processes to use
   qsub_command = None
     .type = str
-    .help = submission command for the queing system
+    .help = Specific command to use on the queue system
 }
 
 output_file_name_prefix = None
@@ -174,6 +177,8 @@ shared_disk = True
   .type = bool
 rst_file = None
   .type = str
+  .help = Restart file to use for determining location in run. Loads previous \
+          results of weight calculations.
 
 dump_gradients=None
   .type = str
