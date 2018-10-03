@@ -157,7 +157,9 @@ refine {
 parallel {
   method = *multiprocessing slurm pbs sge lsf threading
     .type = choice(multi=False)
-    .help = type of parallel mode and efficient method of processes on the current computer. The others are queueing protocols with the expection of threading which is not a safe choice.
+    .help = type of parallel mode and efficient method of processes on the \
+            current computer. The others are queueing protocols with the \
+            expection of threading which is not a safe choice.
   nproc = None
     .type = int
     .help = Number of processes to use

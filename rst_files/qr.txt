@@ -2,6 +2,8 @@ Q|R Documentation
 
 Programs available in Q|R
 
-  `Finalise <finalise.html>`_
+  `Finalise <qr/finalise.html>`_
 
-  `Refinement <qrefine.html>`_
+  `Refinement <qr/qrefine.html>`_
+
+  `Charges <qr/charges.html>`_

@@ -1,0 +1,21 @@
+=====================================
+Calculate the total charge of a model
+=====================================
+
+.. contents::
+
+Overview
+--------
+
+A program to
+
+Running the program
+-------------------
+
+``qr.charges`` can be executed
+
+
+List of all available keywords
+------------------------------
+
+{{phil:qrefine.command_line.charge}}
