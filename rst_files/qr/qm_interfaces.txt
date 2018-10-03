@@ -10,16 +10,32 @@ engine_name
     terachem
 
 requirements
-    set ``TERACHEM_HOME`` to the installation directory.
+    set ``TeraChem_COMMAND`` to the TeraChem execution command.
 
 Notes::
 
     The default runs a HF-D3(BJ)/6-31G calculation.
 
+ORCA
+--------
+engine_name
+    orca
+
+requirements
+    set ``ORCA_COMMAND`` to the ORCA execution command.
+
+Notes::
+
+    For parallel execution of ORCA the ``ORCA_COMMAND`` should contain
+    the full path to the `orca` binary.
+
+
 Gaussian
 --------
 engine_name
     gaussian
+
+requirements
 
 Notes::
 
@@ -46,7 +62,7 @@ engine_name
     mopac
 
 requirements
-    set ``MOPAC_HOME`` to the installation directory.
+    set ``MOPAC_COMMAND`` to the mopac execution command.
 
 Notes::
 
@@ -66,7 +82,65 @@ Notes::
 
 example using non-default GFN1-xTB::
 
-    qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method=-gfn1
+    qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method='-gfn1 -gbsa h2o -etemp 500'
 
-ANI/TORCH-ANI
--------------
+ANI
+----
+engine_name
+    ani
+
+requirements
+
+Notes
+
+
+TORCHANI
+--------
+engine_name
+    torchani
+
+requirements
+
+Notes
+
+
+qm_addon
+========
+
+This helper functionality adds dispersion (DFT-D3) and/or BSSE (gCP) corrections to another interface.
+
+
+Examples:
+
+DFT-D3 dispersion correction
+----------------------------
+
+adds "-D3(BJ)" to B3LYP calculations. Functional needs to parametrized and "-bj or -zero" needs to be specified::
+
+    qr.refine [usual options] quantum.qm_addon=dftd3 quantum.qm_addon_method="b3-lyp -bj"
+
+The `qm_addon_method` string will be handed down the `dftd3` program as `-func <qm_addon_method>`
+
+gCP BSSE correction
+--------------------
+
+adds "gCP correction for HF/6-31G" to any QM results. Basis sets needs to parametrized. Will output an error if a basis is not available (overview of parameter sets available if calling "gcp -h")::
+
+    qr.refine [usual options] quantum.qm_addon=gcp quantum.qm_addon_method="hf/631g"
+
+The `qm_addon_method` string will be handed down the `gcp` program as `-l <qm_addon_method>`
+
+gCP and DFT-D3 together
+-----------------------
+
+If both correction should be applied at the same time (`qm_addon=gcp-d3`) then string input for each programs need to be separated by a plus (`+`) sign where the gcp string is given first::
+
+    qr.refine [usual options] quantum.qm_addon=gcp-d3 quantum.qm_addon_method="hf/631g+b3-lyp -bj"
+
+
+The `dftd3` and `gcp` programs need to be installed separately and can be obtained from Prof. Grimme (https://www.chemie.uni-bonn.de/pctc/mulliken-center/software)
+The gCP and D3 corrections are described herein:
+
+H. Kruse,S. Grimme J. Chem. Phys. 136 , 154101 (2012) https://doi.org/10.1063/1.3700154
+
+S. Grimme, J. Antony, S. Ehrlich, H. Krieg J. Chem. Phys. 132, 154104 (2010) https://doi.org/10.1063/1.3382344
