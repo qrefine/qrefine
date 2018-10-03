@@ -7,12 +7,14 @@ Calculate the total charge of a model
 Overview
 --------
 
-A program to
+A program to calculate the total formal charge of a model.
 
 Running the program
 -------------------
 
-``qr.charges`` can be executed
+``qr.charges`` can be executed on a PDB model file but the primary use if from
+the clustering code to determine the charge for each cluster that is needed by
+the QM code.
 
 
 List of all available keywords

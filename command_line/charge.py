@@ -30,10 +30,13 @@ ligand_cif_file_name = None
   .multiple = True
 list_charges = False
   .type = bool
+  .help = Print a list of all the atoms with non-zero charge.
 electrons = True
   .type = bool
+  .help = debug option - do not change.
 assert_correct_chain_terminii = True
   .type = bool
+  .help = Tests for hydrogens on the N terminii.
 verbose = False
   .type = bool
 """
