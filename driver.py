@@ -87,6 +87,7 @@ class convergence(object):
 class minimizer(object):
   def __init__(self,
         stpmax,
+        log_switch,
         calculator,
         max_iterations,
         gradient_only,
@@ -104,6 +105,7 @@ class minimizer(object):
       target_evaluator=self,
       gradient_only=gradient_only,
       line_search=line_search,
+      log=log_switch,
       core_params=self.lbfgs_core_params,
       termination_params=scitbx.lbfgs.termination_parameters(
         max_iterations=max_iterations),
@@ -190,9 +192,12 @@ class restart_data(object):
 
 def run_minimize(calculator, params, results, geometry_rmsd_manager):
   minimized = None
+  log_switch = None
+  if (params.refine.opt_log or params.debug): log_switch=results.log
   try:
     if(params.refine.max_iterations > 0):
       minimized = minimizer(
+        log_switch            = log_switch,
         calculator            = calculator,
         stpmax                = params.refine.stpmax,
         gradient_only         = params.refine.gradient_only,
@@ -420,6 +425,8 @@ def opt(xray_structure,
         results,
         calculator,
         geometry_rmsd_manager):
+  log_switch = None
+  if (params.refine.opt_log or params.debug): log_switch=results.log
   rst_file = params.rst_file
   rst_data = restart_data(xray_structure, geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
@@ -454,6 +461,7 @@ def opt(xray_structure,
       xray_structure=xray_structure,
       results=results)
     minimized = minimizer(
+      log_switch     = log_switch,
       calculator     = calculator,
       stpmax         = params.refine.stpmax,
       gradient_only  = params.refine.gradient_only,
