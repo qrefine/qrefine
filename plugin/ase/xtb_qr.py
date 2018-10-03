@@ -52,6 +52,7 @@ class GFNxTB(Calculator):
         self.forces = None
         self.stress = None
         self.command = command
+        self.calc_dir = None
 
 
     def run_command(self,command):
@@ -66,8 +67,10 @@ class GFNxTB(Calculator):
         proc.wait()
         exitcode = proc.returncode
         if exitcode != 0:
-            print exitcode
-            raise RuntimeError(command+' exited with error code')
+            # print exitcode,'label:', self.calc_dir
+            error='%s exited with error code %i in %s' % (
+                           command,exitcode,self.calc_dir)
+            raise RuntimeError(error)
         return 0
 
     def write_input(self,atoms):
@@ -84,12 +87,6 @@ class GFNxTB(Calculator):
             for j in range(3):
                 finput.write('%20.10f' % coordinates[i, j])
             finput.write('\n')
-        # finput.write(" %s \n \n" % len(atoms))
-        # for index in range(len(atoms)):
-        #     finput.write(str(atoms.get_chemical_symbols()[index]) +  " "
-        #                     + str(atoms[index].position[0])+  " "
-        #                     + str(atoms[index].position[1])+  " "
-        #                     + str(atoms[index].position[2])+ "\n" )
         finput.close()
 
     def get_command(self):
@@ -124,8 +121,8 @@ class GFNxTB(Calculator):
         working_dir = os.getcwd()
         if not  os.path.isdir(self.label):
           os.mkdir(self.label)
-        calc_dir = os.path.join(working_dir,self.label)
-        os.chdir(calc_dir)
+        self.calc_dir = os.path.join(working_dir,self.label)
+        os.chdir(self.calc_dir)
         self.coordinates = 'xtb_tmp.xyz'
 
         # debug statements
@@ -155,15 +152,30 @@ class GFNxTB(Calculator):
                 str(method) )
 
         #clean up
-        for f in ['energy','gradients']:
+        for f in ['energy','gradients','xtbrestart']:
             if os.path.exists(f):
                 os.remove(f)
+
         self.run_command(command)
+
+        # probably not worth it.
+        # if (not self.check_scf_conv):
+        #     print 'restarting failed xtb job'
+        #     self.run_command(command)
 
         self.read_energy()
         self.read_forces()
         self.energy_zero= self.energy_free
         os.chdir(working_dir)
+
+    def check_scf_conv(self):
+        text = open('energy', 'r').read().lower()
+        lines = iter(text.split('\n'))
+        scf_conv=False
+        for line in lines:
+            if 'scf converged':
+                scf_conv=True
+        return scf_conv
 
     def read_energy(self):
         """Read Energy from Turbomole energy file."""
