@@ -23,6 +23,7 @@ atom_database = {'H' : {'valence' : 1},
                          'metal' : True},
                  }
 # via attila
+# transition metals need to have a mutliplicity set
 atom_database['Cu'] = {'valence': 1, 'lone pairs': 1}
 
 class atom_property(dict):

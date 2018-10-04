@@ -92,6 +92,7 @@ class minimizer(object):
         max_iterations,
         gradient_only,
         line_search,
+        results,
         geometry_rmsd_manager=None):
     adopt_init_args(self, locals())
     self.x = self.calculator.x
@@ -130,6 +131,15 @@ class minimizer(object):
         return True
 
   def compute_functional_and_gradients(self):
+    if 0:
+      run_collect(
+          n_fev                 = 1,
+          results               = self.results,
+          fmodel                = self.calculator.fmodel,
+          calculator            = self.calculator,
+          geometry_rmsd_manager = self.geometry_rmsd_manager)
+      self.results.show('step')
+
     self.counter+=1
     self.number_of_function_and_gradients_evaluations += 1
     # Ad hoc damping shifts; note arbitrary 1.0 below
@@ -203,7 +213,9 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager):
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
         max_iterations        = params.refine.max_iterations,
-        geometry_rmsd_manager = geometry_rmsd_manager)
+        results               = results,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        )
   except Sorry as e:
     print >> results.log, e
   except Exception as e:
