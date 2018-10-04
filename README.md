@@ -92,26 +92,6 @@ modules directory. The above command will clone it from *GitHub*.
 ```
 If any of the tests fail, please raise and issue here: [issue tracker](https://github.com/qrefine/qrefine/issues)
 
-### Run Example 
-
-If tests run successfully, then try and run an example: 
-
-
-```
- qr.finalise --example
-``` 
-
-```
- qr.chunk --example
-``` 
- 
-```
- qr.restraint --example
-```
-
-```
- qr.refine --example
-```
 
 ### adding dispersion or BSSE (gCP) correction to arbitrary methods
 Sometimes quantum chemistry programs do not, or insufficiently, provide the D3 dispersion or the gCP BSSE correction. This can be remedied with the following interface:
@@ -142,7 +122,7 @@ DOI: [10.1063/1.3382344](https://doi.org/10.1063/1.3382344)
 
 If you run into any trouble please ask for help:
 ```
- qr.refine --help
+ qr.refine
 ```
 
 ### Contact us 
