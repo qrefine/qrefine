@@ -117,6 +117,7 @@ def get_pdb_interpretation_params():
     input_string=pdb_interpretation.master_params_str,
     process_includes=True)
   params = master_params.extract()
+  params.automatic_linking.link_metals=True
   return params
 
 def get_processed_pdb(pdb_filename=None,
@@ -125,6 +126,8 @@ def get_processed_pdb(pdb_filename=None,
                       params=None,
                       cif_objects=None,
                       ):
+  if params is None:
+    params = get_pdb_interpretation_params()
   mon_lib_srv = monomer_library.server.server()
   if cif_objects:
     for cif_object in cif_objects:

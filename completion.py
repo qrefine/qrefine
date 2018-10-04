@@ -397,6 +397,10 @@ def conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
         assert p.origin_id==0
         if sgs[0] in p.i_seqs:
           sg_bonds.append(p.i_seqs)
+      for p in bond.get_proxies_without_origin_id(0):
+        assert p.origin_id!=0
+        if sgs[0] in p.i_seqs:
+          sg_bonds.append(p.i_seqs)
   if len(sg_bonds)==1:
     add_cys_hg_to_residue_group(rg)
 
