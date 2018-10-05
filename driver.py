@@ -473,6 +473,7 @@ def opt(xray_structure,
       xray_structure=xray_structure,
       results=results)
     minimized = minimizer(
+      results        = results,
       log_switch     = log_switch,
       calculator     = calculator,
       stpmax         = params.refine.stpmax,
