@@ -120,7 +120,18 @@ class minimizer(object):
         )
         )
 
-  def callback_after_step(self, minimizer):
+  def _helper(self):
+    b_mean = None
+    if(self.geometry_rmsd_manager is not None):
+      s = self.calculator.not_hd_selection
+      energies_sites = \
+        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
+          sites_cart        = flex.vec3_double(self.x).select(s),
+          compute_gradients = False)
+      b_mean = energies_sites.bond_deviations()[2]
+    return b_mean
+
+  def callback_after_step(self, minimizer=None):
     if(self.geometry_rmsd_manager is not None):
       s = self.calculator.not_hd_selection
       energies_sites = \
@@ -140,7 +151,14 @@ class minimizer(object):
           calculator            = self.calculator,
           geometry_rmsd_manager = self.geometry_rmsd_manager)
       self.results.show('step')
-
+    #
+    #cbas=self._helper()
+    #if   cbas > 0.5:  max_value=0.025
+    #elif cbas > 0.06: max_value=0.1
+    #else:             max_value=1.0
+    #print cbas
+    max_value=1
+    #
     self.counter+=1
     self.number_of_function_and_gradients_evaluations += 1
     # Ad hoc damping shifts; note arbitrary 1.0 below
@@ -149,7 +167,7 @@ class minimizer(object):
       self.x_previous = x_current.deep_copy()
     else:
       xray.ext.damp_shifts(previous=self.x_previous, current=x_current,
-        max_value=1.)
+        max_value=max_value)
       self.x_previous = x_current.deep_copy()
     #
     return self.calculator.target_and_gradients(x = self.x)
@@ -205,24 +223,16 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager):
   minimized = None
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=results.log
-  try:
-    if(params.refine.max_iterations > 0):
-      minimized = minimizer(
-        log_switch            = log_switch,
-        calculator            = calculator,
-        stpmax                = params.refine.stpmax,
-        gradient_only         = params.refine.gradient_only,
-        line_search           = params.refine.line_search,
-        max_iterations        = params.refine.max_iterations,
-        results               = results,
-        geometry_rmsd_manager = geometry_rmsd_manager,
-        )
-  except Sorry as e:
-    print >> results.log, e
-  except Exception as e:
-    print >> results.log, e
-    print >> results.log, "  minimizer failed"
-    results.log.flush()
+  if(params.refine.max_iterations > 0):
+    minimized = minimizer(
+      log_switch            = log_switch,
+      calculator            = calculator,
+      stpmax                = params.refine.stpmax,
+      gradient_only         = params.refine.gradient_only,
+      line_search           = params.refine.line_search,
+      max_iterations        = params.refine.max_iterations,
+      results               = results,
+      geometry_rmsd_manager = geometry_rmsd_manager)
   return minimized
 
 def run_collect(n_fev, results, fmodel, geometry_rmsd_manager, calculator):
@@ -299,11 +309,7 @@ def refine(fmodel,
       if(clustering):
         cluster_qm_update.re_clustering(calculator)
       # Calculate weight
-      try:
-        calculator.calculate_weight(verbose=params.debug)
-      except Exception as e:
-        print >> results.log, e
-        raise Sorry("Failed to get weight")
+      calculator.calculate_weight(verbose=params.debug)
       # Collect state
       rst_data.write_rst_file(
         rst_file     = rst_file,
@@ -384,11 +390,7 @@ def refine(fmodel,
   if(refine_cycle_start is None): refine_cycle_start=1
   #
   if(params.refine.skip_initial_weight_optimization):
-    try:
-      calculator.calculate_weight(verbose=params.debug)
-    except Exception as e:
-      print >> results.log, e
-      raise Sorry("Failed to get weight")
+    calculator.calculate_weight(verbose=params.debug)
   #
   for refine_cycle in xrange(refine_cycle_start,
                       params.refine.number_of_refine_cycles+refine_cycle_start):
