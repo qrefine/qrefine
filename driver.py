@@ -117,7 +117,8 @@ class minimizer(object):
         ignore_line_search_failed_maxfev=True,
         ignore_line_search_failed_xtol=True,
         ignore_search_direction_not_descent=True
-        ))
+        )
+        )
 
   def callback_after_step(self, minimizer):
     if(self.geometry_rmsd_manager is not None):
@@ -283,7 +284,7 @@ def refine(fmodel,
     print >> results.log, \
      "Found optimal weight. Proceed to further refinement with this weight."
     fmodel = calculator.fmodel.deep_copy()
-  else:
+  elif(not params.refine.skip_initial_weight_optimization):
     print >> results.log, "Optimal weight search:"
     fmodel_copy = calculator.fmodel.deep_copy()
     for weight_cycle in xrange(weight_cycle_start,
@@ -380,6 +381,15 @@ def refine(fmodel,
     results.show(prefix="  ")
     print >> results.log, "Start further refinement:"
     refine_cycle_start = 1
+  if(refine_cycle_start is None): refine_cycle_start=1
+  #
+  if(params.refine.skip_initial_weight_optimization):
+    try:
+      calculator.calculate_weight(verbose=params.debug)
+    except Exception as e:
+      print >> results.log, e
+      raise Sorry("Failed to get weight")
+  #
   for refine_cycle in xrange(refine_cycle_start,
                       params.refine.number_of_refine_cycles+refine_cycle_start):
     calculator.reset_fmodel(fmodel=fmodel)

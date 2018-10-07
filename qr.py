@@ -124,6 +124,8 @@ refine {
     .type = int
   data_weight=None
     .type = float
+  skip_initial_weight_optimization = False
+    .type = bool
   max_iterations = 50
     .type = int
   line_search = True
