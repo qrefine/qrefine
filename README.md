@@ -80,6 +80,7 @@ modules directory. The above command will clone it from *GitHub*.
   phenix.python -m pip install ase
   phenix.python -m pip install JPype1
   phenix.python -m pip install pymongo
+  git clone https://github.com/qrefine/qrefine.git
   libtbx.configure qrefine
 ```
 
