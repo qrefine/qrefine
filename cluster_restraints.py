@@ -37,10 +37,12 @@ class from_cluster(object):
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
        selection_and_sites_cart.append([selection_fragment, sites_cart,index])
-       # DEBUG
-       self.fragment_manager.pdb_hierarchy_super.select(selection_fragment).write_pdb_file(
+       # DEBUG begin
+       super_selection = self.restraints_manager.fragment_extracts.fragment_super_selections[index]
+       self.fragment_manager.pdb_hierarchy_super.select(super_selection).write_pdb_file(
          file_name        = self.restraints_manager.file_name.replace(".pdb","_%s.pdb"%str(index)),
          crystal_symmetry = self.fragment_manager.expansion.cs_box)
+       # DEBUG end
        if(0):##for debugging parallel_map
          self.restraints_manager.target_and_gradients(sites_cart=sites_cart,
                           selection=selection_fragment, index=index)
