@@ -16,12 +16,7 @@ class from_cluster(object):
   def target_and_gradients(self, sites_cart):
     # update the pdb hierarchy of the center
     system_size = sites_cart.size()
-    self.fragment_manager.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    ## the super_sphere's selection, and its pdb_hierarchy and
-    ##geometry_restraints_manager get updated when a new clustering is executing.
-    ## just update the xyz of pdb_hierarchy_super_sphere
-    self.fragment_manager.pdb_hierarchy_super = self.fragment_manager.\
-      expansion.update_xyz(sites_cart=sites_cart).ph_super_sphere
+    self.fragment_manager.update_xyz(sites_cart)
     sites_cart = self.fragment_manager.pdb_hierarchy_super.atoms().extract_xyz()
     #
     self.fragment_manager.pdb_hierarchy_super.write_pdb_file(

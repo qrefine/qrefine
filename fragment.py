@@ -76,6 +76,9 @@ class fragments(object):
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
     self.get_altloc_molecular_indices()
+    if(1):
+      self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
+                           if atom.pdb_label_columns()[4]!=" "]
     self.expansion = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
@@ -84,9 +87,6 @@ class fragments(object):
     ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
     self.expansion.write_super_cell_selected_in_sphere(file_name=self.expansion_file)
-    if(1):
-      self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
-                           if atom.pdb_label_columns()[4]!=" "]
     if(clustering):
       self.yoink_dat_path = os.path.join(qrefine,"plugin","yoink","dat")
       self.pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"))
@@ -94,6 +94,25 @@ class fragments(object):
       #t0 = time.time()
       self.set_up_cluster_qm()
       #print "time taken for interaction graph",(time.time() - t0)
+  
+  def update_xyz(self,sites_cart):
+    self.pdb_hierarchy.atoms().set_xyz(sites_cart)
+    pre_size= self.pdb_hierarchy_super.atoms_size()
+    self.expansion = self.expansion.update_xyz(
+                                 sites_cart=sites_cart)
+    self.pdb_hierarchy_super = self.expansion.ph_super_sphere
+    if(self.expansion.ph_super_sphere.atoms_size()!=pre_size): 
+      #Note: the atom size of self.expansion.ph_super_sphere gets changeed,
+      #while the atom size in super_sphere_geometry_restraints_manager
+      #does not get changed. Re-generate the object of expand
+      if(1):
+        self.expansion = expand(
+          pdb_hierarchy        = self.pdb_hierarchy,
+          crystal_symmetry     = self.crystal_symmetry,
+          select_within_radius = 10.0)
+        self.pdb_hierarchy_super = self.expansion.ph_super_sphere
+      self.get_fragments()
+      self.get_fragment_hierarchies_and_charges()
 
   def get_altloc_molecular_indices(self):
     self.altloc_molecular_indices=[]
