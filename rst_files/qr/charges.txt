@@ -13,8 +13,11 @@ Running the program
 -------------------
 
 ``qr.charges`` can be executed on a PDB model file but the primary use if from
-the clustering code to determine the charge for each cluster that is needed by
-the QM code.
+the clustering code. The two main functions are
+
+  - cap the cluster with hydrogens to provide a neutral buffer layer and better
+    SCF convergence
+  - to determine the charge for each cluster
 
 
 List of all available keywords

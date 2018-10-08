@@ -5,7 +5,7 @@ Quantum|Refinement: final-stage refinement with restraints from Quantum Chemistr
 Authors
 =======
 
-  Min Zheng, Pavel Afonine, Mark Waller, Nigel Moriarty
+Min Zheng, Pavel Afonine, Mark Waller, Nigel Moriarty
 
 Purpose
 =======
@@ -35,6 +35,8 @@ Literature
 ==========
 
 https://journals.iucr.org/d/issues/2017/01/00/lp5021/lp5021.pdf
+
+https://journals.iucr.org/d/issues/2017/12/00/lp5024/lp5024.pdf
 
 List of all available keywords
 ------------------------------

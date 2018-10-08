@@ -490,7 +490,6 @@ def opt(xray_structure,
       stpmax         = params.refine.stpmax,
       gradient_only  = params.refine.gradient_only,
       line_search    = params.refine.line_search,
-      results        = None,
       max_iterations = params.refine.max_iterations)
     calculator.update_xray_structure()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(

@@ -384,25 +384,48 @@ def add_cys_hg_to_residue_group(rg,
 def conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
                                          rg,
                                          ):
-  sgs = []
+  sgs = None
   for atom in rg.atoms():
     if atom.name.strip()=='SG' and atom.parent().resname=='CYS':
-      sgs.append(atom.i_seq)
-  assert len(sgs) in [0, 1]
-  sg_bonds = []
+      sgs = atom.i_seq
   if sgs:
-    for bond in geometry_restraints_manager.get_all_bond_proxies():
-      if not hasattr(bond, 'get_proxies_with_origin_id'): continue
-      for p in bond.get_proxies_with_origin_id():
-        assert p.origin_id==0
-        if sgs[0] in p.i_seqs:
-          sg_bonds.append(p.i_seqs)
-      for p in bond.get_proxies_without_origin_id(0):
-        assert p.origin_id!=0
-        if sgs[0] in p.i_seqs:
-          sg_bonds.append(p.i_seqs)
-  if len(sg_bonds)==1:
-    add_cys_hg_to_residue_group(rg)
+    sg_bonds = generate_bonded_i_seqs(geometry_restraints_manager, rg, sgs)
+    if len(sg_bonds)==1:
+      add_cys_hg_to_residue_group(rg)
+
+def remove_cys_hg_from_residue_group(rg):
+  for ag in rg.atom_groups():
+    if ag.resname not in ['CYS']: continue
+    for atom in ag.atoms():
+      if atom.name==' HG ':
+        ag.remove_atom(atom)
+        break
+
+def conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
+                                            rg,
+                                            ):
+  sgs = None
+  for atom in rg.atoms():
+    if atom.name.strip()=='SG' and atom.parent().resname=='CYS':
+      sgs = atom.i_seq
+      break
+  if sgs:
+    sg_bonds = generate_bonded_i_seqs(geometry_restraints_manager, rg, sgs)
+    if len(sg_bonds)>2:
+      remove_cys_hg_from_residue_group(rg)
+
+def generate_bonded_i_seqs(geometry_restraints_manager, rg, j_seq):
+  def _not_j_seq(j_seq, i_seqs):
+    i_seqs.remove(j_seq)
+    return i_seqs[0]
+  bonds = []
+  for bond in geometry_restraints_manager.pair_proxies().bond_proxies.simple:
+    if j_seq in bond.i_seqs:
+      bonds.append(_not_j_seq(j_seq, list(bond.i_seqs)))
+  for bond in geometry_restraints_manager.pair_proxies().bond_proxies.asu:
+    if j_seq in [bond.i_seq, bond.j_seq]:
+      bonds.append(_not_j_seq(j_seq, [bond.i_seq, bond.j_seq]))
+  return bonds
 
 def iterate_over_threes(hierarchy,
                         geometry_restraints_manager,
@@ -432,9 +455,11 @@ def iterate_over_threes(hierarchy,
     if use_capping_hydrogens:
       for i in range(len(three)):
         rg = get_residue_group(three[i])
-        conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
-                                              rg,
-                                              )
+        conditional_add_cys_hg_to_atom_group(geometry_restraints_manager, rg)
+    else:
+      for i in range(len(three)):
+        rg = get_residue_group(three[i])
+        conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager, rg)
     # check if N-term residue - FVA
     n_term_done = False
     if three[0].resname in ['FVA',
