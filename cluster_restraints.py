@@ -9,6 +9,18 @@ from scitbx.array_family import flex
 from fragment import fragment_extracts
 from restraints import from_qm
 
+def check_no_altlocs(h, file_name):
+  altlocs = []
+  for ch in h.chains():
+    for co in ch.conformers():
+      altlocs.append(co.altloc)
+  altlocs = list(set(altlocs))
+  assert len(altlocs)<=2, [file_name, altlocs]
+  cntr = 0
+  for a in altlocs:
+    if(len(a)==0): cntr+=1
+  assert cntr==1, [file_name, altlocs]
+
 class from_cluster(object):
   def __init__(self, restraints_manager, fragment_manager, parallel_params):
     adopt_init_args(self, locals())
@@ -33,10 +45,14 @@ class from_cluster(object):
                        self.fragment_manager.fragment_selections):
        selection_and_sites_cart.append([selection_fragment, sites_cart,index])
        # DEBUG begin
-       super_selection = self.restraints_manager.fragment_extracts.fragment_super_selections[index]
-       self.fragment_manager.pdb_hierarchy_super.select(super_selection).write_pdb_file(
-         file_name        = self.restraints_manager.file_name.replace(".pdb","_%s.pdb"%str(index)),
+       super_selection = self.restraints_manager.\
+         fragment_extracts.fragment_super_selections[index]
+       tmp_h = self.fragment_manager.pdb_hierarchy_super.select(super_selection)
+       file_name = self.restraints_manager.file_name.replace(".pdb","_%s.pdb"%str(index))
+       tmp_h.write_pdb_file(
+         file_name        = file_name,
          crystal_symmetry = self.fragment_manager.expansion.cs_box)
+       check_no_altlocs(h=tmp_h, file_name=file_name)
        # DEBUG end
        if(0):##for debugging parallel_map
          self.restraints_manager.target_and_gradients(sites_cart=sites_cart,
