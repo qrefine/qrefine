@@ -97,11 +97,15 @@ class fragments(object):
   
   def update_xyz(self,sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    pre_size= self.pdb_hierarchy_super.atoms_size()
+    pre_atoms=[atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
     self.expansion = self.expansion.update_xyz(
                                  sites_cart=sites_cart)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
-    if(self.expansion.ph_super_sphere.atoms_size()!=pre_size): 
+    new_atoms=[ atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
+    #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size): 
+    if(pre_atoms!=new_atoms):
+      if(self.debug):
+        print("the content of the super sphere has been changed,reset up fragments")
       #Note: the atom size of self.expansion.ph_super_sphere gets changeed,
       #while the atom size in super_sphere_geometry_restraints_manager
       #does not get changed. Re-generate the object of expand
