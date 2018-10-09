@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title></title>
+
+    <link rel="stylesheet" type="text/css" href="../css/html4css1.css" />
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
+
+  </head>
+  <body>
+
+    <div id="header">
+      <a href="../qr.html">
+        <img src="../icons/qr-logo-small.jpg" alt="Q|Refinement" />
+        <span>
+          <strong>Q|R</strong>efinement
+        </span>
+      </a>
+    </div>
+
+    <div class="document">
+<div class="section" id="qm-program-interfaces">
+<h1>QM program interfaces</h1>
+<p>The interfaces to the QM programs are</p>
+<div class="section" id="terachem">
+<h2>TeraChem</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>terachem</dd>
+<dt>requirements</dt>
+<dd>set <tt class="docutils literal">TeraChem_COMMAND</tt> to the TeraChem execution command.</dd>
+</dl>
+<p>Notes:</p>
+<pre class="literal-block">
+The default runs a HF-D3(BJ)/6-31G calculation.
+</pre>
+</div>
+<div class="section" id="orca">
+<h2>ORCA</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>orca</dd>
+<dt>requirements</dt>
+<dd>set <tt class="docutils literal">ORCA_COMMAND</tt> to the ORCA execution command.</dd>
+</dl>
+<p>Notes:</p>
+<pre class="literal-block">
+For parallel execution of ORCA the ``ORCA_COMMAND`` should contain
+the full path to the `orca` binary.
+</pre>
+</div>
+<div class="section" id="gaussian">
+<h2>Gaussian</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>gaussian</dd>
+</dl>
+<p>requirements</p>
+<p>Notes:</p>
+<pre class="literal-block">
+The default runs...
+</pre>
+</div>
+<div class="section" id="turbomole">
+<h2>Turbomole</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>turbomole</dd>
+<dt>requirements</dt>
+<dd>same as for turbomole itself</dd>
+</dl>
+<p>Notes:</p>
+<pre class="literal-block">
+The default runs BP86/def2-SV(P) calculations.
+only RI-J calculations.
+quantum.method sets the DFT functional.
+quantum.basis sets the AO basis set.
+</pre>
+</div>
+<div class="section" id="mopac">
+<h2>MOPAC</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>mopac</dd>
+<dt>requirements</dt>
+<dd>set <tt class="docutils literal">MOPAC_COMMAND</tt> to the mopac execution command.</dd>
+</dl>
+<p>Notes:</p>
+<pre class="literal-block">
+default runs PM7
+</pre>
+</div>
+<div class="section" id="gfn-xtb">
+<h2>GFN-xTB</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>xtb</dd>
+<dt>requirements</dt>
+<dd>set <tt class="docutils literal">XTBHOME</tt> to the installation directory.</dd>
+</dl>
+<p>Notes:</p>
+<pre class="literal-block">
+The default runs GFN2-xTB (-gfn2 option)
+</pre>
+<p>example using non-default GFN1-xTB:</p>
+<pre class="literal-block">
+qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method='-gfn1 -gbsa h2o -etemp 500'
+</pre>
+</div>
+<div class="section" id="ani">
+<h2>ANI</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>ani</dd>
+</dl>
+<p>requirements</p>
+<p>Notes</p>
+</div>
+<div class="section" id="torchani">
+<h2>TORCHANI</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>torchani</dd>
+</dl>
+<p>requirements</p>
+<p>Notes</p>
+</div>
+</div>
+<div class="section" id="qm-addon">
+<h1>qm_addon</h1>
+<p>This helper functionality adds dispersion (DFT-D3) and/or BSSE (gCP) corrections to another interface.</p>
+<p>Examples:</p>
+<div class="section" id="dft-d3-dispersion-correction">
+<h2>DFT-D3 dispersion correction</h2>
+<p>adds &quot;-D3(BJ)&quot; to B3LYP calculations. Functional needs to parametrized and &quot;-bj or -zero&quot; needs to be specified:</p>
+<pre class="literal-block">
+qr.refine [usual options] quantum.qm_addon=dftd3 quantum.qm_addon_method=&quot;b3-lyp -bj&quot;
+</pre>
+<p>The <cite>qm_addon_method</cite> string will be handed down the <cite>dftd3</cite> program as <cite>-func &lt;qm_addon_method&gt;</cite></p>
+</div>
+<div class="section" id="gcp-bsse-correction">
+<h2>gCP BSSE correction</h2>
+<p>adds &quot;gCP correction for HF/6-31G&quot; to any QM results. Basis sets needs to parametrized. Will output an error if a basis is not available (overview of parameter sets available if calling &quot;gcp -h&quot;):</p>
+<pre class="literal-block">
+qr.refine [usual options] quantum.qm_addon=gcp quantum.qm_addon_method=&quot;hf/631g&quot;
+</pre>
+<p>The <cite>qm_addon_method</cite> string will be handed down the <cite>gcp</cite> program as <cite>-l &lt;qm_addon_method&gt;</cite></p>
+</div>
+<div class="section" id="gcp-and-dft-d3-together">
+<h2>gCP and DFT-D3 together</h2>
+<p>If both correction should be applied at the same time (<cite>qm_addon=gcp-d3</cite>) then string input for each programs need to be separated by a plus (<cite>+</cite>) sign where the gcp string is given first:</p>
+<pre class="literal-block">
+qr.refine [usual options] quantum.qm_addon=gcp-d3 quantum.qm_addon_method=&quot;hf/631g+b3-lyp -bj&quot;
+</pre>
+<p>The <cite>dftd3</cite> and <cite>gcp</cite> programs need to be installed separately and can be obtained from Prof. Grimme (<a class="reference external" href="https://www.chemie.uni-bonn.de/pctc/mulliken-center/software">https://www.chemie.uni-bonn.de/pctc/mulliken-center/software</a>)
+The gCP and D3 corrections are described herein:</p>
+<ol class="upperalpha simple" start="8">
+<li>Kruse,S. Grimme J. Chem. Phys. 136 , 154101 (2012) <a class="reference external" href="https://doi.org/10.1063/1.3700154">https://doi.org/10.1063/1.3700154</a></li>
+</ol>
+<ol class="upperalpha simple" start="19">
+<li>Grimme, J. Antony, S. Ehrlich, H. Krieg J. Chem. Phys. 132, 154104 (2010) <a class="reference external" href="https://doi.org/10.1063/1.3382344">https://doi.org/10.1063/1.3382344</a></li>
+</ol>
+</div>
+</div>
+</div>
+
+  </body>
+</html>

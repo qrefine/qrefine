@@ -1,0 +1,187 @@
+body {
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: Verdana, Helvetica, Arial, Sans-Serif;
+  font-size: 0.9em;
+}
+div.wide {
+  width: 1024px;
+}
+img {
+  max-width: 800px;
+}
+#header {
+  border-bottom: solid 1px black;
+}
+#header img {
+  width: 172px;
+  margin-right: 20px;
+}
+#header span {
+  font-size: 12pt;
+  padding-bottom: 10px;
+  font-style: italic;
+}
+#header a {
+  text-decoration: none;
+  color: black;
+}
+.contents {
+  border:solid 1px black;
+  padding: 10px;
+}
+
+/* section headings */
+h1 {
+  font-size: 16pt;
+  text-decoration: underline;
+}
+h2 {
+  font-size: 14pt;
+}
+h3 {
+  font-size: 14pt;
+}
+
+/* PHIL formatting */
+ul.phil {
+  font-family: monospace;
+  list-style: none;
+  padding-left: 0px;
+}
+ul.phil ul {
+  list-style: none;
+}
+li.phil-param {
+  clear:both;
+  padding: 5px;
+}
+.phil-scope > span {
+  font-weight: bold;
+}
+.phil-words {
+  color: red;
+}
+.phil-help {
+  color: blue;
+  width: 500px !important;
+  float: right;
+}
+
+/* Drop-down menu */
+#nav {
+  background: #052a47;
+  list-style: none;
+  margin: 0px;
+  clear: both;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 0px;
+  float: left;
+}
+#nav a {
+  color: white;
+  display: block;
+  padding: 6px;
+  text-decoration: none;
+}
+#nav a:hover {
+  color: #ccc;
+}
+#nav > li {
+  float: left;
+  margin: 0px;
+  position: relative;
+}
+#nav > li > ul {
+  display: none;
+  position: absolute;
+  left: 0px;
+  width: 240px;
+  padding: 0px;
+  list-style: none;
+  background: #9ca9b2;
+}
+#nav > li:hover > ul {
+  display: block;
+}
+
+
+
+.tutorial_td {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.tutorial_btnimg {
+  width: 120px;
+  height: 112px;
+}
+
+.tutorial_text {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tutorial_container{
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  }
+
+.tutorial_accordion {
+    color: #444;
+    cursor: pointer;
+    padding: 5px;
+    margin: 50 auto;
+    width: 100%;
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+    outline: none;
+    font-size: 20px;
+    font-weight: bold;
+    transition: 0.4s;
+}
+
+.tutorial_color1 {
+  background-color: #87CEFA;
+}
+.tutorial_color2 {
+  background-color: #FFA07A;
+}
+.tutorial_color3 {
+  background-color: #90EE90;
+}
+.tutorial_color4 {
+  background-color: #D8BFD8;
+}
+
+.active.tutorial_color1, .accordion.tutorial_color1:hover {
+    background-color: #00BFFF;
+}
+.active.tutorial_color2, .accordion.tutorial_color2:hover {
+    background-color: #E9967A;
+}
+.active.tutorial_color3, .accordion.tutorial_color3:hover {
+    background-color: #66CDAA;
+}
+.active.tutorial_color4, .accordion.tutorial_color4:hover {
+    background-color: #DB7093;
+}
+
+.tutorial_panel {
+    padding: 0 18px;
+    margin-left: 0px;
+    background-color:#f6f6f6;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+

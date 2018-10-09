@@ -5,6 +5,7 @@ from qrefine import finalise
 import iotbx
 import mmtbx
 from mmtbx import utils
+from libtbx.utils import Sorry
 
 log = sys.stdout
 
