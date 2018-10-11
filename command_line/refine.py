@@ -92,12 +92,9 @@ def run(args, log):
   # Read map
   map_data = None
   if(cmdline.ccp4_map is not None):
-    import iotbx.map_and_model
-    inp = iotbx.map_and_model.input(
-      map_data = cmdline.ccp4_map.map_data(),
-      model    = model.model)
     # XXX Pure nonsense!
-    model = inp.model()
+    map_data = cmdline.ccp4_map.map_data()
+    model = model.model#inp.model()
     model = group_args(
       model              = model,
       processed_pdb_file = model._processed_pdb_file, # This must go, use model!
@@ -105,7 +102,6 @@ def run(args, log):
       xray_structure     = model.get_xray_structure(),# This must go, use model!
       cif_objects        = model._restraint_objects,  # This must go, use model!
       has_hd             = model.has_hd)
-    map_data = inp.map_data()
   #
   log.flush()
   qr.run(
