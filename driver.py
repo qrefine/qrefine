@@ -133,12 +133,7 @@ class minimizer(object):
 
   def callback_after_step(self, minimizer=None):
     if(self.geometry_rmsd_manager is not None):
-      s = self.calculator.not_hd_selection
-      energies_sites = \
-        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
-          sites_cart        = flex.vec3_double(self.x).select(s),
-          compute_gradients = False)
-      b_mean = energies_sites.bond_deviations()[2]
+      b_mean = self._helper()
       if(b_mean>0.03 and self.counter-3>5):
         return True
 
@@ -152,13 +147,7 @@ class minimizer(object):
           geometry_rmsd_manager = self.geometry_rmsd_manager)
       self.results.show('step')
     #
-    #cbas=self._helper()
-    #if   cbas > 0.5:  max_value=0.025
-    #elif cbas > 0.06: max_value=0.1
-    #else:             max_value=1.0
-    #print cbas
-    max_value=1
-    #
+    t1 = self._helper()
     self.counter+=1
     self.number_of_function_and_gradients_evaluations += 1
     # Ad hoc damping shifts; note arbitrary 1.0 below
@@ -167,9 +156,10 @@ class minimizer(object):
       self.x_previous = x_current.deep_copy()
     else:
       xray.ext.damp_shifts(previous=self.x_previous, current=x_current,
-        max_value=max_value)
+        max_value=1.0)
       self.x_previous = x_current.deep_copy()
     #
+    print t1, self._helper() # Temporary debugging output
     return self.calculator.target_and_gradients(x = self.x)
 
 class clustering_update(object):
