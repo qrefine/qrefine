@@ -130,7 +130,7 @@ refine {
     .type = int
   line_search = True
     .type = bool
-  stpmax = 3
+  stpmax = 1
     .type = float
   gradient_only = False
     .type = bool
@@ -154,9 +154,23 @@ refine {
     .type = float
   rmsd_tolerance = 0.01
     .type = float
-  opt_log = False
+  opt_log = True
     .type = bool
     .help = additional output of the L-BFGS optimizer
+  pre_opt = False
+    .help = pre-optimization using steepest decent (SD) and conjugate gradient (CG) techniques w/o line search
+  pre_opt_stpmax = 0.1
+    .type = float
+    .help = step size
+  pre_opt_iter= 10
+    .type = int
+    .help = max. iterations for pre-optimizer
+  pre_opt_switch = 2
+    .type = int
+    .help = max. iterations before switching from SD to CG
+  pre_opt_gconv = 3000
+    .type = float
+    .help = gradient norm convergence threshold for pre-optimizer
 }
 
 parallel {
@@ -308,7 +322,7 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       params.quantum.basis=''
   if params.quantum.engine_name=='xtb':
     if params.quantum.method==Auto:
-      params.quantum.method=' -gfn2'
+      params.quantum.method=' -gfn2 -etemp 500 -acc 0.1'
       print >> log, '  Default method for xtb is %s' % (
           params.quantum.method,
           )

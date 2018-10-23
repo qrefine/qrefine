@@ -93,7 +93,8 @@ class minimizer(object):
         gradient_only,
         line_search,
         results,
-        geometry_rmsd_manager=None):
+        geometry_rmsd_manager=None,
+        preopt_params = None):
     adopt_init_args(self, locals())
     self.x = self.calculator.x
     self.x_previous = None
@@ -102,6 +103,11 @@ class minimizer(object):
       stpmin = 1.e-9,
       stpmax = stpmax)
     self.counter = 0
+    self.nstep = 0
+    if preopt_params is not None:
+       self.minimzer  = self.prcg_min (
+       params = preopt_params
+      )
     self.minimizer = scitbx.lbfgs.run(
       target_evaluator=self,
       gradient_only=gradient_only,
@@ -162,6 +168,72 @@ class minimizer(object):
     print t1, self._helper() # Temporary debugging output
     return self.calculator.target_and_gradients(x = self.x)
 
+  def prcg_min(self,params):
+    import numpy as np
+    import os
+    """
+    polak-ribiere conjugate gradient minimizer
+    with simple step scaling and steepest decent steps
+    """
+    max_iter = params["maxiter"]
+    max_step= params["stpmax"] 
+    switch_step= params["iswitch"] - 1
+    gconv = params["gconv"]
+
+    dim=len(self.x)
+    x_new=self.x.as_numpy_array()
+    x_old=x_new
+    g_old=np.zeros(dim)
+    gg=np.zeros(dim)
+    xx=np.zeros(dim)
+    step=np.zeros(dim)
+    gg=np.zeros(dim)
+    conv=False
+    step_old=np.zeros(dim)
+
+    self.x=flex.double(x_new.tolist())
+    for iter in range(max_iter):
+      self.eg=self.calculator.target_and_gradients(x = self.x )
+      g=np.array(list(self.eg[1]))
+      e=self.eg[0]
+      gnorm=np.linalg.norm(g)
+      # gnorm=self.eg[1].norm()/23.0605480121
+      self.number_of_function_and_gradients_evaluations += 1
+      print 'iter= %i E=%12.5E  G=%0.2f' % (iter+1,e,gnorm)
+      #
+      if gnorm <=gconv and iter >1:
+        print 'gnorm pre-convergenced!'
+        self.x=flex.double(x_new.tolist())
+        break
+      #
+      if iter<=switch_step:
+        print 'SD step'
+        step=-g
+      else:
+        print 'CG step'
+        gg=g-g_old
+        gdgg=np.vdot(g,gg)
+        gdg=np.vdot(g_old,g_old)
+        sdgg=np.vdot(step_old,gg)
+        sds=np.vdot(step_old,step_old)
+        alpha=sds/sdgg
+        beta=gdgg/gdg
+        step=-g + beta*step_old
+        step*=alpha
+
+      snorm=np.linalg.norm(step)
+      if snorm>=max_step:
+        step*=max_step/snorm
+        # print 'step norm',snorm
+      x_new =x_old + step
+      #
+      self.x=flex.double(x_new.tolist())
+      e_old=e
+      g_old=g
+      x_old=x_new
+      step_old=step
+    
+
 class clustering_update(object):
   def __init__(self, pre_sites_cart, log, rmsd_tolerance):
     self.pre_sites_cart = pre_sites_cart
@@ -212,6 +284,14 @@ class restart_data(object):
 def run_minimize(calculator, params, results, geometry_rmsd_manager):
   minimized = None
   log_switch = None
+  preopt = None
+  if (params.refine.pre_opt):
+    preopt={
+    'stpmax'  :params.refine.pre_opt_stpmax,
+    'maxiter' :params.refine.pre_opt_iter,
+    'iswitch' :params.refine.pre_opt_switch,
+    'gconv'   :params.refine.pre_opt_gconv,
+  }
   if (params.refine.opt_log or params.debug): log_switch=results.log
   if(params.refine.max_iterations > 0):
     minimized = minimizer(
@@ -222,7 +302,8 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager):
       line_search           = params.refine.line_search,
       max_iterations        = params.refine.max_iterations,
       results               = results,
-      geometry_rmsd_manager = geometry_rmsd_manager)
+      geometry_rmsd_manager = geometry_rmsd_manager,
+      preopt_params         = preopt)
   return minimized
 
 def run_collect(n_fev, results, fmodel, geometry_rmsd_manager, calculator):
@@ -441,6 +522,14 @@ def opt(xray_structure,
         geometry_rmsd_manager):
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=results.log
+  preopt = None
+  if (params.refine.pre_opt):
+    preopt={
+    'stpmax'  :params.refine.pre_opt_stpmax,
+    'maxiter' :params.refine.pre_opt_iter,
+    'iswitch' :params.refine.pre_opt_switch,
+    'gconv'   :params.refine.pre_opt_gconv,
+  }
   rst_file = params.rst_file
   rst_data = restart_data(xray_structure, geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
@@ -481,7 +570,8 @@ def opt(xray_structure,
       gradient_only  = params.refine.gradient_only,
       line_search    = params.refine.line_search,
       results        = results,
-      max_iterations = params.refine.max_iterations)
+      max_iterations = params.refine.max_iterations,
+      preopt_params  = preopt)
     calculator.update_xray_structure()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
@@ -498,5 +588,6 @@ def opt(xray_structure,
        sites_cart = xray_structure.sites_cart())):
       print >> results.log, " Convergence at micro_cycle:", micro_cycle
       break
+    preopt = None # no pre-optimizations after first macrocycle
   rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,
     xray_structure=xray_structure, results=results)

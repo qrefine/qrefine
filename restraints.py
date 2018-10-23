@@ -214,7 +214,7 @@ class from_qm(object):
     else:
       assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
-    unit_convert = ase_units.mol/ase_units.kcal
+    unit_convert = ase_units.mol/ase_units.kcal # ~ 23.06
     self.qm_engine.set_label(qm_pdb_file[:-4])
     cwd = os.getcwd()
 

@@ -152,7 +152,7 @@ class GFNxTB(Calculator):
                 str(method) )
 
         #clean up
-        for f in ['energy','gradients','xtbrestart']:
+        for f in ['energy','gradient','xtbrestart']:
             if os.path.exists(f):
                 os.remove(f)
 
