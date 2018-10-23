@@ -130,7 +130,7 @@ refine {
     .type = int
   line_search = True
     .type = bool
-  stpmax = 1
+  stpmax = 3
     .type = float
   gradient_only = False
     .type = bool
@@ -158,6 +158,7 @@ refine {
     .type = bool
     .help = additional output of the L-BFGS optimizer
   pre_opt = False
+    .type = bool
     .help = pre-optimization using steepest decent (SD) and conjugate gradient (CG) techniques w/o line search
   pre_opt_stpmax = 0.1
     .type = float
