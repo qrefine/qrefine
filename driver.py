@@ -9,6 +9,7 @@ from scitbx.array_family import flex
 import calculator as calculator_module
 from libtbx.utils import Sorry
 from libtbx import group_args
+from ase.optimize.lbfgs import LBFGS
 
 class convergence(object):
   def __init__(self, params, fmodel=None, xray_structure=None):
@@ -223,7 +224,6 @@ class minimizer(object):
       x_old=x_new
       step_old=step
 
-
 class clustering_update(object):
   def __init__(self, pre_sites_cart, log, rmsd_tolerance):
     self.pre_sites_cart = pre_sites_cart
@@ -271,30 +271,60 @@ class restart_data(object):
     self.rst_data["results"] = results
     easy_pickle.dump(file_name=rst_file, obj=self.rst_data)
 
+class minimizer_ase(object):
+  def __init__(self, atoms, restraints):
+    self.restraints = restraints
+    self.atoms = atoms
+    self.opt = LBFGS(atoms=self.atoms)
+    self.cntr = 0
+
+  def step(self):
+    #g = self.atoms.calc.get_forces(self.atoms)
+    pos = self.opt.atoms.get_positions()
+    sites_cart = flex.vec3_double(pos)
+    tg = self.restraints.geometry.energies_sites(
+      sites_cart        = sites_cart,
+      compute_gradients = True)
+    print self.cntr, tg.bond_deviations()[2]
+    g = tg.gradients
+    forces = numpy.array(g) * (-1)
+    self.opt.step(forces)
+    self.cntr += 1
+
+  def write(self, file):
+    write(file, self.opt.atoms)
+
+  def run(self, nstep):
+    for i in range(nstep):
+      self.step()
+
 def run_minimize(calculator, params, results, geometry_rmsd_manager):
   minimized = None
-  log_switch = None
-  preopt = None
-  if (params.refine.pre_opt):
-    preopt={
-    'stpmax'  :params.refine.pre_opt_stpmax,
-    'maxiter' :params.refine.pre_opt_iter,
-    'iswitch' :params.refine.pre_opt_switch,
-    'gconv'   :params.refine.pre_opt_gconv,
-  }
-  if (params.refine.opt_log or params.debug): log_switch=results.log
-  if(params.refine.max_iterations > 0):
-    minimized = minimizer(
-      log_switch            = log_switch,
-      calculator            = calculator,
-      stpmax                = params.refine.stpmax,
-      gradient_only         = params.refine.gradient_only,
-      line_search           = params.refine.line_search,
-      max_iterations        = params.refine.max_iterations,
-      results               = results,
-      mode                  = params.refine.mode,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      preopt_params         = preopt)
+  if(params.refine.use_ase_lbfgs):
+    STOP()
+  else:
+    log_switch = None
+    preopt = None
+    if (params.refine.pre_opt):
+      preopt={
+      'stpmax'  :params.refine.pre_opt_stpmax,
+      'maxiter' :params.refine.pre_opt_iter,
+      'iswitch' :params.refine.pre_opt_switch,
+      'gconv'   :params.refine.pre_opt_gconv,
+    }
+    if (params.refine.opt_log or params.debug): log_switch=results.log
+    if(params.refine.max_iterations > 0):
+      minimized = minimizer(
+        log_switch            = log_switch,
+        calculator            = calculator,
+        stpmax                = params.refine.stpmax,
+        gradient_only         = params.refine.gradient_only,
+        line_search           = params.refine.line_search,
+        max_iterations        = params.refine.max_iterations,
+        results               = results,
+        mode                  = params.refine.mode,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        preopt_params         = preopt)
   return minimized
 
 def run_collect(n_fev, results, fmodel, geometry_rmsd_manager, calculator):

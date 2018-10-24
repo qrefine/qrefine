@@ -43,6 +43,7 @@ import results
 from qrefine.super_cell import expand
 import mmtbx.model.statistics
 from libtbx import Auto
+from ase.io import read as ase_io_read
 
 master_params_str ="""
 
@@ -128,6 +129,8 @@ refine {
     .type = bool
   max_iterations = 50
     .type = int
+  use_ase_lbfgs = False
+    .type = bool
   line_search = True
     .type = bool
   stpmax = 3
@@ -239,7 +242,9 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     model              = model,
     pdb_hierarchy      = model.get_hierarchy(),
     xray_structure     = model.get_xray_structure(),
-    cif_objects        = cif_objects)
+    cif_objects        = cif_objects,
+    ase_atoms          = ase_io_read(pdb_file_name) # To be able to use ASE LBFGS
+    )
 
 def create_fragment_manager(
       cif_objects,
