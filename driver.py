@@ -10,6 +10,7 @@ import calculator as calculator_module
 from libtbx.utils import Sorry
 from libtbx import group_args
 from ase.optimize.lbfgs import LBFGS
+import numpy
 
 class convergence(object):
   def __init__(self, params, fmodel=None, xray_structure=None):
@@ -272,27 +273,27 @@ class restart_data(object):
     easy_pickle.dump(file_name=rst_file, obj=self.rst_data)
 
 class minimizer_ase(object):
-  def __init__(self, atoms, restraints):
-    self.restraints = restraints
-    self.atoms = atoms
-    self.opt = LBFGS(atoms=self.atoms)
-    self.cntr = 0
+  def __init__(self, calculator, params, geometry_rmsd_manager):
+    self.calculator = calculator
+    self.geometry_rmsd_manager = geometry_rmsd_manager
+    self.ase_atoms = calculator.ase_atoms
+    self.ase_atoms.set_positions(flex.vec3_double(self.calculator.x))
+    self.opt = LBFGS(atoms = self.ase_atoms)
+    self.number_of_function_and_gradients_evaluations = 0
+    self.run(nstep = params.refine.max_iterations)
 
   def step(self):
-    #g = self.atoms.calc.get_forces(self.atoms)
     pos = self.opt.atoms.get_positions()
     sites_cart = flex.vec3_double(pos)
-    tg = self.restraints.geometry.energies_sites(
+    t,g = self.calculator.target_and_gradients(x = sites_cart.as_double())
+    b_rmsd = self.geometry_rmsd_manager.geometry.energies_sites(
       sites_cart        = sites_cart,
-      compute_gradients = True)
-    print self.cntr, tg.bond_deviations()[2]
-    g = tg.gradients
+      compute_gradients = True).bond_deviations()[2]
+    print "  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, b_rmsd)
     forces = numpy.array(g) * (-1)
     self.opt.step(forces)
-    self.cntr += 1
-
-  def write(self, file):
-    write(file, self.opt.atoms)
+    self.number_of_function_and_gradients_evaluations += 1
 
   def run(self, nstep):
     for i in range(nstep):
@@ -301,7 +302,10 @@ class minimizer_ase(object):
 def run_minimize(calculator, params, results, geometry_rmsd_manager):
   minimized = None
   if(params.refine.use_ase_lbfgs):
-    STOP()
+    minimized = minimizer_ase(
+      calculator            = calculator,
+      params                = params,
+      geometry_rmsd_manager = geometry_rmsd_manager)
   else:
     log_switch = None
     preopt = None

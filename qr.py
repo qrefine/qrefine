@@ -305,12 +305,14 @@ def create_calculator(weights, params, restraints_manager, fmodel=None,
         fmodel             = fmodel,
         restraints_manager = restraints_manager,
         weights            = weights,
-        dump_gradients     = params.dump_gradients)
+        dump_gradients     = params.dump_gradients,
+        ase_atoms          = model.ase_atoms)
     else:
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
         xray_structure     = model.xray_structure,
-        dump_gradients     = params.dump_gradients)
+        dump_gradients     = params.dump_gradients,
+        ase_atoms          = model.ase_atoms)
   if(params.refine.refine_adp):
     return calculator.adp(
       fmodel             = fmodel,

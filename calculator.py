@@ -137,12 +137,14 @@ class calculator(object):
       self.xray_structure.apply_symmetry_sites()
 
 class sites_opt(calculator):
-  def __init__(self, restraints_manager, xray_structure, dump_gradients):
+  def __init__(self, restraints_manager, xray_structure, dump_gradients,
+                     ase_atoms):
     self.dump_gradients = dump_gradients
     self.restraints_manager = restraints_manager
     self.x = None
     self.xray_structure = xray_structure
     self.not_hd_selection = None # XXX UGLY
+    self.ase_atoms = ase_atoms
     self.initialize(xray_structure = self.xray_structure)
 
   def initialize(self, xray_structure=None):
@@ -171,7 +173,8 @@ class sites(calculator):
                fmodel=None,
                restraints_manager=None,
                weights=None,
-               dump_gradients=None):
+               dump_gradients=None,
+               ase_atoms=None):
     adopt_init_args(self, locals())
     self.x = None
     self.x_target_functor = None
