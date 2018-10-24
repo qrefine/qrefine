@@ -154,7 +154,7 @@ refine {
     .type = float
   rmsd_tolerance = 0.01
     .type = float
-  opt_log = True
+  opt_log = False
     .type = bool
     .help = additional output of the L-BFGS optimizer
   pre_opt = False

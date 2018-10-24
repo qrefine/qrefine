@@ -93,6 +93,7 @@ class minimizer(object):
         gradient_only,
         line_search,
         results,
+        mode,
         geometry_rmsd_manager=None,
         preopt_params = None):
     adopt_init_args(self, locals())
@@ -102,7 +103,6 @@ class minimizer(object):
     self.lbfgs_core_params = scitbx.lbfgs.core_parameters(
       stpmin = 1.e-9,
       stpmax = stpmax)
-    self.counter = 0
     self.nstep = 0
     if preopt_params is not None:
        self.minimzer  = self.prcg_min (
@@ -126,7 +126,7 @@ class minimizer(object):
         )
         )
 
-  def _helper(self):
+  def _get_bond_rmsd(self):
     b_mean = None
     if(self.geometry_rmsd_manager is not None):
       s = self.calculator.not_hd_selection
@@ -138,34 +138,24 @@ class minimizer(object):
     return b_mean
 
   def callback_after_step(self, minimizer=None):
-    if(self.geometry_rmsd_manager is not None):
-      b_mean = self._helper()
-      if(b_mean>0.03 and self.counter-3>5):
+    if(self.geometry_rmsd_manager is not None or self.mode=="refine"):
+      b_mean = self._get_bond_rmsd()
+      if(b_mean>0.03 and self.number_of_function_and_gradients_evaluations-3>5):
         return True
 
   def compute_functional_and_gradients(self):
-    if 0:
-      run_collect(
-          n_fev                 = 1,
-          results               = self.results,
-          fmodel                = self.calculator.fmodel,
-          calculator            = self.calculator,
-          geometry_rmsd_manager = self.geometry_rmsd_manager)
-      self.results.show('step')
-    #
-    t1 = self._helper()
-    self.counter+=1
     self.number_of_function_and_gradients_evaluations += 1
     # Ad hoc damping shifts; note arbitrary 1.0 below
-    x_current = self.x
-    if(self.x_previous is None):
-      self.x_previous = x_current.deep_copy()
-    else:
-      xray.ext.damp_shifts(previous=self.x_previous, current=x_current,
-        max_value=1.0)
-      self.x_previous = x_current.deep_copy()
+    #x_current = self.x
+    #if(self.x_previous is None):
+    #  self.x_previous = x_current.deep_copy()
+    #else:
+    #  xray.ext.damp_shifts(previous=self.x_previous, current=x_current,
+    #    max_value=1.0)
+    #  self.x_previous = x_current.deep_copy()
     #
-    print t1, self._helper() # Temporary debugging output
+    print "  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd())
     return self.calculator.target_and_gradients(x = self.x)
 
   def prcg_min(self,params):
@@ -176,7 +166,7 @@ class minimizer(object):
     with simple step scaling and steepest decent steps
     """
     max_iter = params["maxiter"]
-    max_step= params["stpmax"] 
+    max_step= params["stpmax"]
     switch_step= params["iswitch"] - 1
     gconv = params["gconv"]
 
@@ -232,7 +222,7 @@ class minimizer(object):
       g_old=g
       x_old=x_new
       step_old=step
-    
+
 
 class clustering_update(object):
   def __init__(self, pre_sites_cart, log, rmsd_tolerance):
@@ -302,6 +292,7 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager):
       line_search           = params.refine.line_search,
       max_iterations        = params.refine.max_iterations,
       results               = results,
+      mode                  = params.refine.mode,
       geometry_rmsd_manager = geometry_rmsd_manager,
       preopt_params         = preopt)
   return minimized
@@ -522,14 +513,6 @@ def opt(xray_structure,
         geometry_rmsd_manager):
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=results.log
-  preopt = None
-  if (params.refine.pre_opt):
-    preopt={
-    'stpmax'  :params.refine.pre_opt_stpmax,
-    'maxiter' :params.refine.pre_opt_iter,
-    'iswitch' :params.refine.pre_opt_switch,
-    'gconv'   :params.refine.pre_opt_gconv,
-  }
   rst_file = params.rst_file
   rst_data = restart_data(xray_structure, geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
@@ -563,15 +546,11 @@ def opt(xray_structure,
     rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle,
       xray_structure=xray_structure,
       results=results)
-    minimized = minimizer(
-      log_switch     = log_switch,
-      calculator     = calculator,
-      stpmax         = params.refine.stpmax,
-      gradient_only  = params.refine.gradient_only,
-      line_search    = params.refine.line_search,
-      results        = results,
-      max_iterations = params.refine.max_iterations,
-      preopt_params  = preopt)
+    minimized = run_minimize(
+      calculator            = calculator,
+      params                = params,
+      results               = results,
+      geometry_rmsd_manager = geometry_rmsd_manager)
     calculator.update_xray_structure()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
@@ -588,6 +567,6 @@ def opt(xray_structure,
        sites_cart = xray_structure.sites_cart())):
       print >> results.log, " Convergence at micro_cycle:", micro_cycle
       break
-    preopt = None # no pre-optimizations after first macrocycle
+    params.refine.pre_opt = None # no pre-optimizations after first macrocycle
   rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,
     xray_structure=xray_structure, results=results)
