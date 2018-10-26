@@ -153,6 +153,7 @@ class sites_opt(calculator):
 
   def update(self, x):
     self.x = x
+    self.update_xray_structure()
 
   def target_and_gradients(self, x):
     self.update(x = x)

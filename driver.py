@@ -11,6 +11,7 @@ from libtbx.utils import Sorry
 from libtbx import group_args
 from ase.optimize.lbfgs import LBFGS
 import numpy
+from libtbx.test_utils import approx_equal
 
 class convergence(object):
   def __init__(self, params, fmodel=None, xray_structure=None):
@@ -142,7 +143,8 @@ class minimizer(object):
   def callback_after_step(self, minimizer=None):
     if(self.geometry_rmsd_manager is not None or self.mode=="refine"):
       b_mean = self._get_bond_rmsd()
-      if(b_mean>0.03 and self.number_of_function_and_gradients_evaluations-3>5):
+      if(self.mode=="refine" and
+         b_mean>0.03 and self.number_of_function_and_gradients_evaluations-3>5):
         return True
 
   def compute_functional_and_gradients(self):
@@ -274,32 +276,82 @@ class restart_data(object):
 
 class minimizer_ase(object):
   def __init__(self, calculator, params, geometry_rmsd_manager):
+    self.params = params
     self.calculator = calculator
     self.geometry_rmsd_manager = geometry_rmsd_manager
     self.ase_atoms = calculator.ase_atoms
     self.ase_atoms.set_positions(flex.vec3_double(self.calculator.x))
     self.opt = LBFGS(atoms = self.ase_atoms)
     self.number_of_function_and_gradients_evaluations = 0
+    self.b_rmsd = self._get_bond_rmsd(
+      sites_cart = flex.vec3_double(self.calculator.x))
+    print "  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, self.b_rmsd)
     self.run(nstep = params.refine.max_iterations)
+    # Syncing and cross-checking begin
+    e = 1.e-4
+    assert approx_equal(
+      self.ase_atoms.get_positions(), self.opt.atoms.get_positions(), e)
+    self.calculator.update(x = self.opt.atoms.get_positions())
+    assert approx_equal(self.calculator.x, self.opt.atoms.get_positions(), e)
+    if(params.refine=="refinement"):
+      assert approx_equal(flex.vec3_double(self.calculator.x),
+        self.calculator.fmodel.xray_structure.sites_cart(), e)
+    else:
+      assert approx_equal(flex.vec3_double(self.calculator.x),
+        self.calculator.xray_structure.sites_cart(), e)
+    b_rmsd = self._get_bond_rmsd(sites_cart = flex.vec3_double(self.calculator.x))
+    assert approx_equal(self.b_rmsd, b_rmsd, e)
+    # Syncing and cross-checking end
+
+  def _get_bond_rmsd(self, sites_cart):
+    b_mean = None
+    if(self.geometry_rmsd_manager is not None):
+      s = self.calculator.not_hd_selection
+      energies_sites = \
+        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
+          sites_cart        = sites_cart.select(s),
+          compute_gradients = False)
+      b_mean = energies_sites.bond_deviations()[2]
+    return b_mean
 
   def step(self):
-    pos = self.opt.atoms.get_positions()
-    sites_cart = flex.vec3_double(pos)
-    t,g = self.calculator.target_and_gradients(x = sites_cart.as_double())
-    b_rmsd = self.geometry_rmsd_manager.geometry.energies_sites(
-      sites_cart        = sites_cart,
-      compute_gradients = True).bond_deviations()[2]
-    print "  step: %3d bond rmsd: %8.6f"%(
-      self.number_of_function_and_gradients_evaluations, b_rmsd)
+    sites_cart = flex.vec3_double(self.opt.atoms.get_positions())
+    t,g = self.calculator.target_and_gradients(x = sites_cart)
     forces = numpy.array(g) * (-1)
     self.opt.step(forces)
     self.number_of_function_and_gradients_evaluations += 1
+    self.calculator.update(x = self.opt.atoms.get_positions())
+    #
+    self.b_rmsd = self._get_bond_rmsd(
+      sites_cart = flex.vec3_double(self.opt.atoms.get_positions()))
+    print "  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, self.b_rmsd)
+    if(self.params.refine.mode=="refine" and
+       self.b_rmsd>0.03 and self.number_of_function_and_gradients_evaluations>8):
+      return False
+    #
+    return True
 
   def run(self, nstep):
     for i in range(nstep):
-      self.step()
+      v = self.step()
+      if(not v): return
 
 def run_minimize(calculator, params, results, geometry_rmsd_manager):
+  result = None
+  try:
+    result = run_minimize_(
+      calculator            = calculator,
+      params                = params,
+      results               = results,
+      geometry_rmsd_manager = geometry_rmsd_manager)
+  except Exception as e:
+    print "minimization failed:", e
+    result = None
+  return result
+
+def run_minimize_(calculator, params, results, geometry_rmsd_manager):
   minimized = None
   if(params.refine.use_ase_lbfgs):
     minimized = minimizer_ase(
