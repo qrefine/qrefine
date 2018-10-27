@@ -294,7 +294,7 @@ class minimizer_ase(object):
       self.ase_atoms.get_positions(), self.opt.atoms.get_positions(), e)
     self.calculator.update(x = self.opt.atoms.get_positions())
     assert approx_equal(self.calculator.x, self.opt.atoms.get_positions(), e)
-    if(params.refine=="refinement"):
+    if(params.refine.mode=="refine"):
       assert approx_equal(flex.vec3_double(self.calculator.x),
         self.calculator.fmodel.xray_structure.sites_cart(), e)
     else:
