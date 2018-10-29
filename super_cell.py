@@ -240,4 +240,5 @@ class expand(object):
 
   def write_super_cell_selected_in_sphere(self, file_name="super_sphere.pdb"):
     self.ph_super_sphere.write_pdb_file(file_name = file_name,
-      crystal_symmetry = self.cs_p1)
+      crystal_symmetry = self.cs_box) # box around super-sphere, not original cs
+                                      # or cs in p1.
