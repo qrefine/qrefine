@@ -93,6 +93,7 @@ class minimizer(object):
         log_switch,
         calculator,
         max_iterations,
+        max_bond_rmsd,
         gradient_only,
         line_search,
         results,
@@ -144,7 +145,7 @@ class minimizer(object):
     if(self.geometry_rmsd_manager is not None or self.mode=="refine"):
       b_mean = self._get_bond_rmsd()
       if(self.mode=="refine" and
-         b_mean>0.03 and self.number_of_function_and_gradients_evaluations-3>5):
+         b_mean>self.max_bond_rmsd and self.number_of_function_and_gradients_evaluations-3>20): # 0.35 for high-res
         return True
 
   def compute_functional_and_gradients(self):
@@ -192,7 +193,7 @@ class minimizer(object):
       e=self.eg[0]
       gnorm=np.linalg.norm(g)
       # gnorm=self.eg[1].norm()/23.0605480121
-      self.number_of_function_and_gradients_evaluations += 1
+      #self.number_of_function_and_gradients_evaluations += 1
       print 'iter= %i E=%12.5E  G=%0.2f' % (iter+1,e,gnorm)
       #
       if gnorm <=gconv and iter >1:
@@ -328,7 +329,8 @@ class minimizer_ase(object):
     print "  step: %3d bond rmsd: %8.6f"%(
       self.number_of_function_and_gradients_evaluations, self.b_rmsd)
     if(self.params.refine.mode=="refine" and
-       self.b_rmsd>0.03 and self.number_of_function_and_gradients_evaluations>8):
+       self.b_rmsd>self.params.refine.max_bond_rmsd and
+       self.number_of_function_and_gradients_evaluations>8):
       return False
     #
     return True
@@ -377,6 +379,7 @@ def run_minimize_(calculator, params, results, geometry_rmsd_manager):
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
         max_iterations        = params.refine.max_iterations,
+        max_bond_rmsd         = params.refine.max_bond_rmsd,
         results               = results,
         mode                  = params.refine.mode,
         geometry_rmsd_manager = geometry_rmsd_manager,
