@@ -125,9 +125,15 @@ refine {
     .type = int
   data_weight=None
     .type = float
+  choose_best_use_r_work = False
+    .type = bool
   skip_initial_weight_optimization = False
     .type = bool
-  max_iterations = 50
+  adjust_restraints_weight_scale_value = 2
+    .type = float
+  max_iterations_weight = 50
+    .type = int
+  max_iterations_refine = 50
     .type = int
   use_ase_lbfgs = False
     .type = bool
@@ -470,7 +476,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     xrs_best = results_manager.finalize(
       input_file_name_prefix  = prefix,
       output_file_name_prefix = params.output_file_name_prefix,
-      output_folder_name      = params.output_folder_name)
+      output_folder_name      = params.output_folder_name,
+      use_r_work              = params.refine.choose_best_use_r_work)
 
 if (__name__ == "__main__"):
   t0 = time.time()

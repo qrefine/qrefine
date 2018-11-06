@@ -145,7 +145,8 @@ class minimizer(object):
     if(self.geometry_rmsd_manager is not None or self.mode=="refine"):
       b_mean = self._get_bond_rmsd()
       if(self.mode=="refine" and
-         b_mean>self.max_bond_rmsd and self.number_of_function_and_gradients_evaluations-3>20): # 0.35 for high-res
+         b_mean>self.max_bond_rmsd and
+         self.number_of_function_and_gradients_evaluations-3>20):
         return True
 
   def compute_functional_and_gradients(self):
@@ -276,8 +277,9 @@ class restart_data(object):
     easy_pickle.dump(file_name=rst_file, obj=self.rst_data)
 
 class minimizer_ase(object):
-  def __init__(self, calculator, params, geometry_rmsd_manager):
+  def __init__(self, calculator, params, max_iterations, geometry_rmsd_manager):
     self.params = params
+    self.max_iterations = max_iterations
     self.calculator = calculator
     self.geometry_rmsd_manager = geometry_rmsd_manager
     self.ase_atoms = calculator.ase_atoms
@@ -288,7 +290,7 @@ class minimizer_ase(object):
       sites_cart = flex.vec3_double(self.calculator.x))
     print "  step: %3d bond rmsd: %8.6f"%(
       self.number_of_function_and_gradients_evaluations, self.b_rmsd)
-    self.run(nstep = params.refine.max_iterations)
+    self.run(nstep = max_iterations)
     # Syncing and cross-checking begin
     e = 1.e-4
     assert approx_equal(
@@ -330,7 +332,7 @@ class minimizer_ase(object):
       self.number_of_function_and_gradients_evaluations, self.b_rmsd)
     if(self.params.refine.mode=="refine" and
        self.b_rmsd>self.params.refine.max_bond_rmsd and
-       self.number_of_function_and_gradients_evaluations>8):
+       self.number_of_function_and_gradients_evaluations>20):
       return False
     #
     return True
@@ -340,25 +342,30 @@ class minimizer_ase(object):
       v = self.step()
       if(not v): return
 
-def run_minimize(calculator, params, results, geometry_rmsd_manager):
+def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
+  assert mode in ["weight", "refine"]
   result = None
   try:
     result = run_minimize_(
       calculator            = calculator,
       params                = params,
       results               = results,
-      geometry_rmsd_manager = geometry_rmsd_manager)
+      geometry_rmsd_manager = geometry_rmsd_manager,
+      mode                  = mode)
   except Exception as e:
     print "minimization failed:", e
     result = None
   return result
 
-def run_minimize_(calculator, params, results, geometry_rmsd_manager):
+def run_minimize_(calculator, params, results, geometry_rmsd_manager, mode):
   minimized = None
+  if  (mode == "weight"): max_iterations = params.refine.max_iterations_weight
+  elif(mode == "refine"): max_iterations = params.refine.max_iterations_refine
   if(params.refine.use_ase_lbfgs):
     minimized = minimizer_ase(
       calculator            = calculator,
       params                = params,
+      max_iterations        = max_iterations,
       geometry_rmsd_manager = geometry_rmsd_manager)
   else:
     log_switch = None
@@ -371,14 +378,14 @@ def run_minimize_(calculator, params, results, geometry_rmsd_manager):
       'gconv'   :params.refine.pre_opt_gconv,
     }
     if (params.refine.opt_log or params.debug): log_switch=results.log
-    if(params.refine.max_iterations > 0):
+    if(max_iterations > 0):
       minimized = minimizer(
         log_switch            = log_switch,
         calculator            = calculator,
         stpmax                = params.refine.stpmax,
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
-        max_iterations        = params.refine.max_iterations,
+        max_iterations        = max_iterations,
         max_bond_rmsd         = params.refine.max_bond_rmsd,
         results               = results,
         mode                  = params.refine.mode,
@@ -473,8 +480,12 @@ def refine(fmodel,
       # Run minimization
       n_fev = 0
       for mc in xrange(params.refine.number_of_macro_cycles):
-        minimized = run_minimize(calculator=calculator, params=params,
-          results=results, geometry_rmsd_manager=geometry_rmsd_manager)
+        minimized = run_minimize(
+          calculator            = calculator,
+          params                = params,
+          results               = results,
+          geometry_rmsd_manager = geometry_rmsd_manager,
+          mode                  = "weight")
         if(minimized is not None):
           calculator.reset_fmodel(fmodel = fmodel)
           calculator.update_fmodel()
@@ -499,17 +510,20 @@ def refine(fmodel,
         bond_rmsd = results.bs[len(results.bs)-1],
         fmodel                  = fmodel,
         restraints_weight_scale = calculator.weights.restraints_weight_scale)
-      if(is_converged): break
+      if(is_converged):
+        print >> results.log, "Converged (model)."
+        break
       calculator.weights.adjust_restraints_weight_scale(
         fmodel                = fmodel,
         geometry_rmsd_manager = geometry_rmsd_manager,
         max_bond_rmsd         = params.refine.max_bond_rmsd,
-        scale                 = 2.0)
+        scale                 = params.refine.adjust_restraints_weight_scale_value)
       # Converged?
       is_converged = conv_test.is_weight_scale_converged(
         restraints_weight_scale = calculator.weights.restraints_weight_scale)
-      if(is_converged): break
-
+      if(is_converged):
+        print >> results.log, "Converged (weight scale)."
+        break
       calculator.weights.\
           add_restraints_weight_scale_to_restraints_weight_scales()
     print >> results.log, "At end of weight search:"
@@ -517,7 +531,8 @@ def refine(fmodel,
     #
     # Done with weight search. Now get best result and refine it further.
     #
-    xrs_best, dummy, dummy, wsc_best = results.choose_best()
+    xrs_best, dummy, dummy, wsc_best = results.choose_best(
+      use_r_work = params.refine.choose_best_use_r_work)
     fmodel.update_xray_structure(
       xray_structure = xrs_best,
       update_f_calc  = True,
@@ -559,8 +574,12 @@ def refine(fmodel,
     #
     n_fev = 0
     for mc in xrange(params.refine.number_of_macro_cycles):
-      minimized = run_minimize(calculator=calculator, params=params,
-        results=results, geometry_rmsd_manager=geometry_rmsd_manager)
+      minimized = run_minimize(
+        calculator            = calculator,
+        params                = params,
+        results               = results,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        mode                  = "refine")
       if(minimized is not None):
         calculator.reset_fmodel(fmodel = fmodel)
         calculator.update_fmodel()
@@ -578,6 +597,7 @@ def refine(fmodel,
       output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
     results.show(prefix="  ")
     if(conv_test.is_converged(fmodel=fmodel)):
+      print >> results.log, "Converged (model)."
       break
     calculator.weights.adjust_restraints_weight_scale(
       fmodel                = fmodel,
@@ -639,7 +659,8 @@ def opt(xray_structure,
       calculator            = calculator,
       params                = params,
       results               = results,
-      geometry_rmsd_manager = geometry_rmsd_manager)
+      geometry_rmsd_manager = geometry_rmsd_manager,
+      mode                  = "refine")
     calculator.update_xray_structure()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,

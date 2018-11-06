@@ -63,7 +63,7 @@ class manager(object):
     if(n_fev is not None):
       self.n_fev += n_fev
 
-  def choose_best(self):
+  def choose_best(self, use_r_work):
     # Do not inlude initial model in decision-making.
     rfs  = self.r_frees[1:]
     rws  = self.r_works[1:]
@@ -95,12 +95,14 @@ class manager(object):
       return None, None, None, None
     else:
       # Choose the one that has lowest Rfree
-      min_r = flex.min(rfs)
+      if(use_r_work): rs = rws.deep_copy()
+      else:           rs = rfs.deep_copy()
+      min_r = flex.min(rs)
       min_gap = flex.min(gaps)
       index_best = None
       if(filtered_by_gap):
-        for i in xrange(rfs.size()):
-          if(abs(rfs[i]-min_r)<1.e-5):
+        for i in xrange(rs.size()):
+          if(abs(rs[i]-min_r)<1.e-5):
             index_best = i
             break
       else:
@@ -150,10 +152,11 @@ class manager(object):
   def finalize(self,
                input_file_name_prefix,
                output_file_name_prefix,
-               output_folder_name):
+               output_folder_name,
+               use_r_work):
     xrs_best = None
     if(self.mode == "refine"):
-      xrs_best, r_work, r_free, dummy = self.choose_best()
+      xrs_best, r_work, r_free, dummy = self.choose_best(use_r_work=use_r_work)
       if(xrs_best is not None):
         print >> self.log, "Best r_work: %6.4f r_free: %6.4f"%(r_work, r_free)
       else:
