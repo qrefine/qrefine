@@ -1,5 +1,6 @@
 # Quantum Refinement Module
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Quantum Chemistry can improve bio-macromolecular structures,
 especially when only low-resolution data derived from crystallographic
