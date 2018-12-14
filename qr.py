@@ -216,6 +216,28 @@ def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=master_params_str)
 
+def show_cc(map_data, xray_structure, log):
+  import mmtbx.maps.mtriage
+  from mmtbx.maps.correlation import five_cc
+  xrs = xray_structure
+  xrs.scattering_type_registry(table="electron")
+  mtriage = mmtbx.maps.mtriage.mtriage(
+    map_data         = map_data,
+    crystal_symmetry = xrs.crystal_symmetry())
+  d99 = mtriage.get_results().masked.d99
+  cc = five_cc(
+    map              = map_data,
+    xray_structure   = xrs,
+    d_min            = d99,
+    compute_cc_box   = True)
+  r = cc.result
+  print >> log, "Map-model correlation coefficient (CC)"
+  print >> log, "  CC_mask  : %6.4f" %r.cc_mask
+  print >> log, "  CC_volume: %6.4f" %r.cc_volume
+  print >> log, "  CC_peaks : %6.4f" %r.cc_peaks
+  print >> log, "  CC_box   : %6.4f" %r.cc_box
+
+
 def create_fmodel(cmdline, log):
   fmodel = mmtbx.f_model.manager(
     f_obs          = cmdline.f_obs,
@@ -432,6 +454,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     model            = model)
   if(map_data is not None and params.refine.mode == "refine"):
     model.model.geometry_statistics().show()
+
+    show_cc(
+      map_data                = map_data,
+      xray_structure          = model.xray_structure,
+      log                     = log)
+
     O = calculator.sites_real_space(
       model                   = model.model,
       geometry_rmsd_manager   = geometry_rmsd_manager,
@@ -444,6 +472,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print >> of, model.model_as_pdb(output_cs = True)
     of.close()
     model.geometry_statistics().show()
+    show_cc(
+      map_data                = map_data,
+      xray_structure          = model.get_xray_structure(),
+      log                     = log)
+
+
   else:
     if(fragment_manager is not None):
       cluster_restraints_manager = cluster_restraints.from_cluster(
