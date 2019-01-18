@@ -93,7 +93,7 @@ class GFNxTB(Calculator):
         """Return command string if program installed, otherwise None.  """
         command = None
         if ('XTBHOME' in os.environ):
-          command = os.environ['XTBHOME']+'/xtb '
+          command = os.environ['XTBHOME']+'bin/xtb '
         if command is None:
             raise RuntimeError('$XTBHOME not set')
         return command
@@ -139,17 +139,15 @@ class GFNxTB(Calculator):
 
         binary = self.get_command()
         nproc=self.key_parameters['nproc']
-        # following expects bash-like behaviour. Default for Popen is /bin/sh !
-        OMP=''
-        if int(nproc)>1:
-            OMP="export OMP_NUM_THREADS="+str(nproc)+' ;'
 
-        command='%s %s %s -chrg %s -grad %s > xtb.out' % (
+
+        command='%s %s --chrg %s --grad %s --parallel %s > xtb.out' % (
                 OMP,
                 binary,
                 str(self.coordinates),
                 str(self.key_parameters["charge"]),
-                str(method) )
+                str(method),
+                str(nproc))
 
         #clean up
         for f in ['energy','gradient','xtbrestart']:
