@@ -1,1 +1,1 @@
-__version__=" kindahappy-229-g163508  "
+__version__=" v1.0  "
