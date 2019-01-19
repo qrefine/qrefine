@@ -7,7 +7,7 @@ import libtbx.load_env
 from libtbx import  easy_run
 from libtbx.command_line import easy_qsub
 import mmtbx.command_line
-from qrefine import qr
+from qrefine import qr, __version__
 from mmtbx import utils
 from iotbx import reflection_file_utils
 from cStringIO import StringIO
@@ -116,5 +116,6 @@ def run(args, log):
 if __name__ == '__main__':
   t0 = time.time()
   print >> log,"Starting Q|R"
+  print >> log,'version: ',__version__
   run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)

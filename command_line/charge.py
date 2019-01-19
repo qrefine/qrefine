@@ -1,7 +1,7 @@
 from __future__ import division
 # LIBTBX_SET_DISPATCHER_NAME qr.charges
 import sys, time
-from qrefine import charges
+from qrefine import charges, __version__
 import iotbx
 import mmtbx
 from mmtbx import utils
@@ -81,6 +81,7 @@ def run(args, log):
   )
   if(params.verbose):
     print >> log,"Starting Q|R charge"
+    print >> log,'version: ',__version__
   del sys.argv[1:]
   cc = charges.charges_class(
     params.model_file_name,

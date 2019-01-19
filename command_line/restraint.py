@@ -8,6 +8,7 @@ import iotbx.pdb
 import libtbx.load_env
 import mmtbx.command_line
 import qrefine.qr as qr
+from qrefine import __version__
 from qrefine.restraints import from_qm, from_cctbx
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -43,5 +44,6 @@ if (__name__ == "__main__"):
   print "Restraint for Q|R"
   t0 = time.time()
   print >> log, "Starting Q|R"
+  print >> log,'version: ',__version__
   run(args=sys.argv[1:], log=log)
   print >> log, "Time: %6.4f" % (time.time() - t0)
