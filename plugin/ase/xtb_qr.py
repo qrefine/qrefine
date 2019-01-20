@@ -93,7 +93,7 @@ class GFNxTB(Calculator):
         """Return command string if program installed, otherwise None.  """
         command = None
         if ('XTBHOME' in os.environ):
-          command = os.environ['XTBHOME']+'bin/xtb '
+          command = os.environ['XTBHOME']+'/bin/xtb '
         if command is None:
             raise RuntimeError('$XTBHOME not set')
         return command
@@ -138,11 +138,13 @@ class GFNxTB(Calculator):
 
 
         binary = self.get_command()
-        nproc=self.key_parameters['nproc']
+        if (self.key_parameters['nproc'] > 1):
+            nproc=self.key_parameters['nproc']
+        else:
+            nproc=1
 
 
         command='%s %s --chrg %s --grad %s --parallel %s > xtb.out' % (
-                OMP,
                 binary,
                 str(self.coordinates),
                 str(self.key_parameters["charge"]),

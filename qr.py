@@ -358,7 +358,7 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       params.quantum.basis=''
   if params.quantum.engine_name=='xtb':
     if params.quantum.method==Auto:
-      params.quantum.method=' -gfn2 -etemp 500 -acc 0.1'
+      params.quantum.method=' -- gfn2 --etemp 500 --acc 0.1 --gbsa h2o'
       print >> log, '  Default method for xtb is %s' % (
           params.quantum.method,
           )
