@@ -12,7 +12,7 @@ from mmtbx import utils
 from iotbx import reflection_file_utils
 from cStringIO import StringIO
 from libtbx import group_args
-from libtbx.utils import Sorry
+from libtbx.utils import Sorry,Usage
 from scitbx.array_family import flex
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
@@ -24,6 +24,22 @@ log = sys.stdout
 legend = """
 Refine a model using restraints from Quantum Chemistry
 """
+
+def get_help():
+  print legend
+  raise Usage("""
+    qr.refine is an open-source module that carries out refinement of bio-macromolecules
+    utilizing chemical restraints from ab initio calculations.
+
+    Example:
+    qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
+
+    Options:
+    qr.refine --defaults (print default parameters)
+    qr.refine --version  (print version informations)
+    """)
+  sys.exit(0)
+  return  
 
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
@@ -43,14 +59,22 @@ def reflection_file_server(crystal_symmetry, reflection_files):
     err=StringIO())
 
 def run(args, log):
-  print >> log,"Running refinement"
   cmdline = mmtbx.utils.process_command_line_args(
     args          = args,
     master_params = get_master_phil())
+  if(len(args)==0 or '--help' in args):
+    get_help()
+    return
+  elif('--defaults' in args or '--show' in args):
+    print_legend_and_usage(log)
+    return  
+  elif('--version' in args):
+    print __version__
+    return
+  print >> log,"Running refinement"
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
-  if(len(args)==0):
-    return
+
   # Read atomic model
   # XXX This is not Oleg's model !!!
   # need to validate the input args
