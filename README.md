@@ -124,8 +124,16 @@ DOI: [10.1063/1.3382344](https://doi.org/10.1063/1.3382344)
 
 If you run into any trouble please ask for help:
 ```
- qr.refine
+ qr.refine --help
 ```
+
+### Defualts
+
+If you want to see the options and defualts please type:
+```
+ qr.refine --defualts
+``` 
+ 
 
 ### Contact us 
 
