@@ -129,9 +129,9 @@ If you run into any trouble please ask for help:
 
 ### Defualts
 
-If you want to see the options and defualts please type:
+If you want to see the options and defaults please type:
 ```
- qr.refine --defualts
+ qr.refine --defaults
 ``` 
  
 
