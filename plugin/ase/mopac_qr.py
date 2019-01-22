@@ -230,12 +230,14 @@ class Mopac(Calculator):
 
         command = self.get_command()
         if command is None:
-          raise RuntimeError('MOPAC_COAMMDN is not specified')
+          raise RuntimeError('MOPAC_COMMAND is not specified')
 
         WhatOS=platform.system()
         if "Linux" in WhatOS:
             if ('MOPAC_DIR' in os.environ):
                 mdir = os.environ['MOPAC_DIR']
+            else:
+                raise RuntimeError('MOPAC_DIR is not specified')
             command_exc= "LD_PRELOAD=%s/libiomp5.so %s  %s" % (mdir,command,finput)
         if "Darwin" in WhatOS:
             command_exc= "  ".join([command , finput])
