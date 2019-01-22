@@ -16,11 +16,11 @@
 
 import os
 from subprocess import Popen,PIPE,STDOUT
-import libtbx.load_env
 
 def main(init_filename=None):
   if init_filename is None:
-    qrefine_path = libtbx.env.find_in_repositories("qrefine")
+    qrefine_path = os.path.abspath('.')
+    assert os.path.basename(qrefine_path)=='qrefine'
     init_filename = os.path.join(qrefine_path, '__init__.py')
   git_command='git describe --abbrev=6 --dirty --always --tags'
   shell = Popen([git_command], shell=True, stderr=PIPE,stdout=PIPE)
