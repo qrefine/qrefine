@@ -11,12 +11,13 @@ See accompanying license files for details.
 import os
 import string
 import numpy as np
+import platform
 
 from ase.units import kcal, mol
 from ase.calculators.general import Calculator
 
 str_keys = ['functional', 'job_type', 'command']
-int_keys = ['restart', 'spin', 'charge']
+int_keys = ['restart', 'spin', 'charge','nproc']
 bool_keys = ['OPT']
 float_keys = ['RELSCF']
 
@@ -67,7 +68,7 @@ class Mopac(Calculator):
         self.energy_free = None
         self.forces = None
         self.stress = None
-
+        self.calc_dir = None
         # initialize the results
         self.occupations = None
 
@@ -120,8 +121,13 @@ class Mopac(Calculator):
         charge=self.int_params['charge']
         mopac_input += 'CHARGE= ' + str(charge)+'  '
 
+        if (self.int_params['nproc'] > 1):
+            nproc=self.int_params['nproc']
+        else:
+            nproc=1
+
         # threads should be specified by user
-        mopac_input += ' THREADS=1'
+        mopac_input += ' THREADS=%i' %(nproc)
 
         #write spin
         spin = self.int_params['spin']
@@ -169,19 +175,43 @@ class Mopac(Calculator):
     def set_command(self, command):
       self.command = command
 
+
+    def run_command(self,command):
+        """
+        execute <command> in a subprocess and check error code
+        """
+        from subprocess import Popen, PIPE, STDOUT
+        if command == '':
+            raise RuntimeError('no command for run_command :(')
+        # print 'Running: ', command #debug
+        proc = Popen([command], shell=True, stderr=PIPE)
+        proc.wait()
+        exitcode = proc.returncode
+        if exitcode != 0:
+            # print exitcode,'label:', self.calc_dir
+            error='%s exited with error code %i in %s' % (
+                           command,exitcode,self.calc_dir)
+            stdout,stderr = proc.communicate()
+            print 'shell output: ',stdout,stderr
+            raise RuntimeError(error)
+        return 0
+
     def run(self):
         import subprocess, shlex
         from threading import Timer
 
         def run_timeout(cmd, timeout_sec):
           proc = subprocess.Popen(shlex.split(cmd),
+          # proc = subprocess.Popen(cmd, 
                                   stdout=subprocess.PIPE,
+                                  shell=True,
                                   stderr=subprocess.PIPE)
           kill_proc = lambda p: p.kill()
           timer = Timer(timeout_sec, kill_proc, [proc])
           try:
             timer.start()
             stdout,stderr = proc.communicate()
+            print stdout,stderr
           finally:
             timer.cancel()
 
@@ -195,12 +225,23 @@ class Mopac(Calculator):
         foutput = self.label + '.out'
         self.write_input(finput, self.atoms)
 
+         # directory
+        self.calc_dir = os.getcwd()
+
         command = self.get_command()
         if command is None:
-          raise RuntimeError('MOPAC command not specified')
+          raise RuntimeError('MOPAC_COAMMDN is not specified')
 
-        command_exc= "  ".join([command , finput])
-        run_timeout(command_exc ,72000)# 20hours
+        WhatOS=platform.system()
+        if "Linux" in WhatOS:
+            if ('MOPAC_DIR' in os.environ):
+                mdir = os.environ['MOPAC_DIR']
+            command_exc= "LD_PRELOAD=%s/libiomp5.so %s  %s" % (mdir,command,finput)
+        if "Darwin" in WhatOS:
+            command_exc= "  ".join([command , finput])
+
+        # run_timeout(command_exc ,72000)# 20hours
+        self.run_command(command_exc)
 #        exitcode = os.system('%s %s' % (command, finput)+ '  > /dev/null 2>&1    ')
 
 #        if exitcode != 0:
@@ -342,3 +383,6 @@ class Mopac(Calculator):
 
     def set_label(self, label):
       self.label = label
+
+    def set_nproc(self, nproc):
+      self.int_params['nproc'] = nproc
