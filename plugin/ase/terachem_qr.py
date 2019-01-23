@@ -11,7 +11,7 @@ from ase.units import Hartree, Bohr
 from ase.calculators.general import Calculator
 import copy
 
-key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd lanl2dz_ecp\nZn lanl2dz_ecp\nMg lanl2dz_ecp','maxit':200,'gpumem':512,'gpus':None,'basis':None,'coordinates':None,'charge':None,'method':None,'dftd':None,'run':None,'pointcharges':None ,'threall':1.0e-12,'scf':'diis','watcheindiis' :'no'}
+key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd lanl2dz_ecp\nZn lanl2dz_ecp\nMg lanl2dz_ecp','maxit':200,'gpumem':512,'gpus':None,'basis':None,'coordinates':None,'charge':None,'method':None,'dftd':None,'run':None,'pointcharges':None ,'threall':1.0e-12,'scf':'diis','watcheindiis' :'no','pcm':'cosmo','epsilon':78.39}
 
 class TeraChem(Calculator):
     name = 'TeraChem'
