@@ -139,7 +139,7 @@ refine {
     .type = bool
   line_search = True
     .type = bool
-  stpmax = 3
+  stpmax = 0.2
     .type = float
   gradient_only = False
     .type = bool
