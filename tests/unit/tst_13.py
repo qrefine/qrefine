@@ -120,6 +120,10 @@ def qm_opt(restraints, file):
   opt.write(file)
 
 if(__name__ == "__main__"):
+  """
+  If this test hangs then MOPAC needs to be updated. Run MOPAC command for 
+  update instructions.
+  """
   disable = False
   if(os.environ.get("MOPAC_COMMAND") is None): disable = True
   prefix='tst_13'

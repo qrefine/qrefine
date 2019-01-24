@@ -55,7 +55,7 @@ def create_super_sphere(pdb_hierarchy,
       r.setdefault(pair.j_seq, []).append(rt_mx_ji)
     for k,v in zip(r.keys(), r.values()): # remove duplicates!
       r[k] = list(set(v))
-  c = iotbx.pdb.hierarchy.chain(id = "SS")
+  c = iotbx.pdb.hierarchy.chain(id = "SS") # all symmetry related full residues
   fm = crystal_symmetry.unit_cell().fractionalization_matrix()
   om = crystal_symmetry.unit_cell().orthogonalization_matrix()
   selection = r.keys()
@@ -99,6 +99,7 @@ def create_super_sphere(pdb_hierarchy,
         return a.xyz
   residue_groups_i = list(c.residue_groups())
   residue_groups_j = list(c.residue_groups())
+  residue_groups_k = list() # standard aa residues only
   #
   def dist(r1,r2):
     return math.sqrt((r1[0]-r2[0])**2+(r1[1]-r2[1])**2+(r1[2]-r2[2])**2)
@@ -125,6 +126,7 @@ def create_super_sphere(pdb_hierarchy,
       c.append_residue_group(rgi)
       super_sphere_hierarchy.models()[0].append_chain(c)
       continue
+    residue_groups_k.append(rgi)
     c_linked = 0
     n_linked = 0
     for rgj in residue_groups_j:
@@ -152,7 +154,7 @@ def create_super_sphere(pdb_hierarchy,
     chunk = [rgi]
     n_linked=1
     while n_linked==1:
-      n_linked, rgj = grow_chain(residue_groups_j, chunk, ci)
+      n_linked, rgj = grow_chain(residue_groups_k, chunk, ci)
       if(n_linked==1):
         ci = get_atom(atoms=rgj.atoms(), name="C")
     c = iotbx.pdb.hierarchy.chain(id = all_chains.next())
