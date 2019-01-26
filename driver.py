@@ -123,7 +123,7 @@ class minimizer(object):
       exception_handling_params=scitbx.lbfgs.exception_handling_parameters(
         ignore_line_search_failed_rounding_errors=True,
         ignore_line_search_failed_step_at_lower_bound=True,
-        ignore_line_search_failed_step_at_upper_bound=True,
+        ignore_line_search_failed_step_at_upper_bound=False,#True,
         ignore_line_search_failed_maxfev=True,
         ignore_line_search_failed_xtol=True,
         ignore_search_direction_not_descent=True
