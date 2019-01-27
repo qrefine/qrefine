@@ -483,10 +483,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       grad=[]
       # later, add: # params.clustering.two_buffers=True
       idx=0
-      cluster_scan=[2,5,10]
+      cluster_scan=[5,10,15]
       print >> log, 'Starting loop over differente cluster sizes'
       for n_buffer in range(1,3):
-        if n_buffer > 0: params.cluster.two_buffers=True
+        if n_buffer > 1: params.cluster.two_buffers=True
         print >> log, '~buffer size', n_buffer
         for max_cluster in cluster_scan:
           t0 = time.time()
@@ -521,6 +521,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           print >> log, '~  # clusters  : ',len(frags.clusters)
           print >> log, '~  list of residues per clusters:'
           print >> log, '~   ',[len(x) for x in frags.clusters]
+          print >> log, '~  list of atoms per fragment:'
+          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
+          print >> log, '~  list of atoms per cluster:'
+          print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
           calculator_manager = create_calculator(
             weights            = weights,
             fmodel             = start_fmodel,
