@@ -680,3 +680,22 @@ def opt(xray_structure,
     params.refine.pre_opt = None # no pre-optimizations after first macrocycle
   rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,
     xray_structure=xray_structure, results=results)
+
+
+def run_gradient(calculator,params):
+    import numpy as np
+    eg=calculator.target_and_gradients(x = calculator.x)
+    g=np.array(list(eg[1]))
+    return g
+
+def gtest(xray_structure,
+        params,
+        results,
+        calculator,
+        geometry_rmsd_manager):
+  # results.show(prefix="start")
+  # cluster_qm_update.re_clustering(calculator)
+  g=run_gradient(
+      calculator            = calculator,
+      params                = params)
+  return g

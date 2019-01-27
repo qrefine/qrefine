@@ -163,7 +163,7 @@ class fragments(object):
           new_interaction_list.append(item)
       self.interaction_list = new_interaction_list
     import clustering
-    #t0 = time.time()
+    # t0 = time.time()
     self.clustering = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size=len(self.pyoink.molecules),
@@ -171,7 +171,7 @@ class fragments(object):
     clusters = self.clustering.get_clusters()
     self.clusters = sorted(clusters,
       lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
-    #print "time taken for clustering", (time.time() - t0)
+    # print "time taken for clustering", (time.time() - t0)
 
   def get_fragments(self):
 

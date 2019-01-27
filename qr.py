@@ -111,9 +111,9 @@ refine {
     .type = choice(multi=False)
   refinement_target_name = *ml ls_wunit_k1
     .type = choice
-  mode = opt *refine
+  mode = opt *refine gtest
     .type = choice(multi=False)
-    .help = choose between refinement and geometry optimization
+    .help = choose between refinement, geometry optimization or gradient test
   number_of_macro_cycles=1
     .type = int
   number_of_weight_search_cycles=50
@@ -444,11 +444,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print >> log, "***********************************************************\n"
     start_fmodel = fmodel
     start_ph = None # is it used anywhere? I don't see where it is used!
-  fragment_manager = create_fragment_manager(
-    params           = params,
-    pdb_hierarchy    = model.pdb_hierarchy,
-    cif_objects      = model.cif_objects,
-    crystal_symmetry = model.xray_structure.crystal_symmetry())
+  if not params.refine.mode=='gtest':    
+    fragment_manager = create_fragment_manager(
+      params           = params,
+      pdb_hierarchy    = model.pdb_hierarchy,
+      cif_objects      = model.cif_objects,
+      crystal_symmetry = model.xray_structure.crystal_symmetry())
   restraints_manager = create_restraints_manager(
     params           = params,
     model            = model)
@@ -476,8 +477,75 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       map_data                = map_data,
       xray_structure          = model.get_xray_structure(),
       log                     = log)
+  elif(params.refine.mode == "gtest"):
+      import numpy as np
+      params.cluster.clustering=True
+      grad=[]
+      # later, add: # params.clustering.two_buffers=True
+      idx=0
+      cluster_scan=[2,5,10]
+      print >> log, 'Starting loop over differente cluster sizes'
+      for n_buffer in range(1,3):
+        if n_buffer > 0: params.cluster.two_buffers=True
+        print >> log, '~buffer size', n_buffer
+        for max_cluster in cluster_scan:
+          t0 = time.time()
+          print >> log, "~max cluster size ",max_cluster
+          params.cluster.maxnum_residues_in_cluster=max_cluster
+          # print >> log,'~creating fragments manager'
+          fragment_manager = create_fragment_manager(
+              params           = params,
+              pdb_hierarchy    = model.pdb_hierarchy,
+              cif_objects      = model.cif_objects,
+              crystal_symmetry = model.xray_structure.crystal_symmetry())
+          # if(fragment_manager is not None):
+            # print >> log,'creating cluster_restraints manager'
+          cluster_restraints_manager = cluster_restraints.from_cluster(
+              restraints_manager = restraints_manager,
+              fragment_manager   = fragment_manager,
+              parallel_params    = params.parallel)
+          print "time taken for fragments",(time.time() - t0)
+          # rm = restraints_manager
+          # if(fragment_manager is not None):
+          rm = cluster_restraints_manager
+          # rm = restraints_manager
+          # if(fragment_manager is not None):
+          #   cluster_restraints_manager = cluster_restraints.from_cluster(
+          #     restraints_manager = restraints_manager,
+          #     fragment_manager   = fragment_manager,
+          #     parallel_params    = params.parallel)
+          #   rm = cluster_restraints_manager
+          # print >> log, 'max cluster size ',cluster_scan[i]
+          # frags = fragment_extracts(fragment_manager)
+          frags=fragment_manager
+          print >> log, '~  # clusters  : ',len(frags.clusters)
+          print >> log, '~  list of residues per clusters:'
+          print >> log, '~   ',[len(x) for x in frags.clusters]
+          calculator_manager = create_calculator(
+            weights            = weights,
+            fmodel             = start_fmodel,
+            model              = model,
+            params             = params,
+            restraints_manager = rm)
+          # grad.append(driver.gtest(
+          grad.append(driver.gtest(
+            params                = params,
+            xray_structure        = model.xray_structure,
+            geometry_rmsd_manager = geometry_rmsd_manager,
+            calculator            = calculator_manager,
+            results               = results_manager))
+          print >> log, '~   gnorm',np.linalg.norm(grad[idx])
+          print >> log, '~   max_g', max(grad[idx]), ' min_g',min(grad[idx])
+          idx+=1
+          print "total time for gradient",(time.time() - t0)
 
+      # for i in range(0,idx):
+        # frags = fragment_extracts(fragment_manager)
+        #TODO: print number and sizes of clusters        
+        # print >> log, '   gnorm',np.linalg.norm(grad[i])
+        # print >> log, '   max_g', max(grad[i])
 
+      # print >> log, grad
   else:
     if(fragment_manager is not None):
       cluster_restraints_manager = cluster_restraints.from_cluster(
