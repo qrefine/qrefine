@@ -680,3 +680,18 @@ def opt(xray_structure,
     params.refine.pre_opt = None # no pre-optimizations after first macrocycle
   rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,
     xray_structure=xray_structure, results=results)
+
+
+def run_gradient(calculator,params):
+    eg=calculator.target_and_gradients(x = calculator.x)
+    g=list(eg[1])
+    return g
+
+def gtest(params,
+        results,
+        calculator):
+  g=run_gradient(
+      calculator            = calculator,
+      params                = params)
+  return g
+

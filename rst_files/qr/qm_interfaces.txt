@@ -63,12 +63,13 @@ engine_name
 
 requirements
     set ``MOPAC_COMMAND`` to the mopac execution command.
+    [for Linux] set``MOPAC_DIR`` to installation directory
 
 Notes::
 
     default runs PM7
 
-GFN-xTB
+GFN2-xTB
 -------
 engine_name
     xtb
@@ -78,11 +79,11 @@ requirements
 
 Notes::
 
-    The default runs GFN2-xTB (-gfn2 option)
+    The default runs GFN2-xTB with GBSA
 
-example using non-default GFN1-xTB::
+example using the older GFN1-xTB::
 
-    qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method='-gfn1 -gbsa h2o -etemp 500'
+    qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method='--gfn 1 --gbsa h2o'
 
 ANI
 ----

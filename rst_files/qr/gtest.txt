@@ -1,0 +1,69 @@
+checking the cluster gradient
+==============================
+
+To solve the scaling wall for QM methods the full biomolecular gradient can be computed in ``qr.refine`` using a fragmentation scheme.
+A fragment consists of a *cluster* and a *buffer* region, the latter is obtained from non-covalent interactions density descriptors. Additionally, a surrounding point charge (PC) region (controlled by ``charge_embedding``, ``charge_cutoff``) can be applied. Furthermore, the ``two_buffer`` option adds another layer of buffer around a previously constructed fragment.
+
+The convergence of the gradient obtained via fragmentation can be tested using ``mode=gtest``.
+
+The list of available keywords can be found under the ``cluster`` scope `here <qrefine.html>`_
+
+Central variable is called ``g_mode`` and indicates what kind of buffer region is applied::
+
+	  1 = default buffer
+	  2 = default buffer + PC
+	  3 = two buffer
+	  4 = two buffer + PC
+
+
+two fundemantal modes of operation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sequence of calculations (recommended)
+  specify ``two_buffer=1`` and/or ``charge_embedding=1`` in the command line.
+  This specifies the **largest buffer region** up to which calculations are performed.
+
+Direct buffer selection
+  specify ``g_mode=1/2/3/4`` in the command line to select what kind of buffer region is calculated.
+  Other kinds of buffer regions are not calculated.
+
+output statistics
+^^^^^^^^^^^^^^^^^
+
+example output::
+
+	 index(g_mode - max_res)
+     1 - 10   d(angle)  0.914806
+     1 - 10   d(gnorm)  1.351992
+     1 - 10   d(max_g)  0.266452
+     1 - 10   d(min_g)  0.266452
+     1 - 10   MAD       0.514772
+
+     1 - 25   d(angle)  0.000000
+     1 - 25   d(gnorm)  0.000000
+     1 - 25   d(max_g)  0.000000
+     1 - 25   d(min_g)  0.000000
+     1 - 25   MAD       0.000000
+
+The first number corresponds to the buffer kind (``g_mode``, see above) and the second to the maximum numbers of residues per cluster. The last gradient is selected as the reference gradient (or the one set by ``g_ref``) and various comparisons are done.
+
+comparisons::
+
+    d(angle)  : mean angle deviation between the gradient of all atoms in degree.
+    d(gnorm)  : difference between the gradient norms
+    d(max/min): difference between max/min gradient values
+    MAD       : mean absolute deviation between all gradient components
+
+Example
+^^^^^^^
+Running a sequence of gradient calculations with a maximal number of residue per cluster of 10, 15 and 25, using default buffer and point-charges with GFN2-xTB.
+
+  qr.refine model.pdb engine_name=xtb mode=gtest g_scan="10 15 25" charge_embedding=1
+
+A total of 6 gradient calculations will be performed. 3 with the default buffer and ``maxnum_residues_in_cluster=10/15/25`` and 3 with the default buffer
+plus point-charges with the same ``maxnum_residues_in_cluster`` settings.
+At the end the largest gradient (from ``g_mode=2`` and ``maxnum_residues_in_cluster=25``) will be used as reference for a comparison against the other 5 gradients. Deviations against the gradient norm (gnorm) against the max/min value of the gradient (max/min_g) and the mean absolute deviation (MAD) of each gradient component are printed.
+
+This will also produce a file called ``2-25.npy``, which is the gradient of the largest buffer region. This gradient can be used as reference
+gradient for another calculation using ``cluster.g_ref=2-20.npy``.
+
