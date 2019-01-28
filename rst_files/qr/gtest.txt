@@ -33,11 +33,13 @@ output statistics
 example output::
 
 	 index(g_mode - max_res)
+     1 - 10   d(angle)  0.914806
      1 - 10   d(gnorm)  1.351992
      1 - 10   d(max_g)  0.266452
      1 - 10   d(min_g)  0.266452
      1 - 10   MAD       0.514772
 
+     1 - 25   d(angle)  0.000000
      1 - 25   d(gnorm)  0.000000
      1 - 25   d(max_g)  0.000000
      1 - 25   d(min_g)  0.000000

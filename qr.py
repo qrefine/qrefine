@@ -74,7 +74,7 @@ cluster{
     .type = choice(multi=False)
   g_scan  = 10 15 20
     .type = str
-    .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest)
+    .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest); put in " "
   g_ref   = None
     .type = str
     .help = name of the previously save gradient file that is to be used as reference
@@ -593,7 +593,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       ref_gnorm=np.linalg.norm(ref_grad)
       grad=np.array(grad)
       
-      print >> log,  'index(g_mode - max_res)'
+      print >> log,  '     g_mode - max_res'
       for i in range(0,idx):
         index=" - ".join(map(str,idl[i]))
         print >> log, ' %10s   d(angle)  %f'  %(index, get_grad_angle(grad[i],ref_grad) )
