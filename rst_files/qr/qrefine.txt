@@ -25,11 +25,15 @@ In principle, ``qr.refine`` only needs a data file (e.g. mtz) and a model (e.g. 
 
   qr.refine input.pdb input.mtz
 
-Sensible default options are selected.
+Sensible default options are selected and can be viewed with ``qr.refine --defaults``
 
 QM interface
 ============
 `List of QM interfaces <qm_interfaces.html>`_
+
+Examples and Tips
+==================
+`checking the gradient from the clustering approach <gtest.html>`_
 
 Literature
 ==========

@@ -231,6 +231,7 @@ class fragments(object):
         if True:
           atoms = self.pdb_hierarchy_super.atoms()
           check_selection_integrity(atoms, atoms_in_one_cluster)
+      print "cluster->fragments done"
       if(self.two_buffers):## define a second buffer layer
         print "adding second layer"
         fragment_super_atoms_in_ph = []

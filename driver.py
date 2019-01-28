@@ -683,19 +683,15 @@ def opt(xray_structure,
 
 
 def run_gradient(calculator,params):
-    import numpy as np
     eg=calculator.target_and_gradients(x = calculator.x)
-    g=np.array(list(eg[1]))
+    g=list(eg[1])
     return g
 
-def gtest(xray_structure,
-        params,
+def gtest(params,
         results,
-        calculator,
-        geometry_rmsd_manager):
-  # results.show(prefix="start")
-  # cluster_qm_update.re_clustering(calculator)
+        calculator):
   g=run_gradient(
       calculator            = calculator,
       params                = params)
   return g
+

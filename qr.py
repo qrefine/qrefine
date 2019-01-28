@@ -72,6 +72,15 @@ cluster{
     .help = type of clustering algorithm
   altloc_method = *average subtract
     .type = choice(multi=False)
+  g_scan  = 10 15 20
+    .type = str
+    .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest)
+  g_ref   = None
+    .type = str
+    .help = name of the previously save gradient file that is to be used as reference
+  g_mode = None
+    .type = int
+    .help = manual control over gradient test loops (1=standard, 2=standard + point-charges, 3=two buffer 4=two_buffer+ point-charges)
 }
 
 restraints = cctbx *qm
@@ -446,13 +455,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     start_ph = None # is it used anywhere? I don't see where it is used!
   if not params.refine.mode=='gtest':    
     fragment_manager = create_fragment_manager(
+        params           = params,
+        pdb_hierarchy    = model.pdb_hierarchy,
+        cif_objects      = model.cif_objects,
+        crystal_symmetry = model.xray_structure.crystal_symmetry())
+    restraints_manager = create_restraints_manager(
       params           = params,
-      pdb_hierarchy    = model.pdb_hierarchy,
-      cif_objects      = model.cif_objects,
-      crystal_symmetry = model.xray_structure.crystal_symmetry())
-  restraints_manager = create_restraints_manager(
-    params           = params,
-    model            = model)
+      model            = model)
   if(map_data is not None and params.refine.mode == "refine"):
     model.model.geometry_statistics().show()
 
@@ -479,77 +488,121 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       log                     = log)
   elif(params.refine.mode == "gtest"):
       import numpy as np
+      from utils.mathbox import get_grad_mad, get_grad_angle
+
+      ref_grad=None
+      if params.cluster.g_ref is not None:
+        print >> log, 'Loading reference gradient :', params.cluster.g_ref
+        ref_grad=np.load(params.cluster.g_ref)
+
+      # determine what kind of buffer to calculate
+      g_mode=[]
+      if params.cluster.g_mode is None:
+        g_mode.append(1)
+        if params.cluster.charge_embedding:
+          g_mode.append(2)
+        if params.cluster.two_buffers:
+          g_mode.append(3)
+        if params.cluster.two_buffers and params.cluster.charge_embedding:
+          g_mode.append(3)
+      else:
+        g_mode.append(params.cluster.g_mode)
+
+
+      # reset flags
       params.cluster.clustering=True
+      params.cluster.charge_embedding=False
+      params.cluster.two_buffers=False
       grad=[]
-      # later, add: # params.clustering.two_buffers=True
       idx=0
-      cluster_scan=[5,10,15]
-      print >> log, 'Starting loop over differente cluster sizes'
-      for n_buffer in range(1,3):
-        if n_buffer > 1: params.cluster.two_buffers=True
-        print >> log, '~buffer size', n_buffer
+      idl=[]
+
+      # input for cluster size
+      cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
+      # cluster_scan=[2,10]
+
+      n_grad=len(cluster_scan)*len(g_mode)
+      print >> log, 'Calculating %3i gradients \n' % (n_grad)
+      print >> log, 'Starting loop over different fragment sizes'
+      for ig in g_mode:
+
+        print >> log,'loop for g_mode = %i ' % (ig)
+        if ig == 2:
+          print >> log, 'pc on'
+          params.cluster.charge_embedding=True
+        if ig == 3:
+          print >> log, 'two_buffers on, pc off'
+          params.cluster.charge_embedding=False
+          params.cluster.two_buffers=True
+        if ig == 4:
+          print >> log, 'two_buffers on, pc on'
+          params.cluster.charge_embedding=True
+          params.cluster.two_buffers=True
+
         for max_cluster in cluster_scan:
+          idl.append([ig,max_cluster])
+          print >> log, 'g_mode: %s' % (" - ".join(map(str,idl[idx])))
           t0 = time.time()
           print >> log, "~max cluster size ",max_cluster
           params.cluster.maxnum_residues_in_cluster=max_cluster
-          # print >> log,'~creating fragments manager'
           fragment_manager = create_fragment_manager(
               params           = params,
               pdb_hierarchy    = model.pdb_hierarchy,
               cif_objects      = model.cif_objects,
               crystal_symmetry = model.xray_structure.crystal_symmetry())
-          # if(fragment_manager is not None):
-            # print >> log,'creating cluster_restraints manager'
+          restraints_manager = create_restraints_manager(
+              params           = params,
+              model            = model)
           cluster_restraints_manager = cluster_restraints.from_cluster(
               restraints_manager = restraints_manager,
               fragment_manager   = fragment_manager,
               parallel_params    = params.parallel)
           print "time taken for fragments",(time.time() - t0)
-          # rm = restraints_manager
-          # if(fragment_manager is not None):
           rm = cluster_restraints_manager
-          # rm = restraints_manager
-          # if(fragment_manager is not None):
-          #   cluster_restraints_manager = cluster_restraints.from_cluster(
-          #     restraints_manager = restraints_manager,
-          #     fragment_manager   = fragment_manager,
-          #     parallel_params    = params.parallel)
-          #   rm = cluster_restraints_manager
-          # print >> log, 'max cluster size ',cluster_scan[i]
-          # frags = fragment_extracts(fragment_manager)
           frags=fragment_manager
           print >> log, '~  # clusters  : ',len(frags.clusters)
-          print >> log, '~  list of residues per clusters:'
-          print >> log, '~   ',[len(x) for x in frags.clusters]
-          print >> log, '~  list of atoms per fragment:'
-          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
           print >> log, '~  list of atoms per cluster:'
           print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
+          print >> log, '~  list of atoms per fragment:'
+          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
           calculator_manager = create_calculator(
             weights            = weights,
             fmodel             = start_fmodel,
             model              = model,
             params             = params,
             restraints_manager = rm)
-          # grad.append(driver.gtest(
           grad.append(driver.gtest(
             params                = params,
-            xray_structure        = model.xray_structure,
-            geometry_rmsd_manager = geometry_rmsd_manager,
             calculator            = calculator_manager,
             results               = results_manager))
           print >> log, '~   gnorm',np.linalg.norm(grad[idx])
-          print >> log, '~   max_g', max(grad[idx]), ' min_g',min(grad[idx])
+          print >> log, '~   max_g', max(abs(i) for i in grad[idx]), ' min_g',min(abs(i) for i in grad[idx])
           idx+=1
-          print "total time for gradient",(time.time() - t0)
+          print "total time for gradient",(time.time() - t0),'\n\n'
 
-      # for i in range(0,idx):
-        # frags = fragment_extracts(fragment_manager)
-        #TODO: print number and sizes of clusters        
-        # print >> log, '   gnorm',np.linalg.norm(grad[i])
-        # print >> log, '   max_g', max(grad[i])
+      print >> log, 'overview'
+      if ref_grad is None:
+        ref_idx=idx-1  # should always be the most reliable gradient
+        ref_name="-".join(map(str,idl[ref_idx]))
+        print >>log,'reference gradient taken from  %s' %(ref_name)
+        ref_grad=np.array(grad[ref_idx]) 
+        np.save(ref_name,ref_grad)
 
-      # print >> log, grad
+      ref_max=max(abs(i) for i in ref_grad)
+      ref_min=min(abs(i) for i in ref_grad)
+      ref_gnorm=np.linalg.norm(ref_grad)
+      grad=np.array(grad)
+      
+      print >> log,  'index(g_mode - max_res)'
+      for i in range(0,idx):
+        index=" - ".join(map(str,idl[i]))
+        print >> log, ' %10s   d(angle)  %f'  %(index, get_grad_angle(grad[i],ref_grad) )
+        print >> log, ' %10s   d(gnorm)  %f'  %(index, abs(np.linalg.norm(grad[i])-ref_gnorm) )
+        print >> log, ' %10s   d(max_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
+        print >> log, ' %10s   d(min_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
+        print >> log, ' %10s   MAD       %f'  %(index, get_grad_mad(grad[i],ref_grad) ) # MAD
+        print >> log, ' '
+
   else:
     if(fragment_manager is not None):
       cluster_restraints_manager = cluster_restraints.from_cluster(
