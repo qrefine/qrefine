@@ -74,7 +74,7 @@ cluster{
     .type = choice(multi=False)
   g_scan  = 10 15 20
     .type = str
-    .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest); put in " "
+    .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
   g_ref   = None
     .type = str
     .help = name of the previously save gradient file that is to be used as reference
@@ -504,7 +504,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         if params.cluster.two_buffers:
           g_mode.append(3)
         if params.cluster.two_buffers and params.cluster.charge_embedding:
-          g_mode.append(3)
+          g_mode.append(4)
       else:
         g_mode.append(params.cluster.g_mode)
 

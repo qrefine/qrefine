@@ -214,7 +214,7 @@ class fragments(object):
                           self.yoink_dat_path)
       molecules_in_fragments = []
       for i in range(len(clusters)):
-        print 'processing cluster', i
+        # print 'processing cluster', i
         pyoink.input_file = self.qmmm_file_name
         pyoink.update(clusters[i])
         atoms_in_one_cluster = pyoink.qm_core_fixed_indices
@@ -231,9 +231,9 @@ class fragments(object):
         if True:
           atoms = self.pdb_hierarchy_super.atoms()
           check_selection_integrity(atoms, atoms_in_one_cluster)
-      print "cluster->fragments done"
+      # print "cluster->fragments done"
       if(self.two_buffers):## define a second buffer layer
-        print "adding second layer"
+        # print "adding second layer"
         fragment_super_atoms_in_ph = []
         for molecules in molecules_in_fragments:
           pyoink.input_file = self.qmmm_file_name
