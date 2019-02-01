@@ -574,7 +574,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
             model              = model,
             params             = params,
             restraints_manager = rm)
-          grad.append(driver.run_gradient(calculator=calculator_manager)
+          grad.append(driver.run_gradient(calculator=calculator_manager))
           print >> log, '~   gnorm',np.linalg.norm(grad[idx])
           print >> log, '~   max_g', max(abs(i) for i in grad[idx]), ' min_g',min(abs(i) for i in grad[idx])
           idx+=1
