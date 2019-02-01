@@ -682,16 +682,7 @@ def opt(xray_structure,
     xray_structure=xray_structure, results=results)
 
 
-def run_gradient(calculator,params):
+def run_gradient(calculator):
     eg=calculator.target_and_gradients(x = calculator.x)
-    g=list(eg[1])
-    return g
-
-def gtest(params,
-        results,
-        calculator):
-  g=run_gradient(
-      calculator            = calculator,
-      params                = params)
-  return g
+    return list(eg[1])
 

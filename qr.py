@@ -553,12 +553,15 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           restraints_manager = create_restraints_manager(
               params           = params,
               model            = model)
-          cluster_restraints_manager = cluster_restraints.from_cluster(
+          if(fragment_manager is not None):
+            cluster_restraints_manager = cluster_restraints.from_cluster(
               restraints_manager = restraints_manager,
               fragment_manager   = fragment_manager,
               parallel_params    = params.parallel)
+          rm = restraints_manager
+          if(fragment_manager is not None):
+            rm = cluster_restraints_manager
           print "time taken for fragments",(time.time() - t0)
-          rm = cluster_restraints_manager
           frags=fragment_manager
           print >> log, '~  # clusters  : ',len(frags.clusters)
           print >> log, '~  list of atoms per cluster:'
@@ -571,10 +574,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
             model              = model,
             params             = params,
             restraints_manager = rm)
-          grad.append(driver.gtest(
-            params                = params,
-            calculator            = calculator_manager,
-            results               = results_manager))
+          grad.append(driver.run_gradient(calculator=calculator_manager)
           print >> log, '~   gnorm',np.linalg.norm(grad[idx])
           print >> log, '~   max_g', max(abs(i) for i in grad[idx]), ' min_g',min(abs(i) for i in grad[idx])
           idx+=1
@@ -599,7 +599,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         print >> log, ' %10s   d(angle)  %f'  %(index, get_grad_angle(grad[i],ref_grad) )
         print >> log, ' %10s   d(gnorm)  %f'  %(index, abs(np.linalg.norm(grad[i])-ref_gnorm) )
         print >> log, ' %10s   d(max_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
-        print >> log, ' %10s   d(min_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
+        print >> log, ' %10s   d(min_g)  %f'  %(index, abs(min(abs(i) for i in grad[i])-ref_min) )
         print >> log, ' %10s   MAD       %f'  %(index, get_grad_mad(grad[i],ref_grad) ) # MAD
         print >> log, ' '
 
