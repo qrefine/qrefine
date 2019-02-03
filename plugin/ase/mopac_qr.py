@@ -129,6 +129,9 @@ class Mopac(Calculator):
         # threads should be specified by user
         mopac_input += ' THREADS=%i' %(nproc)
 
+        # add solvent
+        mopac_input += '  EPS=78.4'
+
         #write spin
         spin = self.int_params['spin']
         if spin == 1.:
