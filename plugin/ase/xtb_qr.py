@@ -189,7 +189,7 @@ class GFNxTB(Calculator):
             elif line.startswith('$'):
                 pass
             else:
-                energy_tmp = float(line.split()[1])
+                energy_tmp = float('-' + line.split('-')[1])
         # update energy units
         self.e_au=energy_tmp
         self.e_total = energy_tmp * Hartree/(kcal / mol)
