@@ -661,6 +661,7 @@ def opt(xray_structure,
       results               = results,
       geometry_rmsd_manager = geometry_rmsd_manager,
       mode                  = "refine")
+    if minimized is None: continue
     calculator.update_xray_structure()
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
