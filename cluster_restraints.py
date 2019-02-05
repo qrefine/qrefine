@@ -46,23 +46,23 @@ class from_cluster(object):
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
        selection_and_sites_cart.append([selection_fragment, sites_cart,index])
-       # DEBUG begin
-       try:
-         super_selection = self.restraints_manager.\
-           fragment_extracts.fragment_super_selections[index]
-         tmp_h = self.fragment_manager.pdb_hierarchy_super.select(super_selection)
-         fn = self.restraints_manager.file_name.replace(".pdb","_%s.pdb"%str(index))
-         tmp_h.write_pdb_file(
-           file_name        = fn,
-           crystal_symmetry = self.fragment_manager.expansion.cs_box)
-         check_no_altlocs(h=tmp_h, file_name=fn)
-         self.restraints_manager.target_and_gradients(sites_cart=sites_cart,
-           selection=selection_fragment, index=index)
-       except Exception as e:
-         print "Failed before entering lbfgs minimization"
-         print str(e)
-         STOP()
-       # DEBUG end
+       ## DEBUG begin
+       #try:
+       #  super_selection = self.restraints_manager.\
+       #    fragment_extracts.fragment_super_selections[index]
+       #  tmp_h = self.fragment_manager.pdb_hierarchy_super.select(super_selection)
+       #  fn = self.restraints_manager.file_name.replace(".pdb","_%s.pdb"%str(index))
+       #  tmp_h.write_pdb_file(
+       #    file_name        = fn,
+       #    crystal_symmetry = self.fragment_manager.expansion.cs_box)
+       #  check_no_altlocs(h=tmp_h, file_name=fn)
+       #  self.restraints_manager.target_and_gradients(sites_cart=sites_cart,
+       #    selection=selection_fragment, index=index)
+       #except Exception as e:
+       #  print "Failed before entering lbfgs minimization"
+       #  print str(e)
+       #  STOP()
+       ## DEBUG end
     if(self.parallel_params.nproc is None):
       self.parallel_params.nproc = Auto
     ncount=0
