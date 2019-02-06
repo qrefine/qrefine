@@ -463,7 +463,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       params           = params,
       model            = model)
   if(map_data is not None and params.refine.mode == "refine"):
-    model.model.geometry_statistics().show()
+    model.model.geometry_statistics(use_hydrogens=False).show()
 
     show_cc(
       map_data                = map_data,
@@ -475,13 +475,16 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       geometry_rmsd_manager   = geometry_rmsd_manager,
       max_bond_rmsd           = params.refine.max_bond_rmsd,
       map_data                = map_data,
+      stpmax                  = params.refine.stpmax,
+      gradient_only           = params.refine.gradient_only,
+      line_search             = params.refine.line_search,
       restraints_manager      = restraints_manager,
-      max_iterations          = 100)
+      max_iterations          = params.refine.max_iterations_refine)
     model = O.run()
     of=open("real_space_refined.pdb", "w")
     print >> of, model.model_as_pdb(output_cs = True)
     of.close()
-    model.geometry_statistics().show()
+    model.geometry_statistics(use_hydrogens=False).show()
     show_cc(
       map_data                = map_data,
       xray_structure          = model.get_xray_structure(),

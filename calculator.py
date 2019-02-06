@@ -288,6 +288,9 @@ class sites_real_space(object):
                model,
                geometry_rmsd_manager,
                max_bond_rmsd,
+               stpmax,
+               gradient_only,
+               line_search,
                map_data=None,
                restraints_manager=None,
                max_iterations=50):
@@ -295,6 +298,9 @@ class sites_real_space(object):
     self.weight = 1.
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = max_iterations)
+    self.lbfgs_core_params = scitbx.lbfgs.core_parameters(
+      stpmin = 1.e-9,
+      stpmax = stpmax)
     self.lbfgs_exception_handling_params = scitbx.lbfgs.\
       exception_handling_parameters(
         ignore_line_search_failed_step_at_lower_bound = True,
@@ -308,14 +314,17 @@ class sites_real_space(object):
   def run(self):
     weights = flex.double()
     rmsd = self.cctbx_rm_bonds_rmsd
-    print "Initial weight:", self.weight
+    print "-"*79
+    print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
+    print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
     while True:
       weights.append(self.weight)
       w_prev = self.weight
       rmsd_prev = rmsd
+      print "-"*79
+      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd)
       self.run_one()
       rmsd = self.cctbx_rm_bonds_rmsd
-      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd),
       if(rmsd < self.max_bond_rmsd):
         self.weight = self.weight*2
       else:
@@ -323,12 +332,13 @@ class sites_real_space(object):
         if(self.weight in weights):
           print self.weight
           break
-      print "New weight to try: %8.4f"%self.weight
+      print "  New weight to try: %8.4f"%self.weight
     print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
     return self.run_one()
 
   def run_one(self):
     model = self.model.deep_copy()
+    print "  before:", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
     xrs = model.get_xray_structure()
     uc = xrs.crystal_symmetry().unit_cell()
     refined = cctbx.maptbx.real_space_refinement_simple.lbfgs(
@@ -339,10 +349,14 @@ class sites_real_space(object):
       geometry_restraints_manager     = self.restraints_manager,
       real_space_target_weight        = self.weight,
       real_space_gradients_delta      = 0.25,
+      gradient_only                   = self.gradient_only,
+      line_search                     = self.line_search,
+      lbfgs_core_params               = self.lbfgs_core_params,
       lbfgs_termination_params        = self.lbfgs_termination_params,
       lbfgs_exception_handling_params = self.lbfgs_exception_handling_params)
     model.set_sites_cart(sites_cart=refined.sites_cart)
     self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
       restraints_manager = self.geometry_rmsd_manager.geometry,
       xrs                = model.get_xray_structure())
+    print "  after :", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
     return model
