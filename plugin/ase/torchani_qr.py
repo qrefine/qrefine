@@ -31,7 +31,6 @@ class TorchAni(Calculator):
     self.coordinates = coordinates
     self.charge = charge
     self.pointcharges = pointcharges
-    print(" RUNNING Torch ANI")
     atoms_symbols = self.atoms.get_chemical_symbols()
     xyz = self.atoms.get_positions()
     coords = torch.tensor([xyz], dtype=self.aev_computer.dtype, device=self.aev_computer.device)
@@ -40,8 +39,10 @@ class TorchAni(Calculator):
     force = -derivative
     self.forces = force.squeeze().numpy().astype(np.float64)
     self.energy_free = energy.item()
-    print('Energy:',self.energy_free)
-    print('Force:', self.forces)
+    if 0:
+        print(" RUNNING Torch ANI")
+        print('Energy:',self.energy_free)
+        print('Force:', self.forces)
 
   def get_command(self):
         return "TorchANI"
