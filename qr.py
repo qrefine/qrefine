@@ -106,7 +106,7 @@ quantum {
     .help = number of parallel processes for the QM program
   qm_addon = gcp dftd3 gcp-d3
     .type = choice(multi=False)
-    .help = allows additional calcuations of the gCP and/or DFT-D3 corrections using their stand-alone programs
+    .help = allows additional calculations of the gCP and/or DFT-D3 corrections using their stand-alone programs
   qm_addon_method = None
     .type = str
     .help = specifies flags for the qm_addon. See manual for details.
