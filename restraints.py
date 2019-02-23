@@ -126,8 +126,7 @@ class from_qm(object):
       calculator = Ani()
     elif(self.qm_engine_name == "torchani"):
       from plugin.ase.torchani_qr import TorchAni
-      calculator = TorchAni(method = self.method)
-
+      calculator = TorchAni(method=self.method)
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
     else:
@@ -211,6 +210,8 @@ class from_qm(object):
     elif (self.qm_engine_name == 'torchani'):
       command = self.qm_engine.get_command()
     elif (self.qm_engine_name == 'xtb'):
+      command = self.qm_engine.get_command()
+    elif (self.qm_engine_name == 'pyscf'):
       command = self.qm_engine.get_command()
     else:
       assert 0

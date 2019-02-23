@@ -23,6 +23,8 @@ class Pyscf(Calculator):
         mol.verbose = 1
         self.mol = mol
         self.method = method
+        self.command = None
+        self.label = None
         # set user values
         self.set(**kwargs)
 
@@ -47,8 +49,10 @@ class Pyscf(Calculator):
     def initialize(self, atoms):
         pass
 
-    def run(self):
+    def run_qr(self,atoms, coordinates, charge=None, pointcharges=None, command=None, define_str=None):
             mol = self.mol
+            self.atoms = None
+            self.atoms = atoms
             mol.atom = [[atom.symbol, atom.position] for atom in self.atoms]
             mol.build()
             if self.method == 'hf':
@@ -61,18 +65,31 @@ class Pyscf(Calculator):
                 mdft.max_cycle=200
                 mdft.max_memory=1000
                 self.command = mdft.run(conv_tol=1e-8,conv_tol_grad=1e-12,xc='bp86').apply(pyscf.grad.RKS)
-            result = self.command.run()
-            self.energy = result._scf.e_tot*((Hartree)/(kcal / unit_mol))
+
+
+            self.energy = mscf.scf()*((Hartree)/(kcal / unit_mol))
+
             self.energy_zero = self.energy
             self.energy_free = self.energy
+            result = self.command.run()
             grad = np.array(result.grad())
             self.forces = grad*(-(Hartree/Bohr)/(kcal / unit_mol))
+
+            if 0:
+                print" energy", self.energy
+                print "gradients", self.forces
 
     def read_energy(self, fname):
         return self.energy
 
     def read_forces(self, fname):
         return self.forces
+
+    def get_command(self):
+        return self.command
+
+    def set_label(self, label):
+        self.label = label
 
     def atoms_are_equal(self, atoms_new):
         ''' (adopted from jacapo.py)
