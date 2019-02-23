@@ -43,7 +43,7 @@ class TorchAni(Calculator):
       energy_free (float) gets the energy as a sum of atomic contributions.
       forces (numpy.ndarray) stores the derivative of the energy with respect to the x,y,z coordinates.
   """
-  def __init__(self,method=None,label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
+  def __init__(self,method='ani-1x_8x',label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
 
     self.label  = label
     self.atoms  = atoms
@@ -51,29 +51,19 @@ class TorchAni(Calculator):
     coordinates = os.path.dirname(label)+"/"+ coordinates
     self.coordinates = coordinates
 
-
-
-
     self.method = method
-    if self.method =='ani-1x_8x':
+
+    if self.method == 'ani-1ccx_8x':
+        # TODO: There is a new api for this in master branch of torchani.
+        # calculator = torchani.models.ANI1ccx().ase()
+        # self.atoms.set_calculator(calculator)
+        raise NotImplementedError
+    else: #'ani-1x_8x'
 
         self.aev_computer = torchani.SortedAEV(const_file=const_file, device=device)
         self.nn = torchani.ModelOnAEV(self.aev_computer, derivative=True,
                          from_nc=network_dir, ensemble=1)
         self.shift_energy = torchani.EnergyShifter(sae_file)
-
-        #TODO The ANN models are only trained on H,C,N,O
-        trained = Set(['C', 'H', 'N', 'O'])
-        if Set(self.atoms.get_chemical_symbols()).issubset(trained):
-            print "Models have been trained for atoms in your system. "
-        else:
-            print "Unfortunately, we do not have a trained model for all elements in your system."
-
-    elif self.method == 'ani-1ccx_8x':
-        # TODO: There is a new api for this in master branch of torchani.
-        # calculator = torchani.models.ANI1ccx().ase()
-        # self.atoms.set_calculator(calculator)
-        pass
 
     self.energy_free = None
     self.forces = []
@@ -96,6 +86,14 @@ class TorchAni(Calculator):
     self.coordinates = coordinates
     self.charge = charge
     self.pointcharges = pointcharges
+    # The ANN models are only trained on H,C,N,O
+    trained = Set(['C', 'H', 'N', 'O'])
+    if Set(self.atoms.get_chemical_symbols()).issubset(trained):
+      print
+      "Models have been trained for atoms in your system. "
+    else:
+      print
+      "Unfortunately, we do not have a trained model for all elements in your system."
     atoms_symbols = self.atoms.get_chemical_symbols()
     xyz = self.atoms.get_positions()
     coords = torch.tensor([xyz], dtype=self.aev_computer.dtype, device=self.aev_computer.device)
