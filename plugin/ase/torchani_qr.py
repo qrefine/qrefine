@@ -10,8 +10,6 @@ https://pytorch.org/
 We are using the ASE calculator interface:
 https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html
 
-TODO: add tests for torchani
-
 """
 import os
 import numpy as np
@@ -36,20 +34,23 @@ class TorchAni(Calculator):
 
   Attributes:
       label (str) a useful name for the ASE calculator.
-      atoms (ase.Atoms) of atom
-      coordinates(numpy array) get the positions as x,y and z coordinates in Angstroem.
+      atoms (ase.atoms.Atoms) of atom
+      coordinates(numpy.ndarray) get the positions as x,y and z coordinates in Angstroem.
       energy_free (float) gets the energy as a sum of atomic contributions.
-      forces (numpy array) stores the derivative of the energy with respect to xyz coordinates.
+      forces (numpy.ndarray) stores the derivative of the energy with respect to xyz coordinates.
   """
   def __init__(self,label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
     self.label  = label
     self.atoms  = atoms
     coordinates = os.path.dirname(label)+"/"+ coordinates
     self.coordinates = coordinates
+
+
     self.aev_computer = torchani.SortedAEV(const_file=const_file, device=device)
     self.nn = torchani.ModelOnAEV(self.aev_computer, derivative=True,
-                         from_nc=network_dir, ensemble=8)
+                         from_nc=network_dir, ensemble=1)
     self.shift_energy = torchani.EnergyShifter(sae_file)
+
     self.energy_free = None
     self.forces = []
 
@@ -59,12 +60,12 @@ class TorchAni(Calculator):
     The Q|R code calls this method at each step of LBFGS.
 
     Args:
-      atoms (ase.Atoms) an updated set of atoms.
-      TODO: coordinates (numpy array) an updated set of coordinates. are these even being used?
+      atoms (ase.atoms.Atoms) an updated set of atoms.
+      TODO: coordinates (numpy.ndarray) an updated set of coordinates. are these even being used?
       charge (int) the charge on the molecular system.
       TODO: pointcharges (?) are these even being used?
-      comman (str) not used in this calcualtor
-      define_str() not used in this calculator
+      command (str) not used in this calcualtor
+      define_str() not used in this calculator, legacy from Turbomole?
 
     """
     self.atoms = atoms
@@ -79,6 +80,7 @@ class TorchAni(Calculator):
     self.energy_free = energy.item()
     force = -derivative
     self.forces = force.squeeze().numpy().astype(np.float64)
+
     if 0: # we need debugging flag here to switch on and off.
         print(" RUNNING Torch ANI")
         print('Energy:',self.energy_free)
