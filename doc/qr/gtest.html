@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<title>checking the cluster gradient</title>
+
+    <link rel="stylesheet" type="text/css" href="../css/html4css1.css" />
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
+
+  </head>
+  <body>
+
+    <div id="header">
+      <a href="../qr.html">
+        <img src="../icons/qr-logo-small.jpg" alt="Q|Refinement" />
+        <span>
+          <strong>Q|R</strong>efinement
+        </span>
+      </a>
+    </div>
+
+    <div class="document" id="checking-the-cluster-gradient">
+<h1 class="title">checking the cluster gradient</h1>
+<p>To solve the scaling wall for QM methods the full biomolecular gradient can be computed in <tt class="docutils literal">qr.refine</tt> using a fragmentation scheme.
+A fragment consists of a <em>cluster</em> and a <em>buffer</em> region, the latter is obtained from non-covalent interactions density descriptors. Additionally, a surrounding point charge (PC) region (controlled by <tt class="docutils literal">charge_embedding</tt>, <tt class="docutils literal">charge_cutoff</tt>) can be applied. Furthermore, the <tt class="docutils literal">two_buffer</tt> option adds another layer of buffer around a previously constructed fragment.</p>
+<p>The convergence of the gradient obtained via fragmentation can be tested using <tt class="docutils literal">mode=gtest</tt>.</p>
+<p>The list of available keywords can be found under the <tt class="docutils literal">cluster</tt> scope <a class="reference external" href="qrefine.html">here</a></p>
+<p>Central variable is called <tt class="docutils literal">g_mode</tt> and indicates what kind of buffer region is applied:</p>
+<pre class="literal-block">
+1 = default buffer
+2 = default buffer + PC
+3 = two buffer
+4 = two buffer + PC
+</pre>
+<div class="section" id="two-fundemantal-modes-of-operation">
+<h1>two fundemantal modes of operation</h1>
+<dl class="docutils">
+<dt>Sequence of calculations (recommended)</dt>
+<dd>specify <tt class="docutils literal">two_buffer=1</tt> and/or <tt class="docutils literal">charge_embedding=1</tt> in the command line.
+This specifies the <strong>largest buffer region</strong> up to which calculations are performed.</dd>
+<dt>Direct buffer selection</dt>
+<dd>specify <tt class="docutils literal">g_mode=1/2/3/4</tt> in the command line to select what kind of buffer region is calculated.
+Other kinds of buffer regions are not calculated.</dd>
+</dl>
+</div>
+<div class="section" id="output-statistics">
+<h1>output statistics</h1>
+<p>example output:</p>
+<pre class="literal-block">
+    index(g_mode - max_res)
+1 - 10   d(angle)  0.914806
+1 - 10   d(gnorm)  1.351992
+1 - 10   d(max_g)  0.266452
+1 - 10   d(min_g)  0.266452
+1 - 10   MAD       0.514772
+
+1 - 25   d(angle)  0.000000
+1 - 25   d(gnorm)  0.000000
+1 - 25   d(max_g)  0.000000
+1 - 25   d(min_g)  0.000000
+1 - 25   MAD       0.000000
+</pre>
+<p>The first number corresponds to the buffer kind (<tt class="docutils literal">g_mode</tt>, see above) and the second to the maximum numbers of residues per cluster. The last gradient is selected as the reference gradient (or the one set by <tt class="docutils literal">g_ref</tt>) and various comparisons are done.</p>
+<p>comparisons:</p>
+<pre class="literal-block">
+d(angle)  : mean angle deviation between the gradient of all atoms in degree.
+d(gnorm)  : difference between the gradient norms
+d(max/min): difference between max/min gradient values
+MAD       : mean absolute deviation between all gradient components
+</pre>
+</div>
+<div class="section" id="example">
+<h1>Example</h1>
+<p>Running a sequence of gradient calculations with a maximal number of residue per cluster of 10, 15 and 25, using default buffer and point-charges with GFN2-xTB.</p>
+<blockquote>
+qr.refine model.pdb engine_name=xtb mode=gtest g_scan=&quot;10 15 25&quot; charge_embedding=1</blockquote>
+<p>A total of 6 gradient calculations will be performed. 3 with the default buffer and <tt class="docutils literal">maxnum_residues_in_cluster=10/15/25</tt> and 3 with the default buffer
+plus point-charges with the same <tt class="docutils literal">maxnum_residues_in_cluster</tt> settings.
+At the end the largest gradient (from <tt class="docutils literal">g_mode=2</tt> and <tt class="docutils literal">maxnum_residues_in_cluster=25</tt>) will be used as reference for a comparison against the other 5 gradients. Deviations against the gradient norm (gnorm) against the max/min value of the gradient (max/min_g) and the mean absolute deviation (MAD) of each gradient component are printed.</p>
+<p>This will also produce a file called <tt class="docutils literal"><span class="pre">2-25.npy</span></tt>, which is the gradient of the largest buffer region. This gradient can be used as reference
+gradient for another calculation using <tt class="docutils literal"><span class="pre">cluster.g_ref=2-20.npy</span></tt>.</p>
+</div>
+</div>
+
+  </body>
+</html>
