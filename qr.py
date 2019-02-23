@@ -52,7 +52,7 @@ max_atoms = 15000
   .help = maximum number of atoms
 debug = False
     .type = bool
-    .help = flag to control verbosity of output for debugging prblematic code.
+    .help = flag to control verbosity of output for debugging problematic code.
 cluster{
   charge_cutoff = 8.0
     .type = float
@@ -75,7 +75,7 @@ cluster{
     .help = type of clustering algorithm
   altloc_method = *average subtract
     .type = choice(multi=False)
-    .help = two strategies on how to join energies from multiple energy and graident calculations are performed for alternate locations.
+    .help = two strategies on how to join energies from multiple energy and gradient calculations are performed for alternate locations.
   g_scan  = 10 15 20
     .type = str
     .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
@@ -130,7 +130,7 @@ refine {
     .help = choose between refinement, geometry optimization or gradient test
   number_of_macro_cycles=1
     .type = int
-    .help = number of macro cycles used in the refinment procedure.
+    .help = number of macro cycles used in the refinement procedure.
   number_of_weight_search_cycles=50
     .type = int
   number_of_refine_cycles=5
