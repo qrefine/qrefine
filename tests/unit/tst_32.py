@@ -13,6 +13,8 @@ class atoms_present_test(unittest.TestCase):
                             [0.45554739, 0.54289633, 0.81170881],
                             [0.66091919, -0.16799635, -0.91037834]])
 
+        # This has a S atom in the system.
+        # This should cause the calculator to raise an error.
         self.new_atoms = Atoms('CHHHS', [[0.03192167, 0.00638559, 0.01301679],
                                      [-0.83140486, 0.39370209, -0.26395324],
                                      [-0.66518241, -0.84461308, 0.20759389],
