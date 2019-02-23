@@ -52,6 +52,7 @@ max_atoms = 15000
   .help = maximum number of atoms
 debug = False
     .type = bool
+    .help = flag to control verbosity of output for debugging prblematic code.
 cluster{
   charge_cutoff = 8.0
     .type = float
@@ -64,6 +65,8 @@ cluster{
     .help = point charge embedding
   two_buffers = False
     .type = bool
+    .help = two-buffers are used when gradients for the whole system do not match the joined gradients from fragments \
+            when only as single buffer was used to surround each clusters.
   maxnum_residues_in_cluster = 15
     .type = int
     .help = maximum number of residues in a cluster
@@ -72,6 +75,7 @@ cluster{
     .help = type of clustering algorithm
   altloc_method = *average subtract
     .type = choice(multi=False)
+    .help = two strategies on how to join energies from multiple energy and graident calculations are performed for alternate locations.
   g_scan  = 10 15 20
     .type = str
     .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
@@ -97,7 +101,7 @@ quantum {
     .help = pre-defined defaults
   method = Auto
     .type = str
-    .help = Defaults to HF for all but MOPAC (PM7) and xTB (GFN2)
+    .help = Defaults to HF for all but MOPAC (PM7), xTB (GFN2) and TorchANI (ani-1x_8x)
   memory = None
     .type = str
     .help = memory for the QM program
@@ -118,6 +122,7 @@ refine {
     .help = do not perform calculations, only setup steps
   sf_algorithm = *direct fft
     .type = choice(multi=False)
+    .help = algorithm used to compute structure factors, either the direct method or fast fourier transform.
   refinement_target_name = *ml ls_wunit_k1
     .type = choice
   mode = opt *refine gtest
@@ -125,6 +130,7 @@ refine {
     .help = choose between refinement, geometry optimization or gradient test
   number_of_macro_cycles=1
     .type = int
+    .help = number of macro cycles used in the refinment procedure.
   number_of_weight_search_cycles=50
     .type = int
   number_of_refine_cycles=5
@@ -132,6 +138,7 @@ refine {
     .help = maximum number of refinement cycles
   number_of_micro_cycles=50
     .type = int
+    .help = maximum number of micro cycles used in refinement
   data_weight=None
     .type = float
   choose_best_use_r_work = False
@@ -146,18 +153,24 @@ refine {
     .type = int
   use_ase_lbfgs = False
     .type = bool
+    .help = used for debugging the lbfgs minimizer from cctbx.
   line_search = True
     .type = bool
+    .help = flag to use a line search in minimizer.
   stpmax = 3
     .type = float
+    .help = maximum step length, empirically we find 3 for cctbx, but 0.2 is better for QM methods.
   gradient_only = False
     .type = bool
+    .help = use the gradient only line search according to JA Snyman 2005.
   update_all_scales = True
     .type = bool
   refine_sites = True
     .type = bool
+    .help = only refine the cartesian coordinates of the molecular system.
   refine_adp = False
     .type = bool
+    .help = adp refinement are not currently supported. 
   restraints_weight_scale = 1.0
     .type = float
   shake_sites = False
@@ -172,6 +185,7 @@ refine {
     .type = float
   rmsd_tolerance = 0.01
     .type = float
+    .help = maximum acceptable tolerance for the rmsd. 
   opt_log = False
     .type = bool
     .help = additional output of the L-BFGS optimizer
@@ -212,13 +226,14 @@ output_folder_name = "pdb"
   .type = str
 shared_disk = True
   .type = bool
+  .help = this is deprecated no because we now only use the parallel map.
 rst_file = None
   .type = str
   .help = Restart file to use for determining location in run. Loads previous \
           results of weight calculations.
-
 dump_gradients=None
   .type = str
+  .help = used for debugging gradients when clustering.
 """
 
 def get_master_phil():
