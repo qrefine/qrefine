@@ -15,8 +15,10 @@ import os
 import numpy as np
 import torch
 import torchani
+from sets import Set
 from ase.calculators.general import Calculator
 
+# If you have a GPU available, then PyTorch will use it, otherwise the CPU is used.
 device_str = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = torch.device(device_str )
 
@@ -27,29 +29,51 @@ network_dir = anipath + '/ani/ani-1x_dft_x8ens/train'
 
 class TorchAni(Calculator):
   """
-  This class is one strategy to compute the energy and gradients using the ANI neural network.
+  This class interfaces to the TorchANI package to compute the energy and gradients using the ANI neural network.
 
-  If you have a GPU available, then PyTorch will use it, otherwise the CPU is used.
-
+  Models available:
+  - ani-1ccx_8x    https://chemrxiv.org/articles/Outsmarting_Quantum_Chemistry_Through_Transfer_Learning/6744440/1
+  - ani-1x_8x      https://aip.scitation.org/doi/10.1063/1.5023802
+  - ani-1          https://pubs.rsc.org/en/content/articlelanding/2017/sc/c6sc05720a#!divAbstract
 
   Attributes:
       label (str) a useful name for the ASE calculator.
-      atoms (ase.atoms.Atoms) of atom
-      coordinates(numpy.ndarray) get the positions as x,y and z coordinates in Angstroem.
+      atoms (ase.atoms.Atoms) set of atoms in the molecular system.
+      coordinates(numpy.ndarray) get the positions as x,y and z coordinates in Angstrom.
       energy_free (float) gets the energy as a sum of atomic contributions.
-      forces (numpy.ndarray) stores the derivative of the energy with respect to xyz coordinates.
+      forces (numpy.ndarray) stores the derivative of the energy with respect to the x,y,z coordinates.
   """
-  def __init__(self,label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
+  def __init__(self,method=None,label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
+
     self.label  = label
     self.atoms  = atoms
+
     coordinates = os.path.dirname(label)+"/"+ coordinates
     self.coordinates = coordinates
 
 
-    self.aev_computer = torchani.SortedAEV(const_file=const_file, device=device)
-    self.nn = torchani.ModelOnAEV(self.aev_computer, derivative=True,
+
+
+    self.method = method
+    if self.method =='ani-1x_8x':
+
+        self.aev_computer = torchani.SortedAEV(const_file=const_file, device=device)
+        self.nn = torchani.ModelOnAEV(self.aev_computer, derivative=True,
                          from_nc=network_dir, ensemble=1)
-    self.shift_energy = torchani.EnergyShifter(sae_file)
+        self.shift_energy = torchani.EnergyShifter(sae_file)
+
+        #TODO The ANN models are only trained on H,C,N,O
+        trained = Set(['C', 'H', 'N', 'O'])
+        if Set(self.atoms.get_chemical_symbols()).issubset(trained):
+            print "Models have been trained for atoms in your system. "
+        else:
+            print "Unfortunately, we do not have a trained model for all elements in your system."
+
+    elif self.method == 'ani-1ccx_8x':
+        # TODO: There is a new api for this in master branch of torchani.
+        # calculator = torchani.models.ANI1ccx().ase()
+        # self.atoms.set_calculator(calculator)
+        pass
 
     self.energy_free = None
     self.forces = []
@@ -98,4 +122,7 @@ class TorchAni(Calculator):
   def set_label(self, label):
 
     self.label = label
+
+  def set_method(self, method):
+    self.method = method
 
