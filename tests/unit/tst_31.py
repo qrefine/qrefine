@@ -1,15 +1,7 @@
 import run_tests
 from ase import Atoms
 from qrefine.plugin.ase.torchani_qr import TorchAni
-
-try:
-    import torch
-    import torchnani
-    torchani_installed = True
-except ImportError:
-    torchani_installed = False
-
-device = torch.device('cpu')
+import warnings
 
 def run(prefix):
     """
@@ -22,9 +14,7 @@ def run(prefix):
                             [0.45554739, 0.54289633, 0.81170881],
                             [0.66091919, -0.16799635, -0.91037834]])
 
-    calculator = TorchAni(label="ase",atoms=atoms )
-
-
+    calculator = TorchAni(method='ani-1x_8x',label="ase",atoms=atoms )
 
     print "atoms", atoms
     print "coordinate", atoms.get_positions()
@@ -36,15 +26,26 @@ def run(prefix):
 
     assert calculator.energy_free == -40.425621032714844
     assert calculator.forces == [[-0.00555373, -0.00059946,  0.00076646],
-                                 [ 0.01750624, -0.01134875,  0.00614653],
-                                 [ 0.00449754,  0.01362024, -0.00396855],
-                                 [-0.00801547, -0.00424718, -0.00878889],
-                                 [-0.00843458,  0.00257515,  0.00584446]]
+                                [ 0.01750624, -0.01134875,  0.00614653],
+                                [ 0.00449754,  0.01362024, -0.00396855],
+                                [-0.00801547, -0.00424718, -0.00878889],
+                                [-0.00843458,  0.00257515,  0.00584446]]
 
 if(__name__ == "__main__"):
+  torchani_installed = False
+  try:
+      import torch
+      device = torch.device('cpu')
+      import torchnani
+  except ImportError:
+      with warnings.catch_warnings():
+          warnings.simplefilter("ignore")
+          import torchani
+          torchani_installed = True
+
   prefix="tst_31"
   if torchani_installed:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=True)
-  else:
       rc = run_tests.runner(function=run, prefix=prefix, disable=False)
+  else:
+      rc = run_tests.runner(function=run, prefix=prefix, disable=True)
   assert not rc, '%s rc: %s' % (prefix, rc)
