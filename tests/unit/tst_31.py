@@ -24,6 +24,7 @@ def run(prefix):
     print "energy is :", calculator.energy_free
     print "forces are :", calculator.forces
 
+    assert calculator.method == 'ani-1x_8x'
     assert calculator.energy_free == -40.425621032714844
     assert calculator.forces == [[-0.00555373, -0.00059946,  0.00076646],
                                 [ 0.01750624, -0.01134875,  0.00614653],

@@ -68,6 +68,16 @@ class TorchAni(Calculator):
     self.energy_free = None
     self.forces = []
 
+
+
+  def check_trained_atoms(self):
+      """
+      The ANN models are only trained on H,C,N,O
+      """
+      trained_atoms = Set(['C', 'H', 'N', 'O'])
+      if not Set(self.atoms.get_chemical_symbols()).issubset(trained_atoms):
+          raise NotImplementedError("Unfortunately, we do not have a trained model for all elements in your system.")
+
   def run_qr(self, atoms, coordinates, charge, pointcharges, command=None, define_str=None):
     """
     This method is called every time an energy and forces are needed.
@@ -86,14 +96,7 @@ class TorchAni(Calculator):
     self.coordinates = coordinates
     self.charge = charge
     self.pointcharges = pointcharges
-    # The ANN models are only trained on H,C,N,O
-    trained = Set(['C', 'H', 'N', 'O'])
-    if Set(self.atoms.get_chemical_symbols()).issubset(trained):
-      print
-      "Models have been trained for atoms in your system. "
-    else:
-      print
-      "Unfortunately, we do not have a trained model for all elements in your system."
+    self.check_trained_atoms()
     atoms_symbols = self.atoms.get_chemical_symbols()
     xyz = self.atoms.get_positions()
     coords = torch.tensor([xyz], dtype=self.aev_computer.dtype, device=self.aev_computer.device)
