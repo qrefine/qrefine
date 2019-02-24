@@ -7,17 +7,23 @@ A set of unit tests for qrefine
 Overview
 --------
 
-A set of unit tests.
+A set of unit tests to exercise specific parts of the qrefine codebase.
 
 Running the program
 -------------------
 
-``qr.test`` can be executed on a PDB model file but the primary use if from
-the clustering code. The two main functions are
+``qr.test``
 
-  - cap the cluster with hydrogens to provide a neutral buffer layer and better
-    SCF convergence
-  - to determine the charge for each cluster
+Options available:
+
+``qr.test --nproc=8``
+
+Speed up the test set by running in parallel processes
+
+``qr.test --only=31``
+
+Run a single unit test, in this case only tst_31.py is exercised.
+
 
 
 List of all currently implemented tests

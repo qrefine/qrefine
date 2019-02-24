@@ -38,6 +38,10 @@ then run:
     where the nproc is set to the number of processors you want to use. This can be used to speed up the test set.
 
 
+See more documentation:   `Tests <qr/tests.html>`_
+
+
+
 Stages
 ======
 

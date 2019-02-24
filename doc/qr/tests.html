@@ -34,19 +34,16 @@
 </div>
 <div class="section" id="overview">
 <h1><a class="toc-backref" href="#id1">Overview</a></h1>
-<p>A set of unit tests.</p>
+<p>A set of unit tests to exercise specific parts of the qrefine codebase.</p>
 </div>
 <div class="section" id="running-the-program">
 <h1><a class="toc-backref" href="#id2">Running the program</a></h1>
-<p><tt class="docutils literal">qr.test</tt> can be executed on a PDB model file but the primary use if from
-the clustering code. The two main functions are</p>
-<blockquote>
-<ul class="simple">
-<li>cap the cluster with hydrogens to provide a neutral buffer layer and better
-SCF convergence</li>
-<li>to determine the charge for each cluster</li>
-</ul>
-</blockquote>
+<p><tt class="docutils literal">qr.test</tt></p>
+<p>Options available:</p>
+<p><tt class="docutils literal">qr.test <span class="pre">--nproc=8</span></tt></p>
+<p>Speed up the test set by running in parallel processes</p>
+<p><tt class="docutils literal">qr.test <span class="pre">--only=31</span></tt></p>
+<p>Run a single unit test, in this case only tst_31.py is exercised.</p>
 </div>
 <div class="section" id="list-of-all-currently-implemented-tests">
 <h1><a class="toc-backref" href="#id3">List of all currently implemented tests</a></h1>
