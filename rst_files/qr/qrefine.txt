@@ -27,6 +27,13 @@ In principle, ``qr.refine`` only needs a data file (e.g. mtz) and a model (e.g. 
 
 Sensible default options are selected and can be viewed with ``qr.refine --defaults``
 
+Examples
+========
+
+The default restraints are the classical cctbx. These restraints are taken from the parameterized library.
+
+
+
 QM interface
 ============
 `List of QM interfaces <qm_interfaces.html>`_

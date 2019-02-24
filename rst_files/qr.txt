@@ -7,3 +7,100 @@ Programs available in Q|R
   `Refinement <qr/qrefine.html>`_
 
   `Charges <qr/charges.html>`_
+
+
+
+Installation
+============
+
+A step by step guide on how to install qrefine is found here:
+
+https://github.com/qrefine/qrefine/blob/master/README.md
+
+more details can also be found here:
+
+https://github.com/qrefine/qrefine/wiki/Installation
+
+
+Run Tests
+=========
+Please run the test suite on your system before using qrefine.
+
+Simply make a clean directory, and the change into that empty directory
+
+   ``mkdir clean_test_dir``
+   ``cd clean_test_dir``
+
+then run:
+
+    ``qr.test --nproc=4``
+
+    where the nproc is set to the number of processors you want to use. This can be used to speed up the test set.
+
+
+Stages
+======
+
+A typical workflow would take the following steps:
+
+Step 1. Fetch the pdb of interest  and structure factors from the https://www.rcsb.org/
+
+        ``phenix.fetch_pdb 1yjp --mtz``
+
+Step 2. Complete your pdb by adding hydrogen and by adding missing atoms
+
+         ``qr.finalise 1yjp.pdb``
+
+        output from running this script is
+
+         ``1yjp_complete.pdb``
+
+Step 3.  Check the overall charge of your system by running
+
+         ``qr.charges 1yjp_complete.pdb  verbose=true``
+
+         this will print out the charge, and is a useful sanity check before running a refinement.
+
+         in this example, the output is
+
+         ``Charge: 0``
+
+
+Step 4. Another sanity check is performed by running a single point. MOPAC is used by default.
+
+         ``qr.restraint 1yjp_complete.pdb 1yjp.mtz``
+
+Step 5. A refinement using cctbx can quickly test that the refinement of the model is working as expected.
+          We also run the cctbx refinement to provide a comparison for quantum refinement.
+
+        ``qr.refine 1yjp_complete.pdb 1yjp.mtz > qr.log``
+
+        The refined model is written to the folder
+
+        ``1yjp_complete_refined.pdb``
+
+        adn the refinement statistics are displayed to the screen:
+
+        `` Best r_work: 0.1435 r_free: 0.1860 ``
+
+
+Step 6. Another comparison that can be performed is optimization.
+        This will ignore the experimental data and only use the restraints.
+
+        ``qr.refine 1yjp_complete.pdb mode=opt > qr.log``
+
+        This is useful when evaluating new qm engines to make sure they are performing well.
+
+
+Step 7. Large proteins must be broken up into small manageable pieces when performing refinement or
+         optimization using quantum restraints.
+
+        ``qr.refine 1yjp_complete.pdb 1yjp.mtz clustering=true > qr.log``
+
+
+Step 8. You can change the qm engine if you have other qm engines installed.
+
+         ``qr.refine 1yjp_complete.pdb 1yjp.mtz clustering=true engine_name=pyscf``
+
+
+

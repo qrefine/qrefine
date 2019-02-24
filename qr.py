@@ -15,7 +15,7 @@
                fmodel     = fmodel,
                calculator = calculator_manager,
                results    = results)
-   results_manager (store all reportable infomation, and write it out as a log,
+   results_manager (store all reportable information, and write it out as a log,
    and also write our final pdb structure.)
    """
 from __future__ import division

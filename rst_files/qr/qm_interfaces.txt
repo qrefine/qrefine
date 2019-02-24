@@ -70,7 +70,7 @@ Notes::
     default runs PM7
 
 GFN2-xTB
--------
+--------
 engine_name
     xtb
 

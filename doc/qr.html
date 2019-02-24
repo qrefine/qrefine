@@ -30,6 +30,75 @@
 <p><a class="reference external" href="qr/qrefine.html">Refinement</a></p>
 <p><a class="reference external" href="qr/charges.html">Charges</a></p>
 </blockquote>
+<div class="section" id="installation">
+<h1>Installation</h1>
+<p>A step by step guide on how to install qrefine is found here:</p>
+<p><a class="reference external" href="https://github.com/qrefine/qrefine/blob/master/README.md">https://github.com/qrefine/qrefine/blob/master/README.md</a></p>
+<p>more details can also be found here:</p>
+<p><a class="reference external" href="https://github.com/qrefine/qrefine/wiki/Installation">https://github.com/qrefine/qrefine/wiki/Installation</a></p>
+</div>
+<div class="section" id="run-tests">
+<h1>Run Tests</h1>
+<p>Please run the test suite on your system before using qrefine.</p>
+<p>Simply make a clean directory, and the change into that empty directory</p>
+<blockquote>
+<tt class="docutils literal">mkdir clean_test_dir</tt>
+<tt class="docutils literal">cd clean_test_dir</tt></blockquote>
+<p>then run:</p>
+<blockquote>
+<p><tt class="docutils literal">qr.test <span class="pre">--nproc=4</span></tt></p>
+<p>where the nproc is set to the number of processors you want to use. This can be used to speed up the test set.</p>
+</blockquote>
+</div>
+<div class="section" id="stages">
+<h1>Stages</h1>
+<p>A typical workflow would take the following steps:</p>
+<p>Step 1. Fetch the pdb of interest  and structure factors from the <a class="reference external" href="https://www.rcsb.org/">https://www.rcsb.org/</a></p>
+<blockquote>
+<tt class="docutils literal">phenix.fetch_pdb 1yjp <span class="pre">--mtz</span></tt></blockquote>
+<p>Step 2. Complete your pdb by adding hydrogen and by adding missing atoms</p>
+<blockquote>
+<blockquote>
+<tt class="docutils literal">qr.finalise 1yjp.pdb</tt></blockquote>
+<p>output from running this script is</p>
+<blockquote>
+<tt class="docutils literal">1yjp_complete.pdb</tt></blockquote>
+</blockquote>
+<p>Step 3.  Check the overall charge of your system by running</p>
+<blockquote>
+<p><tt class="docutils literal">qr.charges 1yjp_complete.pdb&nbsp; verbose=true</tt></p>
+<p>this will print out the charge, and is a useful sanity check before running a refinement.</p>
+<p>in this example, the output is</p>
+<p><tt class="docutils literal">Charge: 0</tt></p>
+</blockquote>
+<p>Step 4. Another sanity check is performed by running a single point. MOPAC is used by default.</p>
+<blockquote>
+<tt class="docutils literal">qr.restraint 1yjp_complete.pdb 1yjp.mtz</tt></blockquote>
+<dl class="docutils">
+<dt>Step 5. A refinement using cctbx can quickly test that the refinement of the model is working as expected.</dt>
+<dd><blockquote class="first">
+We also run the cctbx refinement to provide a comparison for quantum refinement.</blockquote>
+<p><tt class="docutils literal">qr.refine 1yjp_complete.pdb 1yjp.mtz &gt; qr.log</tt></p>
+<p>The refined model is written to the folder</p>
+<p><tt class="docutils literal">1yjp_complete_refined.pdb</tt></p>
+<p>adn the refinement statistics are displayed to the screen:</p>
+<p class="last">`` Best r_work: 0.1435 r_free: 0.1860 ``</p>
+</dd>
+<dt>Step 6. Another comparison that can be performed is optimization.</dt>
+<dd><p class="first">This will ignore the experimental data and only use the restraints.</p>
+<p><tt class="docutils literal">qr.refine 1yjp_complete.pdb mode=opt &gt; qr.log</tt></p>
+<p class="last">This is useful when evaluating new qm engines to make sure they are performing well.</p>
+</dd>
+<dt>Step 7. Large proteins must be broken up into small manageable pieces when performing refinement or</dt>
+<dd><blockquote class="first">
+optimization using quantum restraints.</blockquote>
+<p class="last"><tt class="docutils literal">qr.refine 1yjp_complete.pdb 1yjp.mtz clustering=true &gt; qr.log</tt></p>
+</dd>
+</dl>
+<p>Step 8. You can change the qm engine if you have other qm engines installed.</p>
+<blockquote>
+<tt class="docutils literal">qr.refine 1yjp_complete.pdb 1yjp.mtz clustering=true engine_name=pyscf</tt></blockquote>
+</div>
 </div>
 
   </body>

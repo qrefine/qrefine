@@ -9,7 +9,7 @@ from mmtbx import utils
 log = sys.stdout
 
 legend = """\
-Finalise a model before quantum refinement
+A command line tool to calculate the total formal charge of a model.
 """
 
 master_params_str = """
