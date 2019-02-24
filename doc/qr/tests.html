@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<title>A set of unit tests for qrefine</title>
+
+    <link rel="stylesheet" type="text/css" href="../css/html4css1.css" />
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
+
+  </head>
+  <body>
+
+    <div id="header">
+      <a href="../qr.html">
+        <img src="../icons/qr-logo-small.jpg" alt="Q|Refinement" />
+        <span>
+          <strong>Q|R</strong>efinement
+        </span>
+      </a>
+    </div>
+
+    <div class="document" id="a-set-of-unit-tests-for-qrefine">
+<h1 class="title">A set of unit tests for qrefine</h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#overview" id="id1">Overview</a></li>
+<li><a class="reference internal" href="#running-the-program" id="id2">Running the program</a></li>
+<li><a class="reference internal" href="#list-of-all-currently-implemented-tests" id="id3">List of all currently implemented tests</a></li>
+</ul>
+</div>
+<div class="section" id="overview">
+<h1><a class="toc-backref" href="#id1">Overview</a></h1>
+<p>A set of unit tests.</p>
+</div>
+<div class="section" id="running-the-program">
+<h1><a class="toc-backref" href="#id2">Running the program</a></h1>
+<p><tt class="docutils literal">qr.test</tt> can be executed on a PDB model file but the primary use if from
+the clustering code. The two main functions are</p>
+<blockquote>
+<ul class="simple">
+<li>cap the cluster with hydrogens to provide a neutral buffer layer and better
+SCF convergence</li>
+<li>to determine the charge for each cluster</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="list-of-all-currently-implemented-tests">
+<h1><a class="toc-backref" href="#id3">List of all currently implemented tests</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="78%" />
+<col width="9%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Test ID</th>
+<th class="head">Test summary</th>
+<th class="head">Time (s)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>tst_1</td>
+<td>Exercise standard (cctbx-based restraints) refinement with all defaults.</td>
+<td>7</td>
+</tr>
+<tr><td>tst_2</td>
+<td>Exercise standard (cctbx-based restraints) optimization.</td>
+<td>19</td>
+</tr>
+<tr><td>tst_3</td>
+<td>Exercise refine_sites=False.</td>
+<td>4</td>
+</tr>
+<tr><td>tst_4</td>
+<td>Not yet written</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr><td>tst_5</td>
+<td>Exercise max_atoms.</td>
+<td>4</td>
+</tr>
+<tr><td>tst_6</td>
+<td>Exercise altlocs. (NO ASSERT)</td>
+<td>6</td>
+</tr>
+<tr><td>tst_7</td>
+<td>Exercise interaction graph construction.</td>
+<td>6</td>
+</tr>
+<tr><td>tst_8</td>
+<td>Exercise interaction graph clustering.</td>
+<td>5</td>
+</tr>
+<tr><td>tst_9</td>
+<td>Exercise buffer region of cluster.</td>
+<td>0</td>
+</tr>
+<tr><td>tst_10</td>
+<td>Exercise combined energy and gradients from cluster qm.</td>
+<td>10</td>
+</tr>
+<tr><td>tst_11</td>
+<td>Exercise structure completion by finalise.py</td>
+<td>Skipped</td>
+</tr>
+<tr><td>tst_12</td>
+<td>Exercise structure preparation including charge, capping, completion</td>
+<td>29</td>
+</tr>
+<tr><td>tst_13</td>
+<td>Compare gradients from entire qm and clustered qm.</td>
+<td>Skipped</td>
+</tr>
+<tr><td>tst_14</td>
+<td>Exercise supercell.</td>
+<td>0</td>
+</tr>
+<tr><td>tst_15</td>
+<td>Exercise gradients match: small vs large box clustering vs not clustering.</td>
+<td>410</td>
+</tr>
+<tr><td>tst_16</td>
+<td>Exercise gradients match: Non-P1 case (P212121)</td>
+<td>24</td>
+</tr>
+<tr><td>tst_17</td>
+<td>Exercise altlocs</td>
+<td>1</td>
+</tr>
+<tr><td>tst_18</td>
+<td>Exercise gradients match: pdbs with altlocs</td>
+<td>174</td>
+</tr>
+<tr><td>tst_19</td>
+<td>Exercise altlocs using subtract vs using average</td>
+<td>273</td>
+</tr>
+<tr><td>tst_20</td>
+<td>Make sure expand works for this particular file.</td>
+<td>18</td>
+</tr>
+<tr><td>tst_21</td>
+<td>Exercise charges are calculated correctly</td>
+<td>?</td>
+</tr>
+<tr><td>tst_22</td>
+<td>Exercise charges are calculated correctly on pdb</td>
+<td>5</td>
+</tr>
+<tr><td>tst_23</td>
+<td>Exercise charges are calculated correctly</td>
+<td>5</td>
+</tr>
+<tr><td>tst_24</td>
+<td>Exercise finalise and charges both work</td>
+<td>8</td>
+</tr>
+<tr><td>tst_25</td>
+<td>Exercise finalise and charges both work</td>
+<td>7</td>
+</tr>
+<tr><td>tst_26</td>
+<td>Exercise charges  are calculated correctly</td>
+<td>3</td>
+</tr>
+<tr><td>tst_27</td>
+<td>Exercise finalise and charges both work</td>
+<td>11</td>
+</tr>
+<tr><td>tst_28</td>
+<td>Exercise finalise and charges both work</td>
+<td>8</td>
+</tr>
+<tr><td>tst_29</td>
+<td>Exercise charges are calculated correctly</td>
+<td>3</td>
+</tr>
+<tr><td>tst_30</td>
+<td>Exercise standard (cctbx-based restraints) optimization (no data required)</td>
+<td>38</td>
+</tr>
+<tr><td>tst_31</td>
+<td>Exercise TorchANI calculator works as expected</td>
+<td>0</td>
+</tr>
+<tr><td>tst_32</td>
+<td>Exercise TorchANI calculator raising an error with non supported atoms</td>
+<td>0</td>
+</tr>
+<tr><td>tst_33</td>
+<td>Exercise PySCF can compute an Energy and Gradient for a given system</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+  </body>
+</html>
