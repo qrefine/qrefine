@@ -12,7 +12,11 @@ engine_name
 requirements
     set ``TeraChem_COMMAND`` to the TeraChem execution command.
 
+    See User's guide for installation http://www.petachem.com/doc/userguide.pdf
+
 Notes::
+
+    qr.refine model.pdb model.mtz mode=refine engine_name=terachem
 
     The default runs a HF-D3(BJ)/6-31G calculation.
 
@@ -24,10 +28,16 @@ engine_name
 requirements
     set ``ORCA_COMMAND`` to the ORCA execution command.
 
+    see https://orcaforum.kofo.mpg.de/app.php/portal for more information
+
 Notes::
 
     For parallel execution of ORCA the ``ORCA_COMMAND`` should contain
     the full path to the `orca` binary.
+
+    qr.refine model.pdb model.mtz mode=refine engine_name=orca
+    quantum.method sets the DFT functional.
+    quantum.basis sets the AO basis set.
 
 
 Gaussian
@@ -36,10 +46,19 @@ engine_name
     gaussian
 
 requirements
+     The Gaussian ASE interface is currently written against g16.
+
+     To install gaussian please go to:
+      https://gaussian.com/g16/g16bin_install.pdf
+      https://gaussian.com/g16/g16src_install.pdf
 
 Notes::
 
-    The default runs...
+    qr.refine model.pdb model.mtz mode=refine engine_name=gaussian
+
+    The default runs hf/sto-3g calculations.
+    quantum.method sets the DFT functional.
+    quantum.basis sets the AO basis set.
 
 Turbomole
 ---------
@@ -48,6 +67,9 @@ engine_name
 
 requirements
     same as for turbomole itself
+
+    see http://www.turbomole.com/
+
 
 Notes::
 
@@ -66,6 +88,8 @@ requirements
     [for Linux] set``MOPAC_DIR`` to installation directory
 
 Notes::
+
+    qr.refine model.pdb model.mtz mode=refine engine_name=mopac
 
     default runs PM7
 
@@ -92,7 +116,24 @@ engine_name
 
 requirements
 
+The ASE calculator for ANI is available at: https://github.com/isayev/ASE_ANI
+
+There are multiple branches, including a python 2.7 branch.
+
+``git clone -b python27_cuda91 https://github.com/isayev/ASE_ANI.git``
+
+go the /path/to/phenix-1.14rc1-3161/build/lib and symlink libboost_python.so as libboost_python.so.1.63.0
+
+go the /path/to/phenix-1.14rc1-3161/build/lib and symlink libboost_numpy.so as libboost_numpy.so.1.63.0
+
+copy all files in qr-ani/requirement to /path/to/phenix/build/lib
+
+
 Notes
+
+To see the ANI engine is installed:
+
+   qr.refine model.pdb model.mtz mode=refine engine_name=ani
 
 
 TORCHANI
@@ -102,7 +143,80 @@ engine_name
 
 requirements
 
-Notes
+We need to install pytorch https://github.com/pytorch/pytorch
+
+``export CMAKE_PREFIX_PATH=/phenix/path/build``
+
+``phenix.python -m pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing``
+
+``git clone --recursive https://github.com/pytorch/pytorch.git``
+
+``cd pytorch``
+
+``MACOSX_DEPLOYMENT_TARGET=10.14 CC=clang CXX=clang++ NO_CUDA=1 NO_NNPACK=1 phenix.python setup.py install`` (Mac)
+
+Please change MACOSX_DEPLOYMENT_TARGET as same as your Mac version
+
+``NO_NNPACK=1 USE_CUDNN=0 NO_DISTRIBUTED=1 phenix.python setup.py install`` (Centos)
+
+If you have a cmake error cmake:command not found, that is probably because cmake path not in PATH, (bash)
+
+``export PATH=$PATH:/phenix/path/base/bin``
+
+Numpy might also have to be upgraded
+
+To install torchani please go to https://github.com/aiqm/torchani
+
+We need to install the qrefine branch.
+
+``git clone https://github.com/zasdfgbnm/torchani -b qrefine``
+
+``cd torchani``
+
+``phenix.python -m pip install .``
+
+``cd examples``
+
+``phenix.python energy_force.py``
+
+Then you should see the energy and forces printed out.
+
+Notes:
+
+example using the default ani-1x_8x model:
+
+    ``qr.refine model.pdb model.mtz engine_name=torchani``
+
+the newer ani-1ccx_8x is still being added, but when it is implemented you can then use it by:
+
+     qr.refine model.pdb model.mtz engine_name=torchani quantum.method='ani-1ccx_8x'
+
+The important thing to remember when using these models is that they are currently only trained on C,H,N and O atoms.
+An error will be raised if your pdb contains atoms that are not supported.
+
+
+
+PySCF
+--------
+engine_name
+    pyscf
+
+requirements
+
+    ``phenix.python -m pip install pyscf``
+
+    More information: https://sunqm.github.io/pyscf/install.html
+
+
+
+Notes:
+
+    The default runs a Hartree Fock calculation.
+
+    ``qr.refine model.pdb model.mtz engine_name=pyscf``
+
+
+
 
 
 qm_addon

@@ -32,10 +32,14 @@
 <dt>engine_name</dt>
 <dd>terachem</dd>
 <dt>requirements</dt>
-<dd>set <tt class="docutils literal">TeraChem_COMMAND</tt> to the TeraChem execution command.</dd>
+<dd><p class="first">set <tt class="docutils literal">TeraChem_COMMAND</tt> to the TeraChem execution command.</p>
+<p class="last">See User's guide for installation <a class="reference external" href="http://www.petachem.com/doc/userguide.pdf">http://www.petachem.com/doc/userguide.pdf</a></p>
+</dd>
 </dl>
 <p>Notes:</p>
 <pre class="literal-block">
+qr.refine model.pdb model.mtz mode=refine engine_name=terachem
+
 The default runs a HF-D3(BJ)/6-31G calculation.
 </pre>
 </div>
@@ -45,12 +49,18 @@ The default runs a HF-D3(BJ)/6-31G calculation.
 <dt>engine_name</dt>
 <dd>orca</dd>
 <dt>requirements</dt>
-<dd>set <tt class="docutils literal">ORCA_COMMAND</tt> to the ORCA execution command.</dd>
+<dd><p class="first">set <tt class="docutils literal">ORCA_COMMAND</tt> to the ORCA execution command.</p>
+<p class="last">see <a class="reference external" href="https://orcaforum.kofo.mpg.de/app.php/portal">https://orcaforum.kofo.mpg.de/app.php/portal</a> for more information</p>
+</dd>
 </dl>
 <p>Notes:</p>
 <pre class="literal-block">
 For parallel execution of ORCA the ``ORCA_COMMAND`` should contain
 the full path to the `orca` binary.
+
+qr.refine model.pdb model.mtz mode=refine engine_name=orca
+quantum.method sets the DFT functional.
+quantum.basis sets the AO basis set.
 </pre>
 </div>
 <div class="section" id="gaussian">
@@ -58,11 +68,22 @@ the full path to the `orca` binary.
 <dl class="docutils">
 <dt>engine_name</dt>
 <dd>gaussian</dd>
+<dt>requirements</dt>
+<dd><p class="first">The Gaussian ASE interface is currently written against g16.</p>
+<dl class="last docutils">
+<dt>To install gaussian please go to:</dt>
+<dd><a class="reference external" href="https://gaussian.com/g16/g16bin_install.pdf">https://gaussian.com/g16/g16bin_install.pdf</a>
+<a class="reference external" href="https://gaussian.com/g16/g16src_install.pdf">https://gaussian.com/g16/g16src_install.pdf</a></dd>
 </dl>
-<p>requirements</p>
+</dd>
+</dl>
 <p>Notes:</p>
 <pre class="literal-block">
-The default runs...
+qr.refine model.pdb model.mtz mode=refine engine_name=gaussian
+
+The default runs hf/sto-3g calculations.
+quantum.method sets the DFT functional.
+quantum.basis sets the AO basis set.
 </pre>
 </div>
 <div class="section" id="turbomole">
@@ -71,7 +92,9 @@ The default runs...
 <dt>engine_name</dt>
 <dd>turbomole</dd>
 <dt>requirements</dt>
-<dd>same as for turbomole itself</dd>
+<dd><p class="first">same as for turbomole itself</p>
+<p class="last">see <a class="reference external" href="http://www.turbomole.com/">http://www.turbomole.com/</a></p>
+</dd>
 </dl>
 <p>Notes:</p>
 <pre class="literal-block">
@@ -92,6 +115,8 @@ quantum.basis sets the AO basis set.
 </dl>
 <p>Notes:</p>
 <pre class="literal-block">
+qr.refine model.pdb model.mtz mode=refine engine_name=mopac
+
 default runs PM7
 </pre>
 </div>
@@ -119,7 +144,16 @@ qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method='--gfn 1 --
 <dd>ani</dd>
 </dl>
 <p>requirements</p>
+<p>The ASE calculator for ANI is available at: <a class="reference external" href="https://github.com/isayev/ASE_ANI">https://github.com/isayev/ASE_ANI</a></p>
+<p>There are multiple branches, including a python 2.7 branch.</p>
+<p><tt class="docutils literal">git clone <span class="pre">-b</span> python27_cuda91 <span class="pre">https://github.com/isayev/ASE_ANI.git</span></tt></p>
+<p>go the /path/to/phenix-1.14rc1-3161/build/lib and symlink libboost_python.so as libboost_python.so.1.63.0</p>
+<p>go the /path/to/phenix-1.14rc1-3161/build/lib and symlink libboost_numpy.so as libboost_numpy.so.1.63.0</p>
+<p>copy all files in qr-ani/requirement to /path/to/phenix/build/lib</p>
 <p>Notes</p>
+<p>To see the ANI engine is installed:</p>
+<blockquote>
+qr.refine model.pdb model.mtz mode=refine engine_name=ani</blockquote>
 </div>
 <div class="section" id="torchani">
 <h2>TORCHANI</h2>
@@ -128,7 +162,51 @@ qr.refine model.pdb model.mtz quantum.engine_name=xtb quantum.method='--gfn 1 --
 <dd>torchani</dd>
 </dl>
 <p>requirements</p>
-<p>Notes</p>
+<p>We need to install pytorch <a class="reference external" href="https://github.com/pytorch/pytorch">https://github.com/pytorch/pytorch</a></p>
+<p><tt class="docutils literal">export <span class="pre">CMAKE_PREFIX_PATH=/phenix/path/build</span></tt></p>
+<p><tt class="docutils literal">phenix.python <span class="pre">-m</span> pip install numpy pyyaml mkl <span class="pre">mkl-include</span> setuptools cmake cffi typing</tt></p>
+<p><tt class="docutils literal">git clone <span class="pre">--recursive</span> <span class="pre">https://github.com/pytorch/pytorch.git</span></tt></p>
+<p><tt class="docutils literal">cd pytorch</tt></p>
+<p><tt class="docutils literal">MACOSX_DEPLOYMENT_TARGET=10.14 CC=clang CXX=clang++ NO_CUDA=1 NO_NNPACK=1 phenix.python setup.py install</tt> (Mac)</p>
+<p>Please change MACOSX_DEPLOYMENT_TARGET as same as your Mac version</p>
+<p><tt class="docutils literal">NO_NNPACK=1 USE_CUDNN=0 NO_DISTRIBUTED=1 phenix.python setup.py install</tt> (Centos)</p>
+<p>If you have a cmake error cmake:command not found, that is probably because cmake path not in PATH, (bash)</p>
+<p><tt class="docutils literal">export <span class="pre">PATH=$PATH:/phenix/path/base/bin</span></tt></p>
+<p>Numpy might also have to be upgraded</p>
+<p>To install torchani please go to <a class="reference external" href="https://github.com/aiqm/torchani">https://github.com/aiqm/torchani</a></p>
+<p>We need to install the qrefine branch.</p>
+<p><tt class="docutils literal">git clone <span class="pre">https://github.com/zasdfgbnm/torchani</span> <span class="pre">-b</span> qrefine</tt></p>
+<p><tt class="docutils literal">cd torchani</tt></p>
+<p><tt class="docutils literal">phenix.python <span class="pre">-m</span> pip install .</tt></p>
+<p><tt class="docutils literal">cd examples</tt></p>
+<p><tt class="docutils literal">phenix.python energy_force.py</tt></p>
+<p>Then you should see the energy and forces printed out.</p>
+<p>Notes:</p>
+<p>example using the default ani-1x_8x model:</p>
+<blockquote>
+<tt class="docutils literal">qr.refine model.pdb model.mtz engine_name=torchani</tt></blockquote>
+<p>the newer ani-1ccx_8x is still being added, but when it is implemented you can then use it by:</p>
+<blockquote>
+qr.refine model.pdb model.mtz engine_name=torchani quantum.method='ani-1ccx_8x'</blockquote>
+<p>The important thing to remember when using these models is that they are currently only trained on C,H,N and O atoms.
+An error will be raised if your pdb contains atoms that are not supported.</p>
+</div>
+<div class="section" id="pyscf">
+<h2>PySCF</h2>
+<dl class="docutils">
+<dt>engine_name</dt>
+<dd>pyscf</dd>
+</dl>
+<p>requirements</p>
+<blockquote>
+<p><tt class="docutils literal">phenix.python <span class="pre">-m</span> pip install pyscf</tt></p>
+<p>More information: <a class="reference external" href="https://sunqm.github.io/pyscf/install.html">https://sunqm.github.io/pyscf/install.html</a></p>
+</blockquote>
+<p>Notes:</p>
+<blockquote>
+<p>The default runs a Hartree Fock calculation.</p>
+<p><tt class="docutils literal">qr.refine model.pdb model.mtz engine_name=pyscf</tt></p>
+</blockquote>
 </div>
 </div>
 <div class="section" id="qm-addon">
