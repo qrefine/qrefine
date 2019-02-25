@@ -1,6 +1,12 @@
 QM program interfaces
 =====================
 
+There is a command line script for checking which qm code are installed on your system.
+
+``qr.build_interfaces``
+
+
+
 The interfaces to the QM programs are
 
 
