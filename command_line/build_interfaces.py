@@ -1,3 +1,18 @@
+"""
+
+1. This command line tool checks to see that the correct version of java is installed.
+Java 1.8 is needed to run the density based descriptor code. This is called Yoink-0.0.1.jar and is
+installed in the plugin/yoink folder.
+
+2. This command line tool also checks to see if environment variables are pointing to installed qm engines.
+
+3. A conditional import of python based engines.
+
+A list of installed engines are printed to the screen for your convenience.
+
+
+"""
+
 # LIBTBX_SET_DISPATCHER_NAME qr.build_interfaces
 import os, sys
 
@@ -26,6 +41,7 @@ def run():
   msg = ['',
          'Welcome to the Q|R interface checker',
          '',
+         'For more information: https://github.com/qrefine/qrefine/wiki/Installation',
          ]
   draw_box_around_text(msg, width=78)
 
@@ -71,10 +87,14 @@ def run():
     print '\n  Java appears to be installed\n'
   if count:
     print '   STOPPING'
-    sys.exit()
+    #sys.exit()
 
   qm_engine_env_vars = {'MOPAC_COMMAND' : 'Mopac executable',
                         'TERACHEM_COMMAND' : 'TeraChem directory',
+                        'Orca_COMMAND': 'Orca directory',
+                        'XTBHOME':'XTB directory',
+                        'g16root':'Gaussian 16 directory',
+                        'TURBODIR ':'Turbomole directory',
                         }
   count = []
   for env_var in qm_engine_env_vars:
@@ -97,6 +117,47 @@ def run():
         env_var,
         qm_engine_env_vars[env_var],
         )
+
+  qm_engines_python =    { 'PyScf':' A collection of electronic structure programs powered by Python',
+                           'ANI':'ANI-1 neural net potential with python interface (ASE)',
+                           'TorchANI':'Accurate Neural Network Potential on PyTorch'
+
+  }
+
+  qm_engines_python_installed = {}
+  for name,description in qm_engines_python.items():
+
+    if name == 'PyScf':
+      try:
+        import pyscf
+        print "  PyScf successfully imported"
+        print
+        qm_engines_python_installed[name] = description
+      except:
+        print "  PyScf could not be imported"
+        print
+
+    if name == 'TorchANI':
+      try:
+        import torch
+        import torchani
+        print "  TorchANI successfully imported"
+        print
+        qm_engines_python_installed[name] = description
+      except:
+        print "  TorchANI could not be imported"
+        print
+
+    if name == 'ANI':
+      try:
+        import ani
+        from ani.ase_interface import aniensloader
+        from ani.ase_interface import ANIENS
+        print "  ANI successfully imported"
+        qm_engines_python_installed[name] = description
+      except:
+        print "  ANI could not be imported"
+
   if count:
     print '''
     QM engines set
@@ -104,6 +165,9 @@ def run():
     for env_var in count:
       print '%s %s : %s' % (' '*10, env_var, os.environ[env_var])
     print
+    for name, description in qm_engines_python_installed.items():
+      print '%s %s : %s' % (' '*10, name, description)
+      print
   else:
     print '''
     No QM engines found!
@@ -114,7 +178,8 @@ def run():
       print '%s %s : %s' % (' '*10, env_var, help)
     print
 
-  draw_box_around_text(['','Done!','','Run a Q|R job using qr.refine',''])
+
+  draw_box_around_text(['','Done!','','Run a Q|R job using qr.refine','','https://github.com/qrefine/qrefine/wiki/Installation'])
 
 if __name__=="__main__":
   args = sys.argv[1:]
