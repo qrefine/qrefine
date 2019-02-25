@@ -21,10 +21,11 @@ legend = """\
 Compute energy and gradient for a system
 """
 
+
 def get_help():
   print legend
   raise Usage("""
-    qr.restraint is an open-source module that ccomputes chemical restraints from ab initio calculations.
+    qr.restraint is an open-source module that computes chemical restraints from ab initio calculations.
 
     Example:
     qr.restraint model.pdb  data.mtz [<param_name>=<param_value>] ...
@@ -37,6 +38,7 @@ def get_help():
   return
 
 def get_master_phil():
+  # TODO how to just select quantum block from master params?
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=qr.master_params_str)
 

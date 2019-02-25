@@ -1,0 +1,23 @@
+=========================================
+Generate a status report for a refinement
+=========================================
+
+.. contents::
+
+Overview
+--------
+
+A program to check the status of a refinement.
+
+Running the program
+-------------------
+
+``qr.status`` can be executed in a folder where a refinement has been running.
+
+
+
+
+List of all available keywords
+------------------------------
+
+None

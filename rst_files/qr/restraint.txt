@@ -1,0 +1,26 @@
+=====================================
+Calculate the energy and gradient
+=====================================
+
+.. contents::
+
+Overview
+--------
+
+A program to calculate the energy and gradient of a model.
+
+Running the program
+-------------------
+
+``qr.restraint`` can be executed on a PDB model file.
+
+ The main functions are
+
+  - to ensure the finalized model is good enough to compute an energy and gradient.
+  - estimate how long a refinement will take, help with resource planning.
+
+
+List of all available keywords
+------------------------------
+
+{{phil:qrefine.command_line.restraint}}

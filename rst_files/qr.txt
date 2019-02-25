@@ -4,9 +4,18 @@ Programs available in Q|R
 
   `Finalise <qr/finalise.html>`_
 
+  `Charges <qr/charges.html>`_
+
+  `Cluster <qr/cluster.html>`_
+
+  `Restraint <qr/restraint.html>`_
+
   `Refinement <qr/qrefine.html>`_
 
-  `Charges <qr/charges.html>`_
+  `Status <qr/status.html>`_
+
+  `Tests <qr/tests.html>`_
+
 
 
 
