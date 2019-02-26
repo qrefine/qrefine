@@ -60,6 +60,10 @@ modules directory. The above command will clone it from *GitHub*.
 ```
 If any of the tests fail, please raise an issue here: [issue tracker](https://github.com/qrefine/qrefine/issues)
 
+ ### Documentation
+ 
+ Can be found at: https://qrefine.com/qr.html
+ 
 
 ### Help 
 
@@ -74,6 +78,8 @@ If you want to see the available options and default values please type:
 ```
  qr.refine --defaults or qr.refine --show
 ``` 
+
+
  
 
 ### Contact us 
