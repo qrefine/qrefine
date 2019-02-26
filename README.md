@@ -19,40 +19,6 @@ bio-macromolecules by employing a divide and conquer type approach. We
 have developed a new fragmentation approach for achieving a
 quantum-refinement of bio-macromolecules.
 
-### Citations:
-
-Min Zheng, Nigel W. Moriarty, Yanting Xu, Jeffrey Reimers,  Pavel Afonine, and Mark P. Waller,
-Solving the scalability issue in quantum-based refinement: Q|R#1
-(2017). Acta Cryst. D73, 1020-1028.
-DOI: [10.1107/S2059798317016746](http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
-
-Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
-Q|R: Quantum-based Refinement, 
-(2017) Acta Cryst. D73, 45-52.
-DOI: [10.1107/S2059798316019847](http://scripts.iucr.org/cgi-bin/paper?S2059798316019847)
-
-
-#### Clustering
-
-Min Zheng, Mark P. Waller, 
-Yoink: An interaction‐based partitioning API,
-(2018) Journal of Computational Chemistry, 39, 799–806.
-DOI: [10.1002/jcc.25146](https://doi.org/10.1002/jcc.25146)
-
-Min Zheng, Mark P. Waller, 
-Toward more efficient density-based adaptive QM/MM methods, 
-(2017)Int J. Quant. Chem  e25336 
-DOI: [10.1002/qua.25336](https://doi.org/10.1002/qua.25336)
-
-Min Zheng, Mark P. Waller, Adaptive QM/MM Methods,
-(2016) WIREs Comput. Mol. Sci., 6, 369–385.
-DOI: [10.1002/wcms.1255](https://doi.org/10.1002/wcms.1255)
-
-Mark P. Waller, Sadhana Kumbhar, Jack Yang,
-A Density‐Based Adaptive Quantum Mechanical/Molecular Mechanical Method
-(2014) ChemPhysChem  15, 3218–3225. 
-DOI: [10.1002/cphc.201402105](https://doi.org/10.1002/cphc.201402105 )
-
 
 ### Quickstart
 
@@ -92,7 +58,7 @@ modules directory. The above command will clone it from *GitHub*.
  cd tests
  qr.test
 ```
-If any of the tests fail, please raise and issue here: [issue tracker](https://github.com/qrefine/qrefine/issues)
+If any of the tests fail, please raise an issue here: [issue tracker](https://github.com/qrefine/qrefine/issues)
 
 
 ### Help 
@@ -127,6 +93,40 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 * [Lum Wang](https://github.com/Mooooony)
 * [Holger Kruse](https://github.com/hokru)
 
+
+### Citations:
+
+Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
+Q|R: Quantum-based Refinement, 
+(2017) Acta Cryst. D73, 45-52.
+DOI: [10.1107/S2059798316019847](http://scripts.iucr.org/cgi-bin/paper?S2059798316019847)
+
+Min Zheng, Nigel W. Moriarty, Yanting Xu, Jeffrey Reimers,  Pavel Afonine, and Mark P. Waller,
+Solving the scalability issue in quantum-based refinement: Q|R#1
+(2017). Acta Cryst. D73, 1020-1028.
+DOI: [10.1107/S2059798317016746](http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
+
+
+#### Clustering
+
+Min Zheng, Mark P. Waller, 
+Yoink: An interaction‐based partitioning API,
+(2018) Journal of Computational Chemistry, 39, 799–806.
+DOI: [10.1002/jcc.25146](https://doi.org/10.1002/jcc.25146)
+
+Min Zheng, Mark P. Waller, 
+Toward more efficient density-based adaptive QM/MM methods, 
+(2017)Int J. Quant. Chem  e25336 
+DOI: [10.1002/qua.25336](https://doi.org/10.1002/qua.25336)
+
+Min Zheng, Mark P. Waller, Adaptive QM/MM Methods,
+(2016) WIREs Comput. Mol. Sci., 6, 369–385.
+DOI: [10.1002/wcms.1255](https://doi.org/10.1002/wcms.1255)
+
+Mark P. Waller, Sadhana Kumbhar, Jack Yang,
+A Density‐Based Adaptive Quantum Mechanical/Molecular Mechanical Method
+(2014) ChemPhysChem  15, 3218–3225. 
+DOI: [10.1002/cphc.201402105](https://doi.org/10.1002/cphc.201402105 )
 
 
 
