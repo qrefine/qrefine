@@ -7,6 +7,9 @@ https://github.com/aiqm/torchani
 TorchANI is based on PyTorch which is a open source library for deep neural networks.
 https://pytorch.org/
 
+TorchANI is a pytorch implementation of the ANI models:
+https://github.com/isayev/ASE_ANI
+
 We are using the ASE calculator interface:
 https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html
 
@@ -18,14 +21,11 @@ import torchani
 from sets import Set
 from ase.calculators.general import Calculator
 
+
 # If you have a GPU available, then PyTorch will use it, otherwise the CPU is used.
 device_str = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = torch.device(device_str )
 
-anipath = os.path.dirname(__file__)
-const_file  = anipath + '/ani/ani-1x_dft_x8ens/rHCNO-5.2R_16-3.5A_a4-8.params'
-sae_file    = anipath + '/ani/ani-1x_dft_x8ens/sae_linfit.dat'
-network_dir = anipath + '/ani/ani-1x_dft_x8ens/train'
 
 class TorchAni(Calculator):
   """
@@ -53,21 +53,16 @@ class TorchAni(Calculator):
 
     self.method = method
 
-    if self.method == 'ani-1ccx_8x':
+    if self.method == 'ani-1ccx':
+        self.model = torchani.models.ANI1ccx()
         # TODO: There is a new api for this in master branch of torchani.
         # calculator = torchani.models.ANI1ccx().ase()
         # self.atoms.set_calculator(calculator)
-        raise NotImplementedError
     else: #'ani-1x_8x'
-
-        self.aev_computer = torchani.SortedAEV(const_file=const_file, device=device)
-        self.nn = torchani.ModelOnAEV(self.aev_computer, derivative=True,
-                         from_nc=network_dir, ensemble=1)
-        self.shift_energy = torchani.EnergyShifter(sae_file)
+        self.model = torchani.models.ANI1x()
 
     self.energy_free = None
     self.forces = []
-
 
 
   def check_trained_atoms(self):
@@ -88,7 +83,7 @@ class TorchAni(Calculator):
       TODO: coordinates (numpy.ndarray) an updated set of coordinates. are these even being used?
       charge (int) the charge on the molecular system.
       TODO: pointcharges (?) are these even being used?
-      command (str) not used in this calcualtor
+      command (str) not used in this calculator
       define_str() not used in this calculator, legacy from Turbomole?
 
     """
@@ -97,17 +92,22 @@ class TorchAni(Calculator):
     self.charge = charge
     self.pointcharges = pointcharges
     self.check_trained_atoms()
+
     atoms_symbols = self.atoms.get_chemical_symbols()
-    xyz = self.atoms.get_positions()
-    coords = torch.tensor([xyz], dtype=self.aev_computer.dtype, device=self.aev_computer.device)
-    energy, derivative = self.nn(coords,atoms_symbols)
-    energy = self.shift_energy.add_sae(energy, atoms_symbols)
-    self.energy_free = energy.item()
+    atoms_symbols = self.model.species_to_tensor(atoms_symbols).to(device).unsqueeze(0)
+
+    xyz = self.atoms.get_positions().tolist()
+    coords = torch.tensor([xyz],requires_grad = True, device = device)
+
+    _, energy = self.model((atoms_symbols, coords))
+    derivative = torch.autograd.grad(energy.sum(), coords)[0]
     force = -derivative
+
+    self.energy_free = energy.item()
     self.forces = force.squeeze().numpy().astype(np.float64)
 
     if 0: # we need debugging flag here to switch on and off.
-        print(" RUNNING Torch ANI")
+        print("Torch ANI: ",self.method)
         print('Energy:',self.energy_free)
         print('Force:', self.forces)
 
@@ -121,7 +121,6 @@ class TorchAni(Calculator):
     return "TorchANI"
 
   def set_label(self, label):
-
     self.label = label
 
   def set_method(self, method):
