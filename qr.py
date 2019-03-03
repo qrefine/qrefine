@@ -620,13 +620,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         print >> log, ' '
 
   else:
+    rm = restraints_manager
     if(fragment_manager is not None):
       cluster_restraints_manager = cluster_restraints.from_cluster(
         restraints_manager = restraints_manager,
         fragment_manager   = fragment_manager,
         parallel_params    = params.parallel)
-    rm = restraints_manager
-    if(fragment_manager is not None):
       rm = cluster_restraints_manager
     calculator_manager = create_calculator(
       weights            = weights,
