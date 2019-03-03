@@ -609,7 +609,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         xray_structure  = model.xray_structure,
         log             = log)
       O = calculator.sites_real_space(
-        params                = params,
         model                 = model.model,
         geometry_rmsd_manager = geometry_rmsd_manager,
         max_bond_rmsd         = params.refine.max_bond_rmsd,

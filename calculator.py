@@ -323,7 +323,9 @@ class sites_real_space(object):
       rmsd_prev = rmsd
       print "-"*79
       print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd)
-      self.run_one()
+      model = self.run_one()
+      of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
+      print >> of, model.model_as_pdb(output_cs=True)
       rmsd = self.cctbx_rm_bonds_rmsd
       if(rmsd > rmsd_prev):
         self.weight = self.weight*2
