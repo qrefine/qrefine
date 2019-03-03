@@ -325,7 +325,7 @@ class sites_real_space(object):
       print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd)
       self.run_one()
       rmsd = self.cctbx_rm_bonds_rmsd
-      if(rmsd < self.max_bond_rmsd):
+      if(rmsd > rmsd_prev):
         self.weight = self.weight*2
       else:
         self.weight = self.weight/2

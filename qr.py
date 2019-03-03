@@ -475,149 +475,123 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     restraints_manager = create_restraints_manager(
       params           = params,
       model            = model)
-  if(map_data is not None and params.refine.mode == "refine"):
-    model.model.geometry_statistics(use_hydrogens=False).show()
 
-    show_cc(
-      map_data                = map_data,
-      xray_structure          = model.xray_structure,
-      log                     = log)
+  if(params.refine.mode == "gtest"):
+    import numpy as np
+    from utils.mathbox import get_grad_mad, get_grad_angle
 
-    O = calculator.sites_real_space(
-      model                   = model.model,
-      geometry_rmsd_manager   = geometry_rmsd_manager,
-      max_bond_rmsd           = params.refine.max_bond_rmsd,
-      map_data                = map_data,
-      stpmax                  = params.refine.stpmax,
-      gradient_only           = params.refine.gradient_only,
-      line_search             = params.refine.line_search,
-      restraints_manager      = restraints_manager,
-      max_iterations          = params.refine.max_iterations_refine)
-    model = O.run()
-    of=open("real_space_refined.pdb", "w")
-    print >> of, model.model_as_pdb(output_cs = True)
-    of.close()
-    model.geometry_statistics(use_hydrogens=False).show()
-    show_cc(
-      map_data                = map_data,
-      xray_structure          = model.get_xray_structure(),
-      log                     = log)
-  elif(params.refine.mode == "gtest"):
-      import numpy as np
-      from utils.mathbox import get_grad_mad, get_grad_angle
+    ref_grad=None
+    if params.cluster.g_ref is not None:
+      print >> log, 'Loading reference gradient :', params.cluster.g_ref
+      ref_grad=np.load(params.cluster.g_ref)
 
-      ref_grad=None
-      if params.cluster.g_ref is not None:
-        print >> log, 'Loading reference gradient :', params.cluster.g_ref
-        ref_grad=np.load(params.cluster.g_ref)
-
-      # determine what kind of buffer to calculate
-      g_mode=[]
-      if params.cluster.g_mode is None:
-        g_mode.append(1)
-        if params.cluster.charge_embedding:
-          g_mode.append(2)
-        if params.cluster.two_buffers:
-          g_mode.append(3)
-        if params.cluster.two_buffers and params.cluster.charge_embedding:
-          g_mode.append(4)
-      else:
-        g_mode.append(params.cluster.g_mode)
+    # determine what kind of buffer to calculate
+    g_mode=[]
+    if params.cluster.g_mode is None:
+      g_mode.append(1)
+      if params.cluster.charge_embedding:
+        g_mode.append(2)
+      if params.cluster.two_buffers:
+        g_mode.append(3)
+      if params.cluster.two_buffers and params.cluster.charge_embedding:
+        g_mode.append(4)
+    else:
+      g_mode.append(params.cluster.g_mode)
 
 
-      # reset flags
-      params.cluster.clustering=True
-      params.cluster.charge_embedding=False
-      params.cluster.two_buffers=False
-      grad=[]
-      idx=0
-      idl=[]
+    # reset flags
+    params.cluster.clustering=True
+    params.cluster.charge_embedding=False
+    params.cluster.two_buffers=False
+    grad=[]
+    idx=0
+    idl=[]
 
-      # input for cluster size
-      cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
-      # cluster_scan=[2,10]
+    # input for cluster size
+    cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
+    # cluster_scan=[2,10]
 
-      n_grad=len(cluster_scan)*len(g_mode)
-      print >> log, 'Calculating %3i gradients \n' % (n_grad)
-      print >> log, 'Starting loop over different fragment sizes'
-      for ig in g_mode:
+    n_grad=len(cluster_scan)*len(g_mode)
+    print >> log, 'Calculating %3i gradients \n' % (n_grad)
+    print >> log, 'Starting loop over different fragment sizes'
+    for ig in g_mode:
 
-        print >> log,'loop for g_mode = %i ' % (ig)
-        if ig == 2:
-          print >> log, 'pc on'
-          params.cluster.charge_embedding=True
-        if ig == 3:
-          print >> log, 'two_buffers on, pc off'
-          params.cluster.charge_embedding=False
-          params.cluster.two_buffers=True
-        if ig == 4:
-          print >> log, 'two_buffers on, pc on'
-          params.cluster.charge_embedding=True
-          params.cluster.two_buffers=True
+      print >> log,'loop for g_mode = %i ' % (ig)
+      if ig == 2:
+        print >> log, 'pc on'
+        params.cluster.charge_embedding=True
+      if ig == 3:
+        print >> log, 'two_buffers on, pc off'
+        params.cluster.charge_embedding=False
+        params.cluster.two_buffers=True
+      if ig == 4:
+        print >> log, 'two_buffers on, pc on'
+        params.cluster.charge_embedding=True
+        params.cluster.two_buffers=True
 
-        for max_cluster in cluster_scan:
-          idl.append([ig,max_cluster])
-          print >> log, 'g_mode: %s' % (" - ".join(map(str,idl[idx])))
-          t0 = time.time()
-          print >> log, "~max cluster size ",max_cluster
-          params.cluster.maxnum_residues_in_cluster=max_cluster
-          fragment_manager = create_fragment_manager(
-              params           = params,
-              pdb_hierarchy    = model.pdb_hierarchy,
-              cif_objects      = model.cif_objects,
-              crystal_symmetry = model.xray_structure.crystal_symmetry())
-          restraints_manager = create_restraints_manager(
-              params           = params,
-              model            = model)
-          if(fragment_manager is not None):
-            cluster_restraints_manager = cluster_restraints.from_cluster(
-              restraints_manager = restraints_manager,
-              fragment_manager   = fragment_manager,
-              parallel_params    = params.parallel)
-          rm = restraints_manager
-          if(fragment_manager is not None):
-            rm = cluster_restraints_manager
-          print "time taken for fragments",(time.time() - t0)
-          frags=fragment_manager
-          print >> log, '~  # clusters  : ',len(frags.clusters)
-          print >> log, '~  list of atoms per cluster:'
-          print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
-          print >> log, '~  list of atoms per fragment:'
-          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
-          calculator_manager = create_calculator(
-            weights            = weights,
-            fmodel             = start_fmodel,
-            model              = model,
-            params             = params,
-            restraints_manager = rm)
-          grad.append(driver.run_gradient(calculator=calculator_manager))
-          print >> log, '~   gnorm',np.linalg.norm(grad[idx])
-          print >> log, '~   max_g', max(abs(i) for i in grad[idx]), ' min_g',min(abs(i) for i in grad[idx])
-          idx+=1
-          print "total time for gradient",(time.time() - t0),'\n\n'
+      for max_cluster in cluster_scan:
+        idl.append([ig,max_cluster])
+        print >> log, 'g_mode: %s' % (" - ".join(map(str,idl[idx])))
+        t0 = time.time()
+        print >> log, "~max cluster size ",max_cluster
+        params.cluster.maxnum_residues_in_cluster=max_cluster
+        fragment_manager = create_fragment_manager(
+            params           = params,
+            pdb_hierarchy    = model.pdb_hierarchy,
+            cif_objects      = model.cif_objects,
+            crystal_symmetry = model.xray_structure.crystal_symmetry())
+        restraints_manager = create_restraints_manager(
+            params           = params,
+            model            = model)
+        if(fragment_manager is not None):
+          cluster_restraints_manager = cluster_restraints.from_cluster(
+            restraints_manager = restraints_manager,
+            fragment_manager   = fragment_manager,
+            parallel_params    = params.parallel)
+        rm = restraints_manager
+        if(fragment_manager is not None):
+          rm = cluster_restraints_manager
+        print "time taken for fragments",(time.time() - t0)
+        frags=fragment_manager
+        print >> log, '~  # clusters  : ',len(frags.clusters)
+        print >> log, '~  list of atoms per cluster:'
+        print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
+        print >> log, '~  list of atoms per fragment:'
+        print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
+        calculator_manager = create_calculator(
+          weights            = weights,
+          fmodel             = start_fmodel,
+          model              = model,
+          params             = params,
+          restraints_manager = rm)
+        grad.append(driver.run_gradient(calculator=calculator_manager))
+        print >> log, '~   gnorm',np.linalg.norm(grad[idx])
+        print >> log, '~   max_g', max(abs(i) for i in grad[idx]), ' min_g',min(abs(i) for i in grad[idx])
+        idx+=1
+        print "total time for gradient",(time.time() - t0),'\n\n'
 
-      print >> log, 'overview'
-      if ref_grad is None:
-        ref_idx=idx-1  # should always be the most reliable gradient
-        ref_name="-".join(map(str,idl[ref_idx]))
-        print >>log,'reference gradient taken from  %s' %(ref_name)
-        ref_grad=np.array(grad[ref_idx]) 
-        np.save(ref_name,ref_grad)
+    print >> log, 'overview'
+    if ref_grad is None:
+      ref_idx=idx-1  # should always be the most reliable gradient
+      ref_name="-".join(map(str,idl[ref_idx]))
+      print >>log,'reference gradient taken from  %s' %(ref_name)
+      ref_grad=np.array(grad[ref_idx])
+      np.save(ref_name,ref_grad)
 
-      ref_max=max(abs(i) for i in ref_grad)
-      ref_min=min(abs(i) for i in ref_grad)
-      ref_gnorm=np.linalg.norm(ref_grad)
-      grad=np.array(grad)
-      
-      print >> log,  '     g_mode - max_res'
-      for i in range(0,idx):
-        index=" - ".join(map(str,idl[i]))
-        print >> log, ' %10s   d(angle)  %f'  %(index, get_grad_angle(grad[i],ref_grad) )
-        print >> log, ' %10s   d(gnorm)  %f'  %(index, abs(np.linalg.norm(grad[i])-ref_gnorm) )
-        print >> log, ' %10s   d(max_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
-        print >> log, ' %10s   d(min_g)  %f'  %(index, abs(min(abs(i) for i in grad[i])-ref_min) )
-        print >> log, ' %10s   MAD       %f'  %(index, get_grad_mad(grad[i],ref_grad) ) # MAD
-        print >> log, ' '
+    ref_max=max(abs(i) for i in ref_grad)
+    ref_min=min(abs(i) for i in ref_grad)
+    ref_gnorm=np.linalg.norm(ref_grad)
+    grad=np.array(grad)
+
+    print >> log,  '     g_mode - max_res'
+    for i in range(0,idx):
+      index=" - ".join(map(str,idl[i]))
+      print >> log, ' %10s   d(angle)  %f'  %(index, get_grad_angle(grad[i],ref_grad) )
+      print >> log, ' %10s   d(gnorm)  %f'  %(index, abs(np.linalg.norm(grad[i])-ref_gnorm) )
+      print >> log, ' %10s   d(max_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
+      print >> log, ' %10s   d(min_g)  %f'  %(index, abs(min(abs(i) for i in grad[i])-ref_min) )
+      print >> log, ' %10s   MAD       %f'  %(index, get_grad_mad(grad[i],ref_grad) ) # MAD
+      print >> log, ' '
 
   else:
     rm = restraints_manager
@@ -627,31 +601,60 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         fragment_manager   = fragment_manager,
         parallel_params    = params.parallel)
       rm = cluster_restraints_manager
-    calculator_manager = create_calculator(
-      weights            = weights,
-      fmodel             = start_fmodel,
-      model              = model,
-      params             = params,
-      restraints_manager = rm)
-    if(params.refine.mode == "refine"):
-      driver.refine(
+
+    if(map_data is not None and params.refine.mode == "refine"):
+      model.model.geometry_statistics(use_hydrogens=False).show()
+      show_cc(
+        map_data        = map_data,
+        xray_structure  = model.xray_structure,
+        log             = log)
+      O = calculator.sites_real_space(
         params                = params,
-        fmodel                = fmodel,
+        model                 = model.model,
         geometry_rmsd_manager = geometry_rmsd_manager,
-        calculator            = calculator_manager,
-        results               = results_manager)
+        max_bond_rmsd         = params.refine.max_bond_rmsd,
+        map_data              = map_data,
+        stpmax                = params.refine.stpmax,
+        gradient_only         = params.refine.gradient_only,
+        line_search           = params.refine.line_search,
+        restraints_manager    = rm,
+        max_iterations        = params.refine.max_iterations_refine)
+      model = O.run()
+      of = open("real_space_refined.pdb", "w")
+      print >> of, model.model_as_pdb(output_cs=True)
+      of.close()
+      model.geometry_statistics(use_hydrogens=False).show()
+      show_cc(
+        map_data=map_data,
+        xray_structure=model.get_xray_structure(),
+        log=log)
+      return
     else:
-      driver.opt(
-        params                = params,
-        xray_structure        = model.xray_structure,
-        geometry_rmsd_manager = geometry_rmsd_manager,
-        calculator            = calculator_manager,
-        results               = results_manager)
-    xrs_best = results_manager.finalize(
-      input_file_name_prefix  = prefix,
-      output_file_name_prefix = params.output_file_name_prefix,
-      output_folder_name      = params.output_folder_name,
-      use_r_work              = params.refine.choose_best_use_r_work)
+      calculator_manager = create_calculator(
+        weights=weights,
+        fmodel=start_fmodel,
+        model=model,
+        params=params,
+        restraints_manager=rm)
+      if(params.refine.mode == "refine"):
+        driver.refine(
+          params                = params,
+          fmodel                = fmodel,
+          geometry_rmsd_manager = geometry_rmsd_manager,
+          calculator            = calculator_manager,
+          results               = results_manager)
+      else:
+        driver.opt(
+          params                = params,
+          xray_structure        = model.xray_structure,
+          geometry_rmsd_manager = geometry_rmsd_manager,
+          calculator            = calculator_manager,
+          results               = results_manager)
+      xrs_best = results_manager.finalize(
+        input_file_name_prefix  = prefix,
+        output_file_name_prefix = params.output_file_name_prefix,
+        output_folder_name      = params.output_folder_name,
+        use_r_work              = params.refine.choose_best_use_r_work)
 
 if (__name__ == "__main__"):
   t0 = time.time()

@@ -8,6 +8,7 @@ from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
 from fragment import fragment_extracts
 from restraints import from_qm
+from libtbx import group_args
 
 def check_no_altlocs(h, file_name):
   altlocs = []
@@ -26,6 +27,12 @@ def check_no_altlocs(h, file_name):
 class from_cluster(object):
   def __init__(self, restraints_manager, fragment_manager, parallel_params):
     adopt_init_args(self, locals())
+
+  def energies_sites(self, sites_cart, compute_gradients=True):
+    tg = self.target_and_gradients(sites_cart=sites_cart)
+    return group_args(
+      target    = tg[0],
+      gradients = tg[1])
 
   def target_and_gradients(self, sites_cart):
     # update the pdb hierarchy of the center
