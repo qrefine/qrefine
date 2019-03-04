@@ -189,32 +189,7 @@ class from_qm(object):
       charge_file = None
       selection =flex.bool(self.system_size, True)
       gradients_scale = [1.0]*self.system_size
-    #
-    # need to get commands for QM programs from local machine so queue machines
-    # know where to look.
-    #
     define_str=''
-    command = None
-    if (self.qm_engine_name == 'terachem'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'mopac'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'gaussian'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'orca'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'turbomole'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'ani'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'torchani'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'xtb'):
-      command = self.qm_engine.get_command()
-    elif (self.qm_engine_name == 'pyscf'):
-      command = self.qm_engine.get_command()
-    else:
-      assert 0
     atoms = ase_atoms_from_pdb_hierarchy(ph)
     unit_convert = ase_units.mol/ase_units.kcal # ~ 23.06
     self.qm_engine.set_label(qm_pdb_file[:-4])
@@ -234,11 +209,11 @@ class from_qm(object):
     #       if(dist<=thr):
     #         print 'WARNING: atoms ', i,j,' are closer than', thr,' A -> ',dist
     self.qm_engine.run_qr(atoms,
-                          charge=qm_charge,
-                          pointcharges=charge_file,
-                          coordinates=qm_pdb_file[:-4]+".xyz",
-                          command=command,       #
-                          define_str=define_str, # for Turbomole
+                          charge       = qm_charge,
+                          pointcharges = charge_file,
+                          coordinates  = qm_pdb_file[:-4]+".xyz",
+                          command      = self.qm_engine_name,
+                          define_str   = define_str, # for Turbomole
       )
     os.chdir(cwd)
     if self.qm_addon is not None:

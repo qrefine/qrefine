@@ -116,7 +116,6 @@ def run(args, log):
   # Read map
   map_data = None
   if(cmdline.ccp4_map is not None):
-    # XXX Pure nonsense!
     map_data = cmdline.ccp4_map.map_data()
     model = model.model#inp.model()
     model = group_args(
