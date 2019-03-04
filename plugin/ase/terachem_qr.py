@@ -10,6 +10,7 @@ from ase.units import kcal, mol
 from ase.units import Hartree, Bohr
 from ase.calculators.general import Calculator
 import copy
+import platform
 
 key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd lanl2dz_ecp\nZn lanl2dz_ecp\nMg lanl2dz_ecp','maxit':200,'gpumem':512,'gpus':None,'basis':None,'coordinates':None,'charge':None,'method':None,'dftd':None,'run':None,'pointcharges':None ,'threall':1.0e-12,'scf':'diis','watcheindiis' :'no','pcm':'cosmo','epsilon':78.39}
 
@@ -100,6 +101,16 @@ class TeraChem(Calculator):
         command = self.get_command()
         if command is None:
             raise RuntimeError('TeraChem command not specified')
+
+        WhatOS=platform.system()
+        if "Linux" in WhatOS:
+            try:
+	        terachem_library_path = command[0:command.find('bin/terachem')]+"lib"
+                if terachem_library_path not in os.environ['LD_LIBRARY_PATH']:
+                    os.environ['LD_LIBRARY_PATH'] +=':'+ terachem_library_path
+            except:
+                print "failed to load terachem library files"       
+       
         #print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         #exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         import subprocess
