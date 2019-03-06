@@ -340,8 +340,8 @@ class sites_real_space(object):
         just_from_else = True
         self.weight = self.weight/2
       print "  New weight to try: %8.4f"%self.weight
-    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
-    return self.run_one()
+    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd, self.weight)
+    return model
 
   def run_one(self):
     model = self.model.deep_copy()
