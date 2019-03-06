@@ -317,6 +317,7 @@ class sites_real_space(object):
     print "-"*79
     print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
     print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
+    just_from_else = False
     while True:
       weights.append(self.weight)
       w_prev = self.weight
@@ -327,13 +328,17 @@ class sites_real_space(object):
       of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
       print >> of, model.model_as_pdb(output_cs=True)
       rmsd = self.cctbx_rm_bonds_rmsd
-      if(rmsd > rmsd_prev):
-        self.weight = self.weight*2
+      if(rmsd < self.max_bond_rmsd):
+        if(just_from_else): break
+        if(rmsd > rmsd_prev):
+          self.weight = self.weight*2
+        else:
+          self.weight = self.weight/2
+          if(self.weight in weights):
+            break
       else:
+        just_from_else = True
         self.weight = self.weight/2
-        if(self.weight in weights):
-          print self.weight
-          break
       print "  New weight to try: %8.4f"%self.weight
     print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
     return self.run_one()
