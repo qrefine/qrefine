@@ -212,7 +212,7 @@ class from_qm(object):
                           charge       = qm_charge,
                           pointcharges = charge_file,
                           coordinates  = qm_pdb_file[:-4]+".xyz",
-                          command      = self.qm_engine_name,
+                          command      = self.qm_engine.command,
                           define_str   = define_str, # for Turbomole
       )
     os.chdir(cwd)
