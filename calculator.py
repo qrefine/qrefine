@@ -327,6 +327,7 @@ class sites_real_space(object):
       model = self.run_one()
       of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
       print >> of, model.model_as_pdb(output_cs=True)
+      of.close()
       rmsd = self.cctbx_rm_bonds_rmsd
       if(rmsd < self.max_bond_rmsd):
         if(just_from_else): break
