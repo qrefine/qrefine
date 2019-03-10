@@ -15,13 +15,12 @@ class Ani(Calculator):
         self.energy_free = None
         self.forces = []
 
-    def run_qr(self,atoms,coordinates,charge,pointcharges,command=None,define_str=None):
+    def run_qr(self,atoms,coordinates,charge,pointcharges,define_str=None):
         print " RUNNING ANI"
         self.atoms=atoms
         self.coordinates=coordinates
         self.charge=charge
         self.pointcharges=pointcharges
-        self.command=command
         self.define_str=define_str
         mol = atoms
         mol.set_calculator(ANIENS(aniensloader(os.path.dirname(__file__)+"/ani/ani-1x_dft_x8ens.info")))

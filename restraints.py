@@ -100,7 +100,6 @@ class from_qm(object):
     else: self.charge = charge
     self.clustering = clustering
     self.qm_engine = self.create_qm_engine()
-    self.qm_engine.command = self.qm_engine.get_command()
     self.system_size = self.pdb_hierarchy.atoms_size()
 
   def create_qm_engine(self):
@@ -212,7 +211,6 @@ class from_qm(object):
                           charge       = qm_charge,
                           pointcharges = charge_file,
                           coordinates  = qm_pdb_file[:-4]+".xyz",
-                          command      = self.qm_engine.command,
                           define_str   = define_str, # for Turbomole
       )
     os.chdir(cwd)

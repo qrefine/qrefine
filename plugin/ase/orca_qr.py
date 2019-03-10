@@ -46,7 +46,6 @@ class Orca(Calculator):
                  dftd='yes',
                  run='gradient',
                  atoms=None,
-                 command=None,
                  **kwargs):
         self.orca_file = orca_file
         coordinates = os.path.dirname(label) + "/" + coordinates
@@ -70,7 +69,7 @@ class Orca(Calculator):
         self.forces = None
         self.stress = None
 
-        self.command = command
+        self.command = self.get_command()
 
     def write_input(self, fname, atoms):
         key_parameters = self.key_parameters
@@ -111,9 +110,7 @@ class Orca(Calculator):
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
-        if self.command is not None:
-          command = self.command
-        elif ('ORCA_COMMAND' in os.environ):
+        if ('ORCA_COMMAND' in os.environ):
           command = os.environ['ORCA_COMMAND']
         elif ('Orca_COMMAND' in os.environ):
           command = os.environ['Orca_COMMAND']
@@ -125,7 +122,6 @@ class Orca(Calculator):
                coordinates,
                charge,
                pointcharges,
-               command=None,
         ):
         import subprocess
         """
@@ -143,7 +139,7 @@ class Orca(Calculator):
 
         working_dir = os.path.dirname(finput)
         key_parameters["scrdir"] = working_dir + "/scr"
-        command = self.get_command()
+        command = self.command
         if command is None:
             raise RuntimeError('Orca command not specified')
         print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')

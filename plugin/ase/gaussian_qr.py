@@ -127,7 +127,6 @@ class Gaussian(FileIOCalculator):
                  basisfile=None,
                  extra=None,
                  addsec=None,
-                 command=None,
                  **kwargs):
 
         """Constructs a Gaussian-calculator object.

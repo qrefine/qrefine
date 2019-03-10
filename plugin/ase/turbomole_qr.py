@@ -288,8 +288,7 @@ class Turbomole(Calculator):
                define_str,
                coordinates,
                charge,
-               pointcharges,
-               command=None):
+               pointcharges):
         import subprocess
         self.atoms = atoms
         self.key_parameters['charge'] = charge

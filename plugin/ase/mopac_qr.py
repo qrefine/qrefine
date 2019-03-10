@@ -16,7 +16,7 @@ import platform
 from ase.units import kcal, mol
 from ase.calculators.general import Calculator
 
-str_keys = ['functional', 'job_type', 'command']
+str_keys = ['functional', 'job_type']
 int_keys = ['restart', 'spin', 'charge','nproc']
 bool_keys = ['OPT']
 float_keys = ['RELSCF']
@@ -26,7 +26,6 @@ class Mopac(Calculator):
     name = 'MOPAC'
     def __init__(self,
                  label='ase',
-                 command=None,
                  **kwargs):
         # define parameter fields
         self.str_params = {}
@@ -73,8 +72,7 @@ class Mopac(Calculator):
         self.occupations = None
 
         # command
-        self.command = None
-        if command: self.command = command
+        self.command = self.get_command()
 
     def set(self, **kwargs):
         """
@@ -167,11 +165,7 @@ class Mopac(Calculator):
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
         command = None
-        if self.command:
-          command = self.command
-        elif self.str_params['command'] is not None:
-          command = self.str_params['command']
-        elif ('MOPAC_COMMAND' in os.environ):
+        if ('MOPAC_COMMAND' in os.environ):
           command = os.environ['MOPAC_COMMAND']
         return command
 
@@ -231,7 +225,7 @@ class Mopac(Calculator):
          # directory
         self.calc_dir = os.getcwd()
 
-        command = self.get_command()
+        command = self.command
         if command is None:
           raise RuntimeError('MOPAC_COMMAND is not specified')
 

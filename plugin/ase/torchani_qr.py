@@ -73,7 +73,7 @@ class TorchAni(Calculator):
       if not Set(self.atoms.get_chemical_symbols()).issubset(trained_atoms):
           raise NotImplementedError("Unfortunately, we do not have a trained model for all elements in your system.")
 
-  def run_qr(self, atoms, coordinates, charge, pointcharges, command=None, define_str=None):
+  def run_qr(self, atoms, coordinates, charge, pointcharges, define_str=None):
     """
     This method is called every time an energy and forces are needed.
     The Q|R code calls this method at each step of LBFGS.

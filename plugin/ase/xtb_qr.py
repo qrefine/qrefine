@@ -30,7 +30,6 @@ class GFNxTB(Calculator):
                  method='-gfn2',
                  nproc='1',
                  atoms=None,
-                 command=None,
                  pointcharges=None,
                  **kwargs):
 
@@ -51,7 +50,7 @@ class GFNxTB(Calculator):
         self.energy_free = None
         self.forces = None
         self.stress = None
-        self.command = command
+        self.command = self.get_command()
         self.calc_dir = None
 
 
@@ -103,9 +102,7 @@ class GFNxTB(Calculator):
                coordinates,
                charge,
                pointcharges,
-               command=None,
-               define_str=None
-        ):
+               define_str=None):
         import subprocess
         """
         Handels GFN-xTB calculations
@@ -137,7 +134,7 @@ class GFNxTB(Calculator):
           self.set_pointcharges()
 
 
-        binary = self.get_command()
+        binary = self.command
         if (self.key_parameters['nproc'] > 1):
             nproc=self.key_parameters['nproc']
         else:

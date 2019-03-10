@@ -49,7 +49,7 @@ class Pyscf(Calculator):
     def initialize(self, atoms):
         pass
 
-    def run_qr(self,atoms, coordinates, charge=None, pointcharges=None, command=None, define_str=None):
+    def run_qr(self,atoms, coordinates, charge=None, pointcharges=None, define_str=None):
             mol = self.mol
             self.atoms = None
             self.atoms = atoms

@@ -108,7 +108,7 @@ class TeraChem(Calculator):
 	        terachem_library_path = command[0:command.find('bin/terachem')]+"lib"
                 if terachem_library_path not in os.environ['LD_LIBRARY_PATH']:
                     os.environ['LD_LIBRARY_PATH'] +=':'+ terachem_library_path
-            except:
+            except Exception as e:
                 print "failed to load terachem library files"       
        
         #print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
