@@ -392,8 +392,8 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       params.quantum.method='HF'
       outl += '  Setting QM method to HF\n'
     if params.quantum.basis==Auto:
-      params.quantum.basis='STO-3G'
-      outl += '  Setting QM basis to STO-3G\n'
+      params.quantum.basis='6-31g'
+      outl += '  Setting QM basis to 6-31g\n'
   if outl:
     print >> log, '\nSetting QM defaults'
     print >> log, outl
