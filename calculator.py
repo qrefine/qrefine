@@ -312,37 +312,42 @@ class sites_real_space(object):
       xrs                = self.model.get_xray_structure())
 
   def run(self):
-    weights = flex.double()
     rmsd = self.cctbx_rm_bonds_rmsd
     print "-"*79
     print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
     print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
-    just_from_else = False
+    rmsds_so_far = []
+    went_up   = False
+    went_down = False
+    weights   = []
     while True:
       weights.append(self.weight)
       w_prev = self.weight
-      rmsd_prev = rmsd
+      rmsd_prev = round(rmsd,3)
       print "-"*79
       print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd)
       model = self.run_one()
       of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
       print >> of, model.model_as_pdb(output_cs=True)
       of.close()
-      rmsd = self.cctbx_rm_bonds_rmsd
+      rmsd = round(self.cctbx_rm_bonds_rmsd,3)
+      rmsd_str = ("%10.3f"%rmsd).strip()
+      #
+      if([went_up, went_down].count(True)==2):
+        break
+      #
       if(rmsd < self.max_bond_rmsd):
-        if(just_from_else): break
-        if(rmsd > rmsd_prev):
-          self.weight = self.weight*2
-        else:
-          self.weight = self.weight/2
-          if(self.weight in weights):
-            break
+        self.weight = self.weight*2
+        went_up = True
       else:
-        just_from_else = True
         self.weight = self.weight/2
+        went_down = True
       print "  New weight to try: %8.4f"%self.weight
-    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd, self.weight)
-    return model
+    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
+    for mc in xrange(3):
+      m = self.run_one()
+      self.model.set_sites_cart(sites_cart=m.get_sites_cart())
+    return self.model
 
   def run_one(self):
     model = self.model.deep_copy()
