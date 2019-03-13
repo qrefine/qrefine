@@ -82,9 +82,12 @@ def run(args, log):
     pdb_file_name    = cmdline.pdb_file_names[0],
     cif_objects      = cmdline.cif_objects,
     crystal_symmetry = cmdline.crystal_symmetry)
-  # Read reflection data
+  map_data = None
   fmodel = None
-  if(len(cmdline.reflection_files)>0):
+  if(params.refine.mode=="opt"):
+     assert cmdline.reflection_files is None and cmdline.map_data is None
+  elif(len(cmdline.reflection_files)>0):
+    # Read reflection data
     rfs = reflection_file_server(
       crystal_symmetry = cmdline.crystal_symmetry,
       reflection_files = cmdline.reflection_files)
@@ -109,13 +112,8 @@ def run(args, log):
       fmodel.show(show_header=False, show_approx=False)
     print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
       fmodel.r_free())
-  else:
-    if(params.refine.mode=="refine" and cmdline.ccp4_map is None):
-      raise Sorry(
-        "Refinement requested (refine.mode==refine) but no data provided.")
-  # Read map
-  map_data = None
-  if(cmdline.ccp4_map is not None):
+  elif(cmdline.ccp4_map is not None):
+    # Read map
     map_data = cmdline.ccp4_map.map_data()
     model = model.model#inp.model()
     model = group_args(
@@ -125,7 +123,8 @@ def run(args, log):
       xray_structure     = model.get_xray_structure(),# This must go, use model!
       cif_objects        = model._restraint_objects,  # This must go, use model!
       has_hd             = model.has_hd)
-  #
+  else:
+    raise Sorry("Refinement requested (refine.mode==refine) but no data provided.")
   log.flush()
   qr.run(
     model    = model, # XXX This is not mmtbx.model.manager !!! (see above).
