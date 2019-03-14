@@ -291,11 +291,14 @@ class sites_real_space(object):
                stpmax,
                gradient_only,
                line_search,
+               data_weight,
                map_data=None,
                restraints_manager=None,
                max_iterations=50):
     adopt_init_args(self, locals())
-    self.weight = 1.
+    self.weight = data_weight
+    if(self.weight is None):
+      self.weight = 1.
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = max_iterations)
     self.lbfgs_core_params = scitbx.lbfgs.core_parameters(

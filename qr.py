@@ -613,6 +613,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         geometry_rmsd_manager = geometry_rmsd_manager,
         max_bond_rmsd         = params.refine.max_bond_rmsd,
         map_data              = map_data,
+        data_weight           = params.refine.data_weight,
         stpmax                = params.refine.stpmax,
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
