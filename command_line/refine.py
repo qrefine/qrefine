@@ -85,7 +85,7 @@ def run(args, log):
   map_data = None
   fmodel = None
   if(params.refine.mode=="opt"):
-     assert cmdline.reflection_files is None and cmdline.map_data is None
+     assert len(cmdline.reflection_files)==0 and cmdline.ccp4_map is None
   elif(len(cmdline.reflection_files)>0):
     # Read reflection data
     rfs = reflection_file_server(
