@@ -115,6 +115,11 @@ def run(args, log):
   elif(cmdline.ccp4_map is not None):
     # Read map
     map_data = cmdline.ccp4_map.map_data()
+    # Normalize map
+    map_data = map_data - flex.mean(map_data)
+    sd = map_data.sample_standard_deviation()
+    assert sd != 0
+    map_data = map_data/sd
     model = model.model#inp.model()
     model = group_args(
       model              = model,
