@@ -143,7 +143,7 @@ refine {
     .type = float
   choose_best_use_r_work = False
     .type = bool
-  skip_initial_weight_optimization = False
+  skip_weight_search = False
     .type = bool
   adjust_restraints_weight_scale_value = 2
     .type = float
@@ -614,6 +614,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         max_bond_rmsd         = params.refine.max_bond_rmsd,
         map_data              = map_data,
         data_weight           = params.refine.data_weight,
+        skip_weight_search    = params.refine.skip_weight_search,
         stpmax                = params.refine.stpmax,
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,

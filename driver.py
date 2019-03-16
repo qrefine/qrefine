@@ -452,7 +452,7 @@ def refine(fmodel,
     print >> results.log, \
      "Found optimal weight. Proceed to further refinement with this weight."
     fmodel = calculator.fmodel.deep_copy()
-  elif(not params.refine.skip_initial_weight_optimization):
+  elif(not params.refine.skip_weight_search):
     print >> results.log, "Optimal weight search:"
     fmodel_copy = calculator.fmodel.deep_copy()
     for weight_cycle in xrange(weight_cycle_start,
@@ -555,7 +555,7 @@ def refine(fmodel,
     refine_cycle_start = 1
   if(refine_cycle_start is None): refine_cycle_start=1
   #
-  if(params.refine.skip_initial_weight_optimization):
+  if(params.refine.skip_weight_search):
     calculator.calculate_weight(verbose=params.debug)
   #
   for refine_cycle in xrange(refine_cycle_start,

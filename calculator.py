@@ -292,6 +292,7 @@ class sites_real_space(object):
                gradient_only,
                line_search,
                data_weight,
+               skip_weight_search,
                map_data=None,
                restraints_manager=None,
                max_iterations=50):
@@ -299,6 +300,7 @@ class sites_real_space(object):
     self.weight = data_weight
     if(self.weight is None):
       self.weight = 1.
+    self.skip_weight_search = skip_weight_search
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = max_iterations)
     self.lbfgs_core_params = scitbx.lbfgs.core_parameters(
@@ -316,6 +318,7 @@ class sites_real_space(object):
 
   def run(self):
     rmsd = self.cctbx_rm_bonds_rmsd
+    rmsd_prev = round(rmsd,3)
     print "-"*79
     print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
     print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
@@ -323,7 +326,7 @@ class sites_real_space(object):
     went_up   = False
     went_down = False
     weights   = []
-    while True:
+    while not self.skip_weight_search:
       weights.append(self.weight)
       w_prev = self.weight
       rmsd_prev = round(rmsd,3)
