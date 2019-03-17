@@ -351,8 +351,12 @@ class sites_real_space(object):
       print "  New weight to try: %8.4f"%self.weight
     print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
     for mc in xrange(3):
+      print "start refine cycle: ",mc+1
       m = self.run_one()
       self.model.set_sites_cart(sites_cart=m.get_sites_cart())
+      of  = open("./pdb/refine_cycle_"+str(mc+1)+".pdb","w")
+      print >> of, m.model_as_pdb(output_cs=True)
+      of.close()
     return self.model
 
   def run_one(self):
