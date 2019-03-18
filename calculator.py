@@ -354,7 +354,7 @@ class sites_real_space(object):
       print "start refine cycle: ",mc+1
       m = self.run_one()
       self.model.set_sites_cart(sites_cart=m.get_sites_cart())
-      of  = open("./pdb/refine_cycle_"+str(mc+1)+".pdb","w")
+      of  = open("./pdb/cycle_"+str(mc+1)+"_refined"+".pdb","w")
       print >> of, m.model_as_pdb(output_cs=True)
       of.close()
     return self.model
