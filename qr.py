@@ -614,6 +614,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         max_bond_rmsd         = params.refine.max_bond_rmsd,
         map_data              = map_data,
         data_weight           = params.refine.data_weight,
+        refine_cycles         = params.refine.number_of_refine_cycles,
         skip_weight_search    = params.refine.skip_weight_search,
         stpmax                = params.refine.stpmax,
         gradient_only         = params.refine.gradient_only,

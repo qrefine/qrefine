@@ -292,6 +292,7 @@ class sites_real_space(object):
                gradient_only,
                line_search,
                data_weight,
+               refine_cycles,
                skip_weight_search,
                map_data=None,
                restraints_manager=None,
@@ -300,6 +301,7 @@ class sites_real_space(object):
     self.weight = data_weight
     if(self.weight is None):
       self.weight = 1.
+    self.refine_cycles = refine_cycles
     self.skip_weight_search = skip_weight_search
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = max_iterations)
@@ -350,7 +352,7 @@ class sites_real_space(object):
         went_down = True
       print "  New weight to try: %8.4f"%self.weight
     print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
-    for mc in xrange(3):
+    for mc in xrange(self.refine_cycles):
       print "start refine cycle: ",mc+1
       m = self.run_one()
       self.model.set_sites_cart(sites_cart=m.get_sites_cart())
