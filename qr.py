@@ -249,17 +249,17 @@ def show_cc(map_data, xray_structure, log):
     map_data         = map_data,
     crystal_symmetry = xrs.crystal_symmetry())
   d99 = mtriage.get_results().masked.d99
-  cc = five_cc(
+  print >> log, "Resolution of map is: %6.4f" %d99
+  result = five_cc(
     map              = map_data,
     xray_structure   = xrs,
     d_min            = d99,
-    compute_cc_box   = True)
-  r = cc.result
+    compute_cc_box   = True).result
   print >> log, "Map-model correlation coefficient (CC)"
-  print >> log, "  CC_mask  : %6.4f" %r.cc_mask
-  print >> log, "  CC_volume: %6.4f" %r.cc_volume
-  print >> log, "  CC_peaks : %6.4f" %r.cc_peaks
-  print >> log, "  CC_box   : %6.4f" %r.cc_box
+  print >> log, "  CC_mask  : %6.4f" %result.cc_mask
+  print >> log, "  CC_volume: %6.4f" %result.cc_volume
+  print >> log, "  CC_peaks : %6.4f" %result.cc_peaks
+  print >> log, "  CC_box   : %6.4f" %result.cc_box
 
 
 def create_fmodel(cmdline, log):
