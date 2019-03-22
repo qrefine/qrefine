@@ -620,7 +620,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
         restraints_manager    = rm,
-        max_iterations        = params.refine.max_iterations_refine)
+        max_iterations        = params.refine.max_iterations_refine,
+        log                   = log)
       model = O.run()
       of = open("real_space_refined.pdb", "w")
       print >> of, model.model_as_pdb(output_cs=True)

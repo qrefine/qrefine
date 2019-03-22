@@ -12,6 +12,7 @@ from scitbx.array_family import flex
 import cctbx.maptbx.real_space_refinement_simple
 import scitbx.lbfgs
 from libtbx import group_args
+import qr
 
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
@@ -294,6 +295,7 @@ class sites_real_space(object):
                data_weight,
                refine_cycles,
                skip_weight_search,
+               log,
                map_data=None,
                restraints_manager=None,
                max_iterations=50):
@@ -384,4 +386,5 @@ class sites_real_space(object):
       restraints_manager = self.geometry_rmsd_manager.geometry,
       xrs                = model.get_xray_structure())
     print "  after :", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
+    qr.show_cc(map_data=self.map_data,xray_structure=model.get_xray_structure(),log=self.log)
     return model
