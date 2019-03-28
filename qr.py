@@ -429,8 +429,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       start_fmodel.xray_structure)
   else:
     weights = None
-    if (model.pdb_hierarchy.atoms().size() > params.max_atoms):
-      raise Sorry("Too many atoms.")
+    #if (model.pdb_hierarchy.atoms().size() > params.max_atoms):
+    #  raise Sorry("Too many atoms.")
     geometry_rmsd_manager =  model.model.get_restraints_manager()
     cctbx_rm_bonds_rmsd = calculator.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
