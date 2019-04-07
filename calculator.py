@@ -332,10 +332,9 @@ class sites_real_space(object):
     weights   = []
     while not self.skip_weight_search:
       weights.append(self.weight)
-      w_prev = self.weight
       rmsd_prev = round(rmsd,3)
       print "-"*79
-      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(w_prev, rmsd)
+      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(self.weight, rmsd)
       model = self.run_one()
       of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
       print >> of, model.model_as_pdb(output_cs=True)
@@ -344,8 +343,10 @@ class sites_real_space(object):
       rmsd_str = ("%10.3f"%rmsd).strip()
       #
       if([went_up, went_down].count(True)==2):
+        self.weight = w_prev
         break
       #
+      w_prev = self.weight
       if(rmsd < self.max_bond_rmsd):
         self.weight = self.weight*2
         went_up = True
