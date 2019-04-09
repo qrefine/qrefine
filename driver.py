@@ -7,7 +7,6 @@ from libtbx import adopt_init_args
 from cctbx import xray
 from scitbx.array_family import flex
 import calculator as calculator_module
-from libtbx.utils import Sorry
 from libtbx import group_args
 from ase.optimize.lbfgs import LBFGS
 import numpy
