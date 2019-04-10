@@ -34,6 +34,8 @@ skip_validation = False
 calculate_charge = False
   .type = bool
   .help = Will calculate total charge of molecule.
+append_to_end_of_model = False
+  .type = bool
 """
 
 def master_params():
@@ -82,6 +84,7 @@ def run(args, log):
                keep_alt_loc=params.keep_alt_loc,
                skip_validation=params.skip_validation,
                calculate_charge=params.calculate_charge,
+               append_to_end_of_model=params.append_to_end_of_model,
                )
 
 if __name__ == '__main__':

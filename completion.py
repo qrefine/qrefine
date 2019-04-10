@@ -61,20 +61,21 @@ def construct_xyz(ba, bv,
     rh_list.append(rh)
   return rh_list
 
-def _add_atom_to_chain(atom, ag):
-  rg = _add_atom_to_residue_group(atom, ag)
+def _add_atom_to_chain(atom, ag, icode=None):
+  rg = _add_atom_to_residue_group(atom, ag, icode=icode)
   chain = ag.parent().parent()
   tc = iotbx.pdb.hierarchy.chain()
   tc.id = chain.id
   tc.append_residue_group(rg)
   return tc
 
-def _add_atom_to_residue_group(atom, ag):
+def _add_atom_to_residue_group(atom, ag, icode=None):
   tag = iotbx.pdb.hierarchy.atom_group()
   tag.resname = ag.resname
   tag.append_atom(atom)
   rg = iotbx.pdb.hierarchy.residue_group()
   rg.resseq = ag.parent().resseq
+  if icode is not None: rg.icode=icode
   rg.append_atom_group(tag)
   for i, c in enumerate(letters):
     if c==ag.parent().parent().id:
@@ -158,7 +159,9 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
     atom.b = n.b
     atom.segid = ' '*4
     if append_to_end_of_model and i+1==number_of_hydrogens:
-      rg = _add_atom_to_chain(atom, ag)
+      rg = _add_atom_to_chain(atom,
+                              ag,
+                              icode=n.parent().parent().icode)
       rc.append(rg)
     else:
       ag.append_atom(atom)
@@ -257,7 +260,9 @@ def add_c_terminal_oxygens_to_atom_group(ag,
       atom.segid = ' '*4
       atom.xyz = ro2[i]
       if append_to_end_of_model:
-        chain = _add_atom_to_chain(atom, ag)
+        chain = _add_atom_to_chain(atom,
+                                   ag,
+                                   icode=c.parent().parent().icode)
         rc.append(chain)
       else:
         # add the atom to the hierarchy
@@ -343,7 +348,9 @@ def _add_hydrogens_to_atom_group_using_bad(ag,
   atom.segid = ' '*4
   atom.xyz = ro2[0]
   if append_to_end_of_model:
-    chain = _add_atom_to_chain(atom, ag)
+    chain = _add_atom_to_chain(atom,
+                               ag,
+                               icode=ba.parent().parent().icode)
     rc.append(chain)
   else:
     ag.append_atom(atom)

@@ -75,6 +75,7 @@ def run(pdb_filename,
         keep_alt_loc=False,
         skip_validation=False,
         calculate_charge=False,
+        append_to_end_of_model=False,
         ):
   #
   # do all *.pdb in a directory
@@ -168,6 +169,7 @@ def run(pdb_filename,
     pdb_filename=pdb_filename,
     pdb_inp=ppf.all_chain_proxies.pdb_inp,
     use_capping_hydrogens=use_capping_hydrogens,
+    append_to_end_of_model=append_to_end_of_model,
   )
 
   if calculate_charge:
