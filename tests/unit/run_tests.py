@@ -76,7 +76,7 @@ def clean_up(prefix,mtz_name = None):
   files_to_remove2 = [
     'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
     'tst_14_super_sphere.pdb','test_zn_his_charge.pdb']
-  files_to_remove3 = ['cluster_false.pkl', 'cluster_true.pkl']
+  files_to_remove3 = ['cluster_false.pkl', 'cluster_true.pkl','1-20.npy']
   files_to_remove4 = ['A.pdb', 'B.pdb', 'W.pdb']
   for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
     try: os.remove(f)
@@ -154,7 +154,8 @@ def run(nproc=6, only_i=None):
     'tst_31.py',
     'tst_32.py',
     'tst_33.py',
-    'tst_34.py'
+    'tst_34.py',
+    'tst_35.py'
   ]
   failed = 0
   in_separate_directory = not(nproc==1)
