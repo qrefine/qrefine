@@ -84,9 +84,10 @@ def run(args, log):
     crystal_symmetry = cmdline.crystal_symmetry)
   map_data = None
   fmodel = None
-  if(params.refine.mode=="opt"):
-     assert len(cmdline.reflection_files)==0 and cmdline.ccp4_map is None
-  elif(len(cmdline.reflection_files)>0):
+  if(params.refine.mode=="opt" or params.refine.mode=='gtest'):
+    if (len(cmdline.reflection_files)>0 or cmdline.ccp4_map is not None):
+      print >> log, "WARNING: data files not used in optimization or gradient test! "
+  elif(len(cmdline.reflection_files)>0 and params.refine.mode=="refine"):
     # Read reflection data
     rfs = reflection_file_server(
       crystal_symmetry = cmdline.crystal_symmetry,
@@ -112,7 +113,7 @@ def run(args, log):
       fmodel.show(show_header=False, show_approx=False)
     print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
       fmodel.r_free())
-  elif(cmdline.ccp4_map is not None):
+  elif(cmdline.ccp4_map is not None and params.refine.mode=="refine"): 
     # Read map
     map_data = cmdline.ccp4_map.map_data()
     # Normalize map
