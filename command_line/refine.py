@@ -130,8 +130,7 @@ def run(args, log):
       cif_objects        = model._restraint_objects,  # This must go, use model!
       has_hd             = model.has_hd)
   else:
-    if(params.refine.mode=="refine"):
-      raise Sorry("Refinement requested (refine.mode==refine) but no data provided.")
+    raise Sorry("Refinement requested (refine.mode==refine) but no data provided.")
   log.flush()
   qr.run(
     model    = model, # XXX This is not mmtbx.model.manager !!! (see above).
