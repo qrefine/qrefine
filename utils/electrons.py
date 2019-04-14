@@ -26,6 +26,11 @@ atom_database = {'H' : {'valence' : 1},
 # transition metals need to have a mutliplicity set
 atom_database['Cu'] = {'valence': 1, 'lone pairs': 1}
 
+def distance2(xyz1, xyz2):
+  sum = 0
+  for i in range(3): sum+=(xyz2[i]-xyz1[i])**2
+  return sum
+
 class atom_property(dict):
   def __init__(self):
     for element, data in atom_database.items():
@@ -205,7 +210,9 @@ class electron_distribution(dict):
     simple, asu = self.grm.get_all_bond_proxies(sites_cart=xrs.sites_cart())
     # need to filter out H-bonds
     # look for metal coordination
+    # this needs to be intergrated with GRM to get correct metal coordination
     metal_coordination = []
+    tmp = {}
     for bp in simple:
       assert bp.i_seqs not in self
       i_seq, j_seq = bp.i_seqs
@@ -214,15 +221,7 @@ class electron_distribution(dict):
       atom1 = atoms[i_seq]
       atom2 = atoms[j_seq]
       if is_metal(atom1, atom2):
-        self[bp.i_seqs]=0
-        metal_coordination.append(i_seq)
-        metal_coordination.append(j_seq)
-        #if self.properties.is_metal(atom1.element):
-        #  self[j_seq]-=1
-        #elif self.properties.is_metal(atom2.element):
-        #  self[i_seq]-=1
-        self[bp.i_seqs]+=1
-        if verbose: print 'metal',self
+        tmp[distance2(atom1.xyz, atom2.xyz)] = (atom1, atom2)
     # look for single (non-metal) bonds
     for bp in simple:
       if is_metal(atoms[bp.i_seqs[0]], atoms[bp.i_seqs[1]]): continue
@@ -325,10 +324,6 @@ class electron_distribution(dict):
         self[j_seq]-=1
 
   def get_possible_covalent_bonds(self):
-    def distance2(xyz1, xyz2):
-      sum = 0
-      for i in range(3): sum+=(xyz2[i]-xyz1[i])**2
-      return sum
     rc = []
     atoms = self.hierarchy.atoms()
     for i_seq in self._generate_atoms():

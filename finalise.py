@@ -37,20 +37,6 @@ def remove_alternative_locations(hierarchy):
   hierarchy.atoms().reset_i_seq()
   return hierarchy
 
-def run_ready_set(pdb_filename):
-  from StringIO import StringIO
-  assert pdb_filename.find('.pdb')>-1, 'ReadySet! only works on PDB, not CIF'
-  cmd = 'phenix.ready_set %s  remove_water=true ' % pdb_filename
-  print 'Running ReadySet!'
-  print cmd
-  ero = easy_run.fully_buffered(command=cmd)
-  std = StringIO()
-  ero.show_stdout(std)
-  for line in std.getvalue().splitlines():
-    print line
-  return os.path.basename(pdb_filename).replace('.pdb', '.updated.pdb')
-  # maybe read from stdout
-
 def run_fetch_pdb(code):
   cmd = 'phenix.fetch_pdb %s' % code
   print 'Fetching files'
@@ -92,18 +78,6 @@ def run(pdb_filename,
       run_fetch_pdb(pdb_filename)
     pdb_filename = '%s.pdb' % pdb_filename
 
-  if 0: # moved adding hydrogens to complete_pdb_hierarchy
-    if pdb_filename.endswith('.updated.pdb'):
-      pdb_filename_h = pdb_filename
-    else:
-      pdb_filename_h = pdb_filename.replace('.pdb', '.updated.pdb')
-    if not os.path.exists(pdb_filename_h):
-      pdb_filename_h = os.path.basename(pdb_filename_h)
-    print 'pdb_filename_h',pdb_filename_h
-    if not os.path.exists(pdb_filename_h):
-      pdb_filename = run_ready_set(pdb_filename)
-    else: pdb_filename = pdb_filename_h
-
   if 1: # read file option
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename)
   elif 0: # raw records example
@@ -136,7 +110,7 @@ def run(pdb_filename,
     output = hierarchy_utils.write_hierarchy(
       pdb_filename, # uses to get output filename
       ppf.all_chain_proxies.pdb_inp,
-      hierarchy,
+      ppf.all_chain_proxies.pdb_hierarchy,
       "temp0")
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output)
   else:
