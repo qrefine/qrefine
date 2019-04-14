@@ -12,6 +12,7 @@ from qrefine import completion
 from qrefine.utils import hierarchy_utils
 from qrefine.tests.unit.skip import skip
 import mmtbx.model
+from libtbx.utils import null_out
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -189,12 +190,23 @@ def run(pdb_filename,
     )
     print "total_charge",total_charge
 
+  # Idealize H as riding
+  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.use_neutron_distances = True
+  model = mmtbx.model.manager(
+    model_input               = None,
+    build_grm                 = True,
+    pdb_hierarchy             = ppf.all_chain_proxies.pdb_hierarchy,
+    pdb_interpretation_params = params,
+    crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+    log                       = null_out())
+  model.idealize_h_riding()
+
   ## after no error getting total charge, write the completed pdb file
   hierarchy_utils.write_hierarchy(pdb_filename, # uses to get output filename
                                   ppf.all_chain_proxies.pdb_inp,
-                                  ppf.all_chain_proxies.pdb_hierarchy,
+                                  model.get_hierarchy(),
                                   fname)
-
   if not skip_validation:
     final_model_statistics = mmtbx.model.statistics.geometry(
       pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
