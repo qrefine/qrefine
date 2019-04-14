@@ -665,10 +665,13 @@ def opt(xray_structure,
     cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
       restraints_manager = geometry_rmsd_manager.geometry,
       xrs                = xray_structure)
+    n_fev = 0
+    if(minimized is not None):
+      n_fev = minimized.number_of_function_and_gradients_evaluations
     results.update(
-      b      = cctbx_rm_bonds_rmsd,
-      xrs    = xray_structure,
-      n_fev  = minimized.number_of_function_and_gradients_evaluations)
+      b     = cctbx_rm_bonds_rmsd,
+      xrs   = xray_structure,
+      n_fev = n_fev)
     results.write_pdb_file(
       output_folder_name = params.output_folder_name,
       output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
