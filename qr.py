@@ -79,9 +79,6 @@ cluster{
   g_scan  = 10 15 20
     .type = str
     .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
-  g_ref   = None
-    .type = str
-    .help = name of the previously save gradient file that is to be used as reference
   g_mode = None
     .type = int
     .help = manual control over gradient test loops (1=standard, 2=standard + point-charges, 3=two buffer 4=two_buffer+ point-charges)
@@ -479,11 +476,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   if(params.refine.mode == "gtest"):
     import numpy as np
     from utils.mathbox import get_grad_mad, get_grad_angle
-
-    ref_grad=None
-    if params.cluster.g_ref is not None:
-      print >> log, 'Loading reference gradient :', params.cluster.g_ref
-      ref_grad=np.load(params.cluster.g_ref)
 
     # determine what kind of buffer to calculate
     g_mode=[]
