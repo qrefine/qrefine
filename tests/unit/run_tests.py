@@ -93,7 +93,7 @@ def runner(function, prefix, disable=False):
   rc = 0
   try:
     if(disable):
-      print prefix + ": Skipped (not recommended, enable ASAP or remove!)"
+      print prefix + ": Skipped (not recommended, do something about it!)"
     else:
       t0 = time.time()
       function(prefix = prefix)

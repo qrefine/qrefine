@@ -1856,5 +1856,4 @@ if(__name__ == "__main__"):
     f.close()
     args = ['test_point_charges.pdb']
   run(args[0], log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
   run_tests.clean_up(prefix)

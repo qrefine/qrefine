@@ -1,7 +1,6 @@
 import os
 import run_tests
 from ase import Atoms
-from qrefine.plugin.ase.tensormol_qr import TensormolCalculator
 import warnings
 from libtbx.test_utils import approx_equal
 
@@ -61,11 +60,9 @@ if(__name__ == "__main__"):
   tensormol_installed = False
   try:
     import TensorMol
+    from qrefine.plugin.ase.tensormol_qr import TensormolCalculator
     tensormol_installed = True
   except ImportError:
-    print("Please install TensorMol")
+    pass
   prefix = os.path.basename(__file__).replace(".py","")
-  if tensormol_installed:
-    run_tests.runner(function=run, prefix=prefix, disable=False)
-  else:
-    run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=not tensormol_installed)
