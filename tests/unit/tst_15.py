@@ -67,6 +67,6 @@ def run(prefix):
           #print i+1, g1_norms[i], g2_norms[i], g1_norms[i]*0.2
           assert approx_equal(g1_norms[i], g2_norms[i], g1_norms[i]*0.2)
 
-if __name__ == '__main__':
-  rc = run_tests.runner(function=run, prefix="tst_15", disable=False)
-  assert not rc, 'tst_15 rc: %s' % rc
+if(__name__ == '__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

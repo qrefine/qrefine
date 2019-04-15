@@ -48,7 +48,6 @@ def run(prefix):
   os.remove(fnc)
   return rc
 
-if __name__=='__main__':
-  prefix='tst_24'
-  rc = run_tests.runner(function=run, prefix=prefix, disable=False)
-  assert not rc, '%s rc: %s' % (prefix, rc)
+if(__name__=='__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

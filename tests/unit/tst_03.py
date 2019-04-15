@@ -26,6 +26,6 @@ def run(prefix):
   assert approx_equal(d.min_max_mean().as_tuple(), [0,0,0])
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_03", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
-
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)
+  

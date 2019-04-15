@@ -42,6 +42,5 @@ def run(prefix):
   assert approx_equal(s1.bond.mean, s2.bond.mean, 0.001)
 
 if(__name__ == "__main__"):
-  prefix="tst_30"
-  rc = run_tests.runner(function=run, prefix=prefix, disable=False)
-  assert not rc, '%s rc: %s' % (prefix, rc)
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

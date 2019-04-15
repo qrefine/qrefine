@@ -11,7 +11,7 @@ import libtbx.load_env
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-def run(prefix = "tst_18"):
+def run(prefix):
   """
   Exercise gradients match:
   -- pdbs with altlocs
@@ -44,6 +44,6 @@ def run(prefix = "tst_18"):
           print i, diff_i#, g1[i], g2[i]
       assert approx_equal(diff.max(), [0,0,0], [1.0E-3,1.0E-3,1.0E-3])
 
-if __name__ == '__main__':
-  rc = run_tests.runner(function=run, prefix="tst_18", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+if(__name__ == '__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

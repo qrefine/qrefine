@@ -1,6 +1,6 @@
 from __future__ import division
 
-import time
+import time, os
 import run_tests
 
 def run(prefix):
@@ -13,5 +13,5 @@ def run(prefix):
   assert r.stdout_lines == ['Sorry: Too many atoms.']
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_05", disable=False)
-  assert not rc, 'tst_05 rc: %s' % rc
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

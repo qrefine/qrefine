@@ -146,6 +146,5 @@ if(__name__ == "__main__"):
   """
   disable = False
   if(os.environ.get("MOPAC_COMMAND") is None): disable = True
-  prefix='tst_13'
-  rc = run_tests.runner(function=run, prefix=prefix, disable=disable)
-  assert not rc, '%s rc: %s' % (prefix, rc)
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=disable)

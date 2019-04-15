@@ -46,6 +46,6 @@ def run(prefix):
   assert get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb")) < 0.0009
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_01", disable=False)
-  assert not rc, 'tst_01 rc: %s' % rc
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)
 

@@ -167,6 +167,9 @@ def run(pdb_filename,
   # Idealize H as riding
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
+  h = ppf.all_chain_proxies.pdb_hierarchy
+  asc = h.atom_selection_cache()
+  sel = asc.selection("element H or element D")
   model = mmtbx.model.manager(
     model_input               = None,
     build_grm                 = True,
@@ -175,6 +178,7 @@ def run(pdb_filename,
     crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     log                       = null_out())
   model.idealize_h_riding()
+  model.set_occupancies(value=0, selection=sel)
 
   ## after no error getting total charge, write the completed pdb file
   hierarchy_utils.write_hierarchy(pdb_filename, # uses to get output filename

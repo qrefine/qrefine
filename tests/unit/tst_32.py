@@ -3,6 +3,7 @@ from ase import Atoms
 from qrefine.plugin.ase.torchani_qr import TorchAni
 import warnings
 import unittest
+import os
 
 class atoms_present_test(unittest.TestCase):
 
@@ -41,18 +42,16 @@ def run(prefix):
 if(__name__ == "__main__"):
   torchani_installed = False
   try:
-      import torch
-      device = torch.device('cpu')
-      import torchnani
+    import torch
+    device = torch.device('cpu')
+    import torchnani
   except ImportError:
-      with warnings.catch_warnings():
-          warnings.simplefilter("ignore")
-          import torchani
-          torchani_installed = True
-
-  prefix="tst_32"
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        import torchani
+        torchani_installed = True
+  prefix = os.path.basename(__file__).replace(".py","")
   if torchani_installed:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=False)
+    run_tests.runner(function=run, prefix=prefix, disable=False)
   else:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=True)
-  assert not rc, '%s rc: %s' % (prefix, rc)
+    run_tests.runner(function=run, prefix=prefix, disable=True)

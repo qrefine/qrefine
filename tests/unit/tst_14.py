@@ -1,6 +1,6 @@
 from __future__ import division
 
-import time
+import time, os
 import iotbx.pdb
 from qrefine import super_cell
 from libtbx.test_utils import approx_equal
@@ -57,5 +57,5 @@ def run(prefix):
   assert approx_equal(super_sphere_answer,super_sphere)
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_14", disable=False)
-  assert not rc, 'tst_14 rc: %s' % rc
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

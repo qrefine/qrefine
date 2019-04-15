@@ -3,6 +3,7 @@ from ase import Atoms
 from qrefine.plugin.ase.torchani_qr import TorchAni
 import warnings
 from libtbx.test_utils import approx_equal
+import os
 
 def run(prefix):
     """
@@ -42,23 +43,19 @@ def run(prefix):
                                                 [0.0219, 0.0044, 0.0343],
                                                 [-0.0187, 0.0049, 0.0521]], 0.001)
 
-
-
 if(__name__ == "__main__"):
   torchani_installed = False
   try:
-      import torch
-      device = torch.device('cpu')
-      import torchnani
+    import torch
+    device = torch.device('cpu')
+    import torchnani
   except ImportError:
-      with warnings.catch_warnings():
-          warnings.simplefilter("ignore")
-          import torchani
-          torchani_installed = True
-
-  prefix="tst_31"
+    with warnings.catch_warnings():
+      warnings.simplefilter("ignore")
+      import torchani
+      torchani_installed = True
+  prefix = os.path.basename(__file__).replace(".py","")
   if torchani_installed:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=False)
+    run_tests.runner(function=run, prefix=prefix, disable=False)
   else:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=True)
-  assert not rc, '%s rc: %s' % (prefix, rc)
+    run_tests.runner(function=run, prefix=prefix, disable=True)

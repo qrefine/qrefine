@@ -1,6 +1,7 @@
 import  iotbx.pdb
 import time
 import sys
+import os
 import qrefine.completion as completion
 
 import run_tests
@@ -1843,11 +1844,10 @@ log = sys.stdout
 def run(pdb_file, log):
   from qrefine.charges import charges_class
   cc = charges_class(pdb_filename=pdb_file)
-  cc.write_pdb_hierarchy_qxyz_file(file_name="q.xyz",
-                                   exclude_water=False)
+  cc.write_pdb_hierarchy_qxyz_file(file_name="q.xyz", exclude_water=False)
 
-if (__name__ == "__main__"):
-  prefix = 'tst_21'
+if(__name__ == "__main__"):
+  prefix = os.path.basename(__file__).replace(".py","")
   t0 = time.time()
   args = sys.argv[1:]
   if len(args)==0:

@@ -1,6 +1,6 @@
 from __future__ import division
 
-import time
+import time, os
 from libtbx.test_utils import approx_equal
 import qrefine.clustering as clustering
 import run_tests
@@ -37,5 +37,5 @@ def run(prefix):
   assert approx_equal(cc.get_clusters(), bc_clusters)
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_08", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

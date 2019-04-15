@@ -6,16 +6,13 @@ import run_tests
 import iotbx.pdb
 import libtbx.load_env
 
-
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-
-def run(prefix = "tst_35"):
+def run(prefix):
   """
   test execution of mode=gtest
   """
-
   # run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   # pdb_inp = os.path.join(qr_unit_tests,"data_files","2lvr.pdb")
@@ -26,7 +23,7 @@ def run(prefix = "tst_35"):
 
 if(__name__ == "__main__"):
   t0 = time.time()
-  prefix = "tst_35"
+  prefix = os.path.basename(__file__).replace(".py","")
   run(prefix)
   print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
   run_tests.clean_up(prefix)

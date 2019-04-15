@@ -38,6 +38,6 @@ def run(prefix):
       rmsd_diff = sites_cart_average.rms_difference(sites_cart_subtract)
       assert approx_equal(rmsd_diff, 0, 0.2), 'rmsd diff between subtract and average is too large %0.3f' % rmsd_diff
 
-if __name__ == '__main__':
-  rc = run_tests.runner(function=run, prefix="tst_19", disable=False)
-  assert not rc, 'tst_19 rc: %s' % rc
+if(__name__ == '__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

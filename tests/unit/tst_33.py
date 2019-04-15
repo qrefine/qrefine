@@ -1,4 +1,5 @@
 import run_tests
+import os
 from ase import Atoms
 from qrefine.plugin.ase.pyscf_qr import Pyscf
 import warnings
@@ -33,16 +34,13 @@ def run(prefix):
 if(__name__ == "__main__"):
   pyscf_installed = False
   try:
-      import pyscf
-      from pyscf import gto, scf, grad, dft
-      pyscf_installed = True
-
+    import pyscf
+    from pyscf import gto, scf, grad, dft
+    pyscf_installed = True
   except ImportError:
-      print "Pyscf not installed. Please run: phenix.python pip -m  install pyscf"
-
-  prefix="tst_33"
+    print "Pyscf not installed. Please run: phenix.python pip -m  install pyscf"
+  prefix = os.path.basename(__file__).replace(".py","")
   if pyscf_installed:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=False)
+    run_tests.runner(function=run, prefix=prefix, disable=False)
   else:
-      rc = run_tests.runner(function=run, prefix=prefix, disable=True)
-  assert not rc, '%s rc: %s' % (prefix, rc)
+    run_tests.runner(function=run, prefix=prefix, disable=True)

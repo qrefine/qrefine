@@ -41,6 +41,6 @@ def run(prefix):
     print
   assert approx_equal(diff.max(), [0,0,0])
 
-if __name__ == '__main__':
-  rc = run_tests.runner(function=run, prefix="tst_16", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+if(__name__ == '__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

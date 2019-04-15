@@ -57,19 +57,15 @@ def run(prefix):
                                    [14.529074495458673, 6.242069503845828, 12.534003126275708]], 0.001)
 
 
-if (__name__ == "__main__"):
-
-    tensormol_installed = False
-    try:
-        import TensorMol
-        tensormol_installed = True
-    except ImportError:
-        print("Please install TensorMol")
-
-
-    prefix = "tst_34"
-    if tensormol_installed:
-        rc = run_tests.runner(function=run, prefix=prefix, disable=False)
-    else:
-        rc = run_tests.runner(function=run, prefix=prefix, disable=True)
-    assert not rc, '%s rc: %s' % (prefix, rc)
+if(__name__ == "__main__"):
+  tensormol_installed = False
+  try:
+    import TensorMol
+    tensormol_installed = True
+  except ImportError:
+    print("Please install TensorMol")
+  prefix = os.path.basename(__file__).replace(".py","")
+  if tensormol_installed:
+    run_tests.runner(function=run, prefix=prefix, disable=False)
+  else:
+    run_tests.runner(function=run, prefix=prefix, disable=True)

@@ -228,9 +228,8 @@ def run1(prefix):
                 flex.double(esW.gradients[0]))
   assert approx_equal(result, es.gradients[0])
 
-
-if __name__ == '__main__':
-  rc = run_tests.runner(function=run1, prefix="tst_17", disable=False)
-  rc += run_tests.runner(function=run2, prefix="tst_17", disable=False)
-  rc += run_tests.runner(function=run3, prefix="tst_17", disable=False)
-  assert not rc, 'tst_17 rc: %s' % rc
+if(__name__ == '__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run1, prefix=prefix, disable=False)
+  run_tests.runner(function=run2, prefix=prefix, disable=False)
+  run_tests.runner(function=run3, prefix=prefix, disable=False)

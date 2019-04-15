@@ -22,6 +22,6 @@ def run(prefix):
     pdb_hierarchy=ph,
     crystal_symmetry=cs)
 
-if __name__ == '__main__':
-  rc = run_tests.runner(function=run, prefix="tst_20", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+if(__name__ == '__main__'):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

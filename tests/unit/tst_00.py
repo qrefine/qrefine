@@ -40,5 +40,5 @@ def run(prefix):
   assert abs(r_final-fmodel.r_work())<0.0005, abs(r_final-fmodel.r_work())
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_00", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

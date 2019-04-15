@@ -1,6 +1,6 @@
 from __future__ import division
 
-import time
+import time, os
 import shutil
 from libtbx.test_utils import approx_equal
 from libtbx.utils import Sorry
@@ -91,5 +91,5 @@ def complete_pdbs(expected_list, pdb_dir):
     print "skip"
 
 if(__name__ == "__main__"):
-  rc = run_tests.runner(function=run, prefix="tst_11", disable=False)
-  assert not rc, 'tst_00 rc: %s' % rc
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=True)
