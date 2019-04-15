@@ -104,6 +104,8 @@ def runner(function, prefix, disable=False):
   return rc
 
 def run(nproc=6, only_i=None):
+  cwd = os.getcwd()
+  assert cwd.find(' ')==-1, 'test do not work in directory with a space " "'
   try:
     only_i=int(only_i)
     nproc=1
@@ -181,7 +183,9 @@ def run(nproc=6, only_i=None):
       print 'Error output from %s' % args
       print err_str
       print '_'*80
-    if res: failed += 1
+    if res:
+      print '\n\t %s %s\n' % (args,res)
+      failed += 1
   if failed:
     print 'Failed tests : %d' % failed
     return 1
