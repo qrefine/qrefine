@@ -564,34 +564,15 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           model              = model,
           params             = params,
           restraints_manager = rm)
-        grad.append(driver.run_gradient(calculator=calculator_manager))
-        print >> log, '~   gnorm',np.linalg.norm(grad[idx])
-        print >> log, '~   max_g', max(abs(i) for i in grad[idx]), ' min_g',min(abs(i) for i in grad[idx])
+        grad=driver.run_gradient(calculator=calculator_manager)
+        print >> log, '~   gnorm',np.linalg.norm(grad)
+        print >> log, '~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad)
+        name="-".join(map(str,idl[idx]))
+        np.save(name,grad)
         idx+=1
-        print "total time for gradient",(time.time() - t0),'\n\n'
+        print >> log, "total time for gradient",(time.time() - t0),'\n\n'
 
-    print >> log, 'overview'
-    if ref_grad is None:
-      ref_idx=idx-1  # should always be the most reliable gradient
-      ref_name="-".join(map(str,idl[ref_idx]))
-      print >>log,'reference gradient taken from  %s' %(ref_name)
-      ref_grad=np.array(grad[ref_idx])
-      np.save(ref_name,ref_grad)
-
-    ref_max=max(abs(i) for i in ref_grad)
-    ref_min=min(abs(i) for i in ref_grad)
-    ref_gnorm=np.linalg.norm(ref_grad)
-    grad=np.array(grad)
-
-    print >> log,  '     g_mode - max_res'
-    for i in range(0,idx):
-      index=" - ".join(map(str,idl[i]))
-      print >> log, ' %10s   d(angle)  %f'  %(index, get_grad_angle(grad[i],ref_grad) )
-      print >> log, ' %10s   d(gnorm)  %f'  %(index, abs(np.linalg.norm(grad[i])-ref_gnorm) )
-      print >> log, ' %10s   d(max_g)  %f'  %(index, abs(max(abs(i) for i in grad[i])-ref_max) )
-      print >> log, ' %10s   d(min_g)  %f'  %(index, abs(min(abs(i) for i in grad[i])-ref_min) )
-      print >> log, ' %10s   MAD       %f'  %(index, get_grad_mad(grad[i],ref_grad) ) # MAD
-      print >> log, ' '
+    print >> log, 'ready to run qr.granalyse!'
 
   else:
     rm = restraints_manager
