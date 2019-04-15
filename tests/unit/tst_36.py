@@ -51,7 +51,7 @@ def run(prefix):
   """
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
-  cmd = "qr.finalise %s"%pdb_in
+  cmd = "qr.finalise %s > %s.log"%(pdb_in, prefix)
   assert easy_run.call(cmd)==0
   h_answer = iotbx.pdb.input(
     source_info=None, lines = pdb_str_out).construct_hierarchy()

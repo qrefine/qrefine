@@ -56,7 +56,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
   if(1): print " ".join(cmd)
   return easy_run.go(" ".join(cmd))
 
-def clean_up(prefix,mtz_name = None):
+def clean_up(prefix, mtz_name = None):
   test_folder_name = prefix
   if(os.path.exists(test_folder_name)):
     shutil.rmtree(test_folder_name)
@@ -72,7 +72,9 @@ def clean_up(prefix,mtz_name = None):
     'test_point_charges.pdb', 'q.xyz', "expansion.pdb",
     'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb',
     'test_original_pdb_capping.pdb', 'test_short_gap.pdb',
-    'test_short_gap_capping.pdb', 'entire_qm.pdb', 'cluster_qm.pdb']
+    'test_short_gap_capping.pdb', 'entire_qm.pdb', 'cluster_qm.pdb',
+    '%s.pdb'%prefix, '%s.log'%prefix, '%s_complete.pdb'%prefix,
+    '%s_readyset_input.pdb'%prefix]
   files_to_remove2 = [
     'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
     'tst_14_super_sphere.pdb','test_zn_his_charge.pdb']
@@ -81,10 +83,10 @@ def clean_up(prefix,mtz_name = None):
   for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
     try: os.remove(f)
     except: pass
-  try:
-    shutil.rmtree('ase')
-    shutil.rmtree('ase_error')
-  except: pass
+  for folder in ['ase', 'ase_error', 'pdb']:
+    try:
+      shutil.rmtree(folder)
+    except: pass
 
 def runner(function, prefix, disable=False):
   assert_folder_is_empty(prefix=prefix)
@@ -123,43 +125,14 @@ def run(nproc=6, only_i=None):
       os.path.join(qr_unit_tests,file_name)))
     if in_separate_directory:
       os.chdir('..')
-    return rc
-  tests = [
-    "tst_00.py",
-    "tst_01.py",
-    "tst_03.py",
-    "tst_05.py",
-    "tst_06.py",
-    "tst_07.py",
-    "tst_08.py",
-    "tst_09.py",
-    "tst_10.py",
-    "tst_11.py",
-    "tst_12.py",
-    "tst_13.py",
-    "tst_14.py",
-    "tst_15.py",
-    "tst_16.py",
-    "tst_17.py",
-    "tst_18.py",
-    "tst_19.py",
-    "tst_20.py",
-    "tst_21.py",
-    "tst_22.py",
-    "tst_23.py",
-    "tst_24.py",
-    'tst_25.py',
-    'tst_26.py',
-    'tst_27.py',
-    'tst_28.py',
-    'tst_29.py',
-    'tst_30.py',
-    'tst_31.py',
-    'tst_32.py',
-    'tst_33.py',
-    'tst_34.py',
-    'tst_35.py'
-  ]
+    return rc  
+  # Collect test files
+  tests = []
+  for fn in os.listdir(qr_unit_tests):
+    if(fn.startswith("tst_") and fn.endswith(".py")):
+      tests.append(fn)
+  tests.sort()
+  #
   failed = 0
   in_separate_directory = not(nproc==1)
   remove=[]
