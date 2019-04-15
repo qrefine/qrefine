@@ -132,6 +132,8 @@ def run(nproc=6, only_i=None):
     if(fn.startswith("tst_") and fn.endswith(".py")):
       tests.append(fn)
   tests.sort()
+  print "Following tests will be executed:"
+  print " ".join(tests)
   #
   failed = 0
   in_separate_directory = not(nproc==1)
