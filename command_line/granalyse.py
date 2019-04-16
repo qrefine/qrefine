@@ -14,6 +14,7 @@ import iotbx.pdb
 def get_help():
   raise Usage("""
     qr.granalyse analyses gradients obtained from 'qr.refine mode=gtest' runs.
+    Will write the gradient or difference gradient into the PDB.
 
     Examples:
     i)  qr.granalyse model.pdb  
@@ -22,6 +23,7 @@ def get_help():
     Options:
       --ref <npy files> (set reference gradient)
       --occ write to occupancy field (instead of beta) 
+      --grad (write gradient instead of difference gradient into pdb)
       --help  (print this help)
     """)
   sys.exit(0)
@@ -48,7 +50,23 @@ def get_deviations(log,ref_grad,grad):
   print(' d(min_g)  %f'  %(abs(min(abs(i) for i in grad)-ref_min) ),file=log)
   print(' MAD       %f'  %(get_grad_mad(grad,ref_grad) ),file=log) 
   print(' ',file=log)
+
+def get_grad_delta(ref_grad,grad):
   return np.abs(ref_grad-grad)
+
+def get_grad_wdelta(ref_grad,grad):
+  # weighted delta: delta_i= (g_i - g_i^ref)|g_i^ref|
+  # *100 would be a 'percentage'
+  dim3=int(ref_grad.shape[0])
+  dim=int(dim3/3)
+  d=np.zeros(dim)
+  ref=np.reshape(ref_grad,(3,dim))
+  g=np.reshape(grad,(3,dim))
+  for i in range(dim):
+    inorm=np.linalg.norm(ref[0:2,i])
+    for j in range(3):
+      d[i]+=np.abs((g[j,i]-ref[j,i])/inorm)
+  return d*100/3
 
 def sorting_weight(name):
   # apply custom weight based on gtest ID to allow easy sorting
@@ -57,7 +75,7 @@ def sorting_weight(name):
   return weight
 
 def set_ph_field(ph,val,field):
-    # sets delta_gradient to respective PDB field.
+    # sets val to respective PDB field.
     nat_hierachy=len(ph.hierarchy.atoms())
     nat_numpy=val.shape[0]
     assert (nat_numpy-nat_hierachy==0),'wrong number of atoms!'
@@ -78,13 +96,17 @@ def atomic_mean_deviation(x):
   nat=int(x.shape[0]/3)
   new=np.zeros(nat)
   for i in range(nat):
-    new[i]=(x[i]+x[i+1]+x[i+2])/3
+    ii = 0 + 3 * i
+    new[i]=(x[ii]+x[ii+1]+x[ii+2])/3
   return new
 
 #######################################
 def run(args,log):
   field='beta'
   ref_name=None
+  do_grad=False
+  do_delta=False
+  do_wdelta=True
 
   args = sys.argv[1:]
   if ('--ref') in args:
@@ -93,11 +115,16 @@ def run(args,log):
       ref_name=args[args.index('-ref')+1]
   if ('--occ') in args:
       field='occ'
-  if ('-help' or '--help' or '-h') in args:
+  if ('--grad') in args:
+      do_grad=True
+  if ('--delta') in args: # expert debug option
+      do_delta=True
+  if ('--help') in args:
       get_help()
+  if (len(args)<1):
+    get_help()
+  
   pdbname=args[0]
-
-  assert len(pdbname)>0,'provide PDB file!'
   print('Reading: %s' %(pdbname))
   pdb_inp = iotbx.pdb.input(file_name=pdbname)
   pdb_obj = iotbx.pdb.hierarchy.input(file_name=pdbname)
@@ -138,8 +165,14 @@ def run(args,log):
   # loop over available gradients and compare
   for i in range(n_files):
     print('     ~g_mode - max_res:', iname[i][:-4],file=log)
-    dg=get_deviations(log,ref_grad,igrad[i])
-    delta=atomic_mean_deviation(dg)
+    get_deviations(log,ref_grad,igrad[i])
+    if do_delta:
+      dg=np.abs(ref_grad-igrad[i])
+      delta=atomic_mean_deviation(dg)
+    elif do_grad:
+      delta=atomic_mean_deviation(igrad[i])
+    elif do_wdelta:
+      delta=get_grad_wdelta(ref_grad,igrad[i])
     set_ph_field(ph=pdb_obj,val=delta,field=field)
     output_pdb = "%s.pdb" %(iname[i][:-4])
     pdb_obj.hierarchy.write_pdb_file(file_name=output_pdb)

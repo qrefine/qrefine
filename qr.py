@@ -503,6 +503,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
     # cluster_scan=[2,10]
 
+    if g_mode[0]==0:
+      params.cluster.clustering=False
+      cluster_scan=[0]
+      clusters=[]
+
     n_grad=len(cluster_scan)*len(g_mode)
     print >> log, 'Calculating %3i gradients \n' % (n_grad)
     print >> log, 'Starting loop over different fragment sizes'
@@ -543,13 +548,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         rm = restraints_manager
         if(fragment_manager is not None):
           rm = cluster_restraints_manager
-        print "time taken for fragments",(time.time() - t0)
-        frags=fragment_manager
-        print >> log, '~  # clusters  : ',len(frags.clusters)
-        print >> log, '~  list of atoms per cluster:'
-        print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
-        print >> log, '~  list of atoms per fragment:'
-        print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
+          print "time taken for fragments",(time.time() - t0)
+          frags=fragment_manager
+          print >> log, '~  # clusters  : ',len(frags.clusters)
+          print >> log, '~  list of atoms per cluster:'
+          print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
+          print >> log, '~  list of atoms per fragment:'
+          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
         calculator_manager = create_calculator(
           weights            = weights,
           fmodel             = start_fmodel,
