@@ -474,7 +474,9 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       model            = model)
 
   if(params.refine.mode == "gtest"):
+    # needs to be moved! Perhaps also to driver
     import numpy as np
+    from fragment import fragment_extracts
     from utils.mathbox import get_grad_mad, get_grad_angle
 
     # determine what kind of buffer to calculate
@@ -555,6 +557,36 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
           print >> log, '~  list of atoms per fragment:'
           print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
+
+          # save fragment data. below works
+          # better way is to make a single PDB file where the clusters
+          # get a unique chain ID.
+          label="-".join(map(str,idl[idx]))
+          cwd = os.getcwd()
+          frag_dir = os.path.join(os.getcwd(),label)
+          if not os.path.exists(frag_dir):
+            os.mkdir(frag_dir)
+          os.chdir(frag_dir)
+          for index, selection_fragment in enumerate(frags.fragment_selections):
+
+            # cluster_selection = frags.cluster_selections[index]
+            # icluster = frags.pdb_hierarchy_super.select(cluster_selection)
+            # print icluster.chains_size()
+            # sys.exit()
+            cluster_selection = frags.cluster_selections[index]
+            selection = frags.fragment_selections[index]
+            icluster = frags.pdb_hierarchy_super.select(cluster_selection)
+            ifrag = frags.pdb_hierarchy_super.select(selection)
+            fn_cluster = "%s_%s_cluster.pdb" %(label,index)
+            fn = "%s_%s.pdb" %(label,index)
+            icluster.write_pdb_file(
+              file_name        = fn_cluster,
+              crystal_symmetry = frags.expansion.cs_box)
+            ifrag.write_pdb_file(
+              file_name        = fn,
+              crystal_symmetry = frags.expansion.cs_box)
+          os.chdir(cwd)
+
         calculator_manager = create_calculator(
           weights            = weights,
           fmodel             = start_fmodel,

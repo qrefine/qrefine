@@ -376,6 +376,7 @@ class fragments(object):
     self.fragment_charges = []
     self.cluster_selections = []
     self.buffer_selections = []
+    self.cluster_selections = []
     for i in range(len(self.fragment_super_atoms)):
       fragment_selection = pdb_hierarchy_select(
           self.pdb_hierarchy.atoms_size(),
@@ -531,6 +532,7 @@ def write_mm_charge_file(fragment_extracts, index):
 
 def fragment_extracts(fragments):
   return group_args(
+    cluster_selections   = fragments.cluster_selections,
     fragment_charges     = fragments.fragment_charges,
     fragment_selections  = fragments.fragment_selections,
     fragment_super_selections=fragments.fragment_super_selections,
