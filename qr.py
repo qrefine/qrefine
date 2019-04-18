@@ -559,8 +559,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
 
           # save fragment data. below works
-          # better way is to make a single PDB file where the clusters
-          # get a unique chain ID.
+          # better way is to make a single PDB file with chain IDs
           label="-".join(map(str,idl[idx]))
           cwd = os.getcwd()
           frag_dir = os.path.join(os.getcwd(),label)
@@ -569,21 +568,17 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           os.chdir(frag_dir)
           for index, selection_fragment in enumerate(frags.fragment_selections):
 
-            # cluster_selection = frags.cluster_selections[index]
-            # icluster = frags.pdb_hierarchy_super.select(cluster_selection)
-            # print icluster.chains_size()
-            # sys.exit()
             cluster_selection = frags.cluster_selections[index]
-            selection = frags.fragment_selections[index]
-            icluster = frags.pdb_hierarchy_super.select(cluster_selection)
-            ifrag = frags.pdb_hierarchy_super.select(selection)
+            frag_selection = frags.fragment_super_selections[index]
+            icluster = frags.pdb_hierarchy.select(cluster_selection)
+            ifrag = frags.pdb_hierarchy_super.select(frag_selection)
             fn_cluster = "%s_%s_cluster.pdb" %(label,index)
-            fn = "%s_%s.pdb" %(label,index)
+            fn_frag = "%s_%s_frag.pdb" %(label,index)
             icluster.write_pdb_file(
               file_name        = fn_cluster,
               crystal_symmetry = frags.expansion.cs_box)
             ifrag.write_pdb_file(
-              file_name        = fn,
+              file_name        = fn_frag,
               crystal_symmetry = frags.expansion.cs_box)
           os.chdir(cwd)
 
