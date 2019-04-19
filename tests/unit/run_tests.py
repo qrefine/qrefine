@@ -8,6 +8,7 @@ from libtbx import easy_run
 from scitbx.array_family import flex
 from libtbx import easy_mp
 import traceback
+from libtbx.utils import Sorry
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -15,9 +16,11 @@ qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
 
 def assert_folder_is_empty(prefix):
   if(len(os.listdir("."))>0):
+    print '-'*80
     print "Folder is not empty: test prefix:", prefix
     print "Remove before proceeding:", os.listdir(".")
-    STOP()
+    print '-'*80
+    raise Sorry("Folder is not empty: test prefix:", prefix)
 
 def setup_helix_example(pdb_name = "m00_good.pdb",
                         mtz_name = "m00_good.mtz"):
@@ -125,7 +128,7 @@ def run(nproc=6, only_i=None):
       os.path.join(qr_unit_tests,file_name)))
     if in_separate_directory:
       os.chdir('..')
-    return rc  
+    return rc
   # Collect test files
   tests = []
   for fn in os.listdir(qr_unit_tests):
