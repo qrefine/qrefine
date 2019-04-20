@@ -14,28 +14,54 @@ A list of installed engines are printed to the screen for your convenience.
 """
 
 # LIBTBX_SET_DISPATCHER_NAME qr.build_interfaces
+from __future__ import print_function
 import os, sys
 
 from libtbx import easy_run
 
-def draw_box_around_text(msg, width=78):
-  print '\n%s' % ('%s%s%s' % (u'\u250C',
+def draw_box_around_text(msg, width=78, log=None):
+  def _draw_lines(msg, terminating_char):
+    rc = ''
+    for line in msg:
+      outl = '%s' % terminating_char
+      assert len(line)<width-2
+      outl += ' %s ' % line
+      outl += '%s' % (' '*(width-len(line)-2))
+      outl += '%s' % terminating_char
+      rc += '%s\n' % outl
+    return rc[:-1]
+  ##############################
+  if log is None: log=sys.stdout
+  ascii_128 = False
+  try:
+    # assert 0
+    print('\n%s' % ('%s%s%s' % (u'\u250C',
+                                u'\u2500'*width,
+                                u'\u2510',
+                               )
+                  ),
+          file=log,
+          )
+  except:
+    ascii_128 = True
+    top_line = '%s' % ('%s%s%s' % ('|',
+                                   '-'*width,
+                                   '|',
+                                  )
+                      )
+  if ascii_128:
+    print(top_line, file=log)
+    print(_draw_lines(msg, '|'), file=log)
+    print(top_line, file=log)
+  else:
+    print(_draw_lines(msg, u'\u2502'), file=log)
+    print('%s' % ('%s%s%s' % (u'\u2514',
                               u'\u2500'*width,
-                              u'\u2510',
+                              u'\u2518',
                              )
-                )
-  for line in msg:
-    outl = '%s' % u'\u2502'
-    assert len(line)<width-2
-    outl += ' %s ' % line
-    outl += '%s' % (' '*(width-len(line)-2))
-    outl += '%s' % u'\u2502'
-    print outl
-  print '%s' % ('%s%s%s' % (u'\u2514',
-                            u'\u2500'*width,
-                            u'\u2518',
-                           )
-                )
+                  ),
+         file=log,
+         )
 
 def run():
   msg = ['',
@@ -51,10 +77,10 @@ def run():
     if line.find('java version')>-1:
       version = line.split('"')[1][:3]
       if float(version)<1.8:
-        print '''
+        print('''
   Need at least Java 1.8. Please update your system Java using a JDK bundle
   and try again.
-        '''
+        ''')
         sys.exit()
 
   java_env_vars = {'JAVA_HOME' : 'absolute_path_of_java_home',
@@ -63,30 +89,30 @@ def run():
                    }
   count = 0
   for env_var in java_env_vars:
-    print '  Set? "%s" "%s"' % (env_var, os.environ.get(env_var, False))
+    print('  Set? "%s" "%s"' % (env_var, os.environ.get(env_var, False)))
     if not os.environ.get(env_var, False):
-      print '''
+      print('''
       The following environment variables need setting.
-      '''
+      ''')
       for env_var, help in java_env_vars.items():
-        print '%s %s : %s' % (' '*10, env_var, help)
+        print('%s %s : %s' % (' '*10, env_var, help))
       if env_var.startswith('JAVA'):
-        print '''
+        print('''
       On OSX use
         /usr/libexec/java_home -v 1.8
       to find the install directory
-      '''
+      ''')
       elif env_var=='LD_LIBRARY_PATH':
-        print '''
+        print('''
       The Phenix environment ignores the user set LD_LIBRARY_PATH unless the
       environmental variable PHENIX_TRUST_OTHER_ENV is set.
-      '''
+      ''')
       count+=1
       break
   else:
-    print '\n  Java appears to be installed\n'
+    print('\n  Java appears to be installed\n')
   if count:
-    print '   STOPPING'
+    print('   STOPPING')
     #sys.exit()
 
   qm_engine_env_vars = {'MOPAC_COMMAND' : 'Mopac executable',
@@ -99,24 +125,24 @@ def run():
   count = []
   for env_var in qm_engine_env_vars:
     if os.environ.get(env_var, False):
-      print '\n  Environmental variable %s set for "%s" to "%s"\n' % (
+      print('\n  Environmental variable %s set for "%s" to "%s"\n' % (
         env_var,
         qm_engine_env_vars[env_var],
         os.environ[env_var],
-        )
+        ))
       if not os.path.exists(os.environ[env_var]):
-        print '''
+        print('''
         Environmental variable "%s" : "%s" does not point to anything!
 
         STOPPING
-        ''' % (env_var, os.environ[env_var])
+        ''' % (env_var, os.environ[env_var]))
         sys.exit()
       count.append(env_var)
     else:
-      print '  Environmental variable %s for "%s" not found\n' % (
+      print('  Environmental variable %s for "%s" not found\n' % (
         env_var,
         qm_engine_env_vars[env_var],
-        )
+        ))
 
   qm_engines_python =    { 'PyScf':' A collection of electronic structure programs powered by Python',
                            'ANI':'ANI-1 neural net potential with python interface (ASE)',
@@ -130,52 +156,46 @@ def run():
     if name == 'PyScf':
       try:
         import pyscf
-        print "  PyScf successfully imported"
-        print
+        print("  PyScf successfully imported")
         qm_engines_python_installed[name] = description
       except:
-        print "  PyScf could not be imported"
-        print
+        print("  PyScf could not be imported")
 
     if name == 'TorchANI':
       try:
         import torch
         import torchani
-        print "  TorchANI successfully imported"
-        print
+        print("  TorchANI successfully imported")
         qm_engines_python_installed[name] = description
       except:
-        print "  TorchANI could not be imported"
-        print
+        print("  TorchANI could not be imported")
 
     if name == 'ANI':
       try:
         import ani
         from ani.ase_interface import aniensloader
         from ani.ase_interface import ANIENS
-        print "  ANI successfully imported"
+        print("  ANI successfully imported")
         qm_engines_python_installed[name] = description
       except:
-        print "  ANI could not be imported"
+        print("  ANI could not be imported")
 
   if count:
-    print '''
+    print('''
     QM engines set
-    '''
+    ''')
     for env_var in count:
-      print '%s %s : %s' % (' '*10, env_var, os.environ[env_var])
-    print
+      print('%s %s : %s' % (' '*10, env_var, os.environ[env_var]))
     for name, description in qm_engines_python_installed.items():
-      print '%s %s : %s' % (' '*10, name, description)
-      print
+      print('%s %s : %s' % (' '*10, name, description))
   else:
-    print '''
+    print('''
     No QM engines found!
 
     Install and set an environmental variable from the list.
-    '''
+    ''')
     for env_var, help in qm_engine_env_vars.items():
-      print '%s %s : %s' % (' '*10, env_var, help)
+      print('%s %s : %s' % (' '*10, env_var, help))
     print
 
 
