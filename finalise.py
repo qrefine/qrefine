@@ -172,7 +172,7 @@ def run(pdb_filename,
   sel = asc.selection("element H or element D")
   model = mmtbx.model.manager(
     model_input               = None,
-    build_grm                 = True,
+    build_grm                 = False,
     pdb_hierarchy             = ppf.all_chain_proxies.pdb_hierarchy,
     pdb_interpretation_params = params,
     crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
