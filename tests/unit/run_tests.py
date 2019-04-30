@@ -86,7 +86,7 @@ def clean_up(prefix, mtz_name = None):
   for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
     try: os.remove(f)
     except: pass
-  for folder in ['ase', 'ase_error', 'pdb']:
+  for folder in ['ase', 'ase_error', 'pdb', '1-20']:
     try:
       shutil.rmtree(folder)
     except: pass
