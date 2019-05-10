@@ -10,6 +10,7 @@ The list of available keywords can be found under the ``cluster`` scope `here <q
 
 Central variable is called ``g_mode`` and indicates what kind of buffer region is applied::
 
+    0 = model as is (no clustering)
 	  1 = default buffer
 	  2 = default buffer + PC
 	  3 = two buffer
@@ -19,7 +20,7 @@ Central variable is called ``g_mode`` and indicates what kind of buffer region i
 two fundemantal modes of operation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Sequence of calculations (recommended)
+Sequence of calculations 
   specify ``two_buffer=1`` and/or ``charge_embedding=1`` in the command line.
   This specifies the **largest buffer region** up to which calculations are performed.
 
@@ -27,8 +28,16 @@ Direct buffer selection
   specify ``g_mode=1/2/3/4`` in the command line to select what kind of buffer region is calculated.
   Other kinds of buffer regions are not calculated.
 
-output statistics
-^^^^^^^^^^^^^^^^^
+output and statistics
+^^^^^^^^^^^^^^^^^^^^^
+
+``qr.refine mode=gtest`` will write all computed gradients to disk into a python numpy array (.npy file). This way computations can be repeated for other buffers without data loss. To analyse the gradient one can make use of the ``qr.granalyse`` program described below.
+
+qr.granalyse
+^^^^^^^^^^^^^
+
+This tool finds all previously generated .npy files contained the respective gradients and 
+analyses the errors in the gradient. Execute ``qr.granalyse --help`` for command line options.
 
 example output::
 
@@ -45,7 +54,7 @@ example output::
      1 - 25   d(min_g)  0.000000
      1 - 25   MAD       0.000000
 
-The first number corresponds to the buffer kind (``g_mode``, see above) and the second to the maximum numbers of residues per cluster. The last gradient is selected as the reference gradient (or the one set by ``g_ref``) and various comparisons are done.
+The first number corresponds to the buffer kind (``g_mode``, see above) and the second to the maximum numbers of residues per cluster. The last gradient is selected as the reference gradient (or the one set by ``qr.granalyse --ref MyBestGradient.npy``) and various comparisons are done.
 
 comparisons::
 
@@ -54,6 +63,9 @@ comparisons::
     d(max/min): difference between max/min gradient values
     MAD       : mean absolute deviation between all gradient components
 
+*visualizing errors*
+For each gradient a PDB file containing the percentage error of the atomic gradient deviation (averaged over x,y,z components) in the occupancy (beta) field is written. Additionally the used fragments and buffers are provided as well.
+
 Example
 ^^^^^^^
 Running a sequence of gradient calculations with a maximal number of residue per cluster of 10, 15 and 25, using default buffer and point-charges with GFN2-xTB.
@@ -61,9 +73,8 @@ Running a sequence of gradient calculations with a maximal number of residue per
   qr.refine model.pdb engine_name=xtb mode=gtest g_scan="10 15 25" charge_embedding=1
 
 A total of 6 gradient calculations will be performed. 3 with the default buffer and ``maxnum_residues_in_cluster=10/15/25`` and 3 with the default buffer
-plus point-charges with the same ``maxnum_residues_in_cluster`` settings.
-At the end the largest gradient (from ``g_mode=2`` and ``maxnum_residues_in_cluster=25``) will be used as reference for a comparison against the other 5 gradients. Deviations against the gradient norm (gnorm) against the max/min value of the gradient (max/min_g) and the mean absolute deviation (MAD) of each gradient component are printed.
+plus point-charges with the same ``maxnum_residues_in_cluster`` settings. Then run:
 
-This will also produce a file called ``2-25.npy``, which is the gradient of the largest buffer region. This gradient can be used as reference
-gradient for another calculation using ``cluster.g_ref=2-20.npy``.
+  qr.granalyse
 
+This will list 6 npy files containing the gradients and print the error statistics and respective PDBs to visualize the errors.
