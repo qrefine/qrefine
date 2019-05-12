@@ -82,6 +82,9 @@ cluster{
   g_mode = None
     .type = int
     .help = manual control over gradient test loops (1=standard, 2=standard + point-charges, 3=two buffer 4=two_buffer+ point-charges)
+  save_clusters = True
+    .type = bool
+    .help = save currently used fragments and clusters to disk as PDBs.
 }
 
 restraints = cctbx *qm
@@ -314,7 +317,8 @@ def create_fragment_manager(
     qm_engine_name             = params.quantum.engine_name,
     crystal_symmetry           = crystal_symmetry,
     debug                      = params.debug,
-    charge_cutoff              = params.cluster.charge_cutoff)
+    charge_cutoff              = params.cluster.charge_cutoff,
+    save_clusters              = params.cluster.save_clusters)
 
 def create_restraints_manager(
       params,
@@ -476,7 +480,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   if(params.refine.mode == "gtest"):
     # needs to be moved! Perhaps also to driver
     import numpy as np
-    from fragment import fragment_extracts
+    from fragment import fragment_extracts, write_cluster_and_fragments_pdbs
     from utils.mathbox import get_grad_mad, get_grad_angle
 
     # determine what kind of buffer to calculate
@@ -495,6 +499,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
 
     # reset flags
     params.cluster.clustering=True
+    params.cluster.save_clusters=True
     params.cluster.charge_embedding=False
     params.cluster.two_buffers=False
     grad=[]
@@ -561,26 +566,27 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           # save fragment data. below works
           # better way is to make a single PDB file with chain IDs
           label="-".join(map(str,idl[idx]))
-          cwd = os.getcwd()
-          frag_dir = os.path.join(os.getcwd(),label)
-          if not os.path.exists(frag_dir):
-            os.mkdir(frag_dir)
-          os.chdir(frag_dir)
-          for index, selection_fragment in enumerate(frags.fragment_selections):
+          write_cluster_and_fragments_pdbs(fragment_extracts=fragment_extracts(frags),directory=label)
+          # cwd = os.getcwd()
+          # frag_dir = os.path.join(os.getcwd(),label)
+          # if not os.path.exists(frag_dir):
+          #   os.mkdir(frag_dir)
+          # os.chdir(frag_dir)
+          # for index, selection_fragment in enumerate(frags.fragment_selections):
 
-            cluster_selection = frags.cluster_selections[index]
-            frag_selection = frags.fragment_super_selections[index]
-            icluster = frags.pdb_hierarchy.select(cluster_selection)
-            ifrag = frags.pdb_hierarchy_super.select(frag_selection)
-            fn_cluster = "%s_%s_cluster.pdb" %(label,index)
-            fn_frag = "%s_%s_frag.pdb" %(label,index)
-            icluster.write_pdb_file(
-              file_name        = fn_cluster,
-              crystal_symmetry = frags.expansion.cs_box)
-            ifrag.write_pdb_file(
-              file_name        = fn_frag,
-              crystal_symmetry = frags.expansion.cs_box)
-          os.chdir(cwd)
+          #   cluster_selection = frags.cluster_selections[index]
+          #   frag_selection = frags.fragment_super_selections[index]
+          #   icluster = frags.pdb_hierarchy.select(cluster_selection)
+          #   ifrag = frags.pdb_hierarchy_super.select(frag_selection)
+          #   fn_cluster = "%s_%s_cluster.pdb" %(label,index)
+          #   fn_frag = "%s_%s_frag.pdb" %(label,index)
+          #   icluster.write_pdb_file(
+          #     file_name        = fn_cluster,
+          #     crystal_symmetry = frags.expansion.cs_box)
+          #   ifrag.write_pdb_file(
+          #     file_name        = fn_frag,
+          #     crystal_symmetry = frags.expansion.cs_box)
+          # os.chdir(cwd)
 
         calculator_manager = create_calculator(
           weights            = weights,

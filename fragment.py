@@ -54,7 +54,8 @@ class fragments(object):
       qm_run                     = True,
       cif_objects                = None,
       debug                      = False,
-      charge_cutoff              = 8.0):
+      charge_cutoff              = 8.0,
+      save_clusters              = False):
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
@@ -67,6 +68,7 @@ class fragments(object):
     self.altloc_method =  altloc_method
     self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
+    self.save_clusters = save_clusters
     raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
     self.charge_service = charges_class(
         raw_records           = raw_records,
@@ -546,10 +548,46 @@ def fragment_extracts(fragments):
     crystal_symmetry     = fragments.crystal_symmetry,
     pdb_hierarchy        = fragments.pdb_hierarchy,
     pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
-    expansion_cs        = fragments.expansion.cs_box,
+    expansion_cs         = fragments.expansion.cs_box,
     buffer_selections    = fragments.buffer_selections,
     fragment_scales      = fragments.fragment_scales,
     debug                = fragments.debug,
     charge_service       = fragments.charge_service,
     charge_cutoff        = fragments.charge_cutoff,
-    expansion_file      = fragments.expansion_file)
+    expansion_file       = fragments.expansion_file,
+    save_clusters        = fragments.save_clusters)
+
+def write_cluster_and_fragments_pdbs(fragment_extracts,directory):
+  # write current fragment and cluster PDBs into ./<directory>
+  # makes a fresh(!) <directory>
+  F=fragment_extracts
+  if not F.save_clusters:
+    return
+  from shutil import rmtree
+  cwd = os.getcwd()
+  frag_dir = os.path.join(cwd,directory)
+  if os.path.exists(frag_dir):
+    rmtree(frag_dir)
+  os.mkdir(frag_dir)  
+  os.chdir(frag_dir)
+  for index, selection_fragment in enumerate(F.fragment_selections):
+    cluster_selection = F.cluster_selections[index]
+    frag_selection = F.fragment_super_selections[index]
+    index_cluster = F.pdb_hierarchy.select(cluster_selection)
+    index_frag = F.pdb_hierarchy_super.select(frag_selection)
+    filename_cluster = "%s_cluster.pdb" %(index)
+    filename_frag = "%s_frag.pdb" %(index)
+    index_cluster.write_pdb_file(
+    file_name        = filename_cluster,
+    crystal_symmetry = F.expansion_cs)
+    index_frag.write_pdb_file(
+    file_name        = filename_frag,
+    crystal_symmetry = F.expansion_cs)
+
+  log=open('fragment_info.txt','w')
+  print >> log, '~  # clusters  : ',len(F.cluster_atoms)
+  print >> log, '~  list of atoms per cluster:'
+  print >> log, '~   ',[len(x) for x in F.cluster_atoms]
+  print >> log, '~  list of atoms per fragment:'
+  print >> log, '~   ',[len(x) for x in F.fragment_super_atoms]
+  os.chdir(cwd)

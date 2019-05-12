@@ -6,7 +6,7 @@ from libtbx.utils import Sorry
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
-from fragment import fragment_extracts
+from fragment import fragment_extracts, write_cluster_and_fragments_pdbs
 from restraints import from_qm
 from libtbx import group_args
 
@@ -50,9 +50,10 @@ class from_cluster(object):
       fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
     self.restraints_manager.fragment_extracts = fragment_extracts_obj
     selection_and_sites_cart=[]
+    write_cluster_and_fragments_pdbs(fragment_extracts=fragment_extracts_obj,directory='frag_pdbs')
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
-       selection_and_sites_cart.append([selection_fragment, sites_cart,index])
+      selection_and_sites_cart.append([selection_fragment, sites_cart,index])
        ## DEBUG begin
        #try:
        #  super_selection = self.restraints_manager.\
