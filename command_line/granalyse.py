@@ -36,9 +36,14 @@ def id_file(filename):
   return g_mode, clustersize
 
 def get_deviations(log,ref_grad,grad):
+  import ase.units as ase_units
   '''
   calculates several deviation metrics for two gradient vectors
   '''
+  # convert from unit less to kcal/mol
+  unit_convert = ase_units.mol/ase_units.kcal # ~ 23.06
+  ref_grad=ref_grad/unit_convert
+  grad=grad/unit_convert
   ref_max=max(abs(i) for i in ref_grad)
   ref_min=min(abs(i) for i in ref_grad)
   ref_gnorm=np.linalg.norm(ref_grad)
@@ -48,6 +53,7 @@ def get_deviations(log,ref_grad,grad):
   print(' d(gnorm)  %f'  %(abs(np.linalg.norm(grad)-ref_gnorm) ),file=log)
   print(' d(max_g)  %f'  %(abs(max(abs(i) for i in grad)-ref_max) ),file=log)
   print(' d(min_g)  %f'  %(abs(min(abs(i) for i in grad)-ref_min) ),file=log)
+  print(' RMSD      %f'  %(rmsd(grad,ref_grad)),file=log)
   print(' MAD       %f'  %(get_grad_mad(grad,ref_grad) ),file=log) 
   print(' ',file=log)
 
@@ -99,6 +105,13 @@ def atomic_mean_deviation(x):
     ii = 0 + 3 * i
     new[i]=(x[ii]+x[ii+1]+x[ii+2])/3
   return new
+
+def rmsd(V, W):
+    dim = V.shape[0]
+    d = 0.0
+    for i in range(dim):
+        d += (V[i] - W[i])**2.0
+    return np.sqrt(d/dim)
 
 
 def extract_expansion_grad(nat_model,grad):
@@ -208,7 +221,7 @@ def run(args,log):
   #    ref_grad=np.load(ref_name)
   #    print(ref_grad[0:6])
   #    print('cluster gradient:', ref_name)
-  #    g_ex=np.array(extract_expansion_grad(nat,args[args.index('--expansion')+1]))
+  #    g_ex=np.array(extract_expansion_grad(nat,exp_name))
   #    print(g_ex[0:6])
   #    get_deviations(log,g_ex,ref_grad)
   #    dg=np.abs(g_ex-ref_grad)
