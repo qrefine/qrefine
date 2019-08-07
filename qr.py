@@ -54,6 +54,9 @@ debug = False
     .type = bool
     .help = flag to control verbosity of output for debugging problematic code.
 cluster{
+  fast_interaction = False
+    .type = bool
+    .help = enable/disable C++ clustering
   charge_cutoff = 8.0
     .type = float
     .help = distance for point charge cutoff
