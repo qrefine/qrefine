@@ -320,6 +320,7 @@ def create_fragment_manager(
     qm_engine_name             = params.quantum.engine_name,
     crystal_symmetry           = crystal_symmetry,
     debug                      = params.debug,
+    fast_interaction           = params.cluster.fast_interaction,
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters)
 
