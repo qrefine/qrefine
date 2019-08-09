@@ -30,7 +30,7 @@ Once you have PHENIX installed, go to the directory where you installed PHENIX.
 
 ```
  source phenix_env.sh
- phenix.python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine
+ phenix.python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine --use-conda --nproc=8
  ```
  Note: adding --nproc=N can speedup the compilation step.
 
