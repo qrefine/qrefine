@@ -24,6 +24,6 @@ def run(prefix):
 if(__name__ == "__main__"):
   t0 = time.time()
   prefix = os.path.basename(__file__).replace(".py","")
-  run(prefix)
+  #run(prefix)
   print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
-  run_tests.clean_up(prefix)
+  #run_tests.clean_up(prefix)
