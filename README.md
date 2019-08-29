@@ -46,8 +46,7 @@ modules directory. The above command will clone it from *GitHub*.
 
  Clone the qrefine repo in the modules directory of the Phenix installation.
 ```
-  phenix.python -m pip install ase
-  phenix.python -m pip install JPype1
+  phenix.python -m pip install ase==3.17.0
   phenix.python -m pip install pymongo
   git clone https://github.com/qrefine/qrefine.git
   libtbx.configure qrefine
