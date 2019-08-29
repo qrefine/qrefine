@@ -570,7 +570,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           # save fragment data. below works
           # better way is to make a single PDB file with chain IDs
           label="-".join(map(str,idl[idx]))
-          write_cluster_and_fragments_pdbs(fragment_extracts=fragment_extracts(frags),directory=label)
+          write_cluster_and_fragments_pdbs(fragments=fragment_extracts(frags),directory=label)
           # cwd = os.getcwd()
           # frag_dir = os.path.join(os.getcwd(),label)
           # if not os.path.exists(frag_dir):

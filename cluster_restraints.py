@@ -50,7 +50,7 @@ class from_cluster(object):
       fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
     self.restraints_manager.fragment_extracts = fragment_extracts_obj
     selection_and_sites_cart=[]
-    write_cluster_and_fragments_pdbs(fragment_extracts=fragment_extracts_obj,directory='frag_pdbs')
+    write_cluster_and_fragments_pdbs(fragments=fragment_extracts_obj,directory='frag_pdbs')
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
       selection_and_sites_cart.append([selection_fragment, sites_cart,index])

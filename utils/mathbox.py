@@ -8,7 +8,7 @@ def get_grad_mad(grad,ref):
   return s/dim
 
 def unit_vec(v):
-  # much faster than np.linalg.norm because safetly checks
+  # much faster than np.linalg.norm because no safety checks
   l=math.sqrt((v[0])**2+(v[1])**2+(v[2])**2)
   return [v[0]/l,v[1]/l,v[2]/l]
 
@@ -19,7 +19,6 @@ def np_angle(v1, v2):
 
 def get_grad_angle(grad,ref):
   ''' mean angle of all gradient components in deg'''
-  import numpy as np
   g=np.reshape(grad,(3,-1))
   r=np.reshape(ref,(3,-1))
   dim=g.shape[1]

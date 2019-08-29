@@ -407,6 +407,7 @@ class fragments(object):
     self.cluster_selections = []
     self.buffer_selections = []
     self.cluster_selections = []
+    self.fragment_capped_initial = []
     for i in range(len(self.fragment_super_atoms)):
       fragment_selection = pdb_hierarchy_select(
           self.pdb_hierarchy.atoms_size(),
@@ -425,6 +426,7 @@ class fragments(object):
                       crystal_symmetry=self.expansion.cs_box,
                       model_completion=False,
                       original_pdb_filename=self.expansion_file)
+      self.fragment_capped_initial.append(charge_hierarchy)
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.expansion.cs_box)
       if(1):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping_tmp.pdb",
@@ -449,12 +451,12 @@ class fragments(object):
       s = fragment_selection==cluster_selection
       buffer_selection = fragment_selection.deep_copy().set_selected(s, False)
       self.buffer_selections.append(buffer_selection)
-      if(self.debug):
-        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
-          crystal_symmetry=self.expansion.cs_box)
-        cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
-        cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
-          crystal_symmetry=self.expansion.cs_box)
+      # if(self.debug):
+      #   fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
+      #     crystal_symmetry=self.expansion.cs_box)
+      #   cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
+      #   cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
+      #     crystal_symmetry=self.expansion.cs_box)
       check_hierarchy(fragment_super_hierarchy)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
@@ -466,21 +468,19 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
-  if(fragment_extracts.debug):  ## for degugging
+  # if(fragment_extracts.debug):
+  if(1): # at least for now
     fragment_hierarchy.write_pdb_file(
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.expansion_cs)
+  # re-capping because geometry of the fragment has changed.
   ph = completion.run(pdb_hierarchy=fragment_hierarchy,
                       crystal_symmetry=fragment_extracts.expansion_cs,
                       model_completion=False,
                       original_pdb_filename=fragment_extracts.expansion_file)
-  ##for debugging
-  if(fragment_extracts.debug):
-    fragment_hierarchy.write_pdb_file(
-      file_name=qm_pdb_file,
-      crystal_symmetry=fragment_extracts.expansion_cs)
-    ph.write_pdb_file(file_name=complete_qm_pdb_file,
-                      crystal_symmetry=fragment_extracts.expansion_cs)
+  # we now want this file by default  
+  ph.write_pdb_file(file_name=complete_qm_pdb_file,
+                    crystal_symmetry=fragment_extracts.expansion_cs)
   return os.path.abspath(complete_qm_pdb_file), ph
 
 def charge(fragment_extracts, index):
@@ -566,6 +566,7 @@ def fragment_extracts(fragments):
     fragment_charges     = fragments.fragment_charges,
     fragment_selections  = fragments.fragment_selections,
     fragment_super_selections=fragments.fragment_super_selections,
+    fragment_capped_initial=fragments.fragment_capped_initial,
     super_sphere_geometry_restraints_manager= \
           fragments.expansion.super_sphere_geometry_restraints_manager,
     working_folder       = fragments.working_folder,
@@ -585,10 +586,10 @@ def fragment_extracts(fragments):
     expansion_file       = fragments.expansion_file,
     save_clusters        = fragments.save_clusters)
 
-def write_cluster_and_fragments_pdbs(fragment_extracts,directory):
+def write_cluster_and_fragments_pdbs(fragments,directory):
   # write current fragment and cluster PDBs into ./<directory>
   # makes a fresh(!) <directory>
-  F=fragment_extracts
+  F=fragments
   if not F.save_clusters:
     return
   from shutil import rmtree
@@ -605,12 +606,20 @@ def write_cluster_and_fragments_pdbs(fragment_extracts,directory):
     index_frag = F.pdb_hierarchy_super.select(frag_selection)
     filename_cluster = "%s_cluster.pdb" %(index)
     filename_frag = "%s_frag.pdb" %(index)
+    filename_capped = "%s_capped0.pdb" %(index)
     index_cluster.write_pdb_file(
     file_name        = filename_cluster,
     crystal_symmetry = F.expansion_cs)
     index_frag.write_pdb_file(
     file_name        = filename_frag,
     crystal_symmetry = F.expansion_cs)
+    # capped_hierarchy = completion.run(pdb_hierarchy=index_frag,
+    #           crystal_symmetry=F.expansion_cs,
+    #           model_completion=False,
+    #           original_pdb_filename=filename_frag)
+    capped_hierarchy = F.fragment_capped_initial[index]
+    capped_hierarchy.write_pdb_file(file_name=filename_capped,
+              crystal_symmetry=F.expansion_cs)
 
   log=open('fragment_info.txt','w')
   print >> log, '~  # clusters  : ',len(F.cluster_atoms)
