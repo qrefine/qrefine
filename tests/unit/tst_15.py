@@ -55,7 +55,7 @@ def run(prefix):
           for i, diff_i in enumerate(diff):
             print i+1, diff_i, g1[i], g2[i]
           print
-        assert approx_equal(g1, g2, 1.0E-4)
+        assert approx_equal(diff.max(), [0,0,0], , 1.0E-4)
       else:
         ## loose comparison
         ## clustering qm just checks the norm of gradients from
