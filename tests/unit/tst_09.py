@@ -5,9 +5,7 @@ import os
 import os.path
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
-from qrefine.plugin.yoink.pyoink import PYoink
 import iotbx.pdb
-from qrefine.utils import yoink_utils
 from mmtbx.pair_interaction import pair_interaction
 import run_tests
 
@@ -23,6 +21,8 @@ def run(prefix):
 
   # To be deprecated
   if (0):
+    from qrefine.utils import yoink_utils
+    from qrefine.plugin.yoink.pyoink import PYoink
     yoink_utils.write_yoink_infiles("cluster.xml",
                                   "qmmm.xml",
                                   ph,
