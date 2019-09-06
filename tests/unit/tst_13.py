@@ -119,6 +119,7 @@ def generate_restraints(cs, ph, clustering=False):
      two_buffers                = True,
      pdb_hierarchy              = ph,
      qm_engine_name             = "mopac",
+     fast_interaction           = True,
      crystal_symmetry           = cs)
     restraints = from_cluster(
      restraints_manager = fq,
