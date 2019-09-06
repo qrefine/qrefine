@@ -302,7 +302,6 @@ def run(prefix):
         "max_iterations_refine=5",
         "two_buffers=%s"%str(two_buffers),
         "> %s.log"%prefix])
-      print cmd
       assert easy_run.call(cmd)==0
     g1 = easy_pickle.load("cluster_false.pkl")
     g2 = easy_pickle.load("cluster_true.pkl")
