@@ -133,26 +133,20 @@ def run(nproc=6, only_i=None):
   tests = []
   for fn in os.listdir(qr_unit_tests):
     if(fn.startswith("tst_") and fn.endswith(".py")):
-      tests.append(fn)
+      i_test = int(fn[:].replace("tst_","").replace(".py",""))
+      if(only_i is not None):
+        if(only_i == i_test):
+          tests.append(fn)
+      else:
+        tests.append(fn)
   tests.sort()
   print "Following tests will be executed:"
   print " ".join(tests)
   #
   failed = 0
   in_separate_directory = not(nproc==1)
-  remove=[]
   for i, file_name in enumerate(tests):
-    if only_i is not None:
-      j = file_name[4:6]
-      if int(j)!=only_i:
-        remove.append(i)
-        continue
-      print 'adding',file_name
     tests[i]=tuple([file_name, in_separate_directory])
-  if remove:
-    remove.reverse()
-    for r in remove: del tests[r]
-    print tests
   for args, res, err_str in easy_mp.multi_core_run( _run_test,
                                                     tests,
                                                     nproc,
