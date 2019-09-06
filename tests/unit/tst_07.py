@@ -5,8 +5,6 @@ import time
 import iotbx.pdb
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
-from qrefine.utils import yoink_utils
-from qrefine.plugin.yoink.pyoink import PYoink
 from mmtbx.pair_interaction import pair_interaction
 import run_tests
 
@@ -21,6 +19,8 @@ def run(prefix):
   ph = pdb_inp.construct_hierarchy()
 
   if (0): # to be deprecated
+    from qrefine.utils import yoink_utils
+    from qrefine.plugin.yoink.pyoink import PYoink
     yoink_utils.write_yoink_infiles("cluster.xml",
                                   "qmmm.xml",
                                   ph,
