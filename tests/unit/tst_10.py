@@ -2,7 +2,6 @@ from __future__ import division
 
 import os
 import random
-import time
 from ase.units import Hartree, Bohr, mol, kcal
 import iotbx.pdb
 import mmtbx.command_line
