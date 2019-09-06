@@ -9,8 +9,6 @@ from utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
 import qrefine.completion as model_completion
-from qrefine.plugin.yoink.pyoink import PYoink
-from qrefine.utils.yoink_utils import write_yoink_infiles
 import completion
 from charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
@@ -94,9 +92,9 @@ class fragments(object):
     ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
     self.expansion.write_super_cell_selected_in_sphere(file_name=self.expansion_file)
-    print "Fast interaction", self.fast_interaction
     if(not self.fast_interaction):
-      print  "Setting up java for interaction"
+      from qrefine.plugin.yoink.pyoink import PYoink
+      from qrefine.utils.yoink_utils import write_yoink_infiles
       self.yoink_dat_path = os.path.join(qrefine,"plugin","yoink","dat")
       self.pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"))
     self.qm_run = qm_run
