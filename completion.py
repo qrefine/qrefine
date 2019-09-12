@@ -808,7 +808,7 @@ def generate_atom_group_atom_names(rg, names):
           atoms.append(atom)
           break
       else:
-        assert 0
+        assert 0, 'atoms not found %s' % names
     yield atoms[0].parent(), atoms
 
 def _h_h2_on_N(hierarchy,

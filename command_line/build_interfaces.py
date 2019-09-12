@@ -123,6 +123,8 @@ def run():
                         'TURBODIR ':'Turbomole directory',
                         }
   count = []
+  for env_var, value in os.environ.items():
+    print(' ~> %s : %s' % (env_var, value))
   for env_var in qm_engine_env_vars:
     if os.environ.get(env_var, False):
       print('\n  Environmental variable %s set for "%s" to "%s"\n' % (
