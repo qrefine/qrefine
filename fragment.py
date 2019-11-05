@@ -101,7 +101,7 @@ class fragments(object):
     #t0 = time.time()
     self.set_up_cluster_qm()
     #print "time taken for interaction graph",(time.time() - t0)
-  
+
   def update_xyz(self,sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
     pre_atoms=[atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
@@ -109,7 +109,7 @@ class fragments(object):
                                  sites_cart=sites_cart)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
     new_atoms=[ atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
-    #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size): 
+    #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size):
     if(pre_atoms!=new_atoms):
       if(self.debug):
         print("the content of the super sphere has been changed,reset up fragments")
@@ -151,7 +151,7 @@ class fragments(object):
       self.get_fragment_hierarchies_and_charges()
 
   def get_clusters(self):
-    print(self.clustering)
+    #print(self.clustering)
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
     if(not self.clustering):
       return(range(1,n_residues+1,1) )
@@ -161,6 +161,8 @@ class fragments(object):
       self.cluster_file_name = self.working_folder + "/cluster.xml"
       self.qmmm_file_name = self.working_folder + "/qmmm.xml"
       ##  write yoink input file to get interactions
+      if(not self.fast_interaction):
+        from qrefine.utils.yoink_utils import write_yoink_infiles
       write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
                           self.pdb_hierarchy, self.yoink_dat_path)
       self.pyoink.input_file = self.cluster_file_name
@@ -225,6 +227,7 @@ class fragments(object):
       ## write yoink input file to get fragment
       if(not self.fast_interaction):
         pyoink = self.pyoink
+        from qrefine.utils.yoink_utils import write_yoink_infiles
         write_yoink_infiles(self.cluster_file_name,
                           self.qmmm_file_name,
                           ph,
@@ -242,7 +245,7 @@ class fragments(object):
           pyoink.update(clusters[i])
           atoms_in_one_cluster = pyoink.qm_core_fixed_indices
           atoms_in_one_fragment, molecules_in_one_fragment = pyoink.get_qm_indices()
-      
+
         atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
                                                     atoms_in_one_cluster, ph)
         cluster_atoms_in_ph.append(atoms_in_one_cluster)
@@ -476,7 +479,7 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
                       crystal_symmetry=fragment_extracts.expansion_cs,
                       model_completion=False,
                       original_pdb_filename=fragment_extracts.expansion_file)
-  # we now want this file by default  
+  # we now want this file by default
   ph.write_pdb_file(file_name=complete_qm_pdb_file,
                     crystal_symmetry=fragment_extracts.expansion_cs)
   return os.path.abspath(complete_qm_pdb_file), ph
@@ -595,7 +598,7 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
   frag_dir = os.path.join(cwd,directory)
   if os.path.exists(frag_dir):
     rmtree(frag_dir)
-  os.mkdir(frag_dir)  
+  os.mkdir(frag_dir)
   os.chdir(frag_dir)
   for index, selection_fragment in enumerate(F.fragment_selections):
     cluster_selection = F.cluster_selections[index]

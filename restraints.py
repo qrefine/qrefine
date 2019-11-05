@@ -121,7 +121,7 @@ class from_qm(object):
     elif(self.qm_engine_name == "gaussian"):
       calculator = Gaussian()
     elif(self.qm_engine_name == "ani"):
-      from plugin.ase.ani_qr import Ani 
+      from plugin.ase.ani_qr import Ani
       calculator = Ani()
     elif(self.qm_engine_name == "torchani"):
       from plugin.ase.torchani_qr import TorchAni
@@ -147,9 +147,10 @@ class from_qm(object):
           #print '  Setting %s to %s' % (attr, value)
           func(value)
           action=True
-      if not action:
-        if value and not func:
-          print '  No function available to set %s to %s' % (attr, value)
+      # XXX Avoid bare prints. Fix by propagating log channel.
+      #if not action:
+      #  if value and not func:
+      #    print '  No function available to set %s to %s' % (attr, value)
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
@@ -222,9 +223,9 @@ class from_qm(object):
                               addon=self.qm_addon,addon_method=self.qm_addon_method)
       energy = (self.qm_engine.energy_free+tool_e)*unit_convert
       ase_gradients = (tool_g-self.qm_engine.forces)*unit_convert
-    else:                        
+    else:
       energy = self.qm_engine.energy_free*unit_convert
-      ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert 
+      ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
     # remove capping and neigbouring buffer
     gradients = ase_gradients[:selection.count(True)]
     gradients =  flex.vec3_double(gradients)
