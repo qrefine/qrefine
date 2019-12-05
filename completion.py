@@ -389,16 +389,13 @@ def add_cys_hg_to_residue_group(rg,
   return rc
 
 def conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
-                                         rg,
+                                         residue_group,
                                          ):
-  sgs = None
-  for atom in rg.atoms():
-    if atom.name.strip()=='SG' and atom.parent().resname=='CYS':
-      sgs = atom.i_seq
-  if sgs:
-    sg_bonds = generate_bonded_i_seqs(geometry_restraints_manager, rg, sgs)
-    if len(sg_bonds)==1:
-      add_cys_hg_to_residue_group(rg)
+  from mmtbx.hydrogens import specialised_hydrogen_atoms
+  specialised_hydrogen_atoms.conditional_add_cys_hg_to_atom_group(
+    geometry_restraints_manager,
+    residue_group,
+    )
 
 def remove_cys_hg_from_residue_group(rg):
   for ag in rg.atom_groups():

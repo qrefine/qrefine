@@ -569,13 +569,15 @@ def run(prefix):
   f=file(fnc, 'rb')
   lines=f.read()
   f.close()
-  assert ' HG  CYS A   3' not in lines
-  assert ' HG  CYS A   8' not in lines
-  assert ' HG  CYS A  21' not in lines
-  assert ' HG  CYS A  25' not in lines
-  assert ' HG  CYS A  33' not in lines
-  assert ' HG  CYS A  48' not in lines
-  assert ' HE  ARG A  10' in lines
+  for line in [' HG  CYS A   3',
+               ' HG  CYS A   8',
+               ' HG  CYS A  21',
+               ' HG  CYS A  25',
+               ' HG  CYS A  33',
+               ' HG  CYS A  48',
+              ]:
+    assert line not in lines, 'found %s' % line
+  assert ' HE  ARG A  10' in lines, 'not found HE  ARG A  10'
   cmd = 'qr.charges %s verbose=1' % (fnc)
   if 0: print cmd
   rc = easy_run.go(cmd)
