@@ -320,8 +320,8 @@ class sites_real_space(object):
       restraints_manager = self.geometry_rmsd_manager.geometry,
       xrs                = self.model.get_xray_structure())
 
-  def run(self):
-    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50]
+  def macro_cycle(self, weights):
+    print "RSR: weights to try:", weights
     weight_best = None
     i_best = None
     model_best = None
@@ -336,59 +336,54 @@ class sites_real_space(object):
         xrs                = m.get_xray_structure())
       dist = flex.mean(
         self.model.get_xray_structure().distances(m.get_xray_structure()))
-      print w, "%6.3f %6.3f %5.2f"%(rmsd1, rmsd2, dist)
+      print "RSR: weight= %5.2f rmsd: start= %6.4f end= %6.4f shift= %7.4f"%(
+        w, rmsd1, rmsd2, dist)
       if(rmsd2<0.03):
         weight_best = w
         i_best = i
         model_best = m.deep_copy()
       else:
         break
-    print "weight_best:", weight_best
+    print "RSR: weight_best:", weight_best
+    return model_best, weight_best, i_best
+
+  def run(self):
+    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50]
+    model, weight, i = self.macro_cycle(weights = weights)
     #
-    if(weight_best>1):
+    if(weight>1):
       new_weights = []
-      w=weights[i_best]
-      while w<weights[i_best+1]:
+      w=weights[i]
+      while w<weights[i+1]:
         w+=1
         new_weights.append(w)
-    elif(weight_best == 1.0):
+    elif(weight == 1.0):
       new_weights = [1,2,3,4,5,6,7,8,9]
-    elif(weight_best == 0.1):
+    elif(weight == 0.1):
       new_weights = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
-    elif(weight_best == 0.01):
+    elif(weight == 0.01):
       new_weights = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09]
     else:
-      print "FALED TO FIND BEST WEIGHT"
+      print "RSR: FALED TO FIND BEST WEIGHT"
       STOP()
-    print new_weights
-    ###########
-
-    weights = new_weights[:]
-
-    weight_best = None
-    i_best = None
-    for i, w in enumerate(weights):
-      self.weight = w
-      rmsd1 = get_bonds_rmsd(
+    print "RSR: new_weights:", new_weights
+    #
+    model, weight, i = self.macro_cycle(weights = new_weights)
+    self.model  = model
+    self.weight = weight
+    #
+    rmsd = get_bonds_rmsd(
+      restraints_manager = self.geometry_rmsd_manager.geometry,
+      xrs                = self.model.get_xray_structure())
+    print "RSR (before starting final macro-cycles): rmsd= %6.4f"%(rmsd)
+    #
+    for mc in [1,2,3,4,5]:
+      self.model = self.run_one()
+      rmsd = get_bonds_rmsd(
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = self.model.get_xray_structure())
-      m = self.run_one()
-      rmsd2 = get_bonds_rmsd(
-        restraints_manager = self.geometry_rmsd_manager.geometry,
-        xrs                = m.get_xray_structure())
-      dist = flex.mean(
-        self.model.get_xray_structure().distances(m.get_xray_structure()))
-      print w, "%6.3f %6.3f %5.2f"%(rmsd1, rmsd2, dist)
-      if(rmsd2<0.03):
-        weight_best = w
-        i_best = i
-        model_best = m.deep_copy()
-      else:
-        break
-    print "weight_best:", weight_best
-    ###########
-
-    self.model = model_best
+      print "RSR: macro-cycle: %d rmsd= %6.4f"%(mc, rmsd)
+    #
     #
     return self.model
 
