@@ -321,52 +321,125 @@ class sites_real_space(object):
       xrs                = self.model.get_xray_structure())
 
   def run(self):
-    rmsd = self.cctbx_rm_bonds_rmsd
-    rmsd_prev = round(rmsd,3)
-    print "-"*79
-    print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
-    print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
-    rmsds_so_far = []
-    went_up   = False
-    went_down = False
-    weights   = []
-    while not self.skip_weight_search:
-      weights.append(self.weight)
-      rmsd_prev = round(rmsd,3)
-      print "-"*79
-      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(self.weight, rmsd)
-      model = self.run_one()
-      of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
-      print >> of, model.model_as_pdb(output_cs=True)
-      of.close()
-      rmsd = round(self.cctbx_rm_bonds_rmsd,3)
-      rmsd_str = ("%10.3f"%rmsd).strip()
-      #
-      if([went_up, went_down].count(True)==2):
-        self.weight = w_prev
-        break
-      #
-      w_prev = self.weight
-      if(rmsd < self.max_bond_rmsd):
-        self.weight = self.weight*2
-        went_up = True
-      else:
-        self.weight = self.weight/2
-        went_down = True
-      print "  New weight to try: %8.4f"%self.weight
-    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
-    for mc in xrange(self.refine_cycles):
-      print "start refine cycle: ",mc+1
+    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50]
+    weight_best = None
+    i_best = None
+    model_best = None
+    for i, w in enumerate(weights):
+      self.weight = w
+      rmsd1 = get_bonds_rmsd(
+        restraints_manager = self.geometry_rmsd_manager.geometry,
+        xrs                = self.model.get_xray_structure())
       m = self.run_one()
-      self.model.set_sites_cart(sites_cart=m.get_sites_cart())
-      of  = open("./pdb/cycle_"+str(mc+1)+"_refined"+".pdb","w")
-      print >> of, m.model_as_pdb(output_cs=True)
-      of.close()
+      rmsd2 = get_bonds_rmsd(
+        restraints_manager = self.geometry_rmsd_manager.geometry,
+        xrs                = m.get_xray_structure())
+      dist = flex.mean(
+        self.model.get_xray_structure().distances(m.get_xray_structure()))
+      print w, "%6.3f %6.3f %5.2f"%(rmsd1, rmsd2, dist)
+      if(rmsd2<0.03):
+        weight_best = w
+        i_best = i
+        model_best = m.deep_copy()
+      else:
+        break
+    print "weight_best:", weight_best
+    #
+    if(weight_best>1):
+      new_weights = []
+      w=weights[i_best]
+      while w<weights[i_best+1]:
+        w+=1
+        new_weights.append(w)
+    elif(weight_best == 1.0):
+      new_weights = [1,2,3,4,5,6,7,8,9]
+    elif(weight_best == 0.1):
+      new_weights = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+    elif(weight_best == 0.01):
+      new_weights = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09]
+    else:
+      print "FALED TO FIND BEST WEIGHT"
+      STOP()
+    print new_weights
+    ###########
+
+    weights = new_weights[:]
+
+    weight_best = None
+    i_best = None
+    for i, w in enumerate(weights):
+      self.weight = w
+      rmsd1 = get_bonds_rmsd(
+        restraints_manager = self.geometry_rmsd_manager.geometry,
+        xrs                = self.model.get_xray_structure())
+      m = self.run_one()
+      rmsd2 = get_bonds_rmsd(
+        restraints_manager = self.geometry_rmsd_manager.geometry,
+        xrs                = m.get_xray_structure())
+      dist = flex.mean(
+        self.model.get_xray_structure().distances(m.get_xray_structure()))
+      print w, "%6.3f %6.3f %5.2f"%(rmsd1, rmsd2, dist)
+      if(rmsd2<0.03):
+        weight_best = w
+        i_best = i
+        model_best = m.deep_copy()
+      else:
+        break
+    print "weight_best:", weight_best
+    ###########
+
+    self.model = model_best
+    #
     return self.model
+
+
+#  def run(self):
+#    rmsd = self.cctbx_rm_bonds_rmsd
+#    rmsd_prev = round(rmsd,3)
+#    print "-"*79
+#    print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
+#    print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
+#    rmsds_so_far = []
+#    went_up   = False
+#    went_down = False
+#    weights   = []
+#    while not self.skip_weight_search:
+#      weights.append(self.weight)
+#      rmsd_prev = round(rmsd,3)
+#      print "-"*79
+#      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(self.weight, rmsd)
+#      model = self.run_one()
+#      of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
+#      print >> of, model.model_as_pdb(output_cs=True)
+#      of.close()
+#      rmsd = round(self.cctbx_rm_bonds_rmsd,3)
+#      rmsd_str = ("%10.3f"%rmsd).strip()
+#      #
+#      if([went_up, went_down].count(True)==2):
+#        self.weight = w_prev
+#        break
+#      #
+#      w_prev = self.weight
+#      if(rmsd < self.max_bond_rmsd):
+#        self.weight = self.weight*2
+#        went_up = True
+#      else:
+#        self.weight = self.weight/2
+#        went_down = True
+#      print "  New weight to try: %8.4f"%self.weight
+#    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
+#    for mc in xrange(self.refine_cycles):
+#      print "start refine cycle: ",mc+1
+#      m = self.run_one()
+#      self.model.set_sites_cart(sites_cart=m.get_sites_cart())
+#      of  = open("./pdb/cycle_"+str(mc+1)+"_refined"+".pdb","w")
+#      print >> of, m.model_as_pdb(output_cs=True)
+#      of.close()
+#    return self.model
 
   def run_one(self):
     model = self.model.deep_copy()
-    print "  before:", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
+    #print "  before:", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
     xrs = model.get_xray_structure()
     uc = xrs.crystal_symmetry().unit_cell()
     refined = cctbx.maptbx.real_space_refinement_simple.lbfgs(
@@ -383,9 +456,9 @@ class sites_real_space(object):
       lbfgs_termination_params        = self.lbfgs_termination_params,
       lbfgs_exception_handling_params = self.lbfgs_exception_handling_params)
     model.set_sites_cart(sites_cart=refined.sites_cart)
-    self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
-      restraints_manager = self.geometry_rmsd_manager.geometry,
-      xrs                = model.get_xray_structure())
-    print "  after :", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
-    qr.show_cc(map_data=self.map_data,xray_structure=model.get_xray_structure(),log=self.log)
+    #self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
+    #  restraints_manager = self.geometry_rmsd_manager.geometry,
+    #  xrs                = model.get_xray_structure())
+    #print "  after :", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
+    #qr.show_cc(map_data=self.map_data,xray_structure=model.get_xray_structure(),log=self.log)
     return model
