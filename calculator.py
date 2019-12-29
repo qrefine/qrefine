@@ -338,7 +338,7 @@ class sites_real_space(object):
         self.model.get_xray_structure().distances(m.get_xray_structure()))
       print "RSR: weight= %5.2f rmsd: start= %6.4f end= %6.4f shift= %7.4f"%(
         w, rmsd1, rmsd2, dist)
-      if(rmsd2<0.03):
+      if(rmsd2<self.max_bond_rmsd):
         weight_best = w
         i_best = i
         model_best = m.deep_copy()
@@ -348,10 +348,10 @@ class sites_real_space(object):
     return model_best, weight_best, i_best
 
   def run(self):
-    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50]
+    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50, 60,70,80,90,100]
     model, weight, i = self.macro_cycle(weights = weights)
     #
-    if(weight>1):
+    if(weight>1 and i!=len(weights)-1):
       new_weights = []
       w=weights[i]
       while w<weights[i+1]:
@@ -386,51 +386,6 @@ class sites_real_space(object):
     #
     #
     return self.model
-
-
-#  def run(self):
-#    rmsd = self.cctbx_rm_bonds_rmsd
-#    rmsd_prev = round(rmsd,3)
-#    print "-"*79
-#    print "Initial weight:", self.weight, "bond rmsd: %6.3f"%rmsd
-#    print "  start:", self.model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
-#    rmsds_so_far = []
-#    went_up   = False
-#    went_down = False
-#    weights   = []
-#    while not self.skip_weight_search:
-#      weights.append(self.weight)
-#      rmsd_prev = round(rmsd,3)
-#      print "-"*79
-#      print "Trying weight: %8.4f, bond rmsd: %6.3f"%(self.weight, rmsd)
-#      model = self.run_one()
-#      of  = open("./pdb/weight_"+str(self.weight)+"_refined.pdb","w")
-#      print >> of, model.model_as_pdb(output_cs=True)
-#      of.close()
-#      rmsd = round(self.cctbx_rm_bonds_rmsd,3)
-#      rmsd_str = ("%10.3f"%rmsd).strip()
-#      #
-#      if([went_up, went_down].count(True)==2):
-#        self.weight = w_prev
-#        break
-#      #
-#      w_prev = self.weight
-#      if(rmsd < self.max_bond_rmsd):
-#        self.weight = self.weight*2
-#        went_up = True
-#      else:
-#        self.weight = self.weight/2
-#        went_down = True
-#      print "  New weight to try: %8.4f"%self.weight
-#    print "Final (rmsd, self.weight): %6.3f  %8.4f"%(rmsd_prev, self.weight)
-#    for mc in xrange(self.refine_cycles):
-#      print "start refine cycle: ",mc+1
-#      m = self.run_one()
-#      self.model.set_sites_cart(sites_cart=m.get_sites_cart())
-#      of  = open("./pdb/cycle_"+str(mc+1)+"_refined"+".pdb","w")
-#      print >> of, m.model_as_pdb(output_cs=True)
-#      of.close()
-#    return self.model
 
   def run_one(self):
     model = self.model.deep_copy()
