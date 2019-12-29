@@ -301,6 +301,7 @@ class sites_real_space(object):
                max_iterations=50):
     adopt_init_args(self, locals())
     self.weight = data_weight
+    self.sites_cart_start = self.model.get_xray_structure().sites_cart()
     if(self.weight is None):
       self.weight = 1.
     self.refine_cycles = refine_cycles
@@ -320,6 +321,11 @@ class sites_real_space(object):
       restraints_manager = self.geometry_rmsd_manager.geometry,
       xrs                = self.model.get_xray_structure())
 
+  def get_shift(self, other):
+    s1 = self.sites_cart_start
+    s2 = other.sites_cart()
+    return flex.mean(flex.sqrt((s1 - s2).dot()))
+
   def macro_cycle(self, weights):
     print "RSR: weights to try:", weights
     weight_best = None
@@ -334,8 +340,7 @@ class sites_real_space(object):
       rmsd2 = get_bonds_rmsd(
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = m.get_xray_structure())
-      dist = flex.mean(
-        self.model.get_xray_structure().distances(m.get_xray_structure()))
+      dist = self.get_shift(other=m.get_xray_structure())
       print "RSR: weight= %5.2f rmsd: start= %6.4f end= %6.4f shift= %7.4f"%(
         w, rmsd1, rmsd2, dist)
       if(rmsd2<self.max_bond_rmsd):
@@ -382,7 +387,8 @@ class sites_real_space(object):
       rmsd = get_bonds_rmsd(
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = self.model.get_xray_structure())
-      print "RSR: macro-cycle: %d rmsd= %6.4f"%(mc, rmsd)
+      dist = self.get_shift(other=self.model.get_xray_structure())
+      print "RSR: macro-cycle: %d rmsd= %6.4f shift= %7.4f"%(mc, rmsd, dist)
     #
     #
     return self.model
