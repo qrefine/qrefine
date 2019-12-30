@@ -298,8 +298,10 @@ class sites_real_space(object):
                log,
                map_data=None,
                restraints_manager=None,
-               max_iterations=50):
+               max_iterations=None):
     adopt_init_args(self, locals())
+    self.gradient_only = True
+    self.max_iterations = 100
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
     if(self.weight is None):
@@ -307,15 +309,15 @@ class sites_real_space(object):
     self.refine_cycles = refine_cycles
     self.skip_weight_search = skip_weight_search
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
-      max_iterations = max_iterations)
+      max_iterations = self.max_iterations)
     self.lbfgs_core_params = scitbx.lbfgs.core_parameters(
       stpmin = 1.e-9,
       stpmax = stpmax)
     self.lbfgs_exception_handling_params = scitbx.lbfgs.\
       exception_handling_parameters(
-        ignore_line_search_failed_step_at_lower_bound = True,
-        ignore_line_search_failed_step_at_upper_bound = True,
-        ignore_line_search_failed_maxfev              = True)
+        ignore_line_search_failed_step_at_lower_bound = False,
+        ignore_line_search_failed_step_at_upper_bound = False,
+        ignore_line_search_failed_maxfev              = False)
     self.sites_cart_refined = None
     self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
       restraints_manager = self.geometry_rmsd_manager.geometry,
@@ -373,9 +375,12 @@ class sites_real_space(object):
       STOP()
     print "RSR: new_weights:", new_weights
     #
-    model, weight, i = self.macro_cycle(weights = new_weights)
+    model_, weight_, i_ = self.macro_cycle(weights = new_weights)
     self.model  = model
     self.weight = weight
+    if(weight_ is not None):
+      self.model  = model_
+      self.weight = weight_
     #
     rmsd = get_bonds_rmsd(
       restraints_manager = self.geometry_rmsd_manager.geometry,
@@ -388,7 +393,8 @@ class sites_real_space(object):
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = self.model.get_xray_structure())
       dist = self.get_shift(other=self.model.get_xray_structure())
-      print "RSR: macro-cycle: %d rmsd= %6.4f shift= %7.4f"%(mc, rmsd, dist)
+      print "RSR: macro-cycle: %d weight= %5.2f rmsd= %6.4f shift= %7.4f"%(
+        mc, self.weight, rmsd, dist)
     #
     #
     return self.model
