@@ -355,10 +355,12 @@ class sites_real_space(object):
     return model_best, weight_best, i_best
 
   def run(self):
-    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50, 60,70,80,90,100]
+    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50,  200]
     model, weight, i = self.macro_cycle(weights = weights)
     #
-    if(weight>1 and i!=len(weights)-1):
+    if(weight==50.):
+      new_weights = [50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
+    elif(weight>1 and i!=len(weights)-1):
       new_weights = []
       w=weights[i]
       while w<weights[i+1]:
