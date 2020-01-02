@@ -173,7 +173,7 @@ refine {
     .help = only refine the cartesian coordinates of the molecular system.
   refine_adp = False
     .type = bool
-    .help = adp refinement are not currently supported. 
+    .help = adp refinement are not currently supported.
   restraints_weight_scale = 1.0
     .type = float
   shake_sites = False
@@ -188,7 +188,7 @@ refine {
     .type = float
   rmsd_tolerance = 0.01
     .type = float
-    .help = maximum acceptable tolerance for the rmsd. 
+    .help = maximum acceptable tolerance for the rmsd.
   opt_log = False
     .type = bool
     .help = additional output of the L-BFGS optimizer
@@ -243,7 +243,7 @@ def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=master_params_str)
 
-def show_cc(map_data, xray_structure, log):
+def show_cc(map_data, xray_structure, log=None):
   import mmtbx.maps.mtriage
   from mmtbx.maps.correlation import five_cc
   xrs = xray_structure
@@ -252,18 +252,19 @@ def show_cc(map_data, xray_structure, log):
     map_data         = map_data,
     crystal_symmetry = xrs.crystal_symmetry())
   d99 = mtriage.get_results().masked.d99
-  print >> log, "Resolution of map is: %6.4f" %d99
+  if(log is not None): print >> log, "Resolution of map is: %6.4f" %d99
   result = five_cc(
-    map              = map_data,
-    xray_structure   = xrs,
-    d_min            = d99,
-    compute_cc_box   = True).result
-  print >> log, "Map-model correlation coefficient (CC)"
-  print >> log, "  CC_mask  : %6.4f" %result.cc_mask
-  print >> log, "  CC_volume: %6.4f" %result.cc_volume
-  print >> log, "  CC_peaks : %6.4f" %result.cc_peaks
-  print >> log, "  CC_box   : %6.4f" %result.cc_box
-
+    map               = map_data,
+    xray_structure    = xrs,
+    d_min             = d99,
+    compute_cc_box    = False,
+    compute_cc_mask   = True,
+    compute_cc_peaks  = False,
+    compute_cc_volume = False).result
+  if(log is not None):
+    print >> log, "Map-model correlation coefficient (CC)"
+    print >> log, "  CC_mask  : %6.4f" %result.cc_mask
+  return result.cc_mask
 
 def create_fmodel(cmdline, log):
   fmodel = mmtbx.f_model.manager(
@@ -471,7 +472,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print >> log, "***********************************************************\n"
     start_fmodel = fmodel
     start_ph = None # is it used anywhere? I don't see where it is used!
-  if not params.refine.mode=='gtest':    
+  if not params.refine.mode=='gtest':
     fragment_manager = create_fragment_manager(
         params           = params,
         pdb_hierarchy    = model.pdb_hierarchy,

@@ -304,6 +304,7 @@ class sites_real_space(object):
     self.max_iterations = 100
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
+    self.show(model=self.model)
     if(self.weight is None):
       self.weight = 1.
     self.refine_cycles = refine_cycles
@@ -342,9 +343,6 @@ class sites_real_space(object):
       rmsd2 = get_bonds_rmsd(
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = m.get_xray_structure())
-      dist = self.get_shift(other=m.get_xray_structure())
-      print "RSR: weight= %5.2f rmsd: start= %6.4f end= %6.4f shift= %7.4f"%(
-        w, rmsd1, rmsd2, dist)
       if(rmsd2<self.max_bond_rmsd):
         weight_best = w
         i_best = i
@@ -387,23 +385,29 @@ class sites_real_space(object):
     rmsd = get_bonds_rmsd(
       restraints_manager = self.geometry_rmsd_manager.geometry,
       xrs                = self.model.get_xray_structure())
-    print "RSR (before starting final macro-cycles): rmsd= %6.4f"%(rmsd)
+    self.show(model=self.model, prefix="(start macro-cycles)")
     #
     for mc in [1,2,3,4,5]:
       self.model = self.run_one()
-      rmsd = get_bonds_rmsd(
-        restraints_manager = self.geometry_rmsd_manager.geometry,
-        xrs                = self.model.get_xray_structure())
-      dist = self.get_shift(other=self.model.get_xray_structure())
-      print "RSR: macro-cycle: %d weight= %5.2f rmsd= %6.4f shift= %7.4f"%(
-        mc, self.weight, rmsd, dist)
-    #
     #
     return self.model
 
+  def show(self, model, prefix=""):
+    s = model.geometry_statistics(use_hydrogens=False).show_short()
+    s = s.split()
+    s = " ".join(s)
+    dist = self.get_shift(other=model.get_xray_structure())
+    if(self.weight is not None): w = "%5.2f"%self.weight
+    else:                        w = "%5s"%str(None)
+    cc_mask = qr.show_cc(
+      map_data=self.map_data, xray_structure=model.get_xray_structure())
+    print "RSR", prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
+      "cc_mask=%6.4f"%cc_mask
+    with open("weight_%s.pdb"%w.strip(), "w") as of:
+      of.write(model.model_as_pdb())
+
   def run_one(self):
     model = self.model.deep_copy()
-    #print "  before:", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
     xrs = model.get_xray_structure()
     uc = xrs.crystal_symmetry().unit_cell()
     refined = cctbx.maptbx.real_space_refinement_simple.lbfgs(
@@ -420,9 +424,9 @@ class sites_real_space(object):
       lbfgs_termination_params        = self.lbfgs_termination_params,
       lbfgs_exception_handling_params = self.lbfgs_exception_handling_params)
     model.set_sites_cart(sites_cart=refined.sites_cart)
-    #self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
+    ####
+    #rmsd = get_bonds_rmsd(
     #  restraints_manager = self.geometry_rmsd_manager.geometry,
     #  xrs                = model.get_xray_structure())
-    #print "  after :", model.geometry_statistics(use_hydrogens=False).show_short(), "%6.3f"%self.cctbx_rm_bonds_rmsd
-    #qr.show_cc(map_data=self.map_data,xray_structure=model.get_xray_structure(),log=self.log)
+    self.show(model = model)
     return model
