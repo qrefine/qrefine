@@ -13,6 +13,7 @@ import cctbx.maptbx.real_space_refinement_simple
 import scitbx.lbfgs
 from libtbx import group_args
 import qr
+from mmtbx.validation.ramalyze import ramalyze
 
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
@@ -334,21 +335,38 @@ class sites_real_space(object):
     weight_best = None
     i_best = None
     model_best = None
+    models = []
     for i, w in enumerate(weights):
       self.weight = w
       rmsd1 = get_bonds_rmsd(
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = self.model.get_xray_structure())
       m = self.run_one()
+      models.append(m.deep_copy())
+      if(i==0): # we assume best Rama favored with smallest weight
+        rama_fav_best = ramalyze(
+          pdb_hierarchy = m.get_hierarchy(),
+          outliers_only = False).percent_favored
       rmsd2 = get_bonds_rmsd(
         restraints_manager = self.geometry_rmsd_manager.geometry,
         xrs                = m.get_xray_structure())
       if(rmsd2<self.max_bond_rmsd):
         weight_best = w
         i_best = i
-        model_best = m.deep_copy()
+        model_best = models[i_best]
       else:
         break
+      #
+      if(i>0):
+        rama_fav = ramalyze(
+          pdb_hierarchy = m.get_hierarchy(),
+          outliers_only = False).percent_favored
+        if(rama_fav < rama_fav_best and abs(rama_fav-rama_fav_best)>1.):
+          i_best = i-1
+          weight_best = weights[i_best]
+          model_best = models[i_best]
+          break
+      #
     print "RSR: weight_best:", weight_best
     return model_best, weight_best, i_best
 
