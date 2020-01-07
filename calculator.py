@@ -14,6 +14,9 @@ import scitbx.lbfgs
 from libtbx import group_args
 import qr
 from mmtbx.validation.ramalyze import ramalyze
+from mmtbx.validation.cbetadev import cbetadev
+from mmtbx.validation.rotalyze import rotalyze
+from libtbx.utils import null_out
 
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
@@ -306,6 +309,11 @@ class sites_real_space(object):
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
     self.show(model=self.model)
+    #
+    self.rama_fav_best = None
+    self.cbeta_best    = None
+    self.rota_best     = None
+    #
     if(self.weight is None):
       self.weight = 1.
     self.refine_cycles = refine_cycles
@@ -330,6 +338,29 @@ class sites_real_space(object):
     s2 = other.sites_cart()
     return flex.mean(flex.sqrt((s1 - s2).dot()))
 
+  def get_scores(self, model):
+    rama_fav = ramalyze(
+      pdb_hierarchy = model.get_hierarchy(),
+      outliers_only = False).percent_favored
+    cbeta = cbetadev(
+      pdb_hierarchy = model.get_hierarchy(),
+      outliers_only = True,
+      out           = null_out()).get_outlier_percent()
+    rota = rotalyze(
+      pdb_hierarchy = model.get_hierarchy(),
+      outliers_only = False).percent_outliers
+    b_rmsd = get_bonds_rmsd(
+      restraints_manager = self.geometry_rmsd_manager.geometry,
+      xrs                = model.get_xray_structure())
+    return group_args(
+      rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd)
+
+  def ready_to_stop(self, sc):
+    return (sc.rama_fav < self.rama_fav_best and
+            abs(sc.rama_fav-self.rama_fav_best)>1.) or \
+           sc.cbeta > self.cbeta_best or \
+           sc.rota > self.rota_best
+
   def macro_cycle(self, weights):
     print "RSR: weights to try:", weights
     weight_best = None
@@ -338,19 +369,17 @@ class sites_real_space(object):
     models = []
     for i, w in enumerate(weights):
       self.weight = w
-      rmsd1 = get_bonds_rmsd(
-        restraints_manager = self.geometry_rmsd_manager.geometry,
-        xrs                = self.model.get_xray_structure())
       m = self.run_one()
       models.append(m.deep_copy())
-      if(i==0): # we assume best Rama favored with smallest weight
-        rama_fav_best = ramalyze(
-          pdb_hierarchy = m.get_hierarchy(),
-          outliers_only = False).percent_favored
-      rmsd2 = get_bonds_rmsd(
-        restraints_manager = self.geometry_rmsd_manager.geometry,
-        xrs                = m.get_xray_structure())
-      if(rmsd2<self.max_bond_rmsd):
+      sc = self.get_scores(model = m)
+      if(i==0 and self.rama_fav_best is None): # we assume best Rama favored with smallest weight
+        self.rama_fav_best = sc.rama_fav
+        self.cbeta_best    = sc.cbeta
+        self.rota_best     = sc.rota
+      elif(i==0): # 2nd round: fine-tuning
+        if(self.ready_to_stop(sc)):
+          break
+      if(sc.b_rmsd<self.max_bond_rmsd):
         weight_best = w
         i_best = i
         model_best = models[i_best]
@@ -358,10 +387,7 @@ class sites_real_space(object):
         break
       #
       if(i>0):
-        rama_fav = ramalyze(
-          pdb_hierarchy = m.get_hierarchy(),
-          outliers_only = False).percent_favored
-        if(rama_fav < rama_fav_best and abs(rama_fav-rama_fav_best)>1.):
+        if(self.ready_to_stop(sc)):
           i_best = i-1
           weight_best = weights[i_best]
           model_best = models[i_best]
