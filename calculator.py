@@ -16,6 +16,7 @@ import qr
 from mmtbx.validation.ramalyze import ramalyze
 from mmtbx.validation.cbetadev import cbetadev
 from mmtbx.validation.rotalyze import rotalyze
+from mmtbx.validation.clashscore import clashscore
 from libtbx.utils import null_out
 
 def get_bonds_rmsd(restraints_manager, xrs):
@@ -313,6 +314,7 @@ class sites_real_space(object):
     self.rama_fav_best = None
     self.cbeta_best    = None
     self.rota_best     = None
+    self.clash_best    = None
     #
     if(self.weight is None):
       self.weight = 1.
@@ -352,14 +354,18 @@ class sites_real_space(object):
     b_rmsd = get_bonds_rmsd(
       restraints_manager = self.geometry_rmsd_manager.geometry,
       xrs                = model.get_xray_structure())
+    clash = clashscore(
+    pdb_hierarchy = model.get_hierarchy(),
+    keep_hydrogens = True).clashscore
     return group_args(
-      rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd)
+      rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd, clash = clash)
 
   def ready_to_stop(self, sc):
     return (sc.rama_fav < self.rama_fav_best and
             abs(sc.rama_fav-self.rama_fav_best)>1.) or \
            sc.cbeta > self.cbeta_best or \
-           sc.rota > self.rota_best
+           sc.rota > self.rota_best   or \
+           sc.clash > self.clash_best
 
   def macro_cycle(self, weights):
     print "RSR: weights to try:", weights
@@ -376,6 +382,7 @@ class sites_real_space(object):
         self.rama_fav_best = sc.rama_fav
         self.cbeta_best    = sc.cbeta
         self.rota_best     = sc.rota
+        self.clash_best    = sc.clash
       elif(i==0): # 2nd round: fine-tuning
         if(self.ready_to_stop(sc)):
           break

@@ -10,11 +10,12 @@ import copy
 try:
   import pyscf
   from pyscf import gto,scf,grad,dft
+  from pyscf import solvent,dftd3
 except:
   pass
 
 class Pyscf(Calculator):
-    def __init__(self, label='ase',basis='321g',charge=0,spin=0,method="hf", **kwargs):
+    def __init__(self, label='ase',basis='631g',charge=0,spin=0,method="hf", **kwargs):
         mol = pyscf.gto.Mole()
         mol.charge = charge
         mol.spin = spin
