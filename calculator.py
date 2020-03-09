@@ -356,7 +356,7 @@ class sites_real_space(object):
       xrs                = model.get_xray_structure())
     clash = clashscore(
     pdb_hierarchy = model.get_hierarchy(),
-    keep_hydrogens = True).clashscore
+    keep_hydrogens = True).get_clashscore
     return group_args(
       rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd, clash = clash)
 
