@@ -306,7 +306,7 @@ class sites_real_space(object):
                max_iterations=None):
     adopt_init_args(self, locals())
     self.gradient_only = True
-    self.max_iterations = 100
+    self.max_iterations = 20
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
     self.show(model=self.model)
@@ -377,34 +377,34 @@ class sites_real_space(object):
       self.weight = w
       m = self.run_one()
       models.append(m.deep_copy())
-      sc = self.get_scores(model = m)
-      if(i==0 and self.rama_fav_best is None): # we assume best Rama favored with smallest weight
-        self.rama_fav_best = sc.rama_fav
-        self.cbeta_best    = sc.cbeta
-        self.rota_best     = sc.rota
-        self.clash_best    = sc.clash
-      elif(i==0): # 2nd round: fine-tuning
-        if(self.ready_to_stop(sc)):
-          break
-      if(sc.b_rmsd<self.max_bond_rmsd):
-        weight_best = w
-        i_best = i
-        model_best = models[i_best]
-      else:
-        break
+#     sc = self.get_scores(model = m)
+#      if(i==0 and self.rama_fav_best is None): # we assume best Rama favored with smallest weight
+#        self.rama_fav_best = sc.rama_fav
+#        self.cbeta_best    = sc.cbeta
+#        self.rota_best     = sc.rota
+#        self.clash_best    = sc.clash
+#      elif(i==0): # 2nd round: fine-tuning
+#        if(self.ready_to_stop(sc)):
+#          break
+#      if(sc.b_rmsd<self.max_bond_rmsd):
+#        weight_best = w
+#        i_best = i
+#        model_best = models[i_best]
+#      else:
+#        break
       #
-      if(i>0):
-        if(self.ready_to_stop(sc)):
-          i_best = i-1
-          weight_best = weights[i_best]
-          model_best = models[i_best]
-          break
+#      if(i>0):
+#        if(self.ready_to_stop(sc)):
+#          i_best = i-1
+#          weight_best = weights[i_best]
+#          model_best = models[i_best]
+#          break
       #
     print "RSR: weight_best:", weight_best
     return model_best, weight_best, i_best
 
   def run(self):
-    weights = [0.01, 0.1, 1.0, 10, 20, 30, 40, 50,  200]
+    weights = [0.01, 0.1, 0.5, 1.0, 2.0, 5.0, 10, 20, 30, 40, 50,  200]
     model, weight, i = self.macro_cycle(weights = weights)
     #
     if(weight==50.):
