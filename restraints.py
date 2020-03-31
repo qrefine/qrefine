@@ -109,7 +109,7 @@ class from_qm(object):
       ### if TeraChem has problem reading pdb file, update TeraChem version.
       calculator = TeraChem(gpus="4",
                             basis=self.basis,
-                            dftd="yes",
+                            dftd="no",
                             watcheindiis="yes",
                             scf="diis+a")
     elif(self.qm_engine_name == "mopac"):

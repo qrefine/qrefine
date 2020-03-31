@@ -12,11 +12,11 @@ from ase.calculators.general import Calculator
 import copy
 import platform
 
-key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd lanl2dz_ecp\nZn lanl2dz_ecp\nMg lanl2dz_ecp','maxit':200,'gpus':None,'basis':None,'coordinates':None,'charge':None,'method':None,'dftd':None,'run':None,'pointcharges':None ,'threall':1.0e-12,'scf':'diis','watcheindiis' :'no','pcm':'cosmo','epsilon':78.39}
+key_parameters={'seed':1351351,'multibasis':'Se lanl2dz_ecp\nCl lanl2dz_ecp\nCd lanl2dz_ecp\nZn lanl2dz_ecp\nMg lanl2dz_ecp','maxit':200,'gpus':None,'basis':None,'coordinates':None,'charge':None,'method':None,'dftd':'no','run':None,'pointcharges':None ,'threall':1.0e-12,'scf':'diis','watcheindiis' :'no','pcm':'cosmo','epsilon':78.39}
 
 class TeraChem(Calculator):
     name = 'TeraChem'
-    def __init__(self,command=None, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='yes',run='gradient',atoms=None, **kwargs):
+    def __init__(self,command=None, label='ase',terachem_file=False,gpus='1    1',basis='6-31g',coordinates='tmp_ase.pdb',charge='0',method='rhf',dftd='no',run='gradient',atoms=None, **kwargs):
         self.terachem_file=terachem_file
         coordinates=os.path.dirname(label)+"/"+ coordinates
         self.coordinates=coordinates
