@@ -356,7 +356,10 @@ class sites_real_space(object):
       xrs                = model.get_xray_structure())
     clash = clashscore(
     pdb_hierarchy = model.get_hierarchy(),
-    keep_hydrogens = True).get_clashscore
+    keep_hydrogens = False, 
+    fast = True, condensed_probe = True).get_clashscore()
+    print "DEV: b_rmsd= %7.4f clash= %6.4f rota= %6.4f rama_fav= %5.4f cbeta= %6.4f"%(
+    b_rmsd, clash, rota, rama_fav, cbeta)
     return group_args(
       rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd, clash = clash)
 
@@ -365,7 +368,8 @@ class sites_real_space(object):
             abs(sc.rama_fav-self.rama_fav_best)>1.) or \
            sc.cbeta > self.cbeta_best or \
            sc.rota > self.rota_best   or \
-           sc.clash > self.clash_best
+           (sc.clash > self.clash_best and
+            abs(sc.clash-self.clash_best)>1.)
 
   def macro_cycle(self, weights):
     print "RSR: weights to try:", weights
