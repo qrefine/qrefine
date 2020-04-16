@@ -109,7 +109,9 @@ def runner(function, prefix, disable=False):
   assert not rc, "%s rc: %s" % (prefix, rc)
   return rc
 
-def run(nproc=6, only_i=None):
+def run(nproc=6,
+        only_i=None,
+        non_mopac_only=False):
   cwd = os.getcwd()
   assert cwd.find(' ')==-1, 'test do not work in directory with a space " "'
   try:
@@ -140,6 +142,19 @@ def run(nproc=6, only_i=None):
       else:
         tests.append(fn)
   tests.sort()
+  if non_mopac_only:
+    remove = []
+    for i, file_name in enumerate(tests):
+      f=file(os.path.join(qr_unit_tests, file_name), 'rb')
+      lines=f.read()
+      del f
+      if lines.lower().find('mopac')>-1:
+        remove.append(i)
+    if remove:
+      remove.reverse()
+      for r in remove:
+        print 'Removing test %s from list' % tests[r]
+        del tests[r]
   print "Following tests will be executed:"
   print " ".join(tests)
   #

@@ -37,6 +37,10 @@ if __name__ == '__main__':
                       default=None,
                       help='only this test',
                       type=int)
+  parser.add_argument('--non_mopac_only',
+                      action='store_true',
+                      default=False,
+                      help="only tests that don't use MOPAC")
   args = parser.parse_args()
   if (args.unit)      :
     print >> log,"Running Q|R unit tests"
@@ -55,5 +59,7 @@ if __name__ == '__main__':
     regression_tests.run(args=sys.argv[1:])
   if(not args.all and not args.unit and not args.reg and not args.pdb):
     print >> log,"Running Q|R unit tests"
-    rc = unit_tests.run(nproc=args.nproc, only_i=args.only)
+    rc = unit_tests.run(nproc=args.nproc,
+                        only_i=args.only,
+                        non_mopac_only=args.non_mopac_only)
     assert not rc, 'qr.test rc : %s' % rc
