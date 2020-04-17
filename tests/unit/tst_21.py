@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import  iotbx.pdb
 import time
 import sys
 import os
 
-import run_tests
+from qrefine.tests.unit import run_tests
 
 pdb_lines = '''
 CRYST1  100.846  117.207  186.414  90.00  90.00  90.00 P 1

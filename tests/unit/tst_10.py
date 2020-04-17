@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import absolute_import
 
 import os
 import random
@@ -12,7 +13,7 @@ from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm, from_cctbx
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
-import run_tests
+from qrefine.tests.unit import run_tests
 import mmtbx.model
 from qrefine import qr
 

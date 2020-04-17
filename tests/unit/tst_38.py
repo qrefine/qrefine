@@ -1,10 +1,12 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import iotbx.pdb
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 import time, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx import easy_run
@@ -303,8 +305,8 @@ def run(prefix):
           g1 = g1.as_double()
           g2 = g2.as_double()
           diff = flex.abs(g1-g2)
-          print "        min/max/mean of (gradient1 - gradient2):", \
-              diff.min_max_mean().as_tuple()
+          print("  min/max/mean of (gradient1 - gradient2):", \
+            diff.min_max_mean().as_tuple())
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")

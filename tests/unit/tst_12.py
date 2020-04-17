@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import time
 import iotbx
@@ -9,7 +11,7 @@ import qrefine.finalise
 import qrefine.charges
 import qrefine.completion
 from qrefine.utils import hierarchy_utils
-import run_tests
+from qrefine.tests.unit import run_tests
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
@@ -816,7 +818,7 @@ def test_1yjp_charge():
   try:
     charge = charges.calculate_pdb_hierarchy_charge(hierarchy)
     assert 0
-  except Exception, e:
+  except Exception as e:
     assert e.message.find('no hydrogens')>-1
   cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
   easy_run.call(cmd)
@@ -1078,7 +1080,7 @@ def test_10_capping():
   from qrefine import charges
   cc = charges.charges_class('test_10_capping.pdb')
   rc = cc.get_total_charge(list_charges=True)
-  print rc
+  print(rc)
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):
@@ -1150,11 +1152,11 @@ def run(prefix, nproc=1):
         argss.append((i,p))
   for args, res, errstr in easy_mp.multi_core_run(get_test, argss, nproc):
     if errstr:
-      print '-'*80
-      print args
-      print 'RESULT - ERROR   : %s %s' % (tests[args[0]][0].func_name, args)
-      print errstr
-      print '-'*80
+      print('-'*80)
+      print(args)
+      print('RESULT - ERROR   : %s %s' % (tests[args[0]][0].__name__, args))
+      print(errstr)
+      print('-'*80)
       assert 0
 
 if(__name__ == "__main__"):

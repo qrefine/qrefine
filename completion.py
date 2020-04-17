@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import math
 import sys
 from string import letters
@@ -12,7 +14,7 @@ from iotbx.pdb import amino_acid_codes as aac
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
-from utils import hierarchy_utils
+from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 
 def d_squared(xyz1, xyz2):
@@ -444,7 +446,7 @@ def iterate_over_threes(hierarchy,
     backbone_only=False,
     use_capping_hydrogens=use_capping_hydrogens,
   ):
-    if verbose: print three
+    if verbose: print(three)
     if not len(three): continue
     ptr=0
     assert three.are_linked()
@@ -739,12 +741,12 @@ def _eta_peptide_h(hierarchy,
     ):
     if len(three)==1: continue
     if three[-1].resname!='ETA': continue
-    print three
+    print(three)
     eta = get_residue_group(three[-1])
-    print dir(eta)
+    print(dir(eta))
     previous = get_residue_group(three[-2])
-    print previous
-    print dir(previous)
+    print(previous)
+    print(dir(previous))
     for ag in previous.atom_groups(): # smarter?
       previous_c = ag.get_atom('C')
       previous_o = ag.get_atom('O')
@@ -753,7 +755,7 @@ def _eta_peptide_h(hierarchy,
       if ag.get_atom(atom_name):
         assert 0
       else:
-        for atom in ag.atoms(): print atom.format_atom_record()
+        for atom in ag.atoms(): print(atom.format_atom_record())
         rc = _add_hydrogens_to_atom_group_using_bad(
           ag,
           atom_name,
@@ -767,8 +769,8 @@ def _eta_peptide_h(hierarchy,
           #append_to_end_of_model=append_to_end_of_model,
         )
         assert rc is not None
-        print '-'*80
-        for atom in ag.atoms(): print atom.format_atom_record()
+        print('-'*80)
+        for atom in ag.atoms(): print(atom.format_atom_record())
   #      hierarchy.show()
   #assert 0
 
@@ -935,7 +937,7 @@ def complete_pdb_hierarchy(hierarchy,
       add_hydrogens=False,
     )
     if debug:
-      print 'number of side chains changed',n_changed
+      print('number of side chains changed',n_changed)
       output = hierarchy_utils.write_hierarchy(pdb_filename,
                                                pdb_inp,
                                                ppf.all_chain_proxies.pdb_hierarchy,
@@ -1100,9 +1102,9 @@ def run(pdb_filename=None,
   return ppf.all_chain_proxies.pdb_hierarchy
 
 def display_hierarchy_atoms(hierarchy, n=5):
-  print '-'*80
+  print('-'*80)
   for i, atom in enumerate(hierarchy.atoms()):
-    print atom.quote()
+    print(atom.quote())
     if i>n: break
 
 if __name__=="__main__":

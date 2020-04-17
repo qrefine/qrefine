@@ -19,6 +19,8 @@
    and also write our final pdb structure.)
    """
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import sys
@@ -34,12 +36,12 @@ from libtbx.utils import null_out
 from mmtbx import monomer_library
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
-from fragment import fragments
-import calculator
-import driver
-import restraints
-import cluster_restraints
-import results
+from .fragment import fragments
+from . import calculator
+from . import driver
+from . import restraints
+from . import cluster_restraints
+from . import results
 from qrefine.super_cell import expand
 import mmtbx.model.statistics
 from libtbx import Auto
@@ -271,7 +273,7 @@ def show_cc(map_data, xray_structure, log=None):
     map_data         = map_data,
     crystal_symmetry = xrs.crystal_symmetry())
   d99 = mtriage.get_results().masked.d99
-  if(log is not None): print >> log, "Resolution of map is: %6.4f" %d99
+  if(log is not None): print("Resolution of map is: %6.4f" %d99, file=log)
   result = five_cc(
     map               = map_data,
     xray_structure    = xrs,
@@ -281,8 +283,8 @@ def show_cc(map_data, xray_structure, log=None):
     compute_cc_peaks  = False,
     compute_cc_volume = False).result
   if(log is not None):
-    print >> log, "Map-model correlation coefficient (CC)"
-    print >> log, "  CC_mask  : %6.4f" %result.cc_mask
+    print("Map-model correlation coefficient (CC)", file=log)
+    print("  CC_mask  : %6.4f" %result.cc_mask, file=log)
   return result.cc_mask
 
 def create_fmodel(cmdline, log):
@@ -294,7 +296,7 @@ def create_fmodel(cmdline, log):
   if(cmdline.params.refine.update_all_scales):
     fmodel.update_all_scales(remove_outliers=False)
     fmodel.show(show_header=False, show_approx=False)
-  print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free())
+  print("Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free()), file=log)
   log.flush()
   return fmodel
 
@@ -408,9 +410,9 @@ def validate(model, fmodel, params, rst_file, prefix, log):
   if params.quantum.engine_name=='xtb':
     if params.quantum.method==Auto:
       params.quantum.method=' --gfn 2 --etemp 500 --acc 0.1 --gbsa h2o'
-      print >> log, '  Default method for xtb is %s' % (
+      print('  Default method for xtb is %s' % (
           params.quantum.method,
-          )
+          ), file=log)
       params.quantum.basis = ''
   else:
     if params.quantum.method==Auto:
@@ -420,18 +422,18 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       params.quantum.basis='6-31g'
       outl += '  Setting QM basis to 6-31g\n'
   if outl:
-    print >> log, '\nSetting QM defaults'
-    print >> log, outl
+    print('\nSetting QM defaults', file=log)
+    print(outl, file=log)
 
   if params.quantum.engine_name=='mopac':
     if params.quantum.basis:
-      print >> log, '  Because engine is %s basis set %s ignored' % (
+      print('  Because engine is %s basis set %s ignored' % (
         params.quantum.engine_name,
         params.quantum.basis,
-        )
+        ), file=log)
       params.quantum.basis = ''
     if params.quantum.method=='hf': # default
-      print >> log, '  Default method set as PM7'
+      print('  Default method set as PM7', file=log)
       params.quantum.method='PM7'
 
 
@@ -439,10 +441,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)
   if(params.cluster.clustering):
     params.refine.gradient_only = True
-    print >> log, " params.gradient_only", params.refine.gradient_only
+    print(" params.gradient_only", params.refine.gradient_only, file=log)
   # RESTART
   if(os.path.isfile(str(rst_file))):
-    print >> log, "restart info is loaded from %s" % params.rst_file
+    print("restart info is loaded from %s" % params.rst_file, file=log)
     rst_data = easy_pickle.load(params.rst_file)
     fmodel = rst_data["fmodel"]
     results_manager = rst_data["results"]
@@ -486,9 +488,9 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         params.output_file_name_prefix + ".rst.pickle")
     if os.path.isfile(params.rst_file):
       os.remove(params.rst_file)
-    print >> log, "\n***********************************************************"
-    print >> log, "restart info will be stored in %s" % params.rst_file
-    print >> log, "***********************************************************\n"
+    print("\n***********************************************************", file=log)
+    print("restart info will be stored in %s" % params.rst_file, file=log)
+    print("***********************************************************\n", file=log)
     start_fmodel = fmodel
     start_ph = None # is it used anywhere? I don't see where it is used!
   if not params.refine.mode=='gtest':
@@ -503,8 +505,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   if(params.refine.mode == "gtest"):
     # needs to be moved! Perhaps also to driver
     import numpy as np
-    from fragment import fragment_extracts, write_cluster_and_fragments_pdbs
-    from utils.mathbox import get_grad_mad, get_grad_angle
+    from .fragment import fragment_extracts, write_cluster_and_fragments_pdbs
+    from .utils.mathbox import get_grad_mad, get_grad_angle
 
     # determine what kind of buffer to calculate
     g_mode=[]
@@ -539,28 +541,28 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       clusters=[]
 
     n_grad=len(cluster_scan)*len(g_mode)
-    print >> log, 'Calculating %3i gradients \n' % (n_grad)
-    print >> log, 'Starting loop over different fragment sizes'
+    print('Calculating %3i gradients \n' % (n_grad), file=log)
+    print('Starting loop over different fragment sizes', file=log)
     for ig in g_mode:
 
-      print >> log,'loop for g_mode = %i ' % (ig)
+      print('loop for g_mode = %i ' % (ig), file=log)
       if ig == 2:
-        print >> log, 'pc on'
+        print('pc on', file=log)
         params.cluster.charge_embedding=True
       if ig == 3:
-        print >> log, 'two_buffers on, pc off'
+        print('two_buffers on, pc off', file=log)
         params.cluster.charge_embedding=False
         params.cluster.two_buffers=True
       if ig == 4:
-        print >> log, 'two_buffers on, pc on'
+        print('two_buffers on, pc on', file=log)
         params.cluster.charge_embedding=True
         params.cluster.two_buffers=True
 
       for max_cluster in cluster_scan:
         idl.append([ig,max_cluster])
-        print >> log, 'g_mode: %s' % (" - ".join(map(str,idl[idx])))
+        print('g_mode: %s' % (" - ".join(map(str,idl[idx]))), file=log)
         t0 = time.time()
-        print >> log, "~max cluster size ",max_cluster
+        print("~max cluster size ",max_cluster, file=log)
         params.cluster.maxnum_residues_in_cluster=max_cluster
         fragment_manager = create_fragment_manager(
             params           = params,
@@ -576,13 +578,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         rm = restraints_manager
         if(fragment_manager is not None):
           rm = cluster_restraints_manager
-          print "time taken for fragments",(time.time() - t0)
+          print("time taken for fragments",(time.time() - t0))
           frags=fragment_manager
-          print >> log, '~  # clusters  : ',len(frags.clusters)
-          print >> log, '~  list of atoms per cluster:'
-          print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
-          print >> log, '~  list of atoms per fragment:'
-          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
+          print('~  # clusters  : ',len(frags.clusters), file=log)
+          print('~  list of atoms per cluster:', file=log)
+          print('~   ',[len(x) for x in frags.cluster_atoms], file=log)
+          print('~  list of atoms per fragment:', file=log)
+          print('~   ',[len(x) for x in frags.fragment_super_atoms], file=log)
 
           # save fragment data. below works
           # better way is to make a single PDB file with chain IDs
@@ -616,14 +618,14 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           params             = params,
           restraints_manager = rm)
         grad=driver.run_gradient(calculator=calculator_manager)
-        print >> log, '~   gnorm',np.linalg.norm(grad)
-        print >> log, '~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad)
+        print('~   gnorm',np.linalg.norm(grad), file=log)
+        print('~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad), file=log)
         name="-".join(map(str,idl[idx]))
         np.save(name,grad)
         idx+=1
-        print >> log, "total time for gradient",(time.time() - t0),'\n\n'
+        print("total time for gradient",(time.time() - t0),'\n\n', file=log)
 
-    print >> log, 'ready to run qr.granalyse!'
+    print('ready to run qr.granalyse!', file=log)
 
   else:
     rm = restraints_manager
@@ -657,7 +659,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         log                   = log)
       model = O.run()
       of = open("real_space_refined.pdb", "w")
-      print >> of, model.model_as_pdb(output_cs=True)
+      print(model.model_as_pdb(output_cs=True), file=of)
       of.close()
       model.geometry_statistics(use_hydrogens=False).show()
       show_cc(
@@ -696,17 +698,17 @@ if (__name__ == "__main__"):
   t0 = time.time()
   log = sys.stdout
   args = sys.argv[1:]
-  print >> log, '_'*80
-  print >> log, 'Command line arguments'
+  print('_'*80, file=log)
+  print('Command line arguments', file=log)
   outl = '  '
   for arg in args:
     outl += '"%s"' % arg
-  print >> log, '%s\n' % outl
-  print >> log, '_'*80
+  print('%s\n' % outl, file=log)
+  print('_'*80, file=log)
   cmdline = mmtbx.command_line.load_model_and_data(
       args          = args,
       master_phil   = get_master_phil(),
       create_fmodel = False,
       out           = log)
   run(cmdline=cmdline, log = log)
-  print >> log, "Time: %6.4f"%(time.time()-t0)
+  print("Time: %6.4f"%(time.time()-t0), file=log)

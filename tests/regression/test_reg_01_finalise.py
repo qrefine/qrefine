@@ -1,5 +1,6 @@
 from __future__ import division
-from test_reg_00_base import test_base
+from __future__ import absolute_import
+from .test_reg_00_base import test_base
 
 class test_finalise(test_base):
 

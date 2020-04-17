@@ -1,10 +1,12 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import iotbx.pdb
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 import time
-import run_tests
+from qrefine.tests.unit import run_tests
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 
@@ -54,8 +56,8 @@ def run(prefix):
         diff = g1-g2
         if(0):
           for i, diff_i in enumerate(diff):
-            print i+1, diff_i, g1[i], g2[i]
-          print
+            print(i+1, diff_i, g1[i], g2[i])
+          print()
         assert approx_equal(flex.max(diff), 0, 1.0E-4)
       else:
         ## loose comparison

@@ -1,19 +1,20 @@
 from __future__ import division
+from __future__ import absolute_import
 
 import os
 import ase.units as ase_units
 import mmtbx.restraints
 from libtbx.utils import Sorry
-from charges import charges_class
+from .charges import charges_class
 from scitbx.array_family import flex
-from plugin.ase.mopac_qr import Mopac
-from plugin.ase.pyscf_qr import Pyscf
-from plugin.ase.terachem_qr import TeraChem
-from plugin.ase.turbomole_qr import Turbomole
-from plugin.ase.orca_qr import Orca
-from plugin.ase.gaussian_qr import Gaussian
-from plugin.ase.xtb_qr import GFNxTB
-from plugin.tools import qr_tools
+from .plugin.ase.mopac_qr import Mopac
+from .plugin.ase.pyscf_qr import Pyscf
+from .plugin.ase.terachem_qr import TeraChem
+from .plugin.ase.turbomole_qr import Turbomole
+from .plugin.ase.orca_qr import Orca
+from .plugin.ase.gaussian_qr import Gaussian
+from .plugin.ase.xtb_qr import GFNxTB
+from .plugin.tools import qr_tools
 from libtbx import group_args
 import math
 from qrefine.super_cell import expand
@@ -319,10 +320,10 @@ class from_qm(object):
     elif(self.qm_engine_name == "gaussian"):
       calculator = Gaussian()
     elif(self.qm_engine_name == "ani"):
-      from plugin.ase.ani_qr import Ani
+      from .plugin.ase.ani_qr import Ani
       calculator = Ani()
     elif(self.qm_engine_name == "torchani"):
-      from plugin.ase.torchani_qr import TorchAni
+      from .plugin.ase.torchani_qr import TorchAni
       calculator = TorchAni(method=self.method)
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
@@ -365,9 +366,9 @@ class from_qm(object):
 
   def target_and_gradients(self,sites_cart, selection=None, index=None):
     if(self.clustering):
-      from fragment import get_qm_file_name_and_pdb_hierarchy
-      from fragment import charge
-      from fragment import write_mm_charge_file
+      from .fragment import get_qm_file_name_and_pdb_hierarchy
+      from .fragment import charge
+      from .fragment import write_mm_charge_file
       #
       qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=self.fragment_extracts,

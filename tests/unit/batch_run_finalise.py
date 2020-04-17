@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, sys, shutil
 from libtbx import easy_run
 from multiprocessing import Pool
@@ -19,20 +20,20 @@ def callback(args):
 
 def generate_test_pdb_filenames(d):
   for filename in os.listdir(d):
-    print d, filename
+    print(d, filename)
     if not filename.endswith(".pdb"): continue
     #if len(filename.split('.'))!=2: continue
     #if len(filename.split('.')[0])!=4: continue
     tf = "%s.pdb" % filename[:-4]
-    print tf
+    print(tf)
     shutil.copyfile(os.path.join(d, filename), tf)
     if tf in skip:
-      print '\n\tSKIPPING %s\n' % tf
+      print('\n\tSKIPPING %s\n' % tf)
       continue
     yield tf
 
 def _process_pdb_filename(pdb_file):
-  print '_process_pdb_filename',pdb_file
+  print('_process_pdb_filename',pdb_file)
   complete_file=pdb_file[:-4]+"_complete.pdb"
   rc=0
   if ( pdb_file.endswith("pdb") and not os.path.exists(complete_file) ):
@@ -40,7 +41,7 @@ def _process_pdb_filename(pdb_file):
       pdb_file,
       pdb_file.replace('.pdb', ".log"),
       )
-    print '\n\t~> %s\n' % cmd
+    print('\n\t~> %s\n' % cmd)
     ero = easy_run.fully_buffered(command=cmd)
     err = StringIO()
     ero.show_stderr(out=err)
@@ -59,11 +60,11 @@ def run(folder,
   if nproc>1:
     pool = Pool(processes=nproc)
   for pdb_file in generate_test_pdb_filenames(folder):
-    print pdb_file
+    print(pdb_file)
     if only_code is not None and only_code!=pdb_file.split('.')[0]: continue
     if nproc==1:
       rc, pdb_file = _process_pdb_filename(pdb_file)
-      print 'rc',rc
+      print('rc',rc)
       assert rc==0, 'return code != 0'
     else:
       rc = pool.apply_async(
@@ -81,12 +82,12 @@ def run(folder,
   for pdb_file in pdb_files:
     if "complete.pdb" in pdb_file:
       ok_pdbs.append(pdb_file[:4])
-  print ok_pdbs
-  print results
+  print(ok_pdbs)
+  print(results)
   for pdb, rc in sorted(results.items()):
-    print '-'*80
-    print pdb
-    print rc
+    print('-'*80)
+    print(pdb)
+    print(rc)
   return ok_pdbs
 
 if __name__=="__main__":

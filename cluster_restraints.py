@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 from libtbx import Auto
@@ -6,8 +8,8 @@ from libtbx.utils import Sorry
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
-from fragment import fragment_extracts, write_cluster_and_fragments_pdbs
-from restraints import from_qm
+from .fragment import fragment_extracts, write_cluster_and_fragments_pdbs
+from .restraints import from_qm
 from libtbx import group_args
 
 def check_no_altlocs(h, file_name):
@@ -99,8 +101,8 @@ class from_cluster(object):
           print('Directory not copied. Error: %s' % e)
         ncount=ncount+1
         energy_gradients=None
-        print "check independent QM jobs"
-        print e
+        print("check independent QM jobs")
+        print(e)
         raise Sorry('process finished with error: %s' % e)
     target=0
     gradients=flex.vec3_double(system_size)

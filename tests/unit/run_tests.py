@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import os
 import time
 import shutil
@@ -16,10 +17,10 @@ qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
 
 def assert_folder_is_empty(prefix):
   if(len(os.listdir("."))>0):
-    print '-'*80
-    print "Folder is not empty: test prefix:", prefix
-    print "Remove before proceeding:", os.listdir(".")
-    print '-'*80
+    print('-'*80)
+    print("Folder is not empty: test prefix:", prefix)
+    print("Remove before proceeding:", os.listdir("."))
+    print('-'*80)
     raise Sorry("Folder is not empty: test prefix:", prefix)
 
 def setup_helix_example(pdb_name = "m00_good.pdb",
@@ -56,7 +57,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
     cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  if(0): print " ".join(cmd)
+  if(0): print(" ".join(cmd))
   return easy_run.go(" ".join(cmd))
 
 def clean_up(prefix, mtz_name = None):
@@ -71,7 +72,7 @@ def clean_up(prefix, mtz_name = None):
   files_to_remove1 = [
     'c_terminal_capping.pdb', 'c_terminal_capping_capping.pdb', 'cluster.xml',
     'helix.pdb', 'helix_complete.pdb', 'helix_readyset_input.pdb', 'qmmm.xml',
-    'test_10_capping.pdb', 'test_cys_hg_capping.pdb',
+    'test_10_capping.pdb', 'test_cys_hg_capping.pdb','test_alt_loc_original.pdb',
     'test_point_charges.pdb', 'q.xyz', "expansion.pdb",
     'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb',
     'test_original_pdb_capping.pdb', 'test_short_gap.pdb',
@@ -96,13 +97,13 @@ def runner(function, prefix, disable=False):
   rc = 0
   try:
     if(disable):
-      print prefix + ": Skipped (not recommended, do something about it!)"
+      print(prefix + ": Skipped (not recommended, do something about it!)")
     else:
       t0 = time.time()
       function(prefix = prefix)
-      print prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0)
+      print(prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0))
   except Exception as e:
-    print prefix, "FAILED", str(e)
+    print(prefix, "FAILED", str(e))
     traceback.print_exc()
     rc=1
   clean_up(prefix)
@@ -119,7 +120,7 @@ def run(nproc=6,
     nproc=1
   except: only_i=None
   t0=time.time()
-  print 'Running tests on %d processors' % nproc
+  print('Running tests on %d processors' % nproc)
   def _run_test(file_name, in_separate_directory=True):
     if in_separate_directory:
       fn = file_name.split('.')[0]
@@ -166,16 +167,16 @@ def run(nproc=6,
                                                     tests,
                                                     nproc,
                                                     ):
-    print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
+    print('%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0))
     if err_str:
-      print 'Error output from %s' % args
-      print err_str
-      print '_'*80
+      print('Error output from %s' % args)
+      print(err_str)
+      print('_'*80)
     if res:
-      print '\n\t %s %s\n' % (args,res)
+      print('\n\t %s %s\n' % (args,res))
       failed += 1
   if failed:
-    print 'Failed tests : %d' % failed
+    print('Failed tests : %d' % failed)
     return 1
   return 0
 
@@ -185,8 +186,8 @@ if(__name__ == "__main__"):
   nproc=1
   if args: nproc=int(args[0])
   rc = run(nproc=nproc)
-  print "Total time (all tests): %6.2f"%(time.time()-t0)
+  print("Total time (all tests): %6.2f"%(time.time()-t0))
   if rc:
     assert not rc
   else:
-    print "OK"
+    print("OK")

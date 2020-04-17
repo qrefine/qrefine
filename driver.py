@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import pickle
 import scitbx.lbfgs
@@ -6,7 +8,7 @@ from libtbx import easy_pickle
 from libtbx import adopt_init_args
 from cctbx import xray
 from scitbx.array_family import flex
-import calculator as calculator_module
+from . import calculator as calculator_module
 from libtbx import group_args
 from ase.optimize.lbfgs import LBFGS
 import numpy
@@ -159,8 +161,8 @@ class minimizer(object):
     #    max_value=1.0)
     #  self.x_previous = x_current.deep_copy()
     #
-    print "  step: %3d bond rmsd: %8.6f"%(
-      self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd())
+    print("  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd()))
     return self.calculator.target_and_gradients(x = self.x)
 
   def prcg_min(self,params):
@@ -194,18 +196,18 @@ class minimizer(object):
       gnorm=np.linalg.norm(g)
       # gnorm=self.eg[1].norm()/23.0605480121
       #self.number_of_function_and_gradients_evaluations += 1
-      print 'iter= %i E=%12.5E  G=%0.2f' % (iter+1,e,gnorm)
+      print('iter= %i E=%12.5E  G=%0.2f' % (iter+1,e,gnorm))
       #
       if gnorm <=gconv and iter >1:
-        print 'gnorm pre-convergenced!'
+        print('gnorm pre-convergenced!')
         self.x=flex.double(x_new.tolist())
         break
       #
       if iter<=switch_step:
-        print 'SD step'
+        print('SD step')
         step=-g
       else:
-        print 'CG step'
+        print('CG step')
         gg=g-g_old
         gdgg=np.vdot(g,gg)
         gdg=np.vdot(g_old,g_old)
@@ -239,7 +241,7 @@ class clustering_update(object):
     if(rmsd_diff < self.rmsd_tolerance):
       self.redo_clustering = False
     else:
-      print >> self.log, " rmsd_diff: ", rmsd_diff, "--> need to redo clustering"
+      print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       self.redo_clustering = True
       self.pre_sites_cart = sites_cart
 
@@ -247,10 +249,10 @@ class clustering_update(object):
     sites_cart = calculator.fmodel.xray_structure.sites_cart()
     rmsd_diff = self.pre_sites_cart.rms_difference(sites_cart)
     if(rmsd_diff > self.rmsd_tolerance):
-      print >> self.log, " rmsd_diff: ", rmsd_diff, "--> need to redo clustering"
+      print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       calculator.restraints_manager.fragments.set_up_cluster_qm()
-      print >> self.log, " interacting pairs number:  ", \
-        calculator.restraints_manager.fragments.interacting_pairs
+      print(" interacting pairs number:  ", \
+        calculator.restraints_manager.fragments.interacting_pairs, file=self.log)
       self.pre_sites_cart = sites_cart
 
 class restart_data(object):
@@ -287,8 +289,8 @@ class minimizer_ase(object):
     self.number_of_function_and_gradients_evaluations = 0
     self.b_rmsd = self._get_bond_rmsd(
       sites_cart = flex.vec3_double(self.calculator.x))
-    print "  step: %3d bond rmsd: %8.6f"%(
-      self.number_of_function_and_gradients_evaluations, self.b_rmsd)
+    print("  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, self.b_rmsd))
     self.run(nstep = max_iterations)
     # Syncing and cross-checking begin
     e = 1.e-4
@@ -327,8 +329,8 @@ class minimizer_ase(object):
     #
     self.b_rmsd = self._get_bond_rmsd(
       sites_cart = flex.vec3_double(self.opt.atoms.get_positions()))
-    print "  step: %3d bond rmsd: %8.6f"%(
-      self.number_of_function_and_gradients_evaluations, self.b_rmsd)
+    print("  step: %3d bond rmsd: %8.6f"%(
+      self.number_of_function_and_gradients_evaluations, self.b_rmsd))
     if(self.params.refine.mode=="refine" and
        self.b_rmsd>self.params.refine.max_bond_rmsd and
        self.number_of_function_and_gradients_evaluations>20):
@@ -352,7 +354,7 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
       geometry_rmsd_manager = geometry_rmsd_manager,
       mode                  = mode)
   except Exception as e:
-    print "minimization failed:", e
+    print("minimization failed:", e)
     result = None
   return result
 
@@ -418,12 +420,12 @@ def refine(fmodel,
       rst_file_data = pickle.load(handle)
       weight_cycle_start = rst_file_data["weight_cycle"]
       refine_cycle_start = rst_file_data["refine_cycle"]
-      print >> results.log
-      print >> results.log, "*"*50
-      print >> results.log, "restarts from weight_cycle: %d, refine_cycle: %s"%(
-        weight_cycle_start, refine_cycle_start)
-      print >> results.log, "*"*50
-      print >> results.log
+      print(file=results.log)
+      print("*"*50, file=results.log)
+      print("restarts from weight_cycle: %d, refine_cycle: %s"%(
+        weight_cycle_start, refine_cycle_start), file=results.log)
+      print("*"*50, file=results.log)
+      print(file=results.log)
   else:
     weight_cycle_start = 1
     refine_cycle_start = None
@@ -442,26 +444,25 @@ def refine(fmodel,
       rmsd_tolerance = params.refine.rmsd_tolerance * 100,
       verbose=params.debug,
       )
-    print >> results.log, "\ninteracting pairs number:  ", \
-      calculator.restraints_manager.fragments.interacting_pairs
+    print("\ninteracting pairs number:  ", \
+      calculator.restraints_manager.fragments.interacting_pairs, file=results.log)
   weight_cycle = weight_cycle_start
-  print >> results.log, "Start:"
+  print("Start:", file=results.log)
   results.show(prefix="  ")
   if(refine_cycle_start is not None):
-    print >> results.log, \
-     "Found optimal weight. Proceed to further refinement with this weight."
+    print("Found optimal weight. Proceed to further refinement with this weight.", file=results.log)
     fmodel = calculator.fmodel.deep_copy()
   elif(not params.refine.skip_weight_search):
-    print >> results.log, "Optimal weight search:"
+    print("Optimal weight search:", file=results.log)
     fmodel_copy = calculator.fmodel.deep_copy()
     for weight_cycle in xrange(weight_cycle_start,
                                params.refine.number_of_weight_search_cycles+1):
       if((weight_cycle!=1 and weight_cycle==weight_cycle_start)):
         fmodel = calculator.fmodel.deep_copy()
-        if params.debug: print '>>> Using calculator fmodel'
+        if params.debug: print('>>> Using calculator fmodel')
       else:
         fmodel = fmodel_copy.deep_copy()
-        if params.debug: print '>>> Using fmodel_copy fmodel'
+        if params.debug: print('>>> Using fmodel_copy fmodel')
       calculator.reset_fmodel(fmodel = fmodel)
       if(clustering):
         cluster_qm_update.re_clustering(calculator)
@@ -510,7 +511,7 @@ def refine(fmodel,
         fmodel                  = fmodel,
         restraints_weight_scale = calculator.weights.restraints_weight_scale)
       if(is_converged):
-        print >> results.log, "Converged (model)."
+        print("Converged (model).", file=results.log)
         break
       calculator.weights.adjust_restraints_weight_scale(
         fmodel                = fmodel,
@@ -521,11 +522,11 @@ def refine(fmodel,
       is_converged = conv_test.is_weight_scale_converged(
         restraints_weight_scale = calculator.weights.restraints_weight_scale)
       if(is_converged):
-        print >> results.log, "Converged (weight scale)."
+        print("Converged (weight scale).", file=results.log)
         break
       calculator.weights.\
           add_restraints_weight_scale_to_restraints_weight_scales()
-    print >> results.log, "At end of weight search:"
+    print("At end of weight search:", file=results.log)
     results.show(prefix="  ")
     #
     # Done with weight search. Now get best result and refine it further.
@@ -548,9 +549,9 @@ def refine(fmodel,
       geometry_rmsd_manager = geometry_rmsd_manager)
     ####
     # show best
-    print >> results.log, "At start of further refinement:"
+    print("At start of further refinement:", file=results.log)
     results.show(prefix="  ")
-    print >> results.log, "Start further refinement:"
+    print("Start further refinement:", file=results.log)
     refine_cycle_start = 1
   if(refine_cycle_start is None): refine_cycle_start=1
   #
@@ -596,7 +597,7 @@ def refine(fmodel,
       output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
     results.show(prefix="  ")
     if(conv_test.is_converged(fmodel=fmodel)):
-      print >> results.log, "Converged (model)."
+      print("Converged (model).", file=results.log)
       break
     calculator.weights.adjust_restraints_weight_scale(
       fmodel                = fmodel,
@@ -611,7 +612,7 @@ def refine(fmodel,
       weights      = calculator.weights,
       conv_test    = conv_test,
       results      = results)
-  print >> results.log, "At end of further refinement:"
+  print("At end of further refinement:", file=results.log)
   results.show(prefix="  ")
 
 def opt(xray_structure,
@@ -627,9 +628,9 @@ def opt(xray_structure,
     with open(rst_file, 'rb') as handle:
       rst_file_data = pickle.load(handle)
       micro_cycle_start = rst_file_data["micro_cycle"]
-      print >> results.log, "\n***********************************************************"
-      print >> results.log, "restarts from micro_cycle: %d"%(micro_cycle_start)
-      print >> results.log, "***********************************************************\n"
+      print("\n***********************************************************", file=results.log)
+      print("restarts from micro_cycle: %d"%(micro_cycle_start), file=results.log)
+      print("***********************************************************\n", file=results.log)
       ## check the restart fmodel
       xray_structure = calculator.xray_structure
   else:
@@ -642,8 +643,8 @@ def opt(xray_structure,
     cluster_qm_update = clustering_update(
       calculator.xray_structure.sites_cart(), results.log, \
       params.rmsd_tolerance * 100)
-    print >> results.log, "\ninteracting pairs number:  ",\
-      calculator.restraints_manager.fragments.interacting_pairs
+    print("\ninteracting pairs number:  ",\
+      calculator.restraints_manager.fragments.interacting_pairs, file=results.log)
   results.show(prefix="start")
   for micro_cycle in xrange(micro_cycle_start,
                         params.refine.number_of_micro_cycles+micro_cycle_start):
@@ -678,7 +679,7 @@ def opt(xray_structure,
     results.show(prefix="micro_cycle")
     if(conv_test.is_geometry_converged(
        sites_cart = xray_structure.sites_cart())):
-      print >> results.log, " Convergence at micro_cycle:", micro_cycle
+      print(" Convergence at micro_cycle:", micro_cycle, file=results.log)
       break
     params.refine.pre_opt = None # no pre-optimizations after first macrocycle
   rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,

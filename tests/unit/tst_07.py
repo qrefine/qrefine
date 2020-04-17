@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import absolute_import
 
 import os
 import time
@@ -6,7 +7,7 @@ import iotbx.pdb
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from mmtbx.pair_interaction import pair_interaction
-import run_tests
+from qrefine.tests.unit import run_tests
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
