@@ -93,8 +93,11 @@ def run(pdb_filename,
     ppf = hierarchy_utils.get_processed_pdb(pdb_inp=hierarchy.as_pdb_input())
 
   if not skip_validation:
-    initial_model_statistics = mmtbx.model.statistics.geometry(
-      pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
+    model = mmtbx.model.manager(
+      model_input      = None,
+      crystal_symmetry = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+      pdb_hierarchy    = ppf.all_chain_proxies.pdb_hierarchy)
+    initial_model_statistics = model.geometry_statistics()
 
   # should use cctbx
   if keep_alt_loc: pass
@@ -186,8 +189,7 @@ def run(pdb_filename,
                                   model.get_hierarchy(),
                                   fname)
   if not skip_validation:
-    final_model_statistics = mmtbx.model.statistics.geometry(
-      pdb_hierarchy = ppf.all_chain_proxies.pdb_hierarchy)
+    final_model_statistics = model.geometry_statistics()
 
 if __name__=="__main__":
   def _fake_phil_parse(arg):
