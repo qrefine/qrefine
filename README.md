@@ -119,7 +119,7 @@ DOI: [10.1107/S2059798319015122](http://scripts.iucr.org/cgi-bin/paper?S20597983
 
 Lum Wang, Holger Kruse, Oleg V. Sobolev, Nigel W. Moriarty, Mark P. Waller, Pavel V. Afonine, and Malgorzata Biczysko
 Real-space quantum-based refinement for cryo-EM: Q|R#3
-bioRxiv 2020.05.25.115386; 
+(2020) bioRxiv 2020.05.25.115386; 
 DOI:[0.1101/2020.05.25.115386](https://www.biorxiv.org/content/10.1101/2020.05.25.115386v1)
 
 
