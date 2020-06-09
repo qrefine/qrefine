@@ -112,12 +112,12 @@ Solving the scalability issue in quantum-based refinement: Q|R#1
 (2017). Acta Cryst. D73, 1020-1028.
 DOI: [10.1107/S2059798317016746](http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
 
-Min Zheng, Malgorzata Biczysko, Yanting Xu, Nigel W. Moriarty, Holger Kruse, Alexandre Urzhumtsev, Mark P. Waller, and Pavel V. Afonine
+Min Zheng, Malgorzata Biczysko, Yanting Xu, Nigel W. Moriarty, Holger Kruse, Alexandre Urzhumtsev, Mark P. Waller, and Pavel V. Afonine,
 Including Crystallographic Symmetry in Quantum-based Refinement: Q|R#2
 (2020). Acta Cryst. D76, 41-50.
 DOI: [10.1107/S2059798319015122](http://scripts.iucr.org/cgi-bin/paper?S2059798319015122)
 
-Lum Wang, Holger Kruse, Oleg V. Sobolev, Nigel W. Moriarty, Mark P. Waller, Pavel V. Afonine, and Malgorzata Biczysko
+Lum Wang, Holger Kruse, Oleg V. Sobolev, Nigel W. Moriarty, Mark P. Waller, Pavel V. Afonine, and Malgorzata Biczysko,
 Real-space quantum-based refinement for cryo-EM: Q|R#3
 (2020) bioRxiv 2020.05.25.115386; 
 DOI:[0.1101/2020.05.25.115386](https://www.biorxiv.org/content/10.1101/2020.05.25.115386v1)
