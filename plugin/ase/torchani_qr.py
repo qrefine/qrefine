@@ -14,6 +14,7 @@ We are using the ASE calculator interface:
 https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html
 
 """
+from __future__ import print_function
 import os
 import numpy as np
 import torch
@@ -107,9 +108,9 @@ class TorchAni(Calculator):
     self.forces = force.squeeze().numpy().astype(np.float64)
 
     if 0: # we need debugging flag here to switch on and off.
-        print("Torch ANI: ",self.method)
-        print('Energy:',self.energy_free)
-        print('Force:', self.forces)
+        print(("Torch ANI: ",self.method))
+        print(('Energy:',self.energy_free))
+        print(('Force:', self.forces))
 
   def get_command(self):
     """

@@ -2,6 +2,7 @@
 """
   based on ASE script for Mopac
 """
+from __future__ import print_function
 import os
 import string
 import numpy as np
@@ -105,17 +106,18 @@ class TeraChem(Calculator):
         WhatOS=platform.system()
         if "Linux" in WhatOS:
             try:
-	        terachem_library_path = command[0:command.find('bin/terachem')]+"lib"
+                terachem_library_path = command[0:command.find('bin/terachem')] + "lib"
                 if terachem_library_path not in os.environ['LD_LIBRARY_PATH']:
-                    os.environ['LD_LIBRARY_PATH'] +=':'+ terachem_library_path
+                    os.environ[
+                        'LD_LIBRARY_PATH'] += ':' + terachem_library_path
             except Exception as e:
-                print "failed to load terachem library files"       
+                print("failed to load terachem library files")
        
         #print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         #exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         import subprocess
         command = '%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1'
-        print command
+        print(command)
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         process.wait()
         exitcode = process.returncode

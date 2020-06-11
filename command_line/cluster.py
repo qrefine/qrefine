@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.cluster
 import sys
 import time
@@ -17,7 +18,7 @@ Cluster a system into many small pieces
 """
 
 def run(pdb_file, log,  maxnum_residues_in_cluster=15):
-  print >> log, "max number of residues in each cluster:\n", maxnum_residues_in_cluster
+  print("max number of residues in each cluster:\n", maxnum_residues_in_cluster, file=log)
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
@@ -26,7 +27,7 @@ def run(pdb_file, log,  maxnum_residues_in_cluster=15):
     crystal_symmetry=cs,
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
     qm_run=False)# not run qm_calculation, just the clustering result
-  print >> log, "Residue indices for each cluster:\n", fq.clusters
+  print("Residue indices for each cluster:\n", fq.clusters, file=log)
 
 
 if (__name__ == "__main__"):
@@ -34,4 +35,4 @@ if (__name__ == "__main__"):
   args = sys.argv[1:]
   del sys.argv[1:]
   run(args[0], log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
+  print("Time: %6.4f" % (time.time() - t0), file=log)

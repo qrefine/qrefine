@@ -2,6 +2,7 @@
   based on ASE script for Mopac and then for orca.
 
 """
+from __future__ import print_function
 import os
 import string
 import numpy as np
@@ -61,7 +62,7 @@ class GFNxTB(Calculator):
         from subprocess import Popen, PIPE, STDOUT
         if command == '':
             raise RuntimeError('no command for run_command :(')
-        print 'Running: ', command #debug
+        print('Running: ', command) #debug
         proc = Popen([command], shell=True, stderr=PIPE)
         proc.wait()
         exitcode = proc.returncode

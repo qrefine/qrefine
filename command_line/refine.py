@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.refine
 import os
 import sys
@@ -26,7 +27,7 @@ Refine a model using restraints from Quantum Chemistry
 """
 
 def get_help():
-  print legend
+  print(legend)
   raise Usage("""
     qr.refine is an open-source module that carries out refinement of bio-macromolecules
     utilizing chemical restraints from ab initio calculations.
@@ -46,10 +47,10 @@ def get_master_phil():
     phil_string=qr.master_params_str)
 
 def print_legend_and_usage(log):
-  print >> log, "-"*79
-  print >> log, legend
-  print >> log, "-"*79
-  print >> log, get_master_phil().show()
+  print("-"*79, file=log)
+  print(legend, file=log)
+  print("-"*79, file=log)
+  print(get_master_phil().show(), file=log)
 
 def reflection_file_server(crystal_symmetry, reflection_files):
   return reflection_file_utils.reflection_file_server(
@@ -69,9 +70,9 @@ def run(args, log):
     print_legend_and_usage(log)
     return  
   elif('--version' in args):
-    print __version__
+    print(__version__)
     return
-  print >> log,"Running refinement"
+  print("Running refinement", file=log)
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
 
@@ -86,7 +87,7 @@ def run(args, log):
   fmodel = None
   if(params.refine.mode=="opt" or params.refine.mode=='gtest'):
     if (len(cmdline.reflection_files)>0 or cmdline.ccp4_map is not None):
-      print >> log, "WARNING: data files not used in optimization or gradient test! "
+      print("WARNING: data files not used in optimization or gradient test! ", file=log)
   elif(len(cmdline.reflection_files)>0 and params.refine.mode=="refine"):
     # Read reflection data
     rfs = reflection_file_server(
@@ -102,7 +103,7 @@ def run(args, log):
     test_flag_value = determine_data_and_flags_result.test_flag_value
     if(r_free_flags is None):
       r_free_flags=f_obs.generate_r_free_flags()
-      print >> log, "WARNING: no free-R flags available in inputs. "
+      print("WARNING: no free-R flags available in inputs. ", file=log)
     fmodel = mmtbx.f_model.manager(
       f_obs          = f_obs,
       r_free_flags   = r_free_flags,
@@ -111,8 +112,8 @@ def run(args, log):
     if(params.refine.update_all_scales):
       fmodel.update_all_scales(remove_outliers=False)
       fmodel.show(show_header=False, show_approx=False)
-    print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
-      fmodel.r_free())
+    print("Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
+      fmodel.r_free()), file=log)
   elif(cmdline.ccp4_map is not None and params.refine.mode=="refine"): 
     # Read map
     map_data = cmdline.ccp4_map.map_data()
@@ -143,7 +144,7 @@ def run(args, log):
 
 if __name__ == '__main__':
   t0 = time.time()
-  print >> log,"Starting Q|R"
-  print >> log,'version: ',__version__
+  print("Starting Q|R", file=log)
+  print('version: ',__version__, file=log)
   run(args=sys.argv[1:], log=log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
+  print("Time: %6.4f" % (time.time() - t0), file=log)

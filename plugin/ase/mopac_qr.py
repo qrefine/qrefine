@@ -8,6 +8,7 @@ This work is supported by Award No. UK-C0017, made by King Abdullah
 University of Science and Technology (KAUST), Saudi Arabia
 See accompanying license files for details.
 """
+from __future__ import print_function
 import os
 import string
 import numpy as np
@@ -189,7 +190,7 @@ class Mopac(Calculator):
             error='%s exited with error code %i in %s' % (
                            command,exitcode,self.calc_dir)
             stdout,stderr = proc.communicate()
-            print 'shell output: ',stdout,stderr
+            print('shell output: ',stdout,stderr)
             raise RuntimeError(error)
         return 0
 
@@ -208,7 +209,7 @@ class Mopac(Calculator):
           try:
             timer.start()
             stdout,stderr = proc.communicate()
-            print stdout,stderr
+            print(stdout,stderr)
           finally:
             timer.cancel()
 
