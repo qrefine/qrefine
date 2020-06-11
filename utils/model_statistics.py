@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import iotbx.pdb
 from mmtbx import monomer_library
@@ -52,8 +53,8 @@ def get_model_stat(pdb_file_name=None, pdb_hierarchy=None,
     restraints_manager = restraints_manager,
     molprobity_scores  = True)
   if(show):
-    print "-"*79
+    print("-"*79)
     stats.show(out=sys.stdout)
-    print "-"*79
+    print("-"*79)
   #
   return stats
