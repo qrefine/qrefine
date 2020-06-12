@@ -730,7 +730,7 @@ def test_qxyz_non_zero():
                   ]:
     tf='%s.pdb' % residue
     f=open(tf, "wb")
-    f.write(pdbs[residue])
+    f.write(pdbs[residue],encoding='utf8')
     f.close()
     pdb_inp = pdb.input(tf)
     hierarchy = pdb_inp.construct_hierarchy()
@@ -742,7 +742,7 @@ def test_qxyz_non_zero():
 def test_qxyz_xyzq():
   tf='water.pdb'
   f=open(tf, "wb")
-  f.write(pdbs["water"])
+  f.write(bytes(pdbs["water"],encoding='utf8'))
   f.close()
   pdb_inp = pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
@@ -786,7 +786,7 @@ def test_qxyz_xyzq():
 def test_terminal_and_alt_loc(residue):
   tf = '%s_terminal.pdb' % residue
   f=open(tf, "wb")
-  f.write(pdbs["%s_terminal" % residue])
+  f.write(bytes(pdbs["%s_terminal" % residue],encoding='utf8'))
   f.close()
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
   cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
@@ -856,7 +856,7 @@ def test_GLY_terminal_charge():
 def test_capping_of_C_terminal():
   tf = 'c_terminal_capping.pdb'
   f=open(tf,'wb')
-  f.write(pdbs['c_terminal_capping'])
+  f.write(bytes(pdbs['c_terminal_capping'],encoding='utf8'))
   f.close()
   cmd = 'iotbx.python %s model_completion=False %s' % (
     os.path.join(qrefine_d, 'finalise.py'),
@@ -874,7 +874,7 @@ def test_capping_of_C_terminal():
 def test_helix():
   tf = 'helix.pdb'
   f=open(tf, "wb")
-  f.write(pdbs["helix"])
+  f.write(bytes(pdbs["helix"],encoding='utf8'))
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
@@ -1042,7 +1042,7 @@ def test_capping_of_cluster_complete(only_i=None):
 
 def test_short_gap():
   f=open('test_short_gap.pdb', 'wb')
-  f.write(pdbs['short_gap'])
+  f.write(bytes(pdbs['short_gap'],encoding='utf8'))
   f.close()
   cmd = "phenix.python %s %s model_completion=False" % (
     os.path.join(qrefine_d, 'completion.py'),
@@ -1055,7 +1055,7 @@ def test_short_gap():
 
 def test_original_pdb():
   f=open('test_original_pdb.pdb', 'wb')
-  f.write(pdbs['2ona_short'])
+  f.write(bytes(pdbs['2ona_short'],encoding='utf8'))
   f.close()
   cmd = 'phenix.python %s %s %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
@@ -1075,7 +1075,7 @@ def test_original_pdb():
 
 def test_10_capping():
   f=open('test_10_capping.pdb', 'wb')
-  f.write(pdbs['10_capping'])
+  f.write(bytes(pdbs['10_capping'],encoding='utf8'))
   f.close()
   from qrefine import charges
   cc = charges.charges_class('test_10_capping.pdb')
@@ -1091,7 +1091,7 @@ def test_10_capping():
 
 def _run_go_cmd_on_pdb(code, cmd):
   f=open('test_%s.pdb' % code, 'wb')
-  f.write(pdbs[code])
+  f.write(bytes(pdbs[code],encoding='utf8'))
   f.close()
   cmd += ' %s' % ('test_%s.pdb' % code)
   rc = easy_run.go(cmd)
