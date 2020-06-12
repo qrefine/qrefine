@@ -18,7 +18,7 @@ from ase.units import kcal, mol
 from ase.calculators.general import Calculator
 
 str_keys = ['functional', 'job_type']
-int_keys = ['restart', 'spin', 'charge','nproc']
+int_keys = ['restart', 'spin', 'charge']
 bool_keys = ['OPT']
 float_keys = ['RELSCF']
 
@@ -26,6 +26,7 @@ float_keys = ['RELSCF']
 class Mopac(Calculator):
     name = 'MOPAC'
     def __init__(self,
+                nproc=1,
                  label='ase',
                  **kwargs):
         # define parameter fields
@@ -385,4 +386,4 @@ class Mopac(Calculator):
       self.label = label
 
     def set_nproc(self, nproc):
-      self.int_params['nproc'] = nproc
+      self.int_params['nproc'] = int(nproc)

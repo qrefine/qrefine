@@ -154,10 +154,10 @@ def run(nproc=6,
     if remove:
       remove.reverse()
       for r in remove:
-        print 'Removing test %s from list' % tests[r]
+        print('Removing test %s from list' % tests[r])
         del tests[r]
-  print "Following tests will be executed:"
-  print " ".join(tests)
+  print("Following tests will be executed:")
+  print(" ".join(tests))
   #
   failed = 0
   in_separate_directory = not(nproc==1)

@@ -80,7 +80,7 @@ def _add_atom_to_residue_group(atom, ag, icode=None):
   rg.resseq = ag.parent().resseq
   if icode is not None: rg.icode=icode
   rg.append_atom_group(tag)
-  for i, c in enumerate(letters):
+  for i, c in enumerate(ascii_letters):
     if c==ag.parent().parent().id:
       break
   atom.tmp = i

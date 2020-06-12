@@ -18,6 +18,7 @@ key_parameters = {
                   'charge': None,
                   'method': None,
                   'pointcharges': None,
+                  'nproc': None
                   }
 
 class GFNxTB(Calculator):
@@ -29,7 +30,7 @@ class GFNxTB(Calculator):
                  charge='0',
                  version=2,
                  method='-gfn2',
-                 nproc='1',
+                 nproc=1,
                  atoms=None,
                  pointcharges=None,
                  **kwargs):
@@ -134,13 +135,11 @@ class GFNxTB(Calculator):
           self.pointcharges = os.path.abspath(self.pointcharges)
           self.set_pointcharges()
 
-
         binary = self.command
         if (self.key_parameters['nproc'] > 1):
             nproc=self.key_parameters['nproc']
         else:
             nproc=1
-
 
         command='%s %s --chrg %s --grad %s --parallel %s > xtb.out' % (
                 binary,
@@ -249,4 +248,4 @@ class GFNxTB(Calculator):
       self.label = label
 
     def set_nproc(self, nproc):
-      self.key_parameters['nproc'] = str(nproc)
+      self.key_parameters['nproc'] = int(nproc)

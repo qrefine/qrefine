@@ -149,10 +149,10 @@ def write_hierarchy(pdb_filename, pdb_inp, hierarchy, underscore):
                           underscore,
                           )
   output = os.path.basename(output)
-  f=file(output, "wb")
-  f.write(hierarchy.as_pdb_string(
-    crystal_symmetry=pdb_inp.crystal_symmetry()),
-          )
+  f=open(output, "wb")
+  f.write(bytes(hierarchy.as_pdb_string(
+    crystal_symmetry=pdb_inp.crystal_symmetry())
+          ,encoding='utf8'))
   f.close()
   return output
 
@@ -198,9 +198,9 @@ def add_hydrogens_using_ReadySet(pdb_filename,
     sys.stdout = sys_std
   if 0:
     #print 'overwriting',pdb_filename
-    f=file(pdb_filename, 'wb')
+    f=open(pdb_filename, 'wb')
     for line in rc['cryst1']:
-      f.write('%s\n' % line)
+      f.write(bytes('%s\n' % line),encoding='utf8')
     f.write(rc['model_hierarchy'].as_pdb_string())
     f.close()
   else:

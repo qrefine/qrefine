@@ -89,6 +89,7 @@ class from_cluster(object):
           use_manager                = True)
       except Exception as e:
         import shutil
+        import traceback
         if os.path.exists('ase_error'):
           shutil.rmtree('ase_error')
         try:
@@ -103,6 +104,7 @@ class from_cluster(object):
         energy_gradients=None
         print("check independent QM jobs")
         print(e)
+        traceback.print_exc()
         raise Sorry('process finished with error: %s' % e)
     target=0
     gradients=flex.vec3_double(system_size)

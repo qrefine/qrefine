@@ -188,8 +188,9 @@ class fragments(object):
       size = n_residues,
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster)
     clusters = self.clustering.get_clusters()
-    self.clusters = sorted(clusters,
-      lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
+    # print(clusters)
+    self.clusters=sorted(clusters, key=len, reverse=True)
+    # print(self.clusters)
     # print "time taken for clustering", (time.time() - t0)
 
   def get_fragments(self):
