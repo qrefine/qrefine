@@ -1,10 +1,6 @@
 from __future__ import print_function
 import os, sys
-try:
-    from StringIO import StringIO ## for Python 2
-except ImportError:
-    from io import StringIO ## for Python 3
-# import StringIO
+from io import StringIO
 import iotbx
 from libtbx.utils import Sorry
 from mmtbx import monomer_library
@@ -158,7 +154,6 @@ def write_hierarchy(pdb_filename, pdb_inp, hierarchy, underscore):
     crystal_symmetry=pdb_inp.crystal_symmetry()),
           )
   f.close()
-  #print "\n  Output written to: %s" % output
   return output
 
 def get_raw_records(pdb_inp=None,
@@ -185,7 +180,7 @@ def add_hydrogens_using_ReadySet(pdb_filename,
   sys_std = None
   if 1:
     sys_std = sys.stdout
-    sys.stdout = StringIO.StringIO()
+    sys.stdout = io.StringIO()
     print('NOT'*20)
   rc = run_though_all_the_options(
     pdb_lines,

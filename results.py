@@ -100,12 +100,12 @@ class manager(object):
       min_gap = flex.min(gaps)
       index_best = None
       if(filtered_by_gap):
-        for i in xrange(rs.size()):
+        for i in range(rs.size()):
           if(abs(rs[i]-min_r)<1.e-5):
             index_best = i
             break
       else:
-        for i in xrange(gaps.size()):
+        for i in range(gaps.size()):
           if(abs(gaps[i]-min_gap)<1.e-5):
             index_best = i
             break

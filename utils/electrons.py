@@ -5,6 +5,7 @@ from cctbx.array_family import flex
 import mmtbx.model
 import sys
 import time
+from functools import cmp_to_key
 
 atom_database = {'H' : {'valence' : 1},
                  #
@@ -200,7 +201,7 @@ class electron_distribution(dict):
         l = []
         for bp in simple:
           l.append(bp)
-        l.sort(_sort_lone_pairs)
+        l.sort(key=cmp_to_key(_sort_lone_pairs))
         for bp in l:
           yield bp
       else:
@@ -407,8 +408,8 @@ def run(pdb_filename=None,
     assert 0
 
   # create a model manager
-  import StringIO
-  log = StringIO.StringIO()
+  import io
+  log = io.StringIO()
   default_scope = mmtbx.model.manager.get_default_pdb_interpretation_scope()
   working_params = default_scope.extract()
   # optional???

@@ -1851,8 +1851,8 @@ if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   if len(args)==0:
-    f=file('test_point_charges.pdb', 'wb')
-    f.write(pdb_lines)
+    f=open('test_point_charges.pdb', 'wb')
+    f.write(bytes(pdb_lines,encoding='utf8'))
     f.close()
     args = ['test_point_charges.pdb']
   run(args[0], log)

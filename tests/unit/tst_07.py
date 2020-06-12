@@ -29,6 +29,7 @@ def run(prefix):
                                   "qmmm.xml",
                                   ph,
                                   os.path.join(qrefine,"plugin","yoink","dat"))
+
     pyoink=PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"),
                 os.path.join(qrefine,"plugin","yoink","dat"),
                 "cluster.xml")

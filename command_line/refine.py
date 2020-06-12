@@ -11,12 +11,12 @@ import mmtbx.command_line
 from qrefine import qr, __version__
 from mmtbx import utils
 from iotbx import reflection_file_utils
-from cStringIO import StringIO
+from io import StringIO
 from libtbx import group_args
 from libtbx.utils import Sorry,Usage
 from scitbx.array_family import flex
 
-phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
+# phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 example_path = os.path.join(qrefine_path,"examples")
 

@@ -275,7 +275,7 @@ class restart_data(object):
     self.rst_data["weights"] = weights
     self.rst_data["conv_test"] = conv_test
     self.rst_data["results"] = results
-    easy_pickle.dump(file_name=rst_file, obj=self.rst_data)
+    # easy_pickle.dump(file_name=rst_file, obj=self.rst_data) #PY3_TODO
 
 class minimizer_ase(object):
   def __init__(self, calculator, params, max_iterations, geometry_rmsd_manager):
@@ -455,7 +455,7 @@ def refine(fmodel,
   elif(not params.refine.skip_weight_search):
     print("Optimal weight search:", file=results.log)
     fmodel_copy = calculator.fmodel.deep_copy()
-    for weight_cycle in xrange(weight_cycle_start,
+    for weight_cycle in range(weight_cycle_start,
                                params.refine.number_of_weight_search_cycles+1):
       if((weight_cycle!=1 and weight_cycle==weight_cycle_start)):
         fmodel = calculator.fmodel.deep_copy()
@@ -479,7 +479,7 @@ def refine(fmodel,
         results      = results)
       # Run minimization
       n_fev = 0
-      for mc in xrange(params.refine.number_of_macro_cycles):
+      for mc in range(params.refine.number_of_macro_cycles):
         minimized = run_minimize(
           calculator            = calculator,
           params                = params,
@@ -558,7 +558,7 @@ def refine(fmodel,
   if(params.refine.skip_weight_search):
     calculator.calculate_weight(verbose=params.debug)
   #
-  for refine_cycle in xrange(refine_cycle_start,
+  for refine_cycle in range(refine_cycle_start,
                       params.refine.number_of_refine_cycles+refine_cycle_start):
     calculator.reset_fmodel(fmodel=fmodel)
     if(clustering):
@@ -573,7 +573,7 @@ def refine(fmodel,
       results      = results)
     #
     n_fev = 0
-    for mc in xrange(params.refine.number_of_macro_cycles):
+    for mc in range(params.refine.number_of_macro_cycles):
       minimized = run_minimize(
         calculator            = calculator,
         params                = params,
@@ -646,7 +646,7 @@ def opt(xray_structure,
     print("\ninteracting pairs number:  ",\
       calculator.restraints_manager.fragments.interacting_pairs, file=results.log)
   results.show(prefix="start")
-  for micro_cycle in xrange(micro_cycle_start,
+  for micro_cycle in range(micro_cycle_start,
                         params.refine.number_of_micro_cycles+micro_cycle_start):
     if(clustering):
       cluster_qm_update.re_clustering(calculator)

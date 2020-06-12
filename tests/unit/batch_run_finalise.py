@@ -2,7 +2,7 @@ from __future__ import print_function
 import os, sys, shutil
 from libtbx import easy_run
 from multiprocessing import Pool
-from StringIO import StringIO
+from io import StringIO
 import libtbx.load_env
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")

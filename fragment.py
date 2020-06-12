@@ -290,7 +290,7 @@ class fragments(object):
     overlap_fragments_super = {}
     if(len(phs)>1):
       for i_cluster in range(len(clusters)):
-        for j_ph in xrange(1, len(phs)):
+        for j_ph in range(1, len(phs)):
           fragment_same = (set(fragment_super_atoms_in_phs[0][i_cluster])==
                set(fragment_super_atoms_in_phs[j_ph][i_cluster]))
           # two same fragments for same non-altloc clusters

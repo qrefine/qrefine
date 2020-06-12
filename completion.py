@@ -2,7 +2,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import math
 import sys
-from string import letters
+from string import ascii_letters
 
 import iotbx
 from mmtbx.monomer_library import server

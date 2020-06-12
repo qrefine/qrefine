@@ -31,7 +31,7 @@ def setup_helix_example(pdb_name = "m00_good.pdb",
     pdb_name )).xray_structure_simple()
   f_obs = abs(xrs_good.structure_factors(d_min=1.5).f_calc())
   r_free_flags_data = flex.bool()
-  for i in xrange(f_obs.data().size()):
+  for i in range(f_obs.data().size()):
     if(i%10 == 0): r_free_flags_data.append(True)
     else:          r_free_flags_data.append(False)
   r_free_flags = f_obs.array(data = r_free_flags_data)
@@ -57,7 +57,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
     cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  if(0): print(" ".join(cmd))
+  if(1): print(" ".join(cmd))
   return easy_run.go(" ".join(cmd))
 
 def clean_up(prefix, mtz_name = None):

@@ -33,7 +33,7 @@ def run(pdb_file, log):
     qm_engine_name="terachem")
   print("Residue indices for each cluster:\n", fq.clusters, file=log)
   fq_ext = fragment_extracts(fq)
-  for i in xrange(len(fq.clusters)):
+  for i in range(len(fq.clusters)):
       # add capping for the cluster and buffer
       print("capping frag:", i, file=log)
       get_qm_file_name_and_pdb_hierarchy(

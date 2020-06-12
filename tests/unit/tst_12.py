@@ -729,7 +729,7 @@ def test_qxyz_non_zero():
                   'gly',
                   ]:
     tf='%s.pdb' % residue
-    f=file(tf, "wb")
+    f=open(tf, "wb")
     f.write(pdbs[residue])
     f.close()
     pdb_inp = pdb.input(tf)
@@ -741,7 +741,7 @@ def test_qxyz_non_zero():
 
 def test_qxyz_xyzq():
   tf='water.pdb'
-  f=file(tf, "wb")
+  f=open(tf, "wb")
   f.write(pdbs["water"])
   f.close()
   pdb_inp = pdb.input(tf)
@@ -785,7 +785,7 @@ def test_qxyz_xyzq():
 
 def test_terminal_and_alt_loc(residue):
   tf = '%s_terminal.pdb' % residue
-  f=file(tf, "wb")
+  f=open(tf, "wb")
   f.write(pdbs["%s_terminal" % residue])
   f.close()
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
@@ -855,7 +855,7 @@ def test_GLY_terminal_charge():
 
 def test_capping_of_C_terminal():
   tf = 'c_terminal_capping.pdb'
-  f=file(tf,'wb')
+  f=open(tf,'wb')
   f.write(pdbs['c_terminal_capping'])
   f.close()
   cmd = 'iotbx.python %s model_completion=False %s' % (
@@ -873,7 +873,7 @@ def test_capping_of_C_terminal():
 
 def test_helix():
   tf = 'helix.pdb'
-  f=file(tf, "wb")
+  f=open(tf, "wb")
   f.write(pdbs["helix"])
   f.close()
   pdb_inp=pdb.input(tf)
@@ -1041,7 +1041,7 @@ def test_capping_of_cluster_complete(only_i=None):
         '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
 def test_short_gap():
-  f=file('test_short_gap.pdb', 'wb')
+  f=open('test_short_gap.pdb', 'wb')
   f.write(pdbs['short_gap'])
   f.close()
   cmd = "phenix.python %s %s model_completion=False" % (
@@ -1054,7 +1054,7 @@ def test_short_gap():
   assert result_size==28
 
 def test_original_pdb():
-  f=file('test_original_pdb.pdb', 'wb')
+  f=open('test_original_pdb.pdb', 'wb')
   f.write(pdbs['2ona_short'])
   f.close()
   cmd = 'phenix.python %s %s %s %s' % (
@@ -1074,7 +1074,7 @@ def test_original_pdb():
   assert len(pdb_inp.atoms())==50
 
 def test_10_capping():
-  f=file('test_10_capping.pdb', 'wb')
+  f=open('test_10_capping.pdb', 'wb')
   f.write(pdbs['10_capping'])
   f.close()
   from qrefine import charges
@@ -1090,7 +1090,7 @@ def test_10_capping():
       )
 
 def _run_go_cmd_on_pdb(code, cmd):
-  f=file('test_%s.pdb' % code, 'wb')
+  f=open('test_%s.pdb' % code, 'wb')
   f.write(pdbs[code])
   f.close()
   cmd += ' %s' % ('test_%s.pdb' % code)
