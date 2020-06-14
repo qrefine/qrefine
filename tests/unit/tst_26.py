@@ -32,8 +32,8 @@ TER
 
 def run(prefix):
   fn='test_zn_his_charge.pdb'
-  f=file(fn, 'wb')
-  f.write(pdb_lines)
+  f=open(fn, 'wb')
+  f.write(bytes(pdb_lines,encoding='utf8'))
   f.close()
   cmd = 'qr.charges %s verbose=1' % (fn)
   if 0: print(cmd)

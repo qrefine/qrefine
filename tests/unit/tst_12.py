@@ -721,7 +721,7 @@ HETATM   55 HD23 DLE A   4       5.391  -8.150  12.314  0.00 38.38           H
 
 def test_qxyz_non_zero():
   def _check_non_zero_charge(filename):
-    for line in open(filename, 'rb').readlines():
+    for line in open(filename, 'r').readlines():
       tmp = line.split()
       if len(tmp)<2: continue
       assert float(tmp[0])!=0, 'no partial charge %s' % line
@@ -729,8 +729,8 @@ def test_qxyz_non_zero():
                   'gly',
                   ]:
     tf='%s.pdb' % residue
-    f=open(tf, "wb")
-    f.write(pdbs[residue],encoding='utf8')
+    f=open(tf, "w")
+    f.write(pdbs[residue])
     f.close()
     pdb_inp = pdb.input(tf)
     hierarchy = pdb_inp.construct_hierarchy()
@@ -741,8 +741,8 @@ def test_qxyz_non_zero():
 
 def test_qxyz_xyzq():
   tf='water.pdb'
-  f=open(tf, "wb")
-  f.write(bytes(pdbs["water"],encoding='utf8'))
+  f=open(tf, "w")
+  f.write(pdbs["water"])
   f.close()
   pdb_inp = pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
@@ -762,7 +762,7 @@ def test_qxyz_xyzq():
 0.204  0.733  0.0  -0.296
 0.204  -0.524  0.0  0.593
 '''
-  lines = open('test_water.dat', 'rb').read()
+  lines = open('test_water.dat', 'r').read()
   lines = lines.strip().replace('\n','').replace(' ','')
   tst_str = tst_str.strip().replace('\n','').replace(' ','')
   #for a,b in zip(lines.strip(), tst_str.strip()): print '"%s" "%s"' % (a,b)
@@ -777,7 +777,7 @@ def test_qxyz_xyzq():
 -0.21  0.0  -0.296  -0.408
 0.733  0.0  -0.296  0.204
 -0.524  0.0  0.593  0.204'''
-  lines = open('test_water.dat', 'rb').read()
+  lines = open('test_water.dat', 'r').read()
   lines = lines.strip().replace('\n','').replace(' ','')
   tst_str = tst_str.strip().replace('\n','').replace(' ','')
   assert lines.strip()==tst_str, '%s'% (lines)
@@ -785,8 +785,8 @@ def test_qxyz_xyzq():
 
 def test_terminal_and_alt_loc(residue):
   tf = '%s_terminal.pdb' % residue
-  f=open(tf, "wb")
-  f.write(bytes(pdbs["%s_terminal" % residue],encoding='utf8'))
+  f=open(tf, "w")
+  f.write(pdbs["%s_terminal" % residue])
   f.close()
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
   cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
@@ -855,8 +855,8 @@ def test_GLY_terminal_charge():
 
 def test_capping_of_C_terminal():
   tf = 'c_terminal_capping.pdb'
-  f=open(tf,'wb')
-  f.write(bytes(pdbs['c_terminal_capping'],encoding='utf8'))
+  f=open(tf,'w')
+  f.write(pdbs['c_terminal_capping'])
   f.close()
   cmd = 'iotbx.python %s model_completion=False %s' % (
     os.path.join(qrefine_d, 'finalise.py'),
@@ -873,8 +873,8 @@ def test_capping_of_C_terminal():
 
 def test_helix():
   tf = 'helix.pdb'
-  f=open(tf, "wb")
-  f.write(bytes(pdbs["helix"],encoding='utf8'))
+  f=open(tf, "w")
+  f.write(pdbs["helix"])
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
@@ -1041,8 +1041,9 @@ def test_capping_of_cluster_complete(only_i=None):
         '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
 def test_short_gap():
-  f=open('test_short_gap.pdb', 'wb')
-  f.write(bytes(pdbs['short_gap'],encoding='utf8'))
+  f=open('test_short_gap.pdb', 'w')
+  f.write(pdbs['short_gap'])
+  # f.write(bytes(pdbs['short_gap'],encoding='utf8'))
   f.close()
   cmd = "phenix.python %s %s model_completion=False" % (
     os.path.join(qrefine_d, 'completion.py'),
@@ -1054,8 +1055,8 @@ def test_short_gap():
   assert result_size==28
 
 def test_original_pdb():
-  f=open('test_original_pdb.pdb', 'wb')
-  f.write(bytes(pdbs['2ona_short'],encoding='utf8'))
+  f=open('test_original_pdb.pdb', 'w')
+  f.write(pdbs['2ona_short'])
   f.close()
   cmd = 'phenix.python %s %s %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
@@ -1074,8 +1075,8 @@ def test_original_pdb():
   assert len(pdb_inp.atoms())==50
 
 def test_10_capping():
-  f=open('test_10_capping.pdb', 'wb')
-  f.write(bytes(pdbs['10_capping'],encoding='utf8'))
+  f=open('test_10_capping.pdb', 'w')
+  f.write(pdbs['10_capping'],encoding='utf8')
   f.close()
   from qrefine import charges
   cc = charges.charges_class('test_10_capping.pdb')
@@ -1090,8 +1091,8 @@ def test_10_capping():
       )
 
 def _run_go_cmd_on_pdb(code, cmd):
-  f=open('test_%s.pdb' % code, 'wb')
-  f.write(bytes(pdbs[code],encoding='utf8'))
+  f=open('test_%s.pdb' % code, 'w')
+  f.write(pdbs[code])
   f.close()
   cmd += ' %s' % ('test_%s.pdb' % code)
   rc = easy_run.go(cmd)

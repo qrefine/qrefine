@@ -117,8 +117,8 @@ def run(prefix):
     for action, lines in item.items():
       #print code, action,
       fn = '%s_%s.pdb' % (code, action)
-      f=file(fn, 'wb')
-      f.write(lines)
+      f=open(fn, "wb")
+      f.write(bytes(lines,encoding='utf8'))
       f.close()
       cmd = 'qr.charges verbose=True assert_correct_chain_terminii=False'
       cmd += ' %s' % fn

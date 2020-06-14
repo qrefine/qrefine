@@ -560,16 +560,16 @@ TER
 
 def run(prefix):
   fn='test_remove_hg_from_zn_cys.pdb'
-  f=file(fn, 'wb')
-  f.write(pdb_lines)
+  f=open(fn, 'wb')
+  f.write(bytes(pdb_lines,encoding='utf8'))
   f.close()
   cmd = 'qr.finalise %s action="capping"' % (fn)
   if 0: print(cmd)
   rc = easy_run.go(cmd)
   os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  f=file(fnc, 'rb')
-  lines=f.read()
+  f=open(fnc, 'rb')
+  lines=f.read().decode('utf8')
   f.close()
   for line in [' HG  CYS A   3',
                ' HG  CYS A   8',

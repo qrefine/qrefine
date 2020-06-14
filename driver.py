@@ -274,8 +274,8 @@ class restart_data(object):
     self.rst_data["rst_xray_structure"] = xray_structure
     self.rst_data["weights"] = weights
     self.rst_data["conv_test"] = conv_test
-    self.rst_data["results"] = results
-    # easy_pickle.dump(file_name=rst_file, obj=self.rst_data) #PY3_TODO
+    # self.rst_data["results"] = results #PY3_TODO ; cannot pickle this
+    easy_pickle.dump(file_name=rst_file, obj=self.rst_data) 
 
 class minimizer_ase(object):
   def __init__(self, calculator, params, max_iterations, geometry_rmsd_manager):
