@@ -82,7 +82,7 @@ def check_buffer(ph, clusters, qms, pyoink):
       pyoink.update(clusters[i])
       qm_atoms, qm_molecules = pyoink.get_qm_indices()
       qms_calculated.append(list(qm_molecules))
-  print "qms calc: ",qms_calculated
+  #print "qms calc: ",qms_calculated
   assert approx_equal(qms, qms_calculated)
 
 if(__name__ == "__main__"):
