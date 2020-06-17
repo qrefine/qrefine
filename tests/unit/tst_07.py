@@ -53,6 +53,7 @@ def run(prefix):
     assert approx_equal(expected_list_java, interaction_list_java)
 
   if 1:
+    ph = get_hierarchy()
     interaction_list_cpp = pair_interaction.run(ph)
     expected_list_cpp = [(1, 2), (1, 3), (2, 3), (2, 4), (3, 4), (3, 5),
                      (3, 12), (3, 13), (3, 14), (4, 5), (4, 13), (4, 14),

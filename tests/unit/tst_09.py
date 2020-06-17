@@ -13,20 +13,14 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
 
-def run(prefix):
+def run(prefix, fast_interaction=False):
+  # PVA : fast_interaction=True fails.
   """
   Exercise buffer region of cluster.
   """
-  # XXX Remove once move to C++ version
-  from qrefine import qr
-  p = qr.get_master_phil().extract()
-  fast_interaction = p.cluster.fast_interaction
   #
-
   pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"data_files","2lvr.pdb"))
   ph = pdb_inp.construct_hierarchy()
-
-  # To be deprecated
   pyoink = None
   if(not fast_interaction):
     from qrefine.utils import yoink_utils
@@ -38,7 +32,6 @@ def run(prefix):
     pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"),
                                os.path.join(qrefine,"plugin","yoink","dat"),
                                "qmmm.xml")
-
   # Clusters
   bc_clusters = [[1, 2],
                   [3, 4, 5, 13, 14, 15, 16, 17, 18, 19, 20, 21],
@@ -51,26 +44,25 @@ def run(prefix):
             [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31],
             [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
 
-  gn_clusters = [[1, 2],
-                  [3, 4, 5, 14, 13],
-                  [6, 7, 8, 9, 22, 23, 26, 31],
-                  [10, 11, 12],
-                  [15, 16, 17, 18, 19, 20, 21],
-                  [24, 25, 27, 28, 29, 30]]
+  # PVA: not used, not sure what this is..
+  #
+  #gn_clusters = [[1, 2],
+  #                [3, 4, 5, 14, 13],
+  #                [6, 7, 8, 9, 22, 23, 26, 31],
+  #                [10, 11, 12],
+  #                [15, 16, 17, 18, 19, 20, 21],
+  #                [24, 25, 27, 28, 29, 30]]
+  #
+  #gn_qms = [[1, 2, 3, 4], [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 18, 19, 22],
+  #       [5, 6, 7, 8, 9, 10, 11, 13, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31],
+  #       [3, 5, 6, 9, 10, 11, 12, 13, 22],
+  #       [4, 5, 6, 7, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
+  #       [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
 
-  gn_qms = [[1, 2, 3, 4], [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 18, 19, 22],
-         [5, 6, 7, 8, 9, 10, 11, 13, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31],
-         [3, 5, 6, 9, 10, 11, 12, 13, 22],
-         [4, 5, 6, 7, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
-         [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
+  check_buffer(ph, bc_clusters, bc_qms, pyoink=pyoink,
+    fast_interaction=fast_interaction)
 
-  check_buffer(ph, bc_clusters, bc_qms, pyoink=pyoink)
-
-def check_buffer(ph, clusters, qms, pyoink):
-  # XXX Remove once move to C++ version
-  from qrefine import qr
-  p = qr.get_master_phil().extract()
-  fast_interaction = p.cluster.fast_interaction
+def check_buffer(ph, clusters, qms, pyoink, fast_interaction):
   #
   qms_calculated = []
   for i in range(len(clusters)):
