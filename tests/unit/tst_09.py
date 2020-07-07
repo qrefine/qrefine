@@ -12,9 +12,16 @@ import run_tests
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
+def normalize(x):
+  r = []
+  for x_ in x:
+    x_ = list(x_)
+    x_.sort()
+    r.append(x_)
+  r.sort()
+  return r
 
-def run(prefix, fast_interaction=False):
-  # PVA : fast_interaction=True fails.
+def run(prefix, fast_interaction=True):
   """
   Exercise buffer region of cluster.
   """
@@ -44,22 +51,8 @@ def run(prefix, fast_interaction=False):
             [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31],
             [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
 
-  # PVA: not used, not sure what this is..
-  #
-  #gn_clusters = [[1, 2],
-  #                [3, 4, 5, 14, 13],
-  #                [6, 7, 8, 9, 22, 23, 26, 31],
-  #                [10, 11, 12],
-  #                [15, 16, 17, 18, 19, 20, 21],
-  #                [24, 25, 27, 28, 29, 30]]
-  #
-  #gn_qms = [[1, 2, 3, 4], [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 18, 19, 22],
-  #       [5, 6, 7, 8, 9, 10, 11, 13, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31],
-  #       [3, 5, 6, 9, 10, 11, 12, 13, 22],
-  #       [4, 5, 6, 7, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
-  #       [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]
 
-  check_buffer(ph, bc_clusters, bc_qms, pyoink=pyoink,
+  check_buffer(ph.deep_copy(), bc_clusters, bc_qms, pyoink=pyoink,
     fast_interaction=fast_interaction)
 
 def check_buffer(ph, clusters, qms, pyoink, fast_interaction):
@@ -67,14 +60,15 @@ def check_buffer(ph, clusters, qms, pyoink, fast_interaction):
   qms_calculated = []
   for i in range(len(clusters)):
     if(fast_interaction):
-      fragment = pair_interaction.run(ph, core=clusters[i])[2]
+      fragment = pair_interaction.run(ph.deep_copy(), core=clusters[i])[2]
       qms_calculated.append(fragment)
     else:
       assert pyoink is not None
       pyoink.update(clusters[i])
       qm_atoms, qm_molecules = pyoink.get_qm_indices()
       qms_calculated.append(list(qm_molecules))
-  #print "qms calc: ",qms_calculated
+  qms = normalize(qms)
+  qms_calculated = normalize(qms_calculated)
   assert approx_equal(qms, qms_calculated)
 
 if(__name__ == "__main__"):
