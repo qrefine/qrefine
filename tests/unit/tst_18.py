@@ -21,28 +21,29 @@ def run(prefix):
   import multiprocessing
   nproc = str(multiprocessing.cpu_count())
   for data_file_prefix in [ "h_altconf_complete", "h_altconf_2_complete"]:
+    pdb_name = os.path.join(qr_unit_tests_data,"%s.pdb"%data_file_prefix)
+    mtz_name = os.path.join(qr_unit_tests_data,"%s.mtz"%data_file_prefix)
     for maxnum in ["15", "2"]:
-      common_args = ["restraints=cctbx", "mode=opt", "parallel.nproc="+nproc] +\
-                ["altloc_method=subtract","maxnum_residues_in_cluster="+maxnum]
+      common_args = [
+        "restraints=cctbx", 
+        "mode=opt", 
+        "altloc_method=subtract",
+        "maxnum_residues_in_cluster="+maxnum]
       r = run_tests.run_cmd(prefix,
-        args     = common_args+["clustering=true",
-                                "dump_gradients=cluster_true.pkl"],
-        pdb_name = os.path.join(qr_unit_tests_data,"%s.pdb"%data_file_prefix),
-        mtz_name = os.path.join(qr_unit_tests_data,"%s.mtz"%data_file_prefix))
+        args = common_args+["clustering=true", "dump_gradients=cluster_true.pkl"],
+        pdb_name = pdb_name,
+        mtz_name = mtz_name)
       r = run_tests.run_cmd(prefix,
-        args     = common_args+["clustering=false",
-                               "dump_gradients=cluster_false.pkl"],
-        pdb_name = os.path.join(qr_unit_tests_data,"%s.pdb"%data_file_prefix),
-        mtz_name = os.path.join(qr_unit_tests_data,"%s.mtz"%data_file_prefix))
+        args = common_args+["clustering=false", "dump_gradients=cluster_false.pkl"],
+        pdb_name = pdb_name,
+        mtz_name = mtz_name)
       #
-      g1 = flex.vec3_double(easy_pickle.load("cluster_false.pkl"))
-      g2 = flex.vec3_double(easy_pickle.load("cluster_true.pkl"))
+      g1 = easy_pickle.load("cluster_false.pkl").as_double()
+      g2 = easy_pickle.load("cluster_true.pkl").as_double()
       assert g1.size() == g2.size()
-      diff = g1-g2
-      if(0):
-        for i, diff_i in enumerate(diff):
-          print i, diff_i#, g1[i], g2[i]
-      assert approx_equal(diff.max(), [0,0,0], [1.0E-3,1.0E-3,1.0E-3])
+      diff = flex.abs(g1-g2)
+      print flex.max(diff)
+      assert approx_equal(flex.max(diff), 0, 1.e-6)
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")

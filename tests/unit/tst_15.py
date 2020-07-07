@@ -25,6 +25,7 @@ def run(prefix):
       if(restraints is "qm" and data_file_prefix is "2ona_box_S"): continue
       common_args = ["restraints=%s"%restraints,
                      "mode=opt",
+                     #"fast_interaction=true", # this works!
                      "parallel.nproc=1",
                      "quantum.engine_name=mopac",
                      "two_buffers=true"]
