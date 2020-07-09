@@ -42,7 +42,6 @@ def run(prefix):
       g2 = easy_pickle.load("cluster_true.pkl").as_double()
       assert g1.size() == g2.size()
       diff = flex.abs(g1-g2)
-      print flex.max(diff)
       assert approx_equal(flex.max(diff), 0, 1.e-6)
 
 if(__name__ == '__main__'):
