@@ -262,7 +262,6 @@ ATOM    127  HA3 GLY A  99      12.572   9.633  23.783  1.00 80.00           H
 TER
 """
 
-
 def run(prefix):
   """
   Exercise gradients match: using clustering vs not using clustering.
@@ -276,19 +275,17 @@ def run(prefix):
     #
     for fast_interaction in [True, False]:
       print "fast_interaction:", fast_interaction
-      for restraints in ["cctbx"]:#["cctbx", "qm"]:
+      for restraints in ["cctbx", "qm"]:
         print "  restraints:", restraints
         for two_buffers in [False, True]:
           print "    two_buffers=", two_buffers
           for clustering in ["true", "false"]:
-            print "      clustering=", clustering 
+            print "      clustering=", clustering
             cmd = " ".join([
               "qr.refine",
               pdb_in,
               "mode=opt",
-              
-              "altloc_method=subtract", # default is 'average'; if set to average gradients never match!
-              
+              "altloc_method=subtract",
               "fast_interaction=%s"%fast_interaction,
               "stpmax=0.2",
               "gradient_only=true",

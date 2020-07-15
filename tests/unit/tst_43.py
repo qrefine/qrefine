@@ -38,52 +38,49 @@ def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=master_params_str)
 
+def get_model():
+  file_name = os.path.join(qr_unit_tests,"data_files","h_altconf_complete.pdb")
+  pdb_inp = iotbx.pdb.input(file_name)
+  model = qr.process_model_file(
+    pdb_file_name = file_name,
+    cif_objects = None,
+    crystal_symmetry=pdb_inp.crystal_symmetry()).model
+  return model
 
-def run():
+def run(maxnum_residues_in_cluster):
   result = []
   for clustering in [True, False]:
-    print "clustering", clustering, "-"*30
-    file_name = os.path.join(qr_unit_tests,"data_files","h_altconf_complete.pdb")
-    pdb_inp = iotbx.pdb.input(file_name)
-    model = qr.process_model_file(
-      pdb_file_name = file_name, 
-      cif_objects = None, 
-      crystal_symmetry=pdb_inp.crystal_symmetry()).model
-    
+    print "  clustering", clustering, "-"*30
+    model = get_model()
     fq = from_cctbx(restraints_manager = model.get_restraints_manager())
     if(clustering):
       fm = fragments(
        working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
        clustering_method          = betweenness_centrality_clustering,
-       maxnum_residues_in_cluster = 15,
+       maxnum_residues_in_cluster = maxnum_residues_in_cluster,
        altloc_method              = "subtract",
        charge_embedding           = False,
-       two_buffers                = True,
+       two_buffers                = False,
        clustering                 = clustering,
-       pdb_hierarchy              = model.get_hierarchy(),
+       pdb_hierarchy              = model.get_hierarchy().deep_copy(),
        qm_engine_name             = "mopac",
-       fast_interaction           = False,
+       fast_interaction           = True,
        crystal_symmetry           = model.crystal_symmetry())
     else:
-      t, g = fq.target_and_gradients(sites_cart=model.get_sites_cart())
-      result.append(g.as_double().deep_copy())
-      continue
-    
+      fc = fq
     fc = from_cluster(
       restraints_manager = fq,
-      fragment_manager = fm,
-      parallel_params =get_master_phil().extract(),
-      )
-    
+      fragment_manager   = fm,
+      parallel_params    = get_master_phil().extract())
     energy, gradients = fc.target_and_gradients(sites_cart=model.get_sites_cart())
-    #energy = energy*(kcal/mol)*(kcal/mol)/Hartree
-    #gradients = gradients*(kcal/mol)*(kcal/mol)*(Bohr/Hartree)
     gradients = gradients.as_double()
     result.append(gradients.deep_copy())
   diff = flex.abs(result[0] - result[1])
-  #for g1,g2, d  in zip(result[0] , result[1], diff):
-  #  print "%12.6f %12.6f %12.6f"%(g1,g2, d)
-  print flex.max(diff)
+  max_diff = flex.max(diff)
+  #print "  max(diff_grad):", max_diff
+  assert max_diff < 1.e-9
 
 if(__name__ == "__main__"):
-  run()
+  for maxnum_residues_in_cluster in [2, 15]:
+    print "Using maxnum_residues_in_cluster:", maxnum_residues_in_cluster
+    run(maxnum_residues_in_cluster=maxnum_residues_in_cluster)
