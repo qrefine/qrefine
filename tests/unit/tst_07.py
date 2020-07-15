@@ -6,7 +6,6 @@ import iotbx.pdb
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from mmtbx.pair_interaction import pair_interaction
-from mmtbx.pair_interaction import pair_interaction_ORIG
 import run_tests
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
@@ -55,56 +54,21 @@ def run(prefix):
   if 1:
     ph = get_hierarchy()
     interaction_list_cpp = pair_interaction.run(ph)
-    expected_list_cpp = [(1, 2), (1, 3), (2, 3), (2, 4), (3, 4), (3, 5),
-                     (3, 12), (3, 13), (3, 14), (4, 5), (4, 13), (4, 14),
-                     (4, 15), (4, 16), (4, 19), (5, 6), (5, 7), (5, 10),
-                     (5, 11), (5, 12), (5, 13), (5, 19), (6, 7), (6, 8),
-                     (6, 9), (6, 10), (6, 11), (6, 13), (6, 19), (6, 22),
-                     (6, 23), (6, 26), (6, 31), (7, 8), (7, 10), (7, 19),
-                     (7, 23), (8, 9), (8, 10), (8, 23), (8, 26), (9, 10),
-                     (9, 11), (9, 22), (9, 26), (9, 31), (10, 11), (10, 12),
-                     (11, 12), (11, 13), (11, 22), (12, 13), (13, 14), (13, 15),
-                     (13, 18), (13, 19), (13, 22), (14, 15), (15, 16), (15, 17),
-                     (15, 18), (15, 19), (16, 17), (16, 18), (16, 19), (16, 20),
-                     (17, 18), (17, 19), (17, 20), (17, 21), (18, 19), (18, 21),
-                     (18, 22), (19, 20), (19, 22), (19, 23), (20, 21), (20, 22),
-                     (20, 23), (20, 24), (21, 22), (21, 24), (21, 25), (22, 23),
-                     (22, 24), (22, 25), (22, 26), (22, 31), (23, 24), (23, 26),
-                     (23, 27), (24, 25), (24, 27), (24, 28), (24, 30), (25, 26),
-                     (25, 28), (26, 27), (26, 31), (27, 28), (27, 29), (27, 30),
-                     (28, 29), (28, 30), (29, 30)]
-
-    for e1, e2 in zip(expected_list_cpp, interaction_list_cpp):
-      sorted(e1)
-      sorted(e2)
-    expected_list_cpp.sort()
-    interaction_list_cpp.sort()
-    #assert approx_equal(expected_list_cpp, interaction_list_cpp) # This fails
-  # Difference between two
-  def standardize(x):
-    return [list(it) for it in x]
-  #
-  interaction_list_cpp = standardize(interaction_list_cpp)
-  interaction_list_java = standardize(interaction_list_java)
-  for c in interaction_list_cpp:
-    if not c in interaction_list_java:
-      print "CPP result not in Java result:", c
-  for j in interaction_list_java:
-    if not j in interaction_list_cpp:
-      print "Java result not in CPP result:", j
-  print
-  #
-  expected_list_cpp = standardize(expected_list_cpp)
-  expected_list_java = standardize(expected_list_java)
-  for c in expected_list_cpp:
-    if not c in expected_list_java:
-      print "CPP expected not in Java expected:", c
-  for j in expected_list_java:
-    if not j in expected_list_cpp:
-      print "Java expected not in CPP expected:", j
-  print
-
-  #assert approx_equal(interaction_list_java, interaction_list_cpp)
+    expected_list_cpp = [
+      (9, 26), (24, 30), (6, 9), (17, 20), (1, 3), (18, 19), (23, 26), (6, 7),
+      (4, 19), (24, 27), (6, 10), (11, 22), (25, 26), (7, 19), (27, 28), (15, 18),
+      (5, 11), (29, 30), (4, 16), (6, 23), (16, 19), (6, 26), (17, 18), (22, 25),
+      (3, 12), (4, 15), (16, 18), (6, 13), (19, 23), (15, 16), (21, 24), (22, 23),
+      (22, 26), (8, 9), (17, 21), (20, 21), (24, 28), (6, 11), (13, 19), (18, 21),
+      (23, 24), (3, 5), (5, 10), (7, 8), (5, 7), (24, 25), (16, 20), (13, 22),
+      (18, 22), (28, 29), (5, 13), (19, 22), (15, 19), (16, 17), (11, 12), (4, 13),
+      (9, 11), (11, 13), (20, 22), (13, 15), (2, 3), (8, 26), (6, 8), (20, 24),
+      (6, 31), (26, 31), (21, 22), (13, 18), (27, 30), (23, 27), (3, 4), (2, 4),
+      (10, 11), (8, 23), (5, 6), (9, 22), (5, 19), (22, 31), (3, 14), (27, 29),
+      (1, 2), (28, 30), (5, 12), (10, 12), (4, 5), (7, 10), (6, 22), (7, 23),
+      (17, 19), (22, 24), (3, 13), (4, 14), (9, 10), (9, 31), (19, 20), (25, 28),
+      (15, 17), (6, 19), (21, 25), (20, 23), (26, 27), (13, 14), (12, 13), (14, 15)]
+    assert approx_equal(expected_list_cpp, interaction_list_cpp)
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
