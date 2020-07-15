@@ -51,16 +51,16 @@ max_atoms = 15000
   .type = int
   .help = maximum number of atoms
 debug = False
-    .type = bool
-    .help = flag to control verbosity of output for debugging problematic code.
+  .type = bool
+  .help = flag to control verbosity of output for debugging problematic code.
 cluster{
-  fast_interaction = False
+  fast_interaction = True
     .type = bool
     .help = enable/disable C++ clustering
   charge_cutoff = 8.0
     .type = float
     .help = distance for point charge cutoff
-  clustering = False
+  clustering = True
     .type = bool
     .help = enable/disable clustering
   charge_embedding = False
@@ -76,9 +76,11 @@ cluster{
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
     .help = type of clustering algorithm
-  altloc_method = *average subtract
+  altloc_method = average *subtract
     .type = choice(multi=False)
-    .help = two strategies on how to join energies from multiple energy and gradient calculations are performed for alternate locations.
+    .help = two strategies on how to join energies from multiple energy and \
+            gradient calculations are performed for alternate locations.\
+            altloc_method=average does not work! (known issue).
   g_scan  = 10 15 20
     .type = str
     .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
@@ -92,16 +94,17 @@ cluster{
 
 restraints = cctbx *qm
   .type = choice(multi=False)
+  .help = Choice of restraints: cctbx (fast) or any of available QM engines.
 quantum {
   engine_name = *mopac ani torchani terachem turbomole pyscf orca gaussian xtb
     .type = choice(multi=False)
     .help = choose the QM program
-  charge= None
-    .type = int
-    .help = The formal charge of the entire molecule
   basis = Auto
     .type = str
     .help = pre-defined defaults
+  charge= None
+    .type = int
+    .help = The formal charge of the entire molecule
   method = Auto
     .type = str
     .help = Defaults to HF for all but MOPAC (PM7), xTB (GFN2) and TorchANI (ani-1x_8x)
@@ -128,14 +131,16 @@ refine {
     .help = algorithm used to compute structure factors, either the direct method or fast fourier transform.
   refinement_target_name = *ml ls_wunit_k1
     .type = choice
+    .help = Data target type: least-squares or maximum-likelihood.
   mode = opt *refine gtest
     .type = choice(multi=False)
     .help = choose between refinement, geometry optimization or gradient test
   number_of_macro_cycles=1
     .type = int
-    .help = number of macro cycles used in the refinement procedure.
+    .help = number of macro cycles used in the refinement procedure
   number_of_weight_search_cycles=50
     .type = int
+    .help = Number of attempts to find optimal weight
   number_of_refine_cycles=5
     .type = int
     .help = maximum number of refinement cycles
@@ -144,23 +149,28 @@ refine {
     .help = maximum number of micro cycles used in refinement
   data_weight=None
     .type = float
+    .help = Allows to specify data/restraints weight (by-pass weight search)
   choose_best_use_r_work = False
     .type = bool
+    .help = Use Rwork to make a decision about best weight (otherwise use Rfree)
   skip_weight_search = False
     .type = bool
+    .help = Calculate weight based on gradient norms (skip weight optimization)
   adjust_restraints_weight_scale_value = 2
     .type = float
   max_iterations_weight = 50
     .type = int
+    .help = Max number of trial refinement iterations for weight search
   max_iterations_refine = 50
     .type = int
+    .help = Max number of actual refinement iterations
   use_ase_lbfgs = False
     .type = bool
     .help = used for debugging the lbfgs minimizer from cctbx.
   line_search = True
     .type = bool
     .help = flag to use a line search in minimizer.
-  stpmax = 3
+  stpmax = 0.2
     .type = float
     .help = maximum step length, empirically we find 3 for cctbx, but 0.2 is better for QM methods.
   gradient_only = False
@@ -168,6 +178,7 @@ refine {
     .help = use the gradient only line search according to JA Snyman 2005.
   update_all_scales = True
     .type = bool
+    .help = Update bulk-solvent and overall scales
   refine_sites = True
     .type = bool
     .help = only refine the cartesian coordinates of the molecular system.
@@ -176,16 +187,22 @@ refine {
     .help = adp refinement are not currently supported.
   restraints_weight_scale = 1.0
     .type = float
+    .help = Scale factor for restraints term
   shake_sites = False
     .type = bool
+    .help = Randomize coordinates prior weight calculation
   use_convergence_test = True
     .type = bool
+    .help = Check if refinement converged (for earlier termination)
   max_bond_rmsd = 0.03
     .type = float
+    .help = Max bond RMSD to accept optimized weight
   max_r_work_r_free_gap = 5.0
     .type = float
+    .help = Max difference between Rfree and Rwork to accept optimized weight
   r_tolerance = 0.001
     .type = float
+    .help = R factor delta beteen refinement cycles to determine convergence
   rmsd_tolerance = 0.01
     .type = float
     .help = maximum acceptable tolerance for the rmsd.
@@ -225,11 +242,10 @@ parallel {
 
 output_file_name_prefix = None
   .type = str
+  .help = Output file name prefix
 output_folder_name = "pdb"
   .type = str
-shared_disk = True
-  .type = bool
-  .help = this is deprecated no because we now only use the parallel map.
+  .help = Output folder name
 rst_file = None
   .type = str
   .help = Restart file to use for determining location in run. Loads previous \
