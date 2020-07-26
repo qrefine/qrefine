@@ -51,7 +51,7 @@ class Mopac(Calculator):
                  spin=0,
                  OPT=False,
                  functional=functional,
-                 job_type=' MOZYME 1SCF  GRADIENTS AUX(0,PRECISION=9) ',
+                 job_type=' 1SCF  GRADIENTS AUX(0,PRECISION=9) ',
                  RELSCF= None)
         # set user values
         self.set(**kwargs)
