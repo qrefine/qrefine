@@ -6,7 +6,6 @@ import mmtbx.restraints
 from libtbx.utils import Sorry
 from charges import charges_class
 from scitbx.array_family import flex
-from clustering import betweenness_centrality_clustering
 from plugin.ase.mopac_qr import Mopac
 from plugin.ase.pyscf_qr import Pyscf
 from plugin.ase.terachem_qr import TeraChem
@@ -17,6 +16,121 @@ from plugin.ase.xtb_qr import GFNxTB
 from plugin.tools import qr_tools
 from libtbx import group_args
 import math
+from qrefine.super_cell import expand
+import qrefine.completion as model_completion
+from libtbx.utils import null_out
+
+class restraints(object):
+  def __init__(self, params, model):
+    self.params = params
+    self.model = model
+    self.cif_objects      = model.get_restraint_objects()
+    self.pdb_hierarchy    = model.get_hierarchy()
+    self.crystal_symmetry = model.crystal_symmetry()
+    self.pi_params        = model.get_current_pdb_interpretation_params()
+    self.restraints_manager = None
+    self.update(
+      pdb_hierarchy    = model.get_hierarchy(),
+      crystal_symmetry = model.crystal_symmetry())
+
+  def source_of_restraints_qm(self):
+    return self.params.restraints == "qm"
+
+  def update(self, pdb_hierarchy, crystal_symmetry):
+    if(not self.source_of_restraints_qm()):
+      model = mmtbx.model.manager(
+        model_input       = None,
+        restraint_objects = self.cif_objects,
+        pdb_hierarchy     = pdb_hierarchy,
+        process_input     = True,
+        crystal_symmetry  = crystal_symmetry,
+        pdb_interpretation_params = self.pi_params,
+        log               = null_out())
+      model.setup_restraints_manager(grm_normalization=False)
+      self.restraints_manager = from_cctbx(
+        restraints_manager = model.get_restraints_manager())
+    else:
+      assert self.source_of_restraints_qm()
+      self.restraints_manager = from_qm(
+        cif_objects      = self.cif_objects,
+        method           = self.params.quantum.method,
+        basis            = self.params.quantum.basis,
+        pdb_hierarchy    = pdb_hierarchy,
+        charge           = self.params.quantum.charge,
+        qm_engine_name   = self.params.quantum.engine_name,
+        qm_addon         = self.params.quantum.qm_addon,
+        qm_addon_method  = self.params.quantum.qm_addon_method,
+        memory           = self.params.quantum.memory,
+        nproc            = self.params.quantum.nproc,
+        crystal_symmetry = crystal_symmetry,
+        clustering       = self.params.cluster.clustering)
+    return self.restraints_manager
+
+class from_expansion(object):
+  def __init__(self, restraints_source, pdb_hierarchy, crystal_symmetry):
+    self.restraints_manager = restraints_source.restraints_manager
+    self.restraints_source  = restraints_source
+    self.pdb_hierarchy      = pdb_hierarchy
+    self.crystal_symmetry   = crystal_symmetry
+    self.pdb_hierarchy_super_completed = None
+    self.selection = None
+    self.size = self.pdb_hierarchy.atoms().size()
+    self.crystal_symmetry_ss = None
+    self._expand()
+    self.sites_cart_previous = self.pdb_hierarchy.atoms().extract_xyz()
+
+  def __call__(self, selection_and_sites_cart):
+    return self.target_and_gradients(
+      sites_cart = selection_and_sites_cart[1],
+      selection  = selection_and_sites_cart[0],
+      index      = selection_and_sites_cart[2])
+
+  def target_and_gradients(self, sites_cart, selection=None, index=None):
+    self._update(sites_cart = sites_cart)
+    energy, gradients = self.restraints_manager.target_and_gradients(
+        sites_cart = self.pdb_hierarchy_super_completed.atoms().extract_xyz())
+    gradients = gradients.select(self.selection)
+    return energy, gradients
+
+  def energies_sites(self, sites_cart, compute_gradients=True):
+    tg = self.target_and_gradients(sites_cart=sites_cart)
+    return group_args(
+      target    = tg[0],
+      gradients = tg[1])
+
+  def _update(self, sites_cart, threshold = 0.1):
+    shift_max = flex.max(
+      flex.sqrt((sites_cart - self.sites_cart_previous).dot()))
+    if(shift_max > threshold):
+      self.pdb_hierarchy.atoms().set_xyz(sites_cart)
+      self._expand()
+      self.sites_cart_previous = sites_cart
+
+  def _expand(self):
+    expansion = expand(
+      pdb_hierarchy        = self.pdb_hierarchy,
+      crystal_symmetry     = self.crystal_symmetry,
+      select_within_radius = 10.0)
+    pdb_hierarchy_super = expansion.ph_super_sphere
+    pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
+      crystal_symmetry = expansion.cs_box)
+    self.crystal_symmetry_ss = expansion.cs_box
+    if(self.restraints_source.source_of_restraints_qm()):
+      self.pdb_hierarchy_super_completed = model_completion.run(
+        #pdb_hierarchy         = pdb_hierarchy_super,
+        crystal_symmetry      = expansion.cs_box,
+        model_completion      = True,
+        pdb_filename          = "supersphere.pdb",
+        original_pdb_filename = None)
+    else:
+      self.pdb_hierarchy_super_completed = pdb_hierarchy_super
+    selection = flex.bool(
+      self.pdb_hierarchy_super_completed.atoms().size(), False)
+    self.selection = selection.set_selected(
+      flex.size_t(xrange(self.pdb_hierarchy.atoms().size())), True)
+    self.restraints_manager = self.restraints_source.update(
+      pdb_hierarchy    = self.pdb_hierarchy_super_completed,
+      crystal_symmetry = expansion.cs_box)
 
 class from_cctbx(object):
   def __init__(self, restraints_manager, fragment_extracts=None,

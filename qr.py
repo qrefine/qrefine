@@ -95,6 +95,9 @@ cluster{
 restraints = cctbx *qm
   .type = choice(multi=False)
   .help = Choice of restraints: cctbx (fast) or any of available QM engines.
+expansion = False
+  .type = bool
+  .help = Expand input model into super-sphere
 quantum {
   engine_name = *mopac ani torchani terachem turbomole pyscf orca gaussian xtb
     .type = choice(multi=False)
@@ -315,7 +318,8 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     pdb_hierarchy      = model.get_hierarchy(),
     xray_structure     = model.get_xray_structure(),
     cif_objects        = cif_objects,
-    ase_atoms          = ase_io_read(pdb_file_name) # To be able to use ASE LBFGS
+    ase_atoms          = ase_io_read(pdb_file_name), # To be able to use ASE LBFGS
+    crystal_symmetry   = model.get_xray_structure().crystal_symmetry()
     )
 
 def create_fragment_manager(
@@ -341,29 +345,17 @@ def create_fragment_manager(
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters)
 
-def create_restraints_manager(
-      params,
-      model,
-      fragment_manager=None):
-  if(params.restraints == "cctbx"):
-    restraints_manager = restraints.from_cctbx(
-      restraints_manager = model.model.get_restraints_manager())
+def create_restraints_manager(params, model): 
+  restraints_source = restraints.restraints(
+    params = params,
+    model  = model.model)
+  if(params.expansion):
+    return restraints.from_expansion(
+      restraints_source = restraints_source,
+      pdb_hierarchy     = model.model.get_hierarchy(),
+      crystal_symmetry  = model.crystal_symmetry)
   else:
-    assert params.restraints == "qm"
-    restraints_manager = restraints.from_qm(
-      cif_objects                = model.cif_objects,
-      method                     = params.quantum.method,
-      basis                      = params.quantum.basis,
-      pdb_hierarchy              = model.pdb_hierarchy,
-      charge                     = params.quantum.charge,
-      qm_engine_name             = params.quantum.engine_name,
-      qm_addon                   = params.quantum.qm_addon,
-      qm_addon_method            = params.quantum.qm_addon_method,
-      memory                     = params.quantum.memory,
-      nproc                      = params.quantum.nproc,
-      crystal_symmetry           = model.xray_structure.crystal_symmetry(),
-      clustering                 = params.cluster.clustering)
-  return restraints_manager
+    return restraints_source.restraints_manager
 
 def create_calculator(weights, params, restraints_manager, fmodel=None,
                       model=None):
@@ -494,9 +486,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         pdb_hierarchy    = model.pdb_hierarchy,
         cif_objects      = model.cif_objects,
         crystal_symmetry = model.xray_structure.crystal_symmetry())
-    restraints_manager = create_restraints_manager(
-      params           = params,
-      model            = model)
+
+    restraints_manager = create_restraints_manager(params, model)
 
   if(params.refine.mode == "gtest"):
     # needs to be moved! Perhaps also to driver
@@ -565,9 +556,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
             pdb_hierarchy    = model.pdb_hierarchy,
             cif_objects      = model.cif_objects,
             crystal_symmetry = model.xray_structure.crystal_symmetry())
-        restraints_manager = create_restraints_manager(
-            params           = params,
-            model            = model)
+        restraints_manager = create_restraints_manager(params, model)
         if(fragment_manager is not None):
           cluster_restraints_manager = cluster_restraints.from_cluster(
             restraints_manager = restraints_manager,
@@ -628,6 +617,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   else:
     rm = restraints_manager
     if(fragment_manager is not None):
+      assert not params.expansion
       cluster_restraints_manager = cluster_restraints.from_cluster(
         restraints_manager = restraints_manager,
         fragment_manager   = fragment_manager,
