@@ -119,7 +119,7 @@ class from_expansion(object):
       self.pdb_hierarchy_super_completed = model_completion.run(
         #pdb_hierarchy         = pdb_hierarchy_super,
         crystal_symmetry      = expansion.cs_box,
-        model_completion      = True,
+        model_completion      = False,
         pdb_filename          = "supersphere.pdb",
         original_pdb_filename = None)
     else:
