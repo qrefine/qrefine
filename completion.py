@@ -13,6 +13,7 @@ mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
 from utils import hierarchy_utils
+from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 
 def d_squared(xyz1, xyz2):
   d2 = 0
@@ -387,15 +388,6 @@ def add_cys_hg_to_residue_group(rg,
       append_to_end_of_model=append_to_end_of_model,
     )
   return rc
-
-def conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
-                                         residue_group,
-                                         ):
-  from mmtbx.hydrogens import specialised_hydrogen_atoms
-  specialised_hydrogen_atoms.conditional_add_cys_hg_to_atom_group(
-    geometry_restraints_manager,
-    residue_group,
-    )
 
 def remove_cys_hg_from_residue_group(rg):
   for ag in rg.atom_groups():

@@ -421,6 +421,7 @@ def run(pdb_filename=None,
   xrs = model.get_xray_structure()
   grm = model.get_restraints_manager()
   t0=time.time()
+  model.process_input_model(make_restraints=True)
   atom_valences = electron_distribution(
     model.get_hierarchy(), # needs to be altloc free
     model.get_restraints_manager().geometry,
