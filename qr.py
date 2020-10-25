@@ -345,15 +345,25 @@ def create_fragment_manager(
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters)
 
-def create_restraints_manager(params, model): 
+def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(
     params = params,
     model  = model.model)
   if(params.expansion):
-    return restraints.from_expansion(
-      restraints_source = restraints_source,
-      pdb_hierarchy     = model.model.get_hierarchy(),
-      crystal_symmetry  = model.crystal_symmetry)
+    altlocs_present = False
+    conformer_indices = model.model.get_hierarchy().get_conformer_indices()
+    if(len(list(set(list(conformer_indices))))>1):
+      altlocs_present = True
+    if(altlocs_present):
+      return restraints.from_altlocs(
+        restraints_source = restraints_source,
+        pdb_hierarchy     = model.model.get_hierarchy(),
+        crystal_symmetry  = model.crystal_symmetry)
+    else:
+      return restraints.from_expansion(
+        restraints_source = restraints_source,
+        pdb_hierarchy     = model.model.get_hierarchy(),
+        crystal_symmetry  = model.crystal_symmetry)
   else:
     return restraints_source.restraints_manager
 

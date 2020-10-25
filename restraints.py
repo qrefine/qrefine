@@ -132,6 +132,47 @@ class from_expansion(object):
       pdb_hierarchy    = self.pdb_hierarchy_super_completed,
       crystal_symmetry = expansion.cs_box)
 
+class from_altlocs(object):
+  def __init__(self, restraints_source, pdb_hierarchy, crystal_symmetry,
+               method):
+    self.restraints_manager = restraints_source.restraints_manager
+    self.restraints_source  = restraints_source
+    self.pdb_hierarchy      = pdb_hierarchy
+    self.crystal_symmetry   = crystal_symmetry
+    self.method             = method
+
+  def __call__(self, selection_and_sites_cart):
+    return self.target_and_gradients(
+      sites_cart = selection_and_sites_cart[1],
+      selection  = selection_and_sites_cart[0],
+      index      = selection_and_sites_cart[2])
+
+  def target_and_gradients(self, sites_cart, selection=None, index=None):
+    g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
+    conf_ind = ph.get_conformer_indices()
+    n_altlocs = flex.max(conf_ind)
+    sel_W = conf_ind == 0
+    g_blanks = flex.vec3_double(sel_W.count(True))
+    for ci in range(1, n_altlocs+1):
+      sel_ci = conf_ind == ci
+      sel_ci_blank = (conf_ind == ci) | sel_W
+      ph_ci_blank = ph.select(sel_ci_blank)
+      g_ci_blank_ = get_grads2(ph=ph_ci_blank, cs=cs)
+      g_ci = g_ci_blank_.select(ph_ci_blank.get_conformer_indices() == 1)
+      g_result = g_result.set_selected(sel_ci, g_ci)
+      g_blanks += g_ci_blank_.select( ph_ci_blank.get_conformer_indices()==0 )
+    if(self.method=="subtract"):
+      g_blank = get_grads2(ph=ph.select(sel_W), cs=cs)
+      g_result = g_result.set_selected(sel_W, g_blanks-((n_altlocs-1)*g_blank))
+    elif(self.method=="average"):
+      g_result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+    else: assert 0
+
+    # Make sure gradient_only is set correctly!!!
+    return energy, g_result
+
+
+
 class from_cctbx(object):
   def __init__(self, restraints_manager, fragment_extracts=None,
               file_name="./ase/tmp_ase.pdb"):
