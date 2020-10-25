@@ -46,7 +46,7 @@ class restraints(object):
         crystal_symmetry  = crystal_symmetry,
         pdb_interpretation_params = self.pi_params,
         log               = null_out())
-      model.setup_restraints_manager(grm_normalization=False)
+      model.process_input_model(make_restraints=True, grm_normalization=False)
       self.restraints_manager = from_cctbx(
         restraints_manager = model.get_restraints_manager())
     else:

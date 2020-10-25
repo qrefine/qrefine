@@ -21,9 +21,7 @@ class manager(object):
     self.mode = mode
     self.log = log
     self.pdb_hierarchy = pdb_hierarchy
-    self.states = mmtbx.utils.states(
-      pdb_hierarchy  = self.pdb_hierarchy,
-      xray_structure = xrs)
+    self.states = mmtbx.utils.states(pdb_hierarchy  = self.pdb_hierarchy)
     self.crystal_symmetry = xrs.crystal_symmetry()
     self.states.add(sites_cart = xrs.sites_cart())
     self.max_bond_rmsd = max_bond_rmsd

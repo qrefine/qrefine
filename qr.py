@@ -312,7 +312,7 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     process_input             = True,
     pdb_interpretation_params = params,
     log                       = null_out())
-  model.setup_restraints_manager(grm_normalization=False)
+  model.process_input_model(make_restraints=True, grm_normalization=False)
   return group_args(
     model              = model,
     pdb_hierarchy      = model.get_hierarchy(),
