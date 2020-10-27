@@ -2,7 +2,6 @@ import  iotbx.pdb
 import time
 import sys
 import os
-import qrefine.completion as completion
 
 import run_tests
 

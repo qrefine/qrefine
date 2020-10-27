@@ -877,6 +877,27 @@ def complete_pdb_hierarchy(hierarchy,
                            verbose=False,
                            debug=False,
                           ):
+  """Complete PDB hierarchy with hydrogen atoms as needed
+
+       This needs to move to Phenix with better functionality
+
+  Args:
+      hierarchy (hierarchy): Starting model
+      geometry_restraints_manager (GRM): Starting restraints
+      use_capping_hydrogens (bool, optional): Capping or not
+      append_to_end_of_model (bool, optional): Added atoms go to end of atom list
+      pdb_filename (None, optional): Description
+      pdb_inp (None, optional): Description
+      original_pdb_filename (None, optional): Description
+      verbose (bool, optional): Description
+      debug (bool, optional): Description
+
+  Returns:
+      TYPE: Description
+
+  Raises:
+      Sorry: Description
+  """
   for ag in hierarchy.atom_groups():
     if get_class(ag.resname) in ['common_rna_dna']:
       raise Sorry('')
@@ -991,6 +1012,9 @@ def complete_pdb_hierarchy(hierarchy,
                                            )
     sites_cart = hierarchy.atoms().extract_xyz()
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  #
+  # moved to mmtbx.ligands
+  #
   add_terminal_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
                          ppf.geometry_restraints_manager(),
                          use_capping_hydrogens=use_capping_hydrogens,
@@ -1017,17 +1041,23 @@ def run(pdb_filename=None,
   #   1. completing a model with hydrogens in a protein-like manner
   #   2. completing a cluster with hydrogens in a QM-sensible manner
   #
+  # Validation
+  #
   if pdb_hierarchy:
     assert crystal_symmetry
     assert pdb_filename is None
-
+  #
+  # output
+  #
   if model_completion:
     use_capping_hydrogens=False
     fname = 'complete'
   else:
     use_capping_hydrogens=True
     fname = 'capping'
-    #assert 0 # model has H
+  #
+  # adjust parameters
+  #
   params=None
   if use_capping_hydrogens:
     params = hierarchy_utils.get_pdb_interpretation_params()
@@ -1045,6 +1075,9 @@ def run(pdb_filename=None,
     ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
                                             params=params,
                                           )
+  #
+  # guts
+  #
   ppf = complete_pdb_hierarchy(
     ppf.all_chain_proxies.pdb_hierarchy,
     ppf.geometry_restraints_manager(),
