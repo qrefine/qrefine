@@ -358,7 +358,8 @@ def create_restraints_manager(params, model):
       return restraints.from_altlocs(
         restraints_source = restraints_source,
         pdb_hierarchy     = model.model.get_hierarchy(),
-        crystal_symmetry  = model.crystal_symmetry)
+        crystal_symmetry  = model.crystal_symmetry,
+        method            = params.cluster.altloc_method)
     else:
       return restraints.from_expansion(
         restraints_source = restraints_source,

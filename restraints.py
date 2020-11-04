@@ -148,6 +148,48 @@ class from_altlocs(object):
       index      = selection_and_sites_cart[2])
 
   def target_and_gradients(self, sites_cart, selection=None, index=None):
+
+    # XXX This is very durty, just to get things runing for now.
+
+    def get_grm(ph, cs):
+      import mmtbx.monomer_library.server
+      import mmtbx.monomer_library.pdb_interpretation
+      from mmtbx import monomer_library
+
+      mon_lib_srv = mmtbx.monomer_library.server.server()
+      ener_lib    = mmtbx.monomer_library.server.ener_lib()
+      # XXX Nth copy-paste
+      params = mmtbx.monomer_library.pdb_interpretation.master_params.extract()
+      params.use_neutron_distances = True
+      params.restraints_library.cdl = False
+      params.sort_atoms = False
+      processed_pdb_file = mmtbx.monomer_library.pdb_interpretation.process(
+        mon_lib_srv              = mon_lib_srv,
+        ener_lib                 = ener_lib,
+        params                   = params,
+        crystal_symmetry         = cs,
+        pdb_inp                  = ph.as_pdb_input(),
+        strict_conflict_handling = False,
+        force_symmetry           = True,
+        log                      = null_out())
+      xrs = processed_pdb_file.xray_structure()
+      sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
+      has_hd = "H" in sctr_keys or "D" in sctr_keys
+      geometry = processed_pdb_file.geometry_restraints_manager(
+        show_energies                = False,
+        assume_hydrogens_all_missing = not has_hd,
+        plain_pairs_radius           = 5.0)
+      return mmtbx.restraints.manager(
+         geometry = geometry, normalization = False)
+
+    def get_grads2(ph, cs):
+      grm = get_grm(ph=ph, cs=cs)
+      es = grm.energies_sites(sites_cart=ph.atoms().extract_xyz(),
+        compute_gradients=True)
+      return es.gradients
+
+    cs = self.crystal_symmetry
+    ph = self.pdb_hierarchy
     g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
     conf_ind = ph.get_conformer_indices()
     n_altlocs = flex.max(conf_ind)
@@ -169,6 +211,7 @@ class from_altlocs(object):
     else: assert 0
 
     # Make sure gradient_only is set correctly!!!
+    energy=0 # undefined!
     return energy, g_result
 
 
