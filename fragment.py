@@ -614,11 +614,11 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
     index_frag.write_pdb_file(
     file_name        = filename_frag,
     crystal_symmetry = F.expansion_cs)
-    # capped_hierarchy = completion.run(pdb_hierarchy=index_frag,
-    #           crystal_symmetry=F.expansion_cs,
-    #           model_completion=False,
-    #           original_pdb_filename=filename_frag)
-    capped_hierarchy = F.fragment_capped_initial[index]
+    capped_hierarchy = completion.run(pdb_hierarchy=index_frag,
+               crystal_symmetry=F.expansion_cs,
+               model_completion=False,
+               original_pdb_filename=filename_frag)
+    #capped_hierarchy = F.fragment_capped_initial[index]
     capped_hierarchy.write_pdb_file(file_name=filename_capped,
               crystal_symmetry=F.expansion_cs)
 
