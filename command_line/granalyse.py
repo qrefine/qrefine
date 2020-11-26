@@ -113,50 +113,50 @@ def rmsd(V, W):
         d += (V[i] - W[i])**2.0
     return np.sqrt(d/dim)
 
+# TODO:  keep for now but remove eventually (Oct'20)
+# def extract_expansion_grad(nat_model,grad):
+#   import ase.units as ase_units
+#   """read xTB gradient and give back the first nat_model atoms that
+#   should belong the the actual model
+#   NOT USED ANYMORE
+#   """
+#   file = open(grad, 'r')
+#   lines = file.readlines()
+#   file.close()
 
-def extract_expansion_grad(nat_model,grad):
-  import ase.units as ase_units
-  """read xTB gradient and give back the first nat_model atoms that
-  should belong the the actual model
-  NOT USED ANYMORE
-  """
-  file = open(grad, 'r')
-  lines = file.readlines()
-  file.close()
+#   g_ex = np.array([[0, 0, 0]])
 
-  g_ex = np.array([[0, 0, 0]])
+#   nline = len(lines)
+#   iline = -1
+#   n_cyc = 0
+#   for i in range(nline):
+#     if 'cycle' in lines[i]:
+#       n_cyc+=1
+#       iline = i
 
-  nline = len(lines)
-  iline = -1
-  n_cyc = 0
-  for i in range(nline):
-    if 'cycle' in lines[i]:
-      n_cyc+=1
-      iline = i
+#   # deduce number of atoms in expansion file from file
+#   nat = int((nline - 2 - n_cyc)/n_cyc/2)
+#   print('found ',nat,' atoms in file:',grad)
 
-  # deduce number of atoms in expansion file from file
-  nat = int((nline - 2 - n_cyc)/n_cyc/2)
-  print('found ',nat,' atoms in file:',grad)
+#   if iline < 0:
+#     raise RuntimeError('Please check xTB gradient')
 
-  if iline < 0:
-    raise RuntimeError('Please check xTB gradient')
-
-  # next line
-  iline += nat + 1 
-  # $end line
-  nline -= 1
-  # read gradients
-  for i in range(iline, nline):
-    line = lines[i].replace('D', 'E')
-    tmp = np.array([[float(f) for f in line.split()[0:3]]])
-    g_ex = np.concatenate((g_ex, tmp))
+#   # next line
+#   iline += nat + 1 
+#   # $end line
+#   nline -= 1
+#   # read gradients
+#   for i in range(iline, nline):
+#     line = lines[i].replace('D', 'E')
+#     tmp = np.array([[float(f) for f in line.split()[0:3]]])
+#     g_ex = np.concatenate((g_ex, tmp))
   
-  # converter=(ase_units.Hartree / ase_units.Bohr)/(ase_units.kcal / ase_units.mol) 
-  converter=(ase_units.Hartree / ase_units.Bohr)/(ase_units.kcal / ase_units.mol) 
-  g_ex = (-np.delete(g_ex, np.s_[0:1], axis=0)) * converter 
-  # g_out=g_ex
-  g_out=np.reshape(g_ex,(nat*3)) #*nat_model
-  return g_out[0:nat_model*3]
+#   # converter=(ase_units.Hartree / ase_units.Bohr)/(ase_units.kcal / ase_units.mol) 
+#   converter=(ase_units.Hartree / ase_units.Bohr)/(ase_units.kcal / ase_units.mol) 
+#   g_ex = (-np.delete(g_ex, np.s_[0:1], axis=0)) * converter 
+#   # g_out=g_ex
+#   g_out=np.reshape(g_ex,(nat*3)) #*nat_model
+#   return g_out[0:nat_model*3]
 
 #######################################
 def run(args,log):
@@ -180,11 +180,6 @@ def run(args,log):
       do_delta=True
   if ('--help') in args:
       get_help()
-  # if ('--expansion') in args:
-     # do_expan=True
-  if ('--exp') in args:
-      do_expan=True
-      exp_name=args[args.index('--exp')+1]
   if (len(args)<1):
     get_help()
   
@@ -195,43 +190,6 @@ def run(args,log):
   ph = pdb_inp.construct_hierarchy()
   nat=len(pdb_obj.hierarchy.atoms())
   
-  # 0) prepare expansion.pdb (finalise with capping)
-  # 1)run qr.refine with g_mode=0 in expansion.pdb
-  # 2) E.g 'qr.granalyse model.pdb --ref 1-20.npy --exp 0-0.npy'
-  if do_expan:
-     print('atoms in model: ',nat+1)
-     ref_grad=np.load(ref_name)
-     print(ref_grad[0:6])
-     print('cluster gradient:', ref_name)
-     full=np.load(exp_name)
-     print(full[0:6])
-     g_ex=full[0:nat*3]
-     # print(g_ex.shape,ref_grad.shape)
-     get_deviations(log,g_ex,ref_grad)
-     dg=np.abs(g_ex-ref_grad)
-     delta=atomic_mean_deviation(dg)
-     set_ph_field(ph=pdb_obj,val=delta,field=field)
-     output_pdb = "expansion-cluster.pdb" 
-     print('writing color-coded PBD: ',output_pdb)
-     pdb_obj.hierarchy.write_pdb_file(file_name=output_pdb)
-     exit()
-
-  # if do_expan:
-  #    print('atoms in model: ',nat+1)
-  #    ref_grad=np.load(ref_name)
-  #    print(ref_grad[0:6])
-  #    print('cluster gradient:', ref_name)
-  #    g_ex=np.array(extract_expansion_grad(nat,exp_name))
-  #    print(g_ex[0:6])
-  #    get_deviations(log,g_ex,ref_grad)
-  #    dg=np.abs(g_ex-ref_grad)
-  #    delta=atomic_mean_deviation(dg)
-  #    set_ph_field(ph=pdb_obj,val=delta,field=field)
-  #    output_pdb = "expansion-cluster.pdb" 
-  #    print('writing color-coded PBD: ',output_pdb)
-  #    pdb_obj.hierarchy.write_pdb_file(file_name=output_pdb)
-  #    exit()
-
 
   # vectors
   ref_grad=None
@@ -254,13 +212,15 @@ def run(args,log):
   for i in range(0,n_files):
     iname.append(sfiles[i])
     igrad.append(np.load(iname[i]))
-
-
   #set or read reference gradient
   if ref_name is None:
-    ref_idx= n_files-1 # last gradient should have best parameters
-    ref_name=iname[ref_idx]
-    ref_grad=np.array(igrad[ref_idx])
+    if '0-0.npy' in iname:
+      print('Found supercell calc')
+      ref_idx  = 0
+    else:
+      ref_idx  = n_files-1 # last gradient should have best parameters
+    ref_name = iname[ref_idx]
+    ref_grad = np.array(igrad[ref_idx])
   else:
     ref_grad=np.load(ref_name)
   print('reference gradient taken from: %s \n' %(ref_name),file=log)

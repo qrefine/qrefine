@@ -66,6 +66,7 @@ class GFNxTB(Calculator):
         proc.wait()
         exitcode = proc.returncode
         if exitcode != 0:
+            print(proc.communicate())
             # print exitcode,'label:', self.calc_dir
             error='%s exited with error code %i in %s' % (
                            command,exitcode,self.calc_dir)
@@ -148,18 +149,20 @@ class GFNxTB(Calculator):
                 str(method),
                 str(nproc))
 
+        # use this  block if xtb has trouble with charges on the commandline (again)
+        # command='%s %s %s --grad --parallel %s > xtb.out' % (
+        #         binary,
+        #         str(self.coordinates),
+        #         str(method),
+        #         str(nproc))
+        # self.write_charge(self.key_parameters["charge"])
+
         #clean up
         for f in ['energy','gradient','xtbrestart']:
             if os.path.exists(f):
                 os.remove(f)
 
         self.run_command(command)
-
-        # probably not worth it.
-        # if (not self.check_scf_conv):
-        #     print 'restarting failed xtb job'
-        #     self.run_command(command)
-
         self.read_energy()
         self.read_forces()
         self.energy_zero= self.energy_free
@@ -231,7 +234,11 @@ class GFNxTB(Calculator):
         f.writelines(pchrg[0])
         f.writelines(pchrg[2:])
         f.close()
-            
+    
+    def write_charge(self,charge):
+        f = open('.CHRG', "w")
+        f.write('%i' % charge)
+        f.close()
 
     def set(self, **kwargs):
         for key, value in kwargs.items():

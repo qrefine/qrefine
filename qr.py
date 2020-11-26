@@ -523,7 +523,9 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     # cluster_scan=[2,10]
 
     if g_mode[0]==0:
+      print >> log, 'warning: supersphere calculation!'
       params.cluster.clustering=False
+      params.expansion=True
       cluster_scan=[0]
       clusters=[]
 
@@ -577,26 +579,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           # better way is to make a single PDB file with chain IDs
           label="-".join(map(str,idl[idx]))
           write_cluster_and_fragments_pdbs(fragments=fragment_extracts(frags),directory=label)
-          # cwd = os.getcwd()
-          # frag_dir = os.path.join(os.getcwd(),label)
-          # if not os.path.exists(frag_dir):
-          #   os.mkdir(frag_dir)
-          # os.chdir(frag_dir)
-          # for index, selection_fragment in enumerate(frags.fragment_selections):
-
-          #   cluster_selection = frags.cluster_selections[index]
-          #   frag_selection = frags.fragment_super_selections[index]
-          #   icluster = frags.pdb_hierarchy.select(cluster_selection)
-          #   ifrag = frags.pdb_hierarchy_super.select(frag_selection)
-          #   fn_cluster = "%s_%s_cluster.pdb" %(label,index)
-          #   fn_frag = "%s_%s_frag.pdb" %(label,index)
-          #   icluster.write_pdb_file(
-          #     file_name        = fn_cluster,
-          #     crystal_symmetry = frags.expansion.cs_box)
-          #   ifrag.write_pdb_file(
-          #     file_name        = fn_frag,
-          #     crystal_symmetry = frags.expansion.cs_box)
-          # os.chdir(cwd)
 
         calculator_manager = create_calculator(
           weights            = weights,
