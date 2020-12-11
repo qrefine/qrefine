@@ -16,6 +16,8 @@ from qrefine.tests.unit import run_tests
 from ase.io import write
 from ase.io import read as ase_io_read
 from ase.optimize.lbfgs import LBFGS
+from ase.calculators.amber import Amber
+# from qrefine.plugin.ase.mopac_qr import Mopac
 from scitbx.array_family import flex
 from qrefine.restraints import from_qm
 from qrefine.fragment import fragments
@@ -60,14 +62,15 @@ def approx_equal2(v1,v2,tol):
 class lbfgs_gradient(object):
   def __init__(self, atoms, restraints):
     self.restraints = restraints
-    self.opt = LBFGS(atoms=atoms)
+    self.opt = LBFGS(atoms=atoms,force_consistent=False)
+    self.opt.initialize()
 
   def step(self):
     pos = self.opt.atoms.get_positions()
     sites_cart = flex.vec3_double(pos)
     e, g = self.restraints.target_and_gradients(sites_cart)
     forces = np.array(g) * -1
-    self.opt.step(forces)
+    self.opt.step(f=forces)
 
   def write(self, file):
     write(file, self.opt.atoms)
@@ -96,8 +99,10 @@ def run(prefix):
   #old & wrong, but kept to know the original intention: assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"
+  print("optimize entire molecule")
   qm_opt(restraints_entire,file_entire_qm)
   file_cluster_qm = "cluster_qm.pdb"
+  print("optimize clustered molecule")
   qm_opt(restraints_cluster,file_cluster_qm)
   sites_cart_entire_qm = iotbx.pdb.input(file_entire_qm).atoms().extract_xyz()
   sites_cart_cluster_qm = iotbx.pdb.input(file_cluster_qm).atoms().extract_xyz()
@@ -110,6 +115,7 @@ def generate_restraints(cs, ph, clustering=False):
   fq = from_qm(
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
+    nproc="1",
     crystal_symmetry=cs,
     clustering=clustering)
   if(clustering):

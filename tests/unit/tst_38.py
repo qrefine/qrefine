@@ -270,19 +270,19 @@ def run(prefix):
   Altlocs.
   """
   for i, pdb_str_in in enumerate([pdb_str_in1, pdb_str_in2]):
-    if(i==0): print "Altlocs present", "-"*30
-    else:     print "No altlocs", "-"*30
+    if(i==0): print("Altlocs present", "-"*30)
+    else:     print("No altlocs", "-"*30)
     pdb_in = "%s.pdb"%prefix
     open(pdb_in, "w").write(pdb_str_in)
     #
     for fast_interaction in [True, False]:
-      print "fast_interaction:", fast_interaction
+      print("fast_interaction:", fast_interaction)
       for restraints in ["cctbx", "qm"]:
-        print "  restraints:", restraints
+        print("  restraints:", restraints)
         for two_buffers in [False, True]:
-          print "    two_buffers=", two_buffers
+          print("    two_buffers=", two_buffers)
           for clustering in ["true", "false"]:
-            print "      clustering=", clustering
+            print("      clustering=", clustering)
             cmd = " ".join([
               "qr.refine",
               pdb_in,

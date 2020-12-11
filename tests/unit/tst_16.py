@@ -42,8 +42,7 @@ def run(prefix):
     if(0):
       for i, diff_i in enumerate(diff):
         if(abs(max(diff_i)) > 1.e-6):
-        print(i, diff_i, g1[i], g2[i])
-    print()
+           print(i, diff_i, g1[i], g2[i])
     assert approx_equal(diff.max(), [0,0,0])
 
 if(__name__ == '__main__'):

@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 
 import os
 import iotbx.pdb
@@ -34,7 +35,7 @@ def run():
     fn = path + fn
     ph = iotbx.pdb.input(fn).construct_hierarchy()
     if list(ph.altloc_indices()) != ['']: continue
-    print fn
+    print(fn)
     #
     rm1, sites_cart = get_restraints_manager(expansion=False, file_name=fn)
     t1, g1 = rm1.target_and_gradients(sites_cart = sites_cart)
@@ -43,7 +44,7 @@ def run():
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
     diff = flex.abs(g1.as_double()-g2.as_double())
-    print diff.min_max_mean().as_tuple()
+    print(diff.min_max_mean().as_tuple())
     assert flex.max(diff) < 1.e-6
 
 if(__name__ == "__main__"):

@@ -116,7 +116,7 @@ quantum {
   memory = None
     .type = str
     .help = memory for the QM program
-  nproc = None
+  nproc = 1
     .type = int
     .help = number of parallel processes for the QM program
   qm_addon = gcp dftd3 gcp-d3

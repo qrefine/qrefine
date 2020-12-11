@@ -1,6 +1,8 @@
 from __future__ import division
 from __future__ import absolute_import
 
+from builtins import range
+# from builtins import object
 import os
 import ase.units as ase_units
 import mmtbx.restraints
@@ -128,7 +130,7 @@ class from_expansion(object):
     selection = flex.bool(
       self.pdb_hierarchy_super_completed.atoms().size(), False)
     self.selection = selection.set_selected(
-      flex.size_t(xrange(self.pdb_hierarchy.atoms().size())), True)
+      flex.size_t(range(self.pdb_hierarchy.atoms().size())), True)
     self.restraints_manager = self.restraints_source.update(
       pdb_hierarchy    = self.pdb_hierarchy_super_completed,
       crystal_symmetry = expansion.cs_box)
@@ -174,7 +176,7 @@ class from_altlocs(object):
         force_symmetry           = True,
         log                      = null_out())
       xrs = processed_pdb_file.xray_structure()
-      sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
+      sctr_keys = list(xrs.scattering_type_registry().type_count_dict().keys())
       has_hd = "H" in sctr_keys or "D" in sctr_keys
       geometry = processed_pdb_file.geometry_restraints_manager(
         show_energies                = False,
