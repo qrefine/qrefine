@@ -534,7 +534,9 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     # cluster_scan=[2,10]
 
     if g_mode[0]==0:
+      print >> log, 'warning: supersphere calculation!'
       params.cluster.clustering=False
+      params.expansion=True
       cluster_scan=[0]
       clusters=[]
 
