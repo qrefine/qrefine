@@ -596,6 +596,7 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
   from shutil import rmtree
   cwd = os.getcwd()
   frag_dir = os.path.join(cwd,directory)
+  expansion_file = os.path.join(cwd,fragments.expansion_file)
   if os.path.exists(frag_dir):
     rmtree(frag_dir)
   os.mkdir(frag_dir)
@@ -617,7 +618,7 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
     capped_hierarchy = completion.run(pdb_hierarchy=index_frag,
                crystal_symmetry=F.expansion_cs,
                model_completion=False,
-               original_pdb_filename=filename_frag)
+               original_pdb_filename=expansion_file)
     #capped_hierarchy = F.fragment_capped_initial[index]
     capped_hierarchy.write_pdb_file(file_name=filename_capped,
               crystal_symmetry=F.expansion_cs)
