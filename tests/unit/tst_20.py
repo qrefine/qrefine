@@ -1,10 +1,11 @@
 from __future__ import division
+from __future__ import absolute_import
 import iotbx.pdb
 import os
 import time
 import libtbx.load_env
 from qrefine.super_cell import expand
-import run_tests
+from qrefine.tests.unit import run_tests
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")

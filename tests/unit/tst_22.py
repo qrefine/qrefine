@@ -1,8 +1,10 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import time
 import libtbx.load_env
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
@@ -14,7 +16,7 @@ def run(prefix):
   """
   pdb_name = os.path.join(qr_unit_tests_data, "tst_22.pdb")
   cmd = "qr.charges %s verbose=False"%pdb_name
-  if(0): print cmd
+  if(0): print(cmd)
   r = easy_run.go(cmd)
   # Make sure no
   assert len(r.stderr_lines)==0, r.stderr_lines

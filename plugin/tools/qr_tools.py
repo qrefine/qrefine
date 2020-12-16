@@ -3,6 +3,7 @@ collection of add-ons for QM calculations.
 contains:
  - gCP
 """
+from __future__ import print_function
 import os
 import sys
 from ase.io import read, write
@@ -18,12 +19,12 @@ def run_command(command):
     from subprocess import Popen, PIPE, STDOUT
     if command == '':
        raise RuntimeError('no command for run_command :(')
-    print 'Running: ', command #debug
+    print('Running: ', command) #debug
     proc = Popen([command], shell=True, stderr=PIPE)
     proc.wait()
     exitcode = proc.returncode
     if exitcode != 0:
-        print exitcode
+        print(exitcode)
         raise RuntimeError(command+' exited with error code')
     return 0
 
@@ -39,7 +40,7 @@ def run_gcp(atoms,level):
             'DFT/pobTZVP', 'TPSS/def2-SVP', 'PW6B95/def2-SVP', 'hf3c', 'pbeh3c','hf/631g']
     avail = [f.lower() for f in avail]
     if level.lower() not in avail:
-             print "Warning: selected gCP level not standard! Beware of what you are doing!" # during development times
+             print("Warning: selected gCP level not standard! Beware of what you are doing!") # during development times
            # raise RuntimeError("""%s. gCP level not avaiable:  %r""" % (level.upper(), avail))
     exe='gcp gcp_tmp.xyz -grad -v -l '+level+' > '+outfile
     run_command(command=exe)
@@ -66,7 +67,7 @@ def read_gcp(outfile,atoms):
                     gradient[j,:3]=tmp[:3]
 
                     
-    print 'E(GCP): ', energy
+    print('E(GCP): ', energy)
     energy*=(Hartree)/(kcal / mol)
     gradient*=(Hartree/Bohr)/(kcal / mol)
     # print gradient
@@ -104,7 +105,7 @@ def read_dftd3(outfile,atoms):
             gradient[j,:3]=tmp[:3]
 
                     
-    print 'E(D3): ', energy
+    print('E(D3): ', energy)
     energy*=(Hartree)/(kcal / mol)
     gradient*=(Hartree/Bohr)/(kcal / mol)
     # print gradient
@@ -128,7 +129,7 @@ def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
     # select helper program 
     # return E/G in kcal/mol/Angstrom
     if 'gcp-d3' in addon.lower():
-        print
+        print()
         egcp,ggcp=run_gcp(atoms,addon_method.split("+")[0])
         ed3,gd3=run_dftd3(atoms,addon_method.split("+")[1])
         energy=egcp+ed3

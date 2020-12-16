@@ -17,6 +17,7 @@ University of Science and Technology (KAUST), Saudi Arabia.
 
 See accompanying license files for details.
 """
+from __future__ import print_function
 import os
 
 from ase.calculators.calculator import FileIOCalculator, Parameters, ReadError
@@ -352,5 +353,5 @@ if __name__ == '__main__':
   label = sys.argv[1]
   label = label.replace('.log', '')
   p = Gaussian(label=label)
-  print p
+  print(p)
   p.read_results()

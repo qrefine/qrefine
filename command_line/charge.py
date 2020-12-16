@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.charges
 import sys, time
 from qrefine import charges, __version__
@@ -45,12 +46,12 @@ def master_params():
   return iotbx.phil.parse(master_params_str, process_includes=True)
 
 def print_legend_and_usage(log):
-  print >> log, "-"*79
-  print >> log, "                               qr.charges"
-  print >> log, "-"*79
-  print >> log, legend
-  print >> log, "-"*79
-  print >> log, master_params().show()
+  print("-"*79, file=log)
+  print("                               qr.charges", file=log)
+  print("-"*79, file=log)
+  print(legend, file=log)
+  print("-"*79, file=log)
+  print(master_params().show(), file=log)
 
 def get_inputs(args, log, master_params):
   inputs = mmtbx.utils.process_command_line_args(
@@ -80,8 +81,8 @@ def run(args, log):
     #validated     = validated,
   )
   if(params.verbose):
-    print >> log,"Starting Q|R charge"
-    print >> log,'version: ',__version__
+    print("Starting Q|R charge", file=log)
+    print('version: ',__version__, file=log)
   del sys.argv[1:]
   cc = charges.charges_class(
     params.model_file_name,
@@ -94,12 +95,12 @@ def run(args, log):
     assert_correct_chain_terminii=params.assert_correct_chain_terminii,
   )
   if(params.verbose):
-    print >> log, 'Charge: %s' % rc
-    print >> log, "Time: %6.4f" % (time.time() - t0)
+    print('Charge: %s' % rc, file=log)
+    print("Time: %6.4f" % (time.time() - t0), file=log)
   if(params.list_charges):
-    print >> log, 'Charges:'
-    print >> log, rc
-    print >> log, "Time: %6.4f" % (time.time() - t0)
+    print('Charges:', file=log)
+    print(rc, file=log)
+    print("Time: %6.4f" % (time.time() - t0), file=log)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ This work is supported by Award No. UK-C0017, made by King Abdullah
 University of Science and Technology (KAUST), Saudi Arabia
 See accompanying license files for details.
 """
+from __future__ import print_function
 import os
 import string
 import numpy as np
@@ -17,7 +18,7 @@ from ase.units import kcal, mol
 from ase.calculators.general import Calculator
 
 str_keys = ['functional', 'job_type']
-int_keys = ['restart', 'spin', 'charge','nproc']
+int_keys = ['restart', 'spin', 'charge']
 bool_keys = ['OPT']
 float_keys = ['RELSCF']
 
@@ -25,6 +26,7 @@ float_keys = ['RELSCF']
 class Mopac(Calculator):
     name = 'MOPAC'
     def __init__(self,
+                nproc=1,
                  label='ase',
                  **kwargs):
         # define parameter fields
@@ -189,7 +191,7 @@ class Mopac(Calculator):
             error='%s exited with error code %i in %s' % (
                            command,exitcode,self.calc_dir)
             stdout,stderr = proc.communicate()
-            print 'shell output: ',stdout,stderr
+            print('shell output: ',stdout,stderr)
             raise RuntimeError(error)
         return 0
 
@@ -208,7 +210,7 @@ class Mopac(Calculator):
           try:
             timer.start()
             stdout,stderr = proc.communicate()
-            print stdout,stderr
+            print(stdout,stderr)
           finally:
             timer.cancel()
 
@@ -384,4 +386,4 @@ class Mopac(Calculator):
       self.label = label
 
     def set_nproc(self, nproc):
-      self.int_params['nproc'] = nproc
+      self.int_params['nproc'] = int(nproc)

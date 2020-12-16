@@ -198,7 +198,7 @@ def run():
     ''')
     for env_var, help in qm_engine_env_vars.items():
       print('%s %s : %s' % (' '*10, env_var, help))
-    print
+    print()
 
 
   draw_box_around_text(['','Done!','','Run a Q|R job using qr.refine','','https://github.com/qrefine/qrefine/wiki/Installation'])

@@ -1,9 +1,11 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import libtbx.load_env
-from cluster_wrapper import Clusterer
-from test_reg_00_base import test_base
+from .cluster_wrapper import Clusterer
+from .test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_reg_data = os.path.join(qrefine_path, "tests/regression/datasets/cluster")
@@ -18,7 +20,7 @@ class test_chunk(test_base):
     """
     Exercise to test clustering indices, chunk indices, and the number of atoms in each chunk.
     """
-    print "checking result",result
+    print("checking result",result)
     if self.db.old.find_one({"pdb_code": result.pdb_code}) is None:
       self.insert(result)
     else:

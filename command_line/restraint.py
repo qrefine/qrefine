@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.restraint
 import sys
 import time
@@ -23,7 +24,7 @@ Compute energy and gradient for a system
 
 
 def get_help():
-  print legend
+  print(legend)
   raise Usage("""
     qr.restraint is an open-source module that computes chemical restraints from ab initio calculations.
 
@@ -43,10 +44,10 @@ def get_master_phil():
     phil_string=qr.master_params_str)
 
 def print_legend_and_usage(log):
-  print >> log, "-"*79
-  print >> log, legend
-  print >> log, "-"*79
-  print >> log, get_master_phil().show()
+  print("-"*79, file=log)
+  print(legend, file=log)
+  print("-"*79, file=log)
+  print(get_master_phil().show(), file=log)
 
 def run(args, log):
   args.append('mode=opt')
@@ -64,13 +65,13 @@ def run(args, log):
       print_legend_and_usage(log)
       return
   elif ('--version' in args):
-      print
+      print()
       __version__
       return
-  print >> log, "Computing restraint"
+  print("Computing restraint", file=log)
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
-  print ""
+  print("")
   print_legend_and_usage(log)
   cmdline = mmtbx.command_line.load_model_and_data(
         args=args,
@@ -92,10 +93,10 @@ def run(args, log):
 
 
 if (__name__ == "__main__"):
-  print "Restraint for Q|R"
+  print("Restraint for Q|R")
   t0 = time.time()
-  print >> log, "Starting Q|R"
-  print >> log,'version: ',__version__
+  print("Starting Q|R", file=log)
+  print('version: ',__version__, file=log)
   run(args=sys.argv[1:], log=log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
+  print("Time: %6.4f" % (time.time() - t0), file=log)
 

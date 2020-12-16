@@ -1,8 +1,9 @@
 from __future__ import division
+from __future__ import absolute_import
 
 import os
 import time
-import run_tests
+from qrefine.tests.unit import run_tests
 import libtbx.load_env
 from mmtbx import monomer_library
 from mmtbx.monomer_library import server

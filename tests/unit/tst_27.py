@@ -1,5 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -558,16 +560,16 @@ TER
 
 def run(prefix):
   fn='test_remove_hg_from_zn_cys.pdb'
-  f=file(fn, 'wb')
-  f.write(pdb_lines)
+  f=open(fn, 'wb')
+  f.write(bytes(pdb_lines,encoding='utf8'))
   f.close()
   cmd = 'qr.finalise %s action="capping"' % (fn)
-  if 0: print cmd
+  if 0: print(cmd)
   rc = easy_run.go(cmd)
   os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  f=file(fnc, 'rb')
-  lines=f.read()
+  f=open(fnc, 'rb')
+  lines=f.read().decode('utf8')
   f.close()
   for line in [' HG  CYS A   3',
                ' HG  CYS A   8',
@@ -579,7 +581,7 @@ def run(prefix):
     assert line not in lines, 'found %s' % line
   assert ' HE  ARG A  10' in lines, 'not found HE  ARG A  10'
   cmd = 'qr.charges %s verbose=1' % (fnc)
-  if 0: print cmd
+  if 0: print(cmd)
   rc = easy_run.go(cmd)
   assert 'Charge: -1' in rc.stdout_lines
   os.remove(fnc)

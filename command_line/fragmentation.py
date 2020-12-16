@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.fragmentation
 import sys
 import time
@@ -30,15 +31,15 @@ def run(pdb_file, log):
     charge_embedding=True,
     debug=True,
     qm_engine_name="terachem")
-  print >> log, "Residue indices for each cluster:\n", fq.clusters
+  print("Residue indices for each cluster:\n", fq.clusters, file=log)
   fq_ext = fragment_extracts(fq)
-  for i in xrange(len(fq.clusters)):
+  for i in range(len(fq.clusters)):
       # add capping for the cluster and buffer
-      print >> log, "capping frag:", i
+      print("capping frag:", i, file=log)
       get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=fq_ext,
                           index=i)
-      print >>log, "point charge file:", i
+      print("point charge file:", i, file=log)
       #write mm point charge file
       write_mm_charge_file(fragment_extracts=fq_ext,
                                       index=i)
@@ -50,4 +51,4 @@ if (__name__ == "__main__"):
   args = sys.argv[1:]
   del sys.argv[1:]
   run(args[0], log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
+  print("Time: %6.4f" % (time.time() - t0), file=log)

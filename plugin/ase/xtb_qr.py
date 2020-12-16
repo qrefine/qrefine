@@ -2,6 +2,7 @@
   based on ASE script for Mopac and then for orca.
 
 """
+from __future__ import print_function
 import os
 import string
 import numpy as np
@@ -17,6 +18,7 @@ key_parameters = {
                   'charge': None,
                   'method': None,
                   'pointcharges': None,
+                  'nproc': None
                   }
 
 class GFNxTB(Calculator):
@@ -28,7 +30,7 @@ class GFNxTB(Calculator):
                  charge='0',
                  version=2,
                  method='-gfn2',
-                 nproc='1',
+                 nproc=1,
                  atoms=None,
                  pointcharges=None,
                  **kwargs):
@@ -61,7 +63,7 @@ class GFNxTB(Calculator):
         from subprocess import Popen, PIPE, STDOUT
         if command == '':
             raise RuntimeError('no command for run_command :(')
-        print 'Running: ', command #debug
+        print('Running: ', command) #debug
         proc = Popen([command], shell=True, stderr=PIPE)
         proc.wait()
         exitcode = proc.returncode
@@ -133,13 +135,11 @@ class GFNxTB(Calculator):
           self.pointcharges = os.path.abspath(self.pointcharges)
           self.set_pointcharges()
 
-
         binary = self.command
         if (self.key_parameters['nproc'] > 1):
             nproc=self.key_parameters['nproc']
         else:
             nproc=1
-
 
         command='%s %s --chrg %s --grad %s --parallel %s > xtb.out' % (
                 binary,
@@ -248,4 +248,4 @@ class GFNxTB(Calculator):
       self.label = label
 
     def set_nproc(self, nproc):
-      self.key_parameters['nproc'] = str(nproc)
+      self.key_parameters['nproc'] = int(nproc)

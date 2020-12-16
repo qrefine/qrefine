@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import time, os
 import iotbx.pdb
@@ -15,7 +17,7 @@ import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
 import libtbx.load_env
-import run_tests
+from qrefine.tests.unit import run_tests
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
@@ -118,9 +120,9 @@ def run3(prefix):
   diff = g1-g2
   assert approx_equal(diff.max(), [0,0,0])
   if(0):
-    print diff.max()
+    print(diff.max())
     for d in diff:
-      print d
+      print(d)
 
 def run2(prefix):
   file_name=os.path.join(qr_unit_tests_data,"h_altconf.pdb")
@@ -165,9 +167,9 @@ def run2(prefix):
   diff = g1-g2
   assert approx_equal(diff.max(), [0,0,0])
   if(0):
-    print diff.max()
+    print(diff.max())
     for d in diff:
-      print d
+      print(d)
 
 def run1(prefix):
   pdb_inp = iotbx.pdb.input(file_name=os.path.join(qr_unit_tests_data,"m.pdb"))
@@ -178,17 +180,17 @@ def run1(prefix):
   #
   asc = ph.atom_selection_cache()
   sA = asc.selection("altloc A or altloc ' '")
-  if 0: print sA.count(True)
+  if 0: print(sA.count(True))
   phA = ph.select(sA)
   phA.write_pdb_file("A.pdb")
 
   sB = asc.selection("altloc B or altloc ' '")
-  if 0: print sB.count(True)
+  if 0: print(sB.count(True))
   phB = ph.select(sB)
   phB.write_pdb_file("B.pdb")
 
   sW  = asc.selection("altloc ' '")
-  if 0: print sW.count(True)
+  if 0: print(sW.count(True))
   phW = ph.select(sW)
   phW.write_pdb_file("W.pdb")
   #
@@ -205,24 +207,24 @@ def run1(prefix):
     compute_gradients=True)
   #
   if 0:
-    print list(phW.atoms())[0].name
-    print esW.gradients[0]
-    print
+    print(list(phW.atoms())[0].name)
+    print(esW.gradients[0])
+    print()
 
-    print list(ph.atoms())[0].name
-    print es.gradients[0]
-    print esA.gradients[0]
-    print esB.gradients[0]
-    print
-    print list(phA.atoms())[5].name, list(ph.atoms())[5].name
-    print es.gradients[5]
-    print esA.gradients[5]
-    print
-    print list(phB.atoms())[5].name, list(ph.atoms())[12].name
-    print es.gradients[12]
-    print esB.gradients[5]
-    print
-    print "-------"
+    print(list(ph.atoms())[0].name)
+    print(es.gradients[0])
+    print(esA.gradients[0])
+    print(esB.gradients[0])
+    print()
+    print(list(phA.atoms())[5].name, list(ph.atoms())[5].name)
+    print(es.gradients[5])
+    print(esA.gradients[5])
+    print()
+    print(list(phB.atoms())[5].name, list(ph.atoms())[12].name)
+    print(es.gradients[12])
+    print(esB.gradients[5])
+    print()
+    print("-------")
   result = list(flex.double(esA.gradients[0])+
                 flex.double(esB.gradients[0])-
                 flex.double(esW.gradients[0]))

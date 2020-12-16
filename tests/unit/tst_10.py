@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
 
 import os
 import random
@@ -12,7 +14,7 @@ from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm, from_cctbx
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
-import run_tests
+from qrefine.tests.unit import run_tests
 import mmtbx.model
 from qrefine import qr
 
@@ -51,16 +53,17 @@ def run(prefix):
   Exercise combined energy and gradients from cluster qm.
   """
   for restraints in ["cctbx","qm"]:
-    print "Using restraints:", restraints
+    print("Using restraints:", restraints)
     result = []
     for clustering in [True, False]:
-      print "  clustering", clustering, "-"*30
+      print("  clustering", clustering, "-"*30)
       model = get_model()
       if(restraints=="qm"):
         fq = from_qm(
           pdb_hierarchy    = model.get_hierarchy(),
           qm_engine_name   = "mopac",
           method           = "PM3",
+          nproc            = "1",
           crystal_symmetry = model.crystal_symmetry(),
           clustering       = clustering)
       else:

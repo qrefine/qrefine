@@ -1,10 +1,11 @@
 from __future__ import division
+from __future__ import absolute_import
 import iotbx.pdb
 import os
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 import time
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx.test_utils import approx_equal
 import libtbx.load_env
 

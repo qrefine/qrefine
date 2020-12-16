@@ -13,6 +13,7 @@
   For development updates please execute: phenix.python utils/make_version.py
 
 """
+from __future__ import print_function
 
 import os
 from subprocess import Popen,PIPE,STDOUT
@@ -25,7 +26,7 @@ def main(init_filename=None):
   git_command='git describe --abbrev=6 --dirty --always --tags'
   shell = Popen([git_command], shell=True, stderr=PIPE,stdout=PIPE)
   out, err = shell.communicate()
-  print 'Current version is %s ' % (out.rstrip())
+  print('Current version is %s ' % (out.rstrip()))
   version='__version__=\" %s  \"'% (out.rstrip())
 
   with open(init_filename,'w') as outfile:

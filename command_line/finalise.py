@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
 import sys, time
 from qrefine import finalise, __version__
@@ -42,12 +43,12 @@ def master_params():
   return iotbx.phil.parse(master_params_str, process_includes=True)
 
 def print_legend_and_usage(log):
-  print >> log, "-"*79
-  print >> log, "                               qr.finalise"
-  print >> log, "-"*79
-  print >> log, legend
-  print >> log, "-"*79
-  print >> log, master_params().show()
+  print("-"*79, file=log)
+  print("                               qr.finalise", file=log)
+  print("-"*79, file=log)
+  print(legend, file=log)
+  print("-"*79, file=log)
+  print(master_params().show(), file=log)
 
 def get_inputs(args, log, master_params):
   inputs = mmtbx.utils.process_command_line_args(
@@ -89,7 +90,7 @@ def run(args, log):
 
 if __name__ == '__main__':
   t0 = time.time()
-  print >> log,"Starting Q|R finalise"
-  print >> log,'version: ',__version__
+  print("Starting Q|R finalise", file=log)
+  print('version: ',__version__, file=log)
   run(args=sys.argv[1:], log=log)
-  print >> log, "Time: %6.4f" % (time.time() - t0)
+  print("Time: %6.4f" % (time.time() - t0), file=log)
