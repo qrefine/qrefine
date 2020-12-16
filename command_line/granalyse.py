@@ -15,6 +15,7 @@ def get_help():
   raise Usage("""
     qr.granalyse analyses gradients obtained from 'qr.refine mode=gtest' runs.
     Will write the gradient or difference gradient into the PDB.
+    The reference gradient is found automatically if not explicitly specified.
 
     Examples:
     i)  qr.granalyse model.pdb  
@@ -112,51 +113,6 @@ def rmsd(V, W):
     for i in range(dim):
         d += (V[i] - W[i])**2.0
     return np.sqrt(d/dim)
-
-# TODO:  keep for now but remove eventually (Oct'20)
-# def extract_expansion_grad(nat_model,grad):
-#   import ase.units as ase_units
-#   """read xTB gradient and give back the first nat_model atoms that
-#   should belong the the actual model
-#   NOT USED ANYMORE
-#   """
-#   file = open(grad, 'r')
-#   lines = file.readlines()
-#   file.close()
-
-#   g_ex = np.array([[0, 0, 0]])
-
-#   nline = len(lines)
-#   iline = -1
-#   n_cyc = 0
-#   for i in range(nline):
-#     if 'cycle' in lines[i]:
-#       n_cyc+=1
-#       iline = i
-
-#   # deduce number of atoms in expansion file from file
-#   nat = int((nline - 2 - n_cyc)/n_cyc/2)
-#   print('found ',nat,' atoms in file:',grad)
-
-#   if iline < 0:
-#     raise RuntimeError('Please check xTB gradient')
-
-#   # next line
-#   iline += nat + 1 
-#   # $end line
-#   nline -= 1
-#   # read gradients
-#   for i in range(iline, nline):
-#     line = lines[i].replace('D', 'E')
-#     tmp = np.array([[float(f) for f in line.split()[0:3]]])
-#     g_ex = np.concatenate((g_ex, tmp))
-  
-#   # converter=(ase_units.Hartree / ase_units.Bohr)/(ase_units.kcal / ase_units.mol) 
-#   converter=(ase_units.Hartree / ase_units.Bohr)/(ase_units.kcal / ase_units.mol) 
-#   g_ex = (-np.delete(g_ex, np.s_[0:1], axis=0)) * converter 
-#   # g_out=g_ex
-#   g_out=np.reshape(g_ex,(nat*3)) #*nat_model
-#   return g_out[0:nat_model*3]
 
 #######################################
 def run(args,log):
