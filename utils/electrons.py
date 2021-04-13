@@ -10,6 +10,7 @@ atom_database = {'H' : {'valence' : 1},
                  'C' : {'valence' : 4},
                  'N' : {'valence' : 3, 'lone pairs' : 1},
                  'O' : {'valence' : 2},
+                 'F' : {'valence' : 1},
                  #
                  'P' : {'valence' : 3, 'lone pairs' : 1},
                  'S' : {'valence' : 2, 'lone pairs' : 2},
