@@ -70,7 +70,7 @@ def get_grad_wdelta(ref_grad,grad):
   ref=np.reshape(ref_grad,(3,dim))
   g=np.reshape(grad,(3,dim))
   for i in range(dim):
-    inorm=np.linalg.norm(ref[0:2,i])
+    inorm=np.linalg.norm(ref[0:3,i])
     for j in range(3):
       d[i]+=np.abs((g[j,i]-ref[j,i])/inorm)
   return d*100/3
