@@ -39,20 +39,8 @@ def get_restraints_manager(expansion, file_name):
   #params.cluster.maxnum_residues_in_cluster=6
   params.cluster.maxnum_residues_in_cluster=2
 
-  if not expansion:
-    fragment_manager = qr.create_fragment_manager(
-      params           = params,
-      pdb_hierarchy    = model.pdb_hierarchy,
-      cif_objects      = model.cif_objects,
-      crystal_symmetry = model.xray_structure.crystal_symmetry())
   result = qr.create_restraints_manager(params=params, model=model), \
          model.model.get_sites_cart()
-  result = list(result)
-  if not expansion:
-    result[0] = cluster_restraints.from_cluster(
-      restraints_manager = result[0],
-      fragment_manager   = fragment_manager,
-      parallel_params    = params.parallel)
   return result
 
 def run():
@@ -76,7 +64,7 @@ def run():
       for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):
         print ["%8.4f"%i for i in d], \
               ["%8.4f"%i for i in g], \
-              ["%8.4f"%i for i in gg], dist, a.quote()
+              ["%8.4f"%i for i in gg], "%8.4f"%dist, a.quote()
     #
     rs = flex.double()
     for a, b in zip(g1.as_double(), g2.as_double()):
