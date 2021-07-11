@@ -350,11 +350,7 @@ def create_restraints_manager(params, model):
     params = params,
     model  = model.model)
   if(params.expansion):
-    altlocs_present = False
-    conformer_indices = model.model.get_hierarchy().get_conformer_indices()
-    if(len(list(set(list(conformer_indices))))>1):
-      altlocs_present = True
-    if(altlocs_present):
+    if(model.model.altlocs_present()):
       return restraints.from_altlocs(
         restraints_source = restraints_source,
         pdb_hierarchy     = model.model.get_hierarchy(),
@@ -366,7 +362,18 @@ def create_restraints_manager(params, model):
         pdb_hierarchy     = model.model.get_hierarchy(),
         crystal_symmetry  = model.crystal_symmetry)
   else:
-    return restraints_source.restraints_manager
+    if(params.cluster.clustering):
+      fragment_manager = create_fragment_manager(
+        params           = params,
+        pdb_hierarchy    = model.pdb_hierarchy,
+        cif_objects      = model.cif_objects,
+        crystal_symmetry = model.xray_structure.crystal_symmetry())
+      return cluster_restraints.from_cluster(
+        restraints_manager = restraints_source.restraints_manager,
+        fragment_manager   = fragment_manager,
+        parallel_params    = params.parallel)
+    else:
+      return restraints_source.restraints_manager
 
 def create_calculator(weights, params, restraints_manager, fmodel=None,
                       model=None):
@@ -434,6 +441,112 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       print >> log, '  Default method set as PM7'
       params.quantum.method='PM7'
 
+def run_g_test(params, model, weights, start_fmodel, log):
+  # needs to be moved! Perhaps also to driver
+  import numpy as np
+  from fragment import fragment_extracts, write_cluster_and_fragments_pdbs
+  from utils.mathbox import get_grad_mad, get_grad_angle
+
+  # determine what kind of buffer to calculate
+  g_mode=[]
+  if params.cluster.g_mode is None:
+    g_mode.append(1)
+    if params.cluster.charge_embedding:
+      g_mode.append(2)
+    if params.cluster.two_buffers:
+      g_mode.append(3)
+    if params.cluster.two_buffers and params.cluster.charge_embedding:
+      g_mode.append(4)
+  else:
+    g_mode.append(params.cluster.g_mode)
+
+
+  # reset flags
+  params.cluster.clustering=True
+  params.cluster.save_clusters=True
+  params.cluster.charge_embedding=False
+  params.cluster.two_buffers=False
+  grad=[]
+  idx=0
+  idl=[]
+
+  # input for cluster size
+  cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
+  # cluster_scan=[2,10]
+
+  if g_mode[0]==0:
+    print >> log, 'warning: supersphere calculation!'
+    params.cluster.clustering=False
+    params.expansion=True
+    cluster_scan=[0]
+    clusters=[]
+
+  n_grad=len(cluster_scan)*len(g_mode)
+  print >> log, 'Calculating %3i gradients \n' % (n_grad)
+  print >> log, 'Starting loop over different fragment sizes'
+  for ig in g_mode:
+
+    print >> log,'loop for g_mode = %i ' % (ig)
+    if ig == 2:
+      print >> log, 'pc on'
+      params.cluster.charge_embedding=True
+    if ig == 3:
+      print >> log, 'two_buffers on, pc off'
+      params.cluster.charge_embedding=False
+      params.cluster.two_buffers=True
+    if ig == 4:
+      print >> log, 'two_buffers on, pc on'
+      params.cluster.charge_embedding=True
+      params.cluster.two_buffers=True
+
+    for max_cluster in cluster_scan:
+      idl.append([ig,max_cluster])
+      print >> log, 'g_mode: %s' % (" - ".join(map(str,idl[idx])))
+      t0 = time.time()
+      print >> log, "~max cluster size ",max_cluster
+      params.cluster.maxnum_residues_in_cluster=max_cluster
+      fragment_manager = create_fragment_manager(
+          params           = params,
+          pdb_hierarchy    = model.pdb_hierarchy,
+          cif_objects      = model.cif_objects,
+          crystal_symmetry = model.xray_structure.crystal_symmetry())
+      restraints_manager = create_restraints_manager(params, model)
+      if(fragment_manager is not None):
+        cluster_restraints_manager = cluster_restraints.from_cluster(
+          restraints_manager = restraints_manager,
+          fragment_manager   = fragment_manager,
+          parallel_params    = params.parallel)
+      rm = restraints_manager
+      if(fragment_manager is not None):
+        rm = cluster_restraints_manager
+        print "time taken for fragments",(time.time() - t0)
+        frags=fragment_manager
+        print >> log, '~  # clusters  : ',len(frags.clusters)
+        print >> log, '~  list of atoms per cluster:'
+        print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
+        print >> log, '~  list of atoms per fragment:'
+        print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
+
+        # save fragment data. below works
+        # better way is to make a single PDB file with chain IDs
+        label="-".join(map(str,idl[idx]))
+        write_cluster_and_fragments_pdbs(fragments=fragment_extracts(frags),directory=label)
+
+      calculator_manager = create_calculator(
+        weights            = weights,
+        fmodel             = start_fmodel,
+        model              = model,
+        params             = params,
+        restraints_manager = rm)
+      grad=driver.run_gradient(calculator=calculator_manager)
+      print >> log, '~   gnorm',np.linalg.norm(grad)
+      print >> log, '~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad)
+      name="-".join(map(str,idl[idx]))
+      np.save(name,grad)
+      idx+=1
+      print >> log, "total time for gradient",(time.time() - t0),'\n\n'
+
+  print >> log, 'ready to run qr.granalyse!'
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   validate(model, fmodel, params, rst_file, prefix, log)
@@ -491,132 +604,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print >> log, "***********************************************************\n"
     start_fmodel = fmodel
     start_ph = None # is it used anywhere? I don't see where it is used!
-  if not params.refine.mode=='gtest':
-    fragment_manager = create_fragment_manager(
-        params           = params,
-        pdb_hierarchy    = model.pdb_hierarchy,
-        cif_objects      = model.cif_objects,
-        crystal_symmetry = model.xray_structure.crystal_symmetry())
 
-    restraints_manager = create_restraints_manager(params, model)
+  restraints_manager = create_restraints_manager(params, model)
 
   if(params.refine.mode == "gtest"):
-    # needs to be moved! Perhaps also to driver
-    import numpy as np
-    from fragment import fragment_extracts, write_cluster_and_fragments_pdbs
-    from utils.mathbox import get_grad_mad, get_grad_angle
-
-    # determine what kind of buffer to calculate
-    g_mode=[]
-    if params.cluster.g_mode is None:
-      g_mode.append(1)
-      if params.cluster.charge_embedding:
-        g_mode.append(2)
-      if params.cluster.two_buffers:
-        g_mode.append(3)
-      if params.cluster.two_buffers and params.cluster.charge_embedding:
-        g_mode.append(4)
-    else:
-      g_mode.append(params.cluster.g_mode)
-
-
-    # reset flags
-    params.cluster.clustering=True
-    params.cluster.save_clusters=True
-    params.cluster.charge_embedding=False
-    params.cluster.two_buffers=False
-    grad=[]
-    idx=0
-    idl=[]
-
-    # input for cluster size
-    cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
-    # cluster_scan=[2,10]
-
-    if g_mode[0]==0:
-      print >> log, 'warning: supersphere calculation!'
-      params.cluster.clustering=False
-      params.expansion=True
-      cluster_scan=[0]
-      clusters=[]
-
-    n_grad=len(cluster_scan)*len(g_mode)
-    print >> log, 'Calculating %3i gradients \n' % (n_grad)
-    print >> log, 'Starting loop over different fragment sizes'
-    for ig in g_mode:
-
-      print >> log,'loop for g_mode = %i ' % (ig)
-      if ig == 2:
-        print >> log, 'pc on'
-        params.cluster.charge_embedding=True
-      if ig == 3:
-        print >> log, 'two_buffers on, pc off'
-        params.cluster.charge_embedding=False
-        params.cluster.two_buffers=True
-      if ig == 4:
-        print >> log, 'two_buffers on, pc on'
-        params.cluster.charge_embedding=True
-        params.cluster.two_buffers=True
-
-      for max_cluster in cluster_scan:
-        idl.append([ig,max_cluster])
-        print >> log, 'g_mode: %s' % (" - ".join(map(str,idl[idx])))
-        t0 = time.time()
-        print >> log, "~max cluster size ",max_cluster
-        params.cluster.maxnum_residues_in_cluster=max_cluster
-        fragment_manager = create_fragment_manager(
-            params           = params,
-            pdb_hierarchy    = model.pdb_hierarchy,
-            cif_objects      = model.cif_objects,
-            crystal_symmetry = model.xray_structure.crystal_symmetry())
-        restraints_manager = create_restraints_manager(params, model)
-        if(fragment_manager is not None):
-          cluster_restraints_manager = cluster_restraints.from_cluster(
-            restraints_manager = restraints_manager,
-            fragment_manager   = fragment_manager,
-            parallel_params    = params.parallel)
-        rm = restraints_manager
-        if(fragment_manager is not None):
-          rm = cluster_restraints_manager
-          print "time taken for fragments",(time.time() - t0)
-          frags=fragment_manager
-          print >> log, '~  # clusters  : ',len(frags.clusters)
-          print >> log, '~  list of atoms per cluster:'
-          print >> log, '~   ',[len(x) for x in frags.cluster_atoms]
-          print >> log, '~  list of atoms per fragment:'
-          print >> log, '~   ',[len(x) for x in frags.fragment_super_atoms]
-
-          # save fragment data. below works
-          # better way is to make a single PDB file with chain IDs
-          label="-".join(map(str,idl[idx]))
-          write_cluster_and_fragments_pdbs(fragments=fragment_extracts(frags),directory=label)
-
-        calculator_manager = create_calculator(
-          weights            = weights,
-          fmodel             = start_fmodel,
-          model              = model,
-          params             = params,
-          restraints_manager = rm)
-        grad=driver.run_gradient(calculator=calculator_manager)
-        print >> log, '~   gnorm',np.linalg.norm(grad)
-        print >> log, '~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad)
-        name="-".join(map(str,idl[idx]))
-        np.save(name,grad)
-        idx+=1
-        print >> log, "total time for gradient",(time.time() - t0),'\n\n'
-
-    print >> log, 'ready to run qr.granalyse!'
-
+    run_g_test(params=params, log=log, model=model, weights=weights,
+               start_fmodel = start_fmodel)
   else:
-    rm = restraints_manager
-    if(fragment_manager is not None):
-      assert not params.expansion
-      cluster_restraints_manager = cluster_restraints.from_cluster(
-        restraints_manager = restraints_manager,
-        fragment_manager   = fragment_manager,
-        parallel_params    = params.parallel)
-      rm = cluster_restraints_manager
-
     if(map_data is not None and params.refine.mode == "refine"):
       model.model.geometry_statistics(use_hydrogens=False).show()
       show_cc(
@@ -634,7 +628,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         stpmax                = params.refine.stpmax,
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
-        restraints_manager    = rm,
+        restraints_manager    = restraints_manager,
         max_iterations        = params.refine.max_iterations_refine,
         log                   = log)
       model = O.run()
@@ -653,7 +647,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         fmodel=start_fmodel,
         model=model,
         params=params,
-        restraints_manager=rm)
+        restraints_manager=restraints_manager)
       if(params.refine.mode == "refine"):
         driver.refine(
           params                = params,

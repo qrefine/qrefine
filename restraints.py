@@ -21,6 +21,9 @@ import qrefine.completion as model_completion
 from libtbx.utils import null_out
 
 class restraints(object):
+  """
+  Create CCTBX or QM restraints manager.
+  """
   def __init__(self, params, model):
     self.params = params
     self.model = model
@@ -115,7 +118,9 @@ class from_expansion(object):
     pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
       crystal_symmetry = expansion.cs_box)
     self.crystal_symmetry_ss = expansion.cs_box
-    if(self.restraints_source.source_of_restraints_qm()):
+    # Use same route for CCTBX and QM !
+    # if(self.restraints_source.source_of_restraints_qm()):
+    if 1:
       self.pdb_hierarchy_super_completed = model_completion.run(
         #pdb_hierarchy         = pdb_hierarchy_super,
         crystal_symmetry      = expansion.cs_box,
@@ -149,7 +154,7 @@ class from_altlocs(object):
 
   def target_and_gradients(self, sites_cart, selection=None, index=None):
 
-    # XXX This is very durty, just to get things runing for now.
+    # XXX This is very dirty, just to get things runing for now.
 
     def get_grm(ph, cs):
       import mmtbx.monomer_library.server

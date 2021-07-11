@@ -14,6 +14,7 @@ from cStringIO import StringIO
 from libtbx import group_args
 from libtbx.utils import Sorry,Usage
 from scitbx.array_family import flex
+from iotbx import extract_xtal_data
 
 phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
@@ -39,7 +40,7 @@ def get_help():
     qr.refine --version  (print version informations)
     """)
   sys.exit(0)
-  return  
+  return
 
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
@@ -67,7 +68,7 @@ def run(args, log):
     return
   elif('--defaults' in args or '--show' in args):
     print_legend_and_usage(log)
-    return  
+    return
   elif('--version' in args):
     print __version__
     return
@@ -92,7 +93,7 @@ def run(args, log):
     rfs = reflection_file_server(
       crystal_symmetry = cmdline.crystal_symmetry,
       reflection_files = cmdline.reflection_files)
-    determine_data_and_flags_result = utils.determine_data_and_flags(
+    determine_data_and_flags_result = extract_xtal_data.run(
       reflection_file_server  = rfs,
       keep_going              = True,
       log                     = log)
@@ -113,7 +114,7 @@ def run(args, log):
       fmodel.show(show_header=False, show_approx=False)
     print >> log, "Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(),
       fmodel.r_free())
-  elif(cmdline.ccp4_map is not None and params.refine.mode=="refine"): 
+  elif(cmdline.ccp4_map is not None and params.refine.mode=="refine"):
     # Read map
     map_data = cmdline.ccp4_map.map_data()
     # Normalize map

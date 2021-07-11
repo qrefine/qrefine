@@ -1078,7 +1078,7 @@ def test_10_capping():
   from qrefine import charges
   cc = charges.charges_class('test_10_capping.pdb')
   rc = cc.get_total_charge(list_charges=True)
-  print rc
+  if 0: print rc
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):

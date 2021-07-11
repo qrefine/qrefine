@@ -287,14 +287,15 @@ def run(prefix):
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
   #
+  show=False
   for fast_interaction in [True, False]:
-    print "fast_interaction:", fast_interaction
+    if(show): print "fast_interaction:", fast_interaction
     for restraints in ["cctbx", "qm"]:
-      print "  restraints:", restraints
+      if(show): print "  restraints:", restraints
       for two_buffers in [False, True]:
-        print "    two_buffers=", two_buffers
+        if(show): print "    two_buffers=", two_buffers
         for clustering in ["true", "false"]:
-          print "      clustering=", clustering 
+          if(show): print "      clustering=", clustering
           cmd = " ".join([
             "qr.refine",
             pdb_in,
@@ -316,8 +317,9 @@ def run(prefix):
         g1 = g1.as_double()
         g2 = g2.as_double()
         diff = flex.abs(g1-g2)
-        print "        min/max/mean of (gradient1 - gradient2):", \
-            diff.min_max_mean().as_tuple()
+        if(show):
+          print "        min/max/mean of (gradient1 - gradient2):", \
+              diff.min_max_mean().as_tuple()
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")

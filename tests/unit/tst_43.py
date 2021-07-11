@@ -50,7 +50,7 @@ def get_model():
 def run(maxnum_residues_in_cluster):
   result = []
   for clustering in [True, False]:
-    print "  clustering", clustering, "-"*30
+    if 0: print "  clustering", clustering, "-"*30
     model = get_model()
     fq = from_cctbx(restraints_manager = model.get_restraints_manager())
     if(clustering):

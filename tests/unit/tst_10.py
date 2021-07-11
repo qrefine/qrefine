@@ -51,10 +51,12 @@ def run(prefix):
   Exercise combined energy and gradients from cluster qm.
   """
   for restraints in ["cctbx","qm"]:
-    print "Using restraints:", restraints
+    if 0:
+      print "Using restraints:", restraints
     result = []
     for clustering in [True, False]:
-      print "  clustering", clustering, "-"*30
+      if 0:
+        print "  clustering", clustering, "-"*30
       model = get_model()
       if(restraints=="qm"):
         fq = from_qm(

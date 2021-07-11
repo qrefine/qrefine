@@ -281,9 +281,16 @@ def run(prefix):
           print "    two_buffers=", two_buffers
           for clustering in ["true", "false"]:
             print "      clustering=", clustering
+
+            if(not clustering): expansion=True
+            else:               expansion=False
+
             cmd = " ".join([
               "qr.refine",
               pdb_in,
+
+              "expansion=%s"%str(expansion),
+
               "mode=opt",
               "altloc_method=subtract",
               "fast_interaction=%s"%fast_interaction,
@@ -297,6 +304,7 @@ def run(prefix):
               "max_iterations_refine=5",
               "two_buffers=%s"%str(two_buffers),
               "> %s.log"%prefix])
+            #print cmd
             assert easy_run.call(cmd)==0
           g1 = easy_pickle.load("cluster_false.pkl")
           g2 = easy_pickle.load("cluster_true.pkl")
@@ -305,6 +313,8 @@ def run(prefix):
           diff = flex.abs(g1-g2)
           print "        min/max/mean of (gradient1 - gradient2):", \
               diff.min_max_mean().as_tuple()
+          os.remove("cluster_false.pkl")
+          os.remove("cluster_true.pkl")
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")

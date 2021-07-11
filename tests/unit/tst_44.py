@@ -18,7 +18,7 @@ def get_model(file_name):
     cif_objects = None,
     crystal_symmetry=pdb_inp.crystal_symmetry())
   return model
-  
+
 def get_restraints_manager(expansion, file_name):
   model = get_model(file_name=file_name)
   params = qr.get_master_phil().extract()
