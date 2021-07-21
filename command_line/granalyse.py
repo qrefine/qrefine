@@ -1,5 +1,6 @@
 from __future__ import division
 from __future__ import print_function
+from tokenize import Floatnumber
 # LIBTBX_SET_DISPATCHER_NAME qr.granalyse
 import numpy as np
 import os
@@ -7,8 +8,6 @@ import sys
 from qrefine.utils.mathbox import get_grad_mad, get_grad_angle
 from libtbx.utils import Usage
 import iotbx.pdb
-
-
 
 
 def get_help():
@@ -61,19 +60,75 @@ def get_deviations(log,ref_grad,grad):
 def get_grad_delta(ref_grad,grad):
   return np.abs(ref_grad-grad)
 
-def get_grad_wdelta(ref_grad,grad):
+def get_grad_wdelta2(ref,g,name,do_debug):
+  # weighted delta: delta_i= (g_i - g_i^ref)|g_i^ref|
+  # *100 would be a 'percentage'
+  dim3=int(ref.shape[0])
+  dim=int(dim3/3)
+  d=np.zeros(dim)
+  gshape=np.reshape(g,(dim,3))
+  rshape=np.reshape(ref,(dim,3))
+  data=[]
+  for i in range(dim):
+    ii = 0 + 3 * i
+    # norm of ref.gradient vector for ith atom
+    inorm=np.linalg.norm(ref[ii:ii+3])
+    atomic_delta=0
+    for l in range(3):
+      atomic_delta+=np.abs((g[ii+l]-ref[ii+l]))/3
+    d[i]=100*atomic_delta/(inorm)
+    data.append([i,d[i],inorm,atomic_delta,g[ii],g[ii+1],g[ii+2],ref[ii],ref[ii+1],ref[ii+2]])  
+  if (do_debug):
+    np.savetxt(name+'-delta.txt',data,fmt="atom=%i  w.delta=%6.2f  norm(g_ref)=%5.2f  atomic_difference=%f gradient=%f %f %f  reference=%f %f %f")
+    np.savetxt(name+'.txt',gshape,fmt="%12.8f")
+    np.savetxt('reference_gradient.txt',rshape,fmt="%12.8f")
+  return d
+
+
+def get_grad_wdelta3(ref,g,name,do_debug):
+  # weighted delta: delta_i= (g_i - g_i^ref)/max(|g_i - g_i^ref|,30)
+  # 30 is not the final number
+  # *100 would be a 'percentage'
+  dim3=int(ref.shape[0])
+  dim=int(dim3/3)
+  d=np.zeros(dim)
+  gshape=np.reshape(g,(dim,3))
+  rshape=np.reshape(ref,(dim,3))
+  data=[]
+  for i in range(dim):
+    ii = 0 + 3 * i
+    # norm of  difference gradient vector for ith atom
+    dgrad=g[ii:ii+3]-ref[ii:ii+3]
+    inorm=np.linalg.norm(dgrad)
+    # inorm=np.linalg.norm(ref[ii:ii+3])
+    weight=max(inorm,30)
+    atomic_delta=0
+    for l in range(3):
+      atomic_delta+=np.abs((g[ii+l]-ref[ii+l]))/3
+    d[i]=100*atomic_delta/weight
+    data.append([i,d[i],inorm,atomic_delta,g[ii],g[ii+1],g[ii+2],ref[ii],ref[ii+1],ref[ii+2]])  
+  if (do_debug):
+    np.savetxt(name+'-delta.txt',data,fmt="atom=%i  w.delta=%6.2f  norm(g_ref)=%5.2f  atomic_difference=%f gradient=%f %f %f  reference=%f %f %f")
+    np.savetxt(name+'.txt',gshape,fmt="%12.8f")
+    np.savetxt('reference_gradient.txt',rshape,fmt="%12.8f")
+  return d
+
+
+
+def get_grad_wdelta(ref_grad,grad,name,do_debug):
   # weighted delta: delta_i= (g_i - g_i^ref)|g_i^ref|
   # *100 would be a 'percentage'
   dim3=int(ref_grad.shape[0])
   dim=int(dim3/3)
   d=np.zeros(dim)
-  ref=np.reshape(ref_grad,(3,dim))
-  g=np.reshape(grad,(3,dim))
+  ref=np.reshape(ref_grad,(dim,3))
+  g=np.reshape(grad,(dim,3))
   for i in range(dim):
-    inorm=np.linalg.norm(ref[0:3,i])
+    inorm=np.linalg.norm(ref[i,0:3])
     for j in range(3):
-      d[i]+=np.abs((g[j,i]-ref[j,i])/inorm)
+      d[i]+=np.abs((g[i,j]-ref[i,j])/inorm)
   return d*100/3
+
 
 def sorting_weight(name):
   # apply custom weight based on gtest ID to allow easy sorting
@@ -121,7 +176,9 @@ def run(args,log):
   do_grad=False
   do_delta=False
   do_wdelta=True
+  do_wdelta2=False
   do_expan=False
+  do_debug=False
 
   args = sys.argv[1:]
   if ('--ref') in args:
@@ -134,8 +191,12 @@ def run(args,log):
       do_grad=True
   if ('--delta') in args: # expert debug option
       do_delta=True
+  if ('--wdelta2') in args:
+      do_wdelta2=True
   if ('--help') in args:
       get_help()
+  if ('--debug') in args:
+      do_debug=True
   if (len(args)<1):
     get_help()
   
@@ -190,8 +251,10 @@ def run(args,log):
       delta=atomic_mean_deviation(dg)
     elif do_grad:
       delta=atomic_mean_deviation(igrad[i])
+    elif do_wdelta2:
+      delta=get_grad_wdelta3(ref_grad,igrad[i],iname[i][:-4],do_debug)
     elif do_wdelta:
-      delta=get_grad_wdelta(ref_grad,igrad[i])
+      delta=get_grad_wdelta2(ref_grad,igrad[i],iname[i][:-4],do_debug)
     set_ph_field(ph=pdb_obj,val=delta,field=field)
     output_pdb = "%s.pdb" %(iname[i][:-4])
     pdb_obj.hierarchy.write_pdb_file(file_name=output_pdb)
