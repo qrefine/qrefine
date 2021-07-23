@@ -60,9 +60,9 @@ def get_deviations(log,ref_grad,grad):
 def get_grad_delta(ref_grad,grad):
   return np.abs(ref_grad-grad)
 
-def get_grad_wdelta2(ref,g,name,do_debug):
-  # weighted delta: delta_i= (g_i - g_i^ref)|g_i^ref|
-  # *100 would be a 'percentage'
+def get_grad_wdelta(ref,g,name,do_debug):
+  # weighted delta version 1
+  # not good
   dim3=int(ref.shape[0])
   dim=int(dim3/3)
   d=np.zeros(dim)
@@ -85,10 +85,8 @@ def get_grad_wdelta2(ref,g,name,do_debug):
   return d
 
 
-def get_grad_wdelta3(ref,g,name,do_debug):
-  # weighted delta: delta_i= (g_i - g_i^ref)/max(|g_i - g_i^ref|,30)
-  # 30 is not the final number
-  # *100 would be a 'percentage'
+def get_grad_wdelta2(ref,g,name,do_debug,max_val):
+  # weighted delta version 2
   dim3=int(ref.shape[0])
   dim=int(dim3/3)
   d=np.zeros(dim)
@@ -98,36 +96,62 @@ def get_grad_wdelta3(ref,g,name,do_debug):
   for i in range(dim):
     ii = 0 + 3 * i
     # norm of  difference gradient vector for ith atom
+    # regularized with MAX function
     dgrad=g[ii:ii+3]-ref[ii:ii+3]
     inorm=np.linalg.norm(dgrad)
-    # inorm=np.linalg.norm(ref[ii:ii+3])
-    weight=max(inorm,30)
+    weight=max(inorm,max_val)
     atomic_delta=0
     for l in range(3):
       atomic_delta+=np.abs((g[ii+l]-ref[ii+l]))/3
     d[i]=100*atomic_delta/weight
     data.append([i,d[i],inorm,atomic_delta,g[ii],g[ii+1],g[ii+2],ref[ii],ref[ii+1],ref[ii+2]])  
   if (do_debug):
-    np.savetxt(name+'-delta.txt',data,fmt="atom=%i  w.delta=%6.2f  norm(g_ref)=%5.2f  atomic_difference=%f gradient=%f %f %f  reference=%f %f %f")
+    np.savetxt(name+'-delta.txt',data,fmt="atom=%i  w.delta=%6.2f  norm(deltaG)=%5.2f  sum.diff.grad=%f gradient=%f %f %f  reference=%f %f %f")
     np.savetxt(name+'.txt',gshape,fmt="%12.8f")
     np.savetxt('reference_gradient.txt',rshape,fmt="%12.8f")
   return d
 
 
-
-def get_grad_wdelta(ref_grad,grad,name,do_debug):
-  # weighted delta: delta_i= (g_i - g_i^ref)|g_i^ref|
-  # *100 would be a 'percentage'
-  dim3=int(ref_grad.shape[0])
+def get_grad_wdelta3(ref,g,name,do_debug,max_val):
+  # weighted delta version 3
+  dim3=int(ref.shape[0])
   dim=int(dim3/3)
   d=np.zeros(dim)
-  ref=np.reshape(ref_grad,(dim,3))
-  g=np.reshape(grad,(dim,3))
+  gshape=np.reshape(g,(dim,3))
+  rshape=np.reshape(ref,(dim,3))
+  data=[]
   for i in range(dim):
-    inorm=np.linalg.norm(ref[i,0:3])
-    for j in range(3):
-      d[i]+=np.abs((g[i,j]-ref[i,j])/inorm)
-  return d*100/3
+    ii = 0 + 3 * i
+    # norm of  difference gradient vector for ith atom
+    # regularized with MAX function
+    dgrad=g[ii:ii+3]-ref[ii:ii+3]
+    inorm=np.linalg.norm(dgrad)
+    weight=max(inorm,max_val)
+    normg=np.linalg.norm(g[ii:ii+3])
+    normr=np.linalg.norm(ref[ii:ii+3])
+    atomic_delta=np.abs(normg-normr)
+    d[i]=100*atomic_delta/weight
+    data.append([i,d[i],inorm,atomic_delta,g[ii],g[ii+1],g[ii+2],ref[ii],ref[ii+1],ref[ii+2]])  
+  if (do_debug):
+    np.savetxt(name+'-delta.txt',data,fmt="atom=%i  w.delta=%6.2f  norm(deltaG)=%5.2f  diff.norm=%f gradient=%f %f %f  reference=%f %f %f")
+    np.savetxt(name+'.txt',gshape,fmt="%12.8f")
+    np.savetxt('reference_gradient.txt',rshape,fmt="%12.8f")
+  return d
+
+
+# def get_grad_wdelta(ref_grad,grad,name,do_debug):
+#   # weighted delta: delta_i= (g_i - g_i^ref)|g_i^ref|
+#   # *100 would be a 'percentage'
+#   dim3=int(ref_grad.shape[0])
+#   dim=int(dim3/3)
+#   d=np.zeros(dim)
+#   ref=np.reshape(ref_grad,(dim,3))
+#   g=np.reshape(grad,(dim,3))
+#   for i in range(dim):
+#     inorm=np.linalg.norm(ref[i,0:3])
+#     for j in range(3):
+#       d[i]+=np.abs((g[i,j]-ref[i,j])/inorm)
+#   return d*100/3
 
 
 def sorting_weight(name):
@@ -177,8 +201,10 @@ def run(args,log):
   do_delta=False
   do_wdelta=True
   do_wdelta2=False
+  do_wdelta3=False
   do_expan=False
   do_debug=False
+  max_val=30
 
   args = sys.argv[1:]
   if ('--ref') in args:
@@ -193,6 +219,12 @@ def run(args,log):
       do_delta=True
   if ('--wdelta2') in args:
       do_wdelta2=True
+      do_wdelta=False
+  if ('--wdelta3') in args:
+      do_wdelta3=True
+      do_wdelta=False
+  if ('--max') in args:
+      max_val=int(args[args.index('--max')+1])
   if ('--help') in args:
       get_help()
   if ('--debug') in args:
@@ -252,9 +284,11 @@ def run(args,log):
     elif do_grad:
       delta=atomic_mean_deviation(igrad[i])
     elif do_wdelta2:
-      delta=get_grad_wdelta3(ref_grad,igrad[i],iname[i][:-4],do_debug)
+      delta=get_grad_wdelta2(ref_grad,igrad[i],iname[i][:-4],do_debug,max_val)
+    elif do_wdelta3:
+      delta=get_grad_wdelta3(ref_grad,igrad[i],iname[i][:-4],do_debug,max_val)
     elif do_wdelta:
-      delta=get_grad_wdelta2(ref_grad,igrad[i],iname[i][:-4],do_debug)
+      delta=get_grad_wdelta(ref_grad,igrad[i],iname[i][:-4],do_debug)
     set_ph_field(ph=pdb_obj,val=delta,field=field)
     output_pdb = "%s.pdb" %(iname[i][:-4])
     pdb_obj.hierarchy.write_pdb_file(file_name=output_pdb)
