@@ -24,6 +24,8 @@ import os
 import sys
 import time
 import pickle
+
+from numpy.lib.function_base import select
 import mmtbx.command_line
 import mmtbx.f_model
 import mmtbx.utils
@@ -73,6 +75,9 @@ cluster{
   maxnum_residues_in_cluster = 15
     .type = int
     .help = maximum number of residues in a cluster
+  select_within_radius = 10
+    .type = int
+    .help = supersphere expansion radius
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
     .help = type of clustering algorithm
@@ -343,7 +348,8 @@ def create_fragment_manager(
     debug                      = params.debug,
     fast_interaction           = params.cluster.fast_interaction,
     charge_cutoff              = params.cluster.charge_cutoff,
-    save_clusters              = params.cluster.save_clusters)
+    save_clusters              = params.cluster.save_clusters,
+    select_within_radius       = params.cluster.select_within_radius)
 
 def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(
@@ -358,6 +364,7 @@ def create_restraints_manager(params, model):
         method            = params.cluster.altloc_method)
     else:
       return restraints.from_expansion(
+        params           = params,
         restraints_source = restraints_source,
         pdb_hierarchy     = model.model.get_hierarchy(),
         crystal_symmetry  = model.crystal_symmetry)

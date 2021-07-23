@@ -70,11 +70,12 @@ class restraints(object):
     return self.restraints_manager
 
 class from_expansion(object):
-  def __init__(self, restraints_source, pdb_hierarchy, crystal_symmetry):
+  def __init__(self, params, restraints_source, pdb_hierarchy, crystal_symmetry):
     self.restraints_manager = restraints_source.restraints_manager
     self.restraints_source  = restraints_source
     self.pdb_hierarchy      = pdb_hierarchy
     self.crystal_symmetry   = crystal_symmetry
+    self.params             = params
     self.pdb_hierarchy_super_completed = None
     self.selection = None
     self.size = self.pdb_hierarchy.atoms().size()
@@ -113,7 +114,7 @@ class from_expansion(object):
     expansion = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
-      select_within_radius = 10.0)
+      select_within_radius = self.params.cluster.select_within_radius)
     pdb_hierarchy_super = expansion.ph_super_sphere
     pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
       crystal_symmetry = expansion.cs_box)

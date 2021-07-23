@@ -56,8 +56,10 @@ class fragments(object):
       debug                      = False,
       charge_cutoff              = 8.0,
       save_clusters              = False,
-      fast_interaction           = False):
+      fast_interaction           = False,
+      select_within_radius       = 10.0):
     self.clustering = clustering
+    self.select_within_radius = select_within_radius
     self.fast_interaction = fast_interaction
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
@@ -87,7 +89,8 @@ class fragments(object):
     self.expansion = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
-      select_within_radius = 10.0)
+      select_within_radius = self.select_within_radius)
+    print("expansion radius",select_within_radius)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
     ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
@@ -120,7 +123,7 @@ class fragments(object):
         self.expansion = expand(
           pdb_hierarchy        = self.pdb_hierarchy,
           crystal_symmetry     = self.crystal_symmetry,
-          select_within_radius = 10.0)
+          select_within_radius = self.select_within_radius)
         self.pdb_hierarchy_super = self.expansion.ph_super_sphere
       self.get_fragments()
       self.get_fragment_hierarchies_and_charges()
