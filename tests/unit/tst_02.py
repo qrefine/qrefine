@@ -21,7 +21,7 @@ def run(prefix):
   """
   CCTBX gradients in presence of altlocs
   """
-  for file_name in ["gly2_complete.pdb", "h_altconf_complete.pdb",
+  for file_name in ["gly2_1.pdb", "gly2_2.pdb", "h_altconf_complete.pdb",
                     "h_altconf_2_complete.pdb", "altlocs2.pdb", "altlocs.pdb"]:
     file_name = os.path.join(qr_unit_tests,"data_files",file_name)
 
