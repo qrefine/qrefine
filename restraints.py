@@ -19,6 +19,7 @@ import math
 from qrefine.super_cell import expand
 import qrefine.completion as model_completion
 from libtbx.utils import null_out
+from libtbx.test_utils import approx_equal
 
 class restraints(object):
   """
@@ -138,6 +139,61 @@ class from_expansion(object):
       pdb_hierarchy    = self.pdb_hierarchy_super_completed,
       crystal_symmetry = expansion.cs_box)
 
+#-------------------------------------------------------------------------------
+
+def get_cctbx_gradients(ph, cs):
+  def process_model_file(ph, crystal_symmetry, cif_objects=None):
+    import iotbx.pdb
+    params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+    params.pdb_interpretation.use_neutron_distances = True
+    params.pdb_interpretation.restraints_library.cdl = False
+    params.pdb_interpretation.sort_atoms = False
+    model = mmtbx.model.manager(
+      model_input = None,
+      pdb_hierarchy             = ph,
+      crystal_symmetry          = crystal_symmetry,
+      restraint_objects         = cif_objects,
+      process_input             = True,
+      pdb_interpretation_params = params,
+      log                       = null_out())
+    model.process_input_model(make_restraints=True, grm_normalization=False)
+    return model
+  model = process_model_file(ph=ph, crystal_symmetry=cs)
+  gradients = model.get_restraints_manager().energies_sites(
+    sites_cart=ph.atoms().extract_xyz(), compute_gradients=True).gradients
+  return group_args(model = model, gradients = gradients)
+
+def from_cctbx_altlocs(ph, cs, method="subtract"):
+  assert method in ["subtract", "average"]
+  g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
+  conf_ind = ph.get_conformer_indices()
+  n_altlocs = flex.max(conf_ind)
+  sel_W = conf_ind == 0
+  g_blanks = flex.vec3_double(sel_W.count(True))
+  for ci in range(1, n_altlocs+1):
+    sel_ci = conf_ind == ci
+    sel_ci_blank = (conf_ind == ci) | sel_W
+    ph_ci_blank = ph.select(sel_ci_blank)
+    g_ci_blank_ = get_cctbx_gradients(ph=ph_ci_blank, cs=cs).gradients
+    g_ci = g_ci_blank_.select(ph_ci_blank.get_conformer_indices() == 1)
+    g_result = g_result.set_selected(sel_ci, g_ci)
+    g_blanks += g_ci_blank_.select( ph_ci_blank.get_conformer_indices()==0 )
+  if(method=="subtract"):
+    # Option 1
+#    g_blank = get_cctbx_gradients(ph=ph.select(sel_W), cs=cs).gradients
+#    g_result_1 = g_result.set_selected(sel_W, g_blanks-((n_altlocs-1)*g_blank))
+    # Option 2
+    g_blank = get_cctbx_gradients(ph=ph, cs=cs).gradients.select(sel_W)
+    g_result_2 = g_result.set_selected(sel_W, g_blank)
+    #
+    # Options 1 and 2 are identical. Disabled for performance and because it
+    # expectedly crashes when altloc is ' '.
+#    assert approx_equal(g_result_1, g_result_2)
+  elif(method=="average"):
+    g_result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+  else: assert 0
+  return g_result_2
+
 class from_altlocs(object):
   def __init__(self, restraints_source, pdb_hierarchy, crystal_symmetry,
                method):
@@ -155,72 +211,15 @@ class from_altlocs(object):
 
   def target_and_gradients(self, sites_cart, selection=None, index=None):
 
-    # XXX This is very dirty, just to get things runing for now.
+    # XXX This is very durty, just to get things runing for now.
 
-    def get_grm(ph, cs):
-      import mmtbx.monomer_library.server
-      import mmtbx.monomer_library.pdb_interpretation
-      from mmtbx import monomer_library
-
-      mon_lib_srv = mmtbx.monomer_library.server.server()
-      ener_lib    = mmtbx.monomer_library.server.ener_lib()
-      # XXX Nth copy-paste
-      params = mmtbx.monomer_library.pdb_interpretation.master_params.extract()
-      params.use_neutron_distances = True
-      params.restraints_library.cdl = False
-      params.sort_atoms = False
-      processed_pdb_file = mmtbx.monomer_library.pdb_interpretation.process(
-        mon_lib_srv              = mon_lib_srv,
-        ener_lib                 = ener_lib,
-        params                   = params,
-        crystal_symmetry         = cs,
-        pdb_inp                  = ph.as_pdb_input(),
-        strict_conflict_handling = False,
-        force_symmetry           = True,
-        log                      = null_out())
-      xrs = processed_pdb_file.xray_structure()
-      sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
-      has_hd = "H" in sctr_keys or "D" in sctr_keys
-      geometry = processed_pdb_file.geometry_restraints_manager(
-        show_energies                = False,
-        assume_hydrogens_all_missing = not has_hd,
-        plain_pairs_radius           = 5.0)
-      return mmtbx.restraints.manager(
-         geometry = geometry, normalization = False)
-
-    def get_grads2(ph, cs):
-      grm = get_grm(ph=ph, cs=cs)
-      es = grm.energies_sites(sites_cart=ph.atoms().extract_xyz(),
-        compute_gradients=True)
-      return es.gradients
-
-    cs = self.crystal_symmetry
-    ph = self.pdb_hierarchy
-    g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
-    conf_ind = ph.get_conformer_indices()
-    n_altlocs = flex.max(conf_ind)
-    sel_W = conf_ind == 0
-    g_blanks = flex.vec3_double(sel_W.count(True))
-    for ci in range(1, n_altlocs+1):
-      sel_ci = conf_ind == ci
-      sel_ci_blank = (conf_ind == ci) | sel_W
-      ph_ci_blank = ph.select(sel_ci_blank)
-      g_ci_blank_ = get_grads2(ph=ph_ci_blank, cs=cs)
-      g_ci = g_ci_blank_.select(ph_ci_blank.get_conformer_indices() == 1)
-      g_result = g_result.set_selected(sel_ci, g_ci)
-      g_blanks += g_ci_blank_.select( ph_ci_blank.get_conformer_indices()==0 )
-    if(self.method=="subtract"):
-      g_blank = get_grads2(ph=ph.select(sel_W), cs=cs)
-      g_result = g_result.set_selected(sel_W, g_blanks-((n_altlocs-1)*g_blank))
-    elif(self.method=="average"):
-      g_result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
-    else: assert 0
-
+    gradient = from_cctbx_altlocs(
+      ph=self.pdb_hierarchy, cs=self.crystal_symmetry, method=self.method)
     # Make sure gradient_only is set correctly!!!
     energy=0 # undefined!
-    return energy, g_result
+    return energy, gradient
 
-
+#-------------------------------------------------------------------------------
 
 class from_cctbx(object):
   def __init__(self, restraints_manager, fragment_extracts=None,
@@ -249,9 +248,15 @@ class from_cctbx(object):
     if(selection is not None): ### clustering
       super_selection = self.fragment_extracts.fragment_super_selections[index]
       grm = self.fragment_extracts.super_sphere_geometry_restraints_manager
+
+      #es = grm.energies_sites(
+      #  sites_cart=sites_cart, compute_gradients=True)
+      #es.gradients = es.gradients.select(super_selection)[:selection.count(True)]
+      # Is this the same?
       es = grm.select(super_selection).energies_sites(
         sites_cart=sites_cart.select(super_selection), compute_gradients=True)
       es.gradients = es.gradients[:selection.count(True)]
+
       es.gradients = es.gradients * flex.double(
             self.fragment_extracts.fragment_scales[index])
     else:

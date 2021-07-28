@@ -104,6 +104,7 @@ class from_cluster(object):
         raise Sorry('process finished with error: %s' % e)
     target=0
     gradients=flex.vec3_double(system_size)
+
     for index, item in enumerate(energy_gradients):
       t = item[0]
       g = item[1]

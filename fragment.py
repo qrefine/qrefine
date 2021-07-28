@@ -212,7 +212,8 @@ class fragments(object):
       ## the first one altloc is " ", A B.. altlocs start from 1
       altlocs = self.pdb_hierarchy_super.altloc_indices().keys()
       altlocs.sort()
-      for altloc in altlocs[1:]:
+      for altloc in altlocs:
+        if(altloc==""): continue
         sel = asc.selection("altloc '%s' or altloc '' or altloc ' '"%altloc)
         ph_altloc = self.pdb_hierarchy_super.select(sel)
         phs.append(ph_altloc)
