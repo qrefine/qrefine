@@ -190,7 +190,7 @@ def from_cctbx_altlocs(ph, cs, method="subtract"):
     # expectedly crashes when altloc is ' '.
 #    assert approx_equal(g_result_1, g_result_2)
   elif(method=="average"):
-    g_result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+    g_result_2 = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
   else: assert 0
   return g_result_2
 
@@ -256,7 +256,6 @@ class from_cctbx(object):
       es = grm.select(super_selection).energies_sites(
         sites_cart=sites_cart.select(super_selection), compute_gradients=True)
       es.gradients = es.gradients[:selection.count(True)]
-
       es.gradients = es.gradients * flex.double(
             self.fragment_extracts.fragment_scales[index])
     else:

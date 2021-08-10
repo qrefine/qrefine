@@ -95,6 +95,9 @@ cluster{
   save_clusters = True
     .type = bool
     .help = save currently used fragments and clusters to disk as PDBs.
+  bond_with_altloc = True
+    .type = bool
+    .help = Disable bond_with_altloc check
 }
 
 restraints = cctbx *qm
@@ -349,7 +352,8 @@ def create_fragment_manager(
     fast_interaction           = params.cluster.fast_interaction,
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters,
-    select_within_radius       = params.cluster.select_within_radius)
+    select_within_radius       = params.cluster.select_within_radius,
+    bond_with_altloc_flag      = params.cluster.bond_with_altloc)
 
 def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(

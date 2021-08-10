@@ -22,7 +22,7 @@ def get_model(file_name):
     crystal_symmetry=pdb_inp.crystal_symmetry())
   return model
 
-def get_restraints_manager(expansion, file_name):
+def get_restraints_manager(expansion, file_name, altloc_method):
   model = get_model(file_name=file_name)
   params = qr.get_master_phil().extract()
   params.restraints="cctbx"
@@ -36,7 +36,8 @@ def get_restraints_manager(expansion, file_name):
   params.quantum.method='PM7'
   params.quantum.basis=''
   params.cluster.two_buffers=False
-  params.cluster.altloc_method="subtract"
+  params.cluster.altloc_method=altloc_method
+  params.cluster.bond_with_altloc = False # False to agree with Min's code
   #params.cluster.maxnum_residues_in_cluster=6
   params.cluster.maxnum_residues_in_cluster=999
 
@@ -45,33 +46,37 @@ def get_restraints_manager(expansion, file_name):
   return result
 
 def run(prefix, verbose=False):
-  path = qr_unit_tests+"/data_files/"
-  files = ["gly2_1.pdb", "altlocs2.pdb", "altlocs.pdb", "gly2_2.pdb"]
-  for f in files:
-    fn = path + f
-    ph = iotbx.pdb.input(fn).construct_hierarchy()
-    #
-    if(verbose): print "expansion=False "
-    rm1, sites_cart = get_restraints_manager(expansion=False, file_name=fn)
-    t1, g1 = rm1.target_and_gradients(sites_cart = sites_cart)
-    #
-    if(verbose): print "expansion=True "
-    rm2, sites_cart = get_restraints_manager(expansion=True, file_name=fn)
-    t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
-    #
-    if(verbose):
-      atoms = ph.atoms()
-      ds = flex.sqrt((g1 - g2).dot())
-      for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):
-        print ["%8.4f"%i for i in d], \
-              ["%8.4f"%i for i in g], \
-              ["%8.4f"%i for i in gg], "%8.4f"%dist, a.quote()
-    #
-    rs = flex.double()
-    for a, b in zip(g1.as_double(), g2.as_double()):
-      r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
-      rs.append(r)
-    assert flex.max(flex.abs(rs)) < 1.e-6
+  for altloc_method in ["average", "subtract"]:
+    path = qr_unit_tests+"/data_files/"
+    files = ["gly2_1.pdb", "altlocs2.pdb", "altlocs.pdb", "gly2_2.pdb"]
+    for f in files:
+      print f
+      fn = path + f
+      ph = iotbx.pdb.input(fn).construct_hierarchy()
+      #
+      if(verbose): print "expansion=False "
+      rm1, sites_cart = get_restraints_manager(
+        expansion=False, file_name=fn, altloc_method=altloc_method)
+      t1, g1 = rm1.target_and_gradients(sites_cart = sites_cart)
+      #
+      if(verbose): print "expansion=True "
+      rm2, sites_cart = get_restraints_manager(
+        expansion=True, file_name=fn, altloc_method=altloc_method)
+      t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
+      #
+      if(verbose):
+        atoms = ph.atoms()
+        ds = flex.sqrt((g1 - g2).dot())
+        for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):
+          print ["%8.4f"%i for i in d], \
+                ["%8.4f"%i for i in g], \
+                ["%8.4f"%i for i in gg], "%8.4f"%dist, a.quote()
+      #
+      rs = flex.double()
+      for a, b in zip(g1.as_double(), g2.as_double()):
+        r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
+        rs.append(r)
+      assert flex.max(flex.abs(rs)) < 1.e-6
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")

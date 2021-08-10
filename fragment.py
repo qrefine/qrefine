@@ -57,7 +57,9 @@ class fragments(object):
       charge_cutoff              = 8.0,
       save_clusters              = False,
       fast_interaction           = False,
-      select_within_radius       = 10.0):
+      select_within_radius       = 10.0,
+      bond_with_altloc_flag      = True):
+    self.bond_with_altloc_flag = bond_with_altloc_flag
     self.clustering = clustering
     self.select_within_radius = select_within_radius
     self.fast_interaction = fast_interaction
@@ -90,7 +92,6 @@ class fragments(object):
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = self.select_within_radius)
-    print("expansion radius",select_within_radius)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
     ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
@@ -356,7 +357,7 @@ class fragments(object):
                                        if i <= self.system_size]):
           if(atom in self.cluster_atoms[i_cluster] and
              atom in frequency_overlap_atoms.keys() and
-               not self.bond_with_altloc(atom)):
+               not self.bond_with_altloc(atom, self.bond_with_altloc_flag)):
               self.fragment_scales[i_cluster][index] = \
                 1.0/frequency_overlap_atoms[atom]
       ## add overlap clusters and fragments
@@ -364,14 +365,16 @@ class fragments(object):
          scale_list = []
          for atom in [i for i in fragment_super if i <= self.system_size]:
            if(atom in clusters[index] and atom in frequency_overlap_atoms.keys()
-                and not self.bond_with_altloc(atom)):
+              and not self.bond_with_altloc(atom, self.bond_with_altloc_flag)):
+
              scale_list.append(1.0/frequency_overlap_atoms[atom])
            else: scale_list.append(1.0)
          self.cluster_atoms.append(clusters[index])
          self.fragment_super_atoms.append(fragment_super)
          self.fragment_scales.append(scale_list)
 
-  def bond_with_altloc(self, atom_index):
+  def bond_with_altloc(self, atom_index, bond_with_altloc_flag):
+    if(not bond_with_altloc_flag): return False
     ph_atoms = list(self.pdb_hierarchy.atoms())
     ph_atom = ph_atoms[atom_index-1]
     bond = False
