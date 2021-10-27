@@ -91,7 +91,7 @@ cluster{
     .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
   g_mode = None
     .type = int
-    .help = manual control over gradient test loops (1=standard, 2=standard + point-charges, 3=two buffer 4=two_buffer+ point-charges)
+    .help = manual control over gradient test loops (0=expansion ,1=standard, 2=standard + point-charges, 3=two buffer 4=two_buffer+ point-charges)
   save_clusters = True
     .type = bool
     .help = save currently used fragments and clusters to disk as PDBs.
@@ -522,14 +522,8 @@ def run_g_test(params, model, weights, start_fmodel, log):
           cif_objects      = model.cif_objects,
           crystal_symmetry = model.xray_structure.crystal_symmetry())
       restraints_manager = create_restraints_manager(params, model)
-      if(fragment_manager is not None):
-        cluster_restraints_manager = cluster_restraints.from_cluster(
-          restraints_manager = restraints_manager,
-          fragment_manager   = fragment_manager,
-          parallel_params    = params.parallel)
       rm = restraints_manager
       if(fragment_manager is not None):
-        rm = cluster_restraints_manager
         print "time taken for fragments",(time.time() - t0)
         frags=fragment_manager
         print >> log, '~  # clusters  : ',len(frags.clusters)

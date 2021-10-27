@@ -115,7 +115,7 @@ def run(nproc=6,
   cwd = os.getcwd()
   assert cwd.find(' ')==-1, 'test do not work in directory with a space " "'
   try:
-    only_i=int(only_i)
+    only_i=only_i
     nproc=1
   except: only_i=None
   t0=time.time()
@@ -135,7 +135,9 @@ def run(nproc=6,
   tests = []
   for fn in os.listdir(qr_unit_tests):
     if(fn.startswith("tst_") and fn.endswith(".py")):
-      i_test = int(fn[:].replace("tst_","").replace(".py",""))
+      # i_test = int(fn[:].replace("tst_","").replace(".py",""))
+      i_test = fn[:].replace("tst_","").replace(".py","")
+      print i_test,only_i
       if(only_i is not None):
         if(only_i == i_test):
           tests.append(fn)

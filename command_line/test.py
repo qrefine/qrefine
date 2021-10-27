@@ -36,7 +36,7 @@ if __name__ == '__main__':
                       action='store',
                       default=None,
                       help='only this test',
-                      type=int)
+                      type=str)
   parser.add_argument('--non_mopac_only',
                       action='store_true',
                       default=False,
