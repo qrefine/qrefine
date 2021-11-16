@@ -415,14 +415,14 @@ def run(pdb_filename=None,
   working_params.pdb_interpretation.automatic_linking.link_metals=True
   model = mmtbx.model.manager(
     model_input = inp,
-    pdb_interpretation_params = working_params,
     log = log,
   )
+  model.process(make_restraints=True, 
+    pdb_interpretation_params = working_params)
   # get xray structure
   xrs = model.get_xray_structure()
   grm = model.get_restraints_manager()
   t0=time.time()
-  model.process_input_model(make_restraints=True)
   atom_valences = electron_distribution(
     model.get_hierarchy(), # needs to be altloc free
     model.get_restraints_manager().geometry,

@@ -314,13 +314,12 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   params.pdb_interpretation.sort_atoms = False
   pdb_inp = iotbx.pdb.input(file_name=pdb_file_name)
   model = mmtbx.model.manager(
-    model_input               = pdb_inp,
-    crystal_symmetry          = crystal_symmetry,
-    restraint_objects         = cif_objects,
-    process_input             = True,
-    pdb_interpretation_params = params,
-    log                       = null_out())
-  model.process_input_model(make_restraints=True, grm_normalization=False)
+    model_input       = pdb_inp,
+    crystal_symmetry  = crystal_symmetry,
+    restraint_objects = cif_objects,
+    log               = null_out())
+  model.process(make_restraints=True, grm_normalization=False,
+    pdb_interpretation_params = params)
   return group_args(
     model              = model,
     pdb_hierarchy      = model.get_hierarchy(),

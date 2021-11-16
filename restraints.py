@@ -43,14 +43,12 @@ class restraints(object):
   def update(self, pdb_hierarchy, crystal_symmetry):
     if(not self.source_of_restraints_qm()):
       model = mmtbx.model.manager(
-        model_input       = None,
+        model_input       = pdb_hierarchy.as_pdb_input(),
         restraint_objects = self.cif_objects,
-        pdb_hierarchy     = pdb_hierarchy,
-        process_input     = True,
         crystal_symmetry  = crystal_symmetry,
-        pdb_interpretation_params = self.pi_params,
         log               = null_out())
-      model.process_input_model(make_restraints=True, grm_normalization=False)
+      model.process(make_restraints=True, grm_normalization=False,
+        pdb_interpretation_params = self.pi_params)
       self.restraints_manager = from_cctbx(
         restraints_manager = model.get_restraints_manager())
     else:
