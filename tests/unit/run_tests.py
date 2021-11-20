@@ -56,7 +56,7 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
     cmd.append(arg)
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
-  if(0): print " ".join(cmd)
+  if(1): print " ".join(cmd)
   return easy_run.go(" ".join(cmd))
 
 def clean_up(prefix, mtz_name = None):

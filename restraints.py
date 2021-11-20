@@ -147,14 +147,12 @@ def get_cctbx_gradients(ph, cs):
     params.pdb_interpretation.restraints_library.cdl = False
     params.pdb_interpretation.sort_atoms = False
     model = mmtbx.model.manager(
-      model_input = None,
-      pdb_hierarchy             = ph,
+      model_input = ph.as_pdb_input(),
       crystal_symmetry          = crystal_symmetry,
       restraint_objects         = cif_objects,
-      process_input             = True,
-      pdb_interpretation_params = params,
       log                       = null_out())
-    model.process_input_model(make_restraints=True, grm_normalization=False)
+    model.process(make_restraints=True, grm_normalization=False,
+      pdb_interpretation_params = params,)
     return model
   model = process_model_file(ph=ph, crystal_symmetry=cs)
   gradients = model.get_restraints_manager().energies_sites(

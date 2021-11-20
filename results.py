@@ -14,13 +14,14 @@ def selxrs(xrss, s):
   return tmp[:]
 
 class manager(object):
-  def __init__(self, b, xrs, max_bond_rmsd,
+  def __init__(self, model, max_bond_rmsd,
                      restraints_weight_scale, max_r_work_r_free_gap,
-                     pdb_hierarchy, mode, log, r_work=None, r_free=None):
+                     mode, log, r_work=None, r_free=None):
     assert [r_work, r_free].count(None) in [0,2]
+    xrs = model.get_xray_structure()
     self.mode = mode
     self.log = log
-    self.pdb_hierarchy = pdb_hierarchy
+    self.pdb_hierarchy = model.get_hierarchy()
     self.states = mmtbx.utils.states(pdb_hierarchy  = self.pdb_hierarchy)
     self.crystal_symmetry = xrs.crystal_symmetry()
     self.states.add(sites_cart = xrs.sites_cart())
@@ -34,7 +35,7 @@ class manager(object):
     if([r_work, r_free].count(None) == 0):
       self.r_works.append(r_work)
       self.r_frees.append(r_free)
-    self.bs.append(b)
+    self.bs.append(model.get_bonds_rmsd())
     self.xrss.append(xrs.deep_copy_scatterers())
     self.restraints_weight_scales = flex.double([restraints_weight_scale])
     self.n_fev = 0

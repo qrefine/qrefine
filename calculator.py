@@ -5,7 +5,7 @@
    factor is halved.
 """
 from __future__ import division
-import random
+import random, time
 from cctbx import xray
 from libtbx import adopt_init_args
 from scitbx.array_family import flex
@@ -142,46 +142,84 @@ class calculator(object):
       self.xray_structure.tidy_us()
       self.xray_structure.apply_symmetry_sites()
 
-class sites_opt(calculator):
-  def __init__(self, restraints_manager, xray_structure, dump_gradients,
-                     ase_atoms):
-    self.dump_gradients = dump_gradients
+class sites_opt(object):
+  """
+  General calculator for model geometry optimization. For native CCTBX
+  restraints, restraints_manager and model.restraints_manager are the same
+  things.
+  However, restraints_manager can be an external entity, such as coming from
+  external packeges (eg., QM).
+  Ideally, and this is probably a TODO item for the future, any
+  restraints_manager should always be in the model.
+  dump_gradients is used for debugging.
+  """
+
+  def __init__(self, model, max_shift, restraints_manager=None,
+               dump_gradients=False, convergence_threshold=1.e-3,
+               convergence_reached_times=3):
+    self.model = model
     self.restraints_manager = restraints_manager
-    self.x = None
-    self.xray_structure = xray_structure
-    self.not_hd_selection = None # XXX UGLY
-    self.ase_atoms = ase_atoms
-    self.initialize(xray_structure = self.xray_structure)
+    self.dump_gradients = dump_gradients
+    self.convergence_threshold = convergence_threshold
+    self.convergence_reached_times = convergence_reached_times
+    self.meat_convergence_criteria = 0
+    self.x = flex.double(self.model.size()*3, 0)
+    self.n = self.x.size()
+    self.f = None
+    self.g = None
+    self.f_start = None
+    self.max_shift_between_resets = 0
+    self.sites_cart = self.model.get_sites_cart()
+    self.bound_flags = flex.int(self.n, 2)
+    self.lower_bound = flex.double([-1*max_shift]*self.n)
+    self.upper_bound = flex.double([   max_shift]*self.n)
 
-  def initialize(self, xray_structure=None):
-    self.not_hd_selection = ~self.xray_structure.hd_selection() # XXX UGLY
-    self.x = self.xray_structure.sites_cart().as_double()
-
-  def update(self, x):
-    self.x = x
-    self.update_xray_structure()
-
-  def target_and_gradients(self, x):
-    self.update(x = x)
-    f, g = self.restraints_manager.target_and_gradients(
-      sites_cart = flex.vec3_double(self.x))
-    if(self.dump_gradients is not None):
+  def target_and_gradients(self):
+    sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
+    self.f, self.g = self.restraints_manager.target_and_gradients(
+      sites_cart = sites_plus_x)
+    self.g = self.g.as_double()
+    # For tests
+    if(self.dump_gradients):
       from libtbx import easy_pickle
-      easy_pickle.dump(self.dump_gradients, g)
+      easy_pickle.dump(self.dump_gradients, self.g)
       STOP()
-    return f, g.as_double()
+    #
+    if(self.f_start is None):
+      self.f_start = self.f
 
-  def update_xray_structure(self):
-    self.xray_structure.set_sites_cart(
-      sites_cart = flex.vec3_double(self.x))
+    self.max_shift_between_resets = flex.max(flex.sqrt((
+      self.sites_cart - sites_plus_x).dot()))
+
+    return self.f, self.g
+
+  def compute_functional_and_gradients(self):
+    return self.target_and_gradients()
+
+  def apply_x(self):
+    self.f_start = self.f
+    self.model.set_sites_cart(
+      sites_cart = self.sites_cart+flex.vec3_double(self.x))
+    self.x = flex.double(self.model.size()*3, 0)
+    self.sites_cart = self.model.get_sites_cart()
+    if(self.max_shift_between_resets < self.convergence_threshold):
+      self.meat_convergence_criteria += 1
+
+  def converged(self):
+    if(self.meat_convergence_criteria >= self.convergence_reached_times):
+      return True
+    return False
+
+  def __call__(self):
+    f, g = self.target_and_gradients()
+    return self.x, f, g
 
 class sites(calculator):
   def __init__(self,
                fmodel=None,
                restraints_manager=None,
                weights=None,
-               dump_gradients=None,
-               ase_atoms=None):
+               dump_gradients=None):
     adopt_init_args(self, locals())
     self.x = None
     self.x_target_functor = None
@@ -356,7 +394,7 @@ class sites_real_space(object):
       xrs                = model.get_xray_structure())
     clash = clashscore(
     pdb_hierarchy = model.get_hierarchy(),
-    keep_hydrogens = False, 
+    keep_hydrogens = False,
     fast = True, condensed_probe = True).get_clashscore()
     print "DEV: b_rmsd= %7.4f clash= %6.4f rota= %6.4f rama_fav= %5.4f cbeta= %6.4f"%(
     b_rmsd, clash, rota, rama_fav, cbeta)

@@ -107,7 +107,7 @@ def run(args, log):
     fmodel = mmtbx.f_model.manager(
       f_obs          = f_obs,
       r_free_flags   = r_free_flags,
-      xray_structure = model.xray_structure,
+      xray_structure = model.get_xray_structure(),
       target_name    = params.refine.refinement_target_name)
     if(params.refine.update_all_scales):
       fmodel.update_all_scales(remove_outliers=False)

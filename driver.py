@@ -11,6 +11,7 @@ from libtbx import group_args
 from ase.optimize.lbfgs import LBFGS
 import numpy
 from libtbx.test_utils import approx_equal
+from scitbx import minimizers
 
 class convergence(object):
   def __init__(self, params, fmodel=None, xray_structure=None):
@@ -132,10 +133,9 @@ class minimizer(object):
   def _get_bond_rmsd(self):
     b_mean = None
     if(self.geometry_rmsd_manager is not None):
-      s = self.calculator.not_hd_selection
       energies_sites = \
-        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
-          sites_cart        = flex.vec3_double(self.x).select(s),
+        self.geometry_rmsd_manager.geometry.energies_sites(
+          sites_cart        = flex.vec3_double(self.x),
           compute_gradients = False)
       b_mean = energies_sites.bond_deviations()[2]
     return b_mean
@@ -150,15 +150,6 @@ class minimizer(object):
 
   def compute_functional_and_gradients(self):
     self.number_of_function_and_gradients_evaluations += 1
-    # Ad hoc damping shifts; note arbitrary 1.0 below
-    #x_current = self.x
-    #if(self.x_previous is None):
-    #  self.x_previous = x_current.deep_copy()
-    #else:
-    #  xray.ext.damp_shifts(previous=self.x_previous, current=x_current,
-    #    max_value=1.0)
-    #  self.x_previous = x_current.deep_copy()
-    #
     print "  step: %3d bond rmsd: %8.6f"%(
       self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd())
     return self.calculator.target_and_gradients(x = self.x)
@@ -244,13 +235,15 @@ class clustering_update(object):
       self.pre_sites_cart = sites_cart
 
   def re_clustering(self, calculator):
-    sites_cart = calculator.fmodel.xray_structure.sites_cart()
+    try:    sites_cart = calculator.fmodel.xray_structure.sites_cart()
+    except: sites_cart = calculator.model.get_sites_cart()
     rmsd_diff = self.pre_sites_cart.rms_difference(sites_cart)
+    print rmsd_diff, self.rmsd_tolerance
     if(rmsd_diff > self.rmsd_tolerance):
       print >> self.log, " rmsd_diff: ", rmsd_diff, "--> need to redo clustering"
-      calculator.restraints_manager.fragments.set_up_cluster_qm()
+      calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
       print >> self.log, " interacting pairs number:  ", \
-        calculator.restraints_manager.fragments.interacting_pairs
+        calculator.restraints_manager.fragment_manager.interacting_pairs
       self.pre_sites_cart = sites_cart
 
 class restart_data(object):
@@ -309,9 +302,8 @@ class minimizer_ase(object):
   def _get_bond_rmsd(self, sites_cart):
     b_mean = None
     if(self.geometry_rmsd_manager is not None):
-      s = self.calculator.not_hd_selection
       energies_sites = \
-        self.geometry_rmsd_manager.geometry.select(s).energies_sites(
+        self.geometry_rmsd_manager.geometry.energies_sites(
           sites_cart        = sites_cart.select(s),
           compute_gradients = False)
       b_mean = energies_sites.bond_deviations()[2]
@@ -342,21 +334,6 @@ class minimizer_ase(object):
       if(not v): return
 
 def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
-  assert mode in ["weight", "refine"]
-  result = None
-  try:
-    result = run_minimize_(
-      calculator            = calculator,
-      params                = params,
-      results               = results,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      mode                  = mode)
-  except Exception as e:
-    print "minimization failed:", e
-    result = None
-  return result
-
-def run_minimize_(calculator, params, results, geometry_rmsd_manager, mode):
   minimized = None
   if  (mode == "weight"): max_iterations = params.refine.max_iterations_weight
   elif(mode == "refine"): max_iterations = params.refine.max_iterations_refine
@@ -614,78 +591,43 @@ def refine(fmodel,
   print >> results.log, "At end of further refinement:"
   results.show(prefix="  ")
 
-def opt(xray_structure,
-        params,
-        results,
-        calculator,
-        geometry_rmsd_manager):
+def opt(model, params, results, calculator):
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=results.log
-  rst_file = params.rst_file
-  rst_data = restart_data(xray_structure, geometry_rmsd_manager)
-  if(os.path.isfile(rst_file)):
-    with open(rst_file, 'rb') as handle:
-      rst_file_data = pickle.load(handle)
-      micro_cycle_start = rst_file_data["micro_cycle"]
-      print >> results.log, "\n***********************************************************"
-      print >> results.log, "restarts from micro_cycle: %d"%(micro_cycle_start)
-      print >> results.log, "***********************************************************\n"
-      ## check the restart fmodel
-      xray_structure = calculator.xray_structure
-  else:
-    micro_cycle_start = 1
-  try:
-    clustering = calculator.restraints_manager.clustering
-  except :
-    clustering = False
-  if(clustering):
+  start = model.geometry_statistics().show_short()
+  print >> log_switch, "start: %s"%start
+  if(params.cluster.clustering):
     cluster_qm_update = clustering_update(
-      calculator.xray_structure.sites_cart(), results.log, \
-      params.rmsd_tolerance * 100)
+      model.get_sites_cart(), results.log,
+      params.cluster.re_calculate_rmsd_tolerance)
     print >> results.log, "\ninteracting pairs number:  ",\
-      calculator.restraints_manager.fragments.interacting_pairs
-  results.show(prefix="start")
-  for micro_cycle in xrange(micro_cycle_start,
-                        params.refine.number_of_micro_cycles+micro_cycle_start):
-    if(clustering):
+      len(calculator.restraints_manager.fragment_manager.interaction_list)
+  for micro_cycle in range(0, params.refine.number_of_micro_cycles):
+    if(params.cluster.clustering):
       cluster_qm_update.re_clustering(calculator)
-    conv_test = convergence(
-      xray_structure=calculator.xray_structure, params=params)
-    rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle,
-      xray_structure=xray_structure,
-      results=results)
-    minimized = run_minimize(
-      calculator            = calculator,
-      params                = params,
-      results               = results,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      mode                  = "refine")
-    #if minimized is None: break
-    calculator.update_xray_structure()
-    cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
-      restraints_manager = geometry_rmsd_manager.geometry,
-      xrs                = xray_structure)
-    n_fev = 0
-    if(minimized is not None):
-      n_fev = minimized.number_of_function_and_gradients_evaluations
-    results.update(
-      b     = cctbx_rm_bonds_rmsd,
-      xrs   = xray_structure,
-      n_fev = n_fev)
-    results.write_pdb_file(
-      output_folder_name = params.output_folder_name,
-      output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
-    results.show(prefix="micro_cycle")
-    if(conv_test.is_geometry_converged(
-       sites_cart = xray_structure.sites_cart())):
-      print >> results.log, " Convergence at micro_cycle:", micro_cycle
+    if(params.refine.minimizer == "lbfgs"):
+      minimized = minimizers.lbfgs(
+        calculator     = calculator,
+        max_iterations = params.refine.max_iterations_refine,
+        gradient_only  = params.refine.gradient_only,
+        stpmax         = params.refine.stpmax)
+    else:
+      minimized = minimizers.lbfgsb(
+        calculator     = calculator,
+        max_iterations = params.refine.max_iterations_refine)
+    prefix="cycle: %3d max_shift: %.6f "%(micro_cycle,
+      calculator.max_shift_between_resets)
+    minimized.show(log = log_switch, prefix=prefix)
+    calculator.apply_x()
+    if(calculator.converged()):
+      print >> results.log, "Convergence reached. Stopping now."
       break
-    params.refine.pre_opt = None # no pre-optimizations after first macrocycle
-  rst_data.write_rst_file(rst_file, micro_cycle=micro_cycle+1,
-    xray_structure=xray_structure, results=results)
-
-
-def run_gradient(calculator):
-    eg=calculator.target_and_gradients(x = calculator.x)
-    return list(eg[1])
-
+  results.update(
+    b     = model.get_bonds_rmsd(),
+    xrs   = model.get_xray_structure(),
+    n_fev = minimized.nfev)
+  results.write_pdb_file(
+    output_folder_name = params.output_folder_name,
+    output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
+  final = model.geometry_statistics().show_short()
+  print >> log_switch, "final: %s"%final

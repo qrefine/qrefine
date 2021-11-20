@@ -98,6 +98,10 @@ cluster{
   bond_with_altloc = True
     .type = bool
     .help = Disable bond_with_altloc check
+  re_calculate_rmsd_tolerance = 0.5
+    .type = float
+    .help = Re-calculate clusters once the model shifted by more than \
+            re_calculate_rmsd_tolerance from initial
 }
 
 restraints = cctbx *qm
@@ -235,6 +239,10 @@ refine {
   pre_opt_gconv = 3000
     .type = float
     .help = gradient norm convergence threshold for pre-optimizer
+  minimizer = *lbfgs lbfgsb
+    .type = choice(multi=False)
+    .help = Choice of minimizer to use. LBFGS-B requires target and gradients.\
+            LBFGS can use either gradients only or both, target and gradients.
 }
 
 parallel {
@@ -320,33 +328,24 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     log               = null_out())
   model.process(make_restraints=True, grm_normalization=False,
     pdb_interpretation_params = params)
-  return group_args(
-    model              = model,
-    pdb_hierarchy      = model.get_hierarchy(),
-    xray_structure     = model.get_xray_structure(),
-    cif_objects        = cif_objects,
-    ase_atoms          = ase_io_read(pdb_file_name), # To be able to use ASE LBFGS
-    crystal_symmetry   = model.get_xray_structure().crystal_symmetry()
-    )
+  return model
 
 def create_fragment_manager(
-      cif_objects,
-      pdb_hierarchy,
-      crystal_symmetry,
+      model,
       params,
-      file_name      = os.path.join("ase","tmp_ase.pdb")):
+      file_name = os.path.join("ase","tmp_ase.pdb")):
   if(not params.cluster.clustering): return None
   return fragments(
-    cif_objects                = cif_objects,
+    cif_objects                = model._restraint_objects,
     working_folder             = os.path.split(file_name)[0]+ "/",
     clustering_method          = params.cluster.clustering_method,
     altloc_method              = params.cluster.altloc_method,
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
     two_buffers                = params.cluster.two_buffers,
-    pdb_hierarchy              = pdb_hierarchy,
+    pdb_hierarchy              = model.get_hierarchy(),
     qm_engine_name             = params.quantum.engine_name,
-    crystal_symmetry           = crystal_symmetry,
+    crystal_symmetry           = model.crystal_symmetry(),
     debug                      = params.debug,
     fast_interaction           = params.cluster.fast_interaction,
     charge_cutoff              = params.cluster.charge_cutoff,
@@ -355,9 +354,7 @@ def create_fragment_manager(
     bond_with_altloc_flag      = params.cluster.bond_with_altloc)
 
 def create_restraints_manager(params, model):
-  restraints_source = restraints.restraints(
-    params = params,
-    model  = model.model)
+  restraints_source = restraints.restraints(params = params, model = model)
   if(params.expansion):
     if(model.model.altlocs_present()):
       return restraints.from_altlocs(
@@ -373,11 +370,7 @@ def create_restraints_manager(params, model):
         crystal_symmetry  = model.crystal_symmetry)
   else:
     if(params.cluster.clustering):
-      fragment_manager = create_fragment_manager(
-        params           = params,
-        pdb_hierarchy    = model.pdb_hierarchy,
-        cif_objects      = model.cif_objects,
-        crystal_symmetry = model.xray_structure.crystal_symmetry())
+      fragment_manager = create_fragment_manager(params = params, model = model)
       return cluster_restraints.from_cluster(
         restraints_manager = restraints_source.restraints_manager,
         fragment_manager   = fragment_manager,
@@ -399,14 +392,13 @@ def create_calculator(weights, params, restraints_manager, fmodel=None,
         fmodel             = fmodel,
         restraints_manager = restraints_manager,
         weights            = weights,
-        dump_gradients     = params.dump_gradients,
-        ase_atoms          = model.ase_atoms)
+        dump_gradients     = params.dump_gradients)
     else:
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
-        xray_structure     = model.xray_structure,
+        model              = model,
         dump_gradients     = params.dump_gradients,
-        ase_atoms          = model.ase_atoms)
+        max_shift          = params.refine.stpmax)
   if(params.refine.refine_adp):
     return calculator.adp(
       fmodel             = fmodel,
@@ -571,12 +563,9 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       start_fmodel.xray_structure)
   else:
     weights = None
-    if (model.pdb_hierarchy.atoms().size() > params.max_atoms):
+    if (model.size() > params.max_atoms):
       raise Sorry("Too many atoms.")
-    geometry_rmsd_manager =  model.model.get_restraints_manager()
-    cctbx_rm_bonds_rmsd = calculator.get_bonds_rmsd(
-      restraints_manager = geometry_rmsd_manager.geometry,
-      xrs                = model.xray_structure)
+    geometry_rmsd_manager = model.get_restraints_manager()
     #
     if(params.refine.dry_run): return
     #
@@ -586,11 +575,9 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     results_manager = results.manager(
       r_work                  = r_work,
       r_free                  = r_free,
-      b                       = cctbx_rm_bonds_rmsd,
-      xrs                     = model.xray_structure,
+      model                   = model,
       max_bond_rmsd           = params.refine.max_bond_rmsd,
       max_r_work_r_free_gap   = params.refine.max_r_work_r_free_gap,
-      pdb_hierarchy           = model.pdb_hierarchy,
       mode                    = params.refine.mode,
       log                     = log,
       restraints_weight_scale = params.refine.restraints_weight_scale)
@@ -661,11 +648,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           results               = results_manager)
       else:
         driver.opt(
-          params                = params,
-          xray_structure        = model.xray_structure,
-          geometry_rmsd_manager = geometry_rmsd_manager,
-          calculator            = calculator_manager,
-          results               = results_manager)
+          params     = params,
+          model      = model,
+          calculator = calculator_manager,
+          results    = results_manager)
       xrs_best = results_manager.finalize(
         input_file_name_prefix  = prefix,
         output_file_name_prefix = params.output_file_name_prefix,
