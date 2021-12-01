@@ -47,7 +47,7 @@ class restraints(object):
         restraint_objects = self.cif_objects,
         crystal_symmetry  = crystal_symmetry,
         log               = null_out())
-      model.process(make_restraints=True, grm_normalization=False,
+      model.process(make_restraints=True, grm_normalization=True,
         pdb_interpretation_params = self.pi_params)
       self.restraints_manager = from_cctbx(
         restraints_manager = model.get_restraints_manager())
@@ -151,7 +151,7 @@ def get_cctbx_gradients(ph, cs):
       crystal_symmetry          = crystal_symmetry,
       restraint_objects         = cif_objects,
       log                       = null_out())
-    model.process(make_restraints=True, grm_normalization=False,
+    model.process(make_restraints=True, grm_normalization=True,
       pdb_interpretation_params = params,)
     return model
   model = process_model_file(ph=ph, crystal_symmetry=cs)

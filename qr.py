@@ -314,7 +314,7 @@ def create_fmodel(cmdline, log):
   log.flush()
   return fmodel
 
-def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
+def process_model_file(pdb_file_name, cif_objects=None, crystal_symmetry=None):
   import iotbx.pdb
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
@@ -326,7 +326,7 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     crystal_symmetry  = crystal_symmetry,
     restraint_objects = cif_objects,
     log               = null_out())
-  model.process(make_restraints=True, grm_normalization=False,
+  model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
   return model
 
