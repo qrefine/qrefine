@@ -507,11 +507,7 @@ def run_g_test(params, model, weights, start_fmodel, log):
       t0 = time.time()
       print >> log, "~max cluster size ",max_cluster
       params.cluster.maxnum_residues_in_cluster=max_cluster
-      fragment_manager = create_fragment_manager(
-          params           = params,
-          pdb_hierarchy    = model.pdb_hierarchy,
-          cif_objects      = model.cif_objects,
-          crystal_symmetry = model.xray_structure.crystal_symmetry())
+      fragment_manager = create_fragment_manager(params = params, model = model)
       restraints_manager = create_restraints_manager(params, model)
       rm = restraints_manager
       if(fragment_manager is not None):
@@ -534,7 +530,7 @@ def run_g_test(params, model, weights, start_fmodel, log):
         model              = model,
         params             = params,
         restraints_manager = rm)
-      grad=driver.run_gradient(calculator=calculator_manager)
+      grad=list(calculator_manager.target_and_gradients())[1]
       print >> log, '~   gnorm',np.linalg.norm(grad)
       print >> log, '~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad)
       name="-".join(map(str,idl[idx]))
