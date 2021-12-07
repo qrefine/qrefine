@@ -16,15 +16,10 @@ https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html
 """
 import os
 import numpy as np
-import torch
-import torchani
 from sets import Set
+import ase.units as ase_units
 from ase.calculators.general import Calculator
-
-
-# If you have a GPU available, then PyTorch will use it, otherwise the CPU is used.
-device_str = 'cuda' if torch.cuda.is_available() else 'cpu'
-device = torch.device(device_str )
+from ani.ani_interface import ANIRPCCalculator
 
 
 class TorchAni(Calculator):
@@ -43,33 +38,21 @@ class TorchAni(Calculator):
       energy_free (float) gets the energy as a sum of atomic contributions.
       forces (numpy.ndarray) stores the derivative of the energy with respect to the x,y,z coordinates.
   """
-  def __init__(self,method='ani-1x_8x',label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
+  def __init__(self,method='qr-ef',label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):
 
     self.label  = label
     self.atoms  = atoms
-
     coordinates = os.path.dirname(label)+"/"+ coordinates
     self.coordinates = coordinates
-
     self.method = method
-
-    if self.method == 'ani-1ccx':
-        self.model = torchani.models.ANI1ccx()
-        # TODO: There is a new api for this in master branch of torchani.
-        # calculator = torchani.models.ANI1ccx().ase()
-        # self.atoms.set_calculator(calculator)
-    else: #'ani-1x_8x'
-        self.model = torchani.models.ANI1x()
-
     self.energy_free = None
     self.forces = []
-
 
   def check_trained_atoms(self):
       """
       The ANN models are only trained on H,C,N,O
       """
-      trained_atoms = Set(['C', 'H', 'N', 'O'])
+      trained_atoms = Set(['C', 'H', 'N', 'O', 'S', 'F', 'Cl'])
       if not Set(self.atoms.get_chemical_symbols()).issubset(trained_atoms):
           raise NotImplementedError("Unfortunately, we do not have a trained model for all elements in your system.")
 
@@ -77,7 +60,6 @@ class TorchAni(Calculator):
     """
     This method is called every time an energy and forces are needed.
     The Q|R code calls this method at each step of LBFGS.
-
     Args:
       atoms (ase.atoms.Atoms) an updated set of atoms.
       TODO: coordinates (numpy.ndarray) an updated set of coordinates. are these even being used?
@@ -85,26 +67,15 @@ class TorchAni(Calculator):
       TODO: pointcharges (?) are these even being used?
       command (str) not used in this calculator
       define_str() not used in this calculator, legacy from Turbomole?
-
     """
+  
     self.atoms = atoms
-    self.coordinates = coordinates
-    self.charge = charge
-    self.pointcharges = pointcharges
     self.check_trained_atoms()
-
-    atoms_symbols = self.atoms.get_chemical_symbols()
-    atoms_symbols = self.model.species_to_tensor(atoms_symbols).to(device).unsqueeze(0)
-
-    xyz = self.atoms.get_positions().tolist()
-    coords = torch.tensor([xyz],requires_grad = True, device = device)
-
-    _, energy = self.model((atoms_symbols, coords))
-    derivative = torch.autograd.grad(energy.sum(), coords)[0]
-    force = -derivative
-
-    self.energy_free = energy.item()
-    self.forces = force.squeeze().numpy().astype(np.float64)
+    calc = ANIRPCCalculator()
+    atoms.set_calculator(calc)
+    unit_convert = ase_units.kcal/ase_units.mol
+    self.energy_free = atoms.get_potential_energy()*unit_convert
+    self.forces = atoms.get_forces().astype(np.float64)*unit_convert
 
     if 0: # we need debugging flag here to switch on and off.
         print("Torch ANI: ",self.method)
@@ -125,4 +96,3 @@ class TorchAni(Calculator):
 
   def set_method(self, method):
     self.method = method
-

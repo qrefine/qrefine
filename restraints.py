@@ -286,6 +286,7 @@ class from_qm(object):
     self.qm_addon = qm_addon
     self.qm_addon_method = qm_addon_method
 
+    self.crystal_symmetry = crystal_symmetry
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
     self.file_name = file_name
@@ -329,7 +330,7 @@ class from_qm(object):
       calculator = Ani()
     elif(self.qm_engine_name == "torchani"):
       from plugin.ase.torchani_qr import TorchAni
-      calculator = TorchAni(method=self.method)
+      calculator = TorchAni()
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
     else:
@@ -394,7 +395,7 @@ class from_qm(object):
       selection =flex.bool(self.system_size, True)
       gradients_scale = [1.0]*self.system_size
     define_str=''
-    atoms = ase_atoms_from_pdb_hierarchy(ph)
+    atoms = ase_atoms_from_pdb_hierarchy(ph, self.crystal_symmetry, self.qm_engine_name)
     unit_convert = ase_units.mol/ase_units.kcal # ~ 23.06
     self.qm_engine.set_label(qm_pdb_file[:-4])
     cwd = os.getcwd()
@@ -439,7 +440,7 @@ class from_qm(object):
     return energy, gradients
 
 from ase import Atoms
-def ase_atoms_from_pdb_hierarchy(ph):
+def ase_atoms_from_pdb_hierarchy(ph, crystal_symmetry, qm_engine_name):
 
   def read_pdb_hierarchy(pdb_hierarchy):
     positions = []
@@ -453,6 +454,9 @@ def ase_atoms_from_pdb_hierarchy(ph):
           symbols.append(element)
           positions.append(list(atom.xyz))
     return symbols, positions
-
   symbols, positions = read_pdb_hierarchy(ph)
-  return Atoms(symbols=symbols, positions=positions)
+  if(qm_engine_name == "torchani"):
+    unit_cell = crystal_symmetry.unit_cell().parameters()
+    return Atoms(symbols=symbols, positions=positions, pbc=True, cell=unit_cell)
+  else:
+    return Atoms(symbols=symbols, positions=positions)
