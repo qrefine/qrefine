@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
  get current qrefine version and update init file
 
@@ -25,7 +26,7 @@ def main(init_filename=None):
   git_command='git describe --abbrev=6 --dirty --always --tags'
   shell = Popen([git_command], shell=True, stderr=PIPE,stdout=PIPE)
   out, err = shell.communicate()
-  print 'Current version is %s ' % (out.rstrip())
+  print('Current version is %s ' % (out.rstrip()))
   version='__version__=\" %s  \"'% (out.rstrip())
 
   with open(init_filename,'w') as outfile:
