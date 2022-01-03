@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.test
 # LIBTBX_SET_DISPATCHER_NAME qr.run_tests
 import sys
@@ -43,22 +44,22 @@ if __name__ == '__main__':
                       help="only tests that don't use MOPAC")
   args = parser.parse_args()
   if (args.unit)      :
-    print >> log,"Running Q|R unit tests"
+    print("Running Q|R unit tests", file=log)
     unit_tests.run(nproc=args.nproc)
   if (args.reg):
-    print >> log,"Running Q|R regression tests"
+    print("Running Q|R regression tests", file=log)
     regression_tests.run(nproc=args.nproc)
   if (args.pdb)       :
-    print >> log,"Running Q|R pdb tests"
+    print("Running Q|R pdb tests", file=log)
     # swith to acceptance_tests.py
     regression_tests.run(args=sys.argv[1:])
   if(args.all):
-    print >> log,"Running all regression tests"
+    print("Running all regression tests", file=log)
     unit_tests.run()
     regression_tests.run()
     regression_tests.run(args=sys.argv[1:])
   if(not args.all and not args.unit and not args.reg and not args.pdb):
-    print >> log,"Running Q|R unit tests"
+    print("Running Q|R unit tests", file=log)
     rc = unit_tests.run(nproc=args.nproc,
                         only_i=args.only,
                         non_mopac_only=args.non_mopac_only)

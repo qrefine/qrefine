@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 
 import os
 import iotbx.pdb
@@ -62,16 +63,16 @@ def run():
       atoms = ph.atoms()
       ds = flex.sqrt((g1 - g2).dot())
       for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):
-        print ["%8.4f"%i for i in d], \
+        print(["%8.4f"%i for i in d], \
               ["%8.4f"%i for i in g], \
-              ["%8.4f"%i for i in gg], "%8.4f"%dist, a.quote()
+              ["%8.4f"%i for i in gg], "%8.4f"%dist, a.quote())
     #
     rs = flex.double()
     for a, b in zip(g1.as_double(), g2.as_double()):
       r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
       #print r
       rs.append(r)
-    print f, "min/max/mean:", rs.min_max_mean().as_tuple()
+    print(f, "min/max/mean:", rs.min_max_mean().as_tuple())
 
 if(__name__ == "__main__"):
     run()

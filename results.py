@@ -2,6 +2,7 @@
    needed for logging the results of the refinement.
 """
 from __future__ import division
+from __future__ import print_function
 import os
 import mmtbx.utils
 from scitbx.array_family import flex
@@ -100,12 +101,12 @@ class manager(object):
       min_gap = flex.min(gaps)
       index_best = None
       if(filtered_by_gap):
-        for i in xrange(rs.size()):
+        for i in range(rs.size()):
           if(abs(rs[i]-min_r)<1.e-5):
             index_best = i
             break
       else:
-        for i in xrange(gaps.size()):
+        for i in range(gaps.size()):
           if(abs(gaps[i]-min_gap)<1.e-5):
             index_best = i
             break
@@ -122,14 +123,14 @@ class manager(object):
     if(self.r_works.size()>0):
       fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws: %6.3f n_fev: %d"
       i = self.r_works.size()-1
-      print >> self.log, fmt%(prefix, i, self.r_works[-1], self.r_frees[-1],
+      print(fmt%(prefix, i, self.r_works[-1], self.r_frees[-1],
         self.r_frees[-1]-self.r_works[-1], self.bs[-1],
-        self.restraints_weight_scales[-1], self.n_fev)
+        self.restraints_weight_scales[-1], self.n_fev), file=self.log)
     else:
       fmt="%s %3d rmsd(b): %7.4f rws: %6.3f n_fev: %d"
       i = self.bs.size()-1
-      print >> self.log, fmt%(prefix, i, self.bs[-1],
-        self.restraints_weight_scales[-1], self.n_fev)
+      print(fmt%(prefix, i, self.bs[-1],
+        self.restraints_weight_scales[-1], self.n_fev), file=self.log)
     self.log.flush()
 
   def write_final_pdb_files(self, output_file_name, output_folder_name):
@@ -157,10 +158,10 @@ class manager(object):
     if(self.mode == "refine"):
       xrs_best, r_work, r_free, dummy = self.choose_best(use_r_work=use_r_work)
       if(xrs_best is not None):
-        print >> self.log, "Best r_work: %6.4f r_free: %6.4f"%(r_work, r_free)
+        print("Best r_work: %6.4f r_free: %6.4f"%(r_work, r_free), file=self.log)
       else:
-        print >> self.log, " r_factor (best): None"
-        print >> self.log, " take the last structure"
+        print(" r_factor (best): None", file=self.log)
+        print(" take the last structure", file=self.log)
         self.show(prefix="")
         xrs_best = self.xrss[0]
     if(self.mode == "opt"):
@@ -172,5 +173,5 @@ class manager(object):
     self.write_final_pdb_files(
       output_file_name   = file_name,
       output_folder_name = output_folder_name)
-    print >> self.log, "See %s in %s folder."%(file_name, output_folder_name)
+    print("See %s in %s folder."%(file_name, output_folder_name), file=self.log)
     return xrs_best

@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import random
@@ -12,7 +14,7 @@ from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm, from_cctbx
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
-import run_tests
+from qrefine.tests.unit import run_tests
 import mmtbx.model
 from qrefine import qr
 
@@ -52,11 +54,11 @@ def run(prefix):
   """
   for restraints in ["cctbx","qm"]:
     if 0:
-      print "Using restraints:", restraints
+      print("Using restraints:", restraints)
     result = []
     for clustering in [True, False]:
       if 0:
-        print "  clustering", clustering, "-"*30
+        print("  clustering", clustering, "-"*30)
       model = get_model()
       if(restraints=="qm"):
         fq = from_qm(

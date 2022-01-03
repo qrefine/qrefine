@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import time
 import iotbx
@@ -9,7 +11,7 @@ import qrefine.finalise
 import qrefine.charges
 import qrefine.completion
 from qrefine.utils import hierarchy_utils
-import run_tests
+from qrefine.tests.unit import run_tests
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
@@ -19,7 +21,7 @@ qr_repo_parent = os.environ.get(qr_repo_parent_env, None)
 qrefine_d = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine_d, "tests", "unit")
 
-pdbs = {'short_gap' : '''
+pdbs = {'short_gap' : b'''
 CRYST1   51.603   51.675   51.797 109.94 108.48 110.02 P 1
 ATOM    226  N   PRO C 207     -10.829 -35.831   9.195  1.00124.77           N
 ATOM    227  CA  PRO C 207     -11.186 -35.424   7.855  1.00124.42           C
@@ -46,7 +48,7 @@ ATOM    247  HB1 ALA C 209      -8.240 -29.551   9.011  1.00126.59           H
 ATOM    248  HB2 ALA C 209      -9.207 -30.906   9.629  1.00126.59           H
 ATOM    249  HB3 ALA C 209      -8.172 -31.125   8.219  1.00126.59           H
 ''',
-  "PRO_terminal" : """
+  "PRO_terminal" : b"""
 CRYST1   42.664   49.718   66.065 109.25  94.96  99.24 P 1           4
 ATOM    874  N   PRO A 115      -9.167  -7.159   4.783  1.00 30.39           N
 ATOM    875  CA  PRO A 115      -9.350  -8.630   5.081  1.00 30.17           C
@@ -84,7 +86,7 @@ ATOM    906  O  BSER A 118      -4.263 -16.472  -0.176  0.50 39.26           O
 ATOM    907  CB BSER A 118      -6.980 -17.441  -1.256  0.50 37.71           C
 ATOM    908  OG BSER A 118      -8.020 -16.788  -1.972  0.50 34.61           O
 """,
-  'GLY_terminal' : '''
+  'GLY_terminal' : b'''
 CRYST1   16.614   15.265   16.902  90.00  90.00  90.00 P 1
 HETATM    1  N   GLY A   1      -2.476  -2.684  -3.356  1.00 20.00      A    N+1
 HETATM    5  CA  GLY A   1      -2.620  -1.390  -2.713  1.00 20.00      A    C
@@ -101,7 +103,7 @@ HETATM   24  CB  ALA A   3       3.994   0.806   1.318  1.00 20.00      A    C
 HETATM   28  C   ALA A   3       2.525   2.581   2.367  1.00 20.00      A    C
 HETATM   29  O   ALA A   3       2.383   2.166   3.546  1.00 20.00      A    O
 ''',
-  'helix' : """
+  'helix' : b"""
 CRYST1   16.291   18.744   30.715  90.00  90.00  90.00 P 1
 SCALE1      0.061384  0.000000  0.000000        0.00000
 SCALE2      0.000000  0.053350  0.000000        0.00000
@@ -203,12 +205,12 @@ ATOM     94  HXT GLY A  99       8.983   6.901  23.568  1.00 80.00           H
 TER
 END
 """,
-  'water' : '''
+  'water' : b'''
 HETATM    1  O   HOH A   1      -0.210   0.000  -0.296  1.00 20.00      A    O
 HETATM    2  H1  HOH A   1       0.733   0.000  -0.296  1.00 20.00      A    H
 HETATM    3  H2  HOH A   1      -0.524   0.000   0.593  1.00 20.00      A    H
 ''',
-  'pro' : '''
+  'pro' : b'''
 ATOM      1  N   PRO A   2     -25.598  25.222  75.213  1.00101.82           N
 ATOM      2  CA  PRO A   2     -25.442  24.229  76.278  1.00101.04           C
 ATOM      3  C   PRO A   2     -24.538  24.735  77.395  1.00102.01           C
@@ -226,7 +228,7 @@ ATOM     14  HG3 PRO A   2     -25.186  23.086  73.532  1.00 98.65           H
 ATOM     15  HD2 PRO A   2     -23.805  25.394  74.287  1.00 98.90           H
 ATOM     16  HD3 PRO A   2     -25.039  25.275  73.267  1.00 98.90           H
 ''',
-  'gly' : '''
+  'gly' : b'''
 ATOM      1  N   GLY A   1      -9.009   4.612   6.102  1.00 16.77           N
 ATOM      2  CA  GLY A   1      -9.052   4.207   4.651  1.00 16.57           C
 ATOM      3  C   GLY A   1      -8.015   3.140   4.419  1.00 16.16           C
@@ -237,7 +239,7 @@ ATOM      7  H3  GLY A   1      -8.340   5.184   6.231  1.00 16.77           H
 ATOM      8  HA2 GLY A   1      -9.928   3.856   4.426  1.00 16.57           H
 ATOM      9  HA3 GLY A   1      -8.858   4.970   4.084  1.00 16.57           H
 ''',
-  'c_terminal_capping' : '''
+  'c_terminal_capping' : b'''
 CRYST1   16.291   18.744   30.715  90.00  90.00  90.00 P 1
 ATOM     65  N   GLY A  96       8.848   9.743  18.892  1.00 80.00           N
 ATOM     66  CA  GLY A  96       8.100   9.974  20.115  1.00 80.00           C
@@ -270,7 +272,7 @@ ATOM     92  HA2 GLY A  99      12.210   7.256  23.832  1.00 80.00           H
 ATOM     93  HA3 GLY A  99      11.525   8.746  23.181  1.00 80.00           H
 ATOM     94  HXT GLY A  99       8.983   6.901  23.568  1.00 80.00           H
 ''',
-  '2ona_short' : '''
+  '2ona_short' : b'''
 CRYST1  114.000   56.292   72.397  90.00  90.00  90.00 P 1
 SCALE1      0.008772  0.000000  0.000000        0.00000
 SCALE2      0.000000  0.017764  0.000000        0.00000
@@ -325,7 +327,7 @@ ATOM    211  H   GLY C   4      21.543   0.170   6.750  0.00 13.71           H
 ATOM    212  HA2 GLY C   4      22.533   2.649   7.724  0.00 12.70           H
 ATOM    213  HA3 GLY C   4      21.527   1.870   8.830  0.00 12.70           H
 ''',
-  '10_capping' : '''
+  '10_capping' : b'''
 CRYST1  154.429  137.481   99.277  90.00  90.00  90.00 P 1
 SCALE1      0.006475  0.000000  0.000000        0.00000
 SCALE2      0.000000  0.007274  0.000000        0.00000
@@ -606,7 +608,7 @@ ATOM    261 HG23 THR A  53     -12.513   7.484  -3.818  0.00 32.39           H
 ATOM         HC  THR A  53     -12.515   7.072   1.010  1.00 37.53           H
 TER
   ''',
-  'cys_hg_capping' : '''
+  'cys_hg_capping' : b'''
 CRYST1   20.038   14.618   20.320  90.00  90.00  90.00 P 1
 ATOM    660  N   CYS A  44     -13.948  11.544   0.019  1.00 43.55           N
 ATOM    661  CA  CYS A  44     -13.878  12.244  -1.255  1.00 43.52           C
@@ -652,7 +654,7 @@ ATOM    700  HA  ASP A  46     -15.659  12.730  -7.927  0.00 32.85           H
 ATOM    701  HB2 ASP A  46     -13.841  11.127  -7.790  0.00 33.02           H
 ATOM    702  HB3 ASP A  46     -14.782  10.137  -8.603  0.00 33.02           H
   ''',
-  'fva' : '''
+  'fva' : b'''
 CRYST1  100.846  117.207  186.414  90.00  90.00  90.00 P 1
 SCALE1      0.009916  0.000000  0.000000        0.00000
 SCALE2      0.000000  0.008532  0.000000        0.00000
@@ -727,7 +729,7 @@ def test_qxyz_non_zero():
                   'gly',
                   ]:
     tf='%s.pdb' % residue
-    f=file(tf, "wb")
+    f=open(tf, "wb")
     f.write(pdbs[residue])
     f.close()
     pdb_inp = pdb.input(tf)
@@ -739,7 +741,7 @@ def test_qxyz_non_zero():
 
 def test_qxyz_xyzq():
   tf='water.pdb'
-  f=file(tf, "wb")
+  f=open(tf, "wb")
   f.write(pdbs["water"])
   f.close()
   pdb_inp = pdb.input(tf)
@@ -783,7 +785,7 @@ def test_qxyz_xyzq():
 
 def test_terminal_and_alt_loc(residue):
   tf = '%s_terminal.pdb' % residue
-  f=file(tf, "wb")
+  f=open(tf, "wb")
   f.write(pdbs["%s_terminal" % residue])
   f.close()
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
@@ -816,7 +818,7 @@ def test_1yjp_charge():
   try:
     charge = charges.calculate_pdb_hierarchy_charge(hierarchy)
     assert 0
-  except Exception, e:
+  except Exception as e:
     assert e.message.find('no hydrogens')>-1
   cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
   easy_run.call(cmd)
@@ -853,7 +855,7 @@ def test_GLY_terminal_charge():
 
 def test_capping_of_C_terminal():
   tf = 'c_terminal_capping.pdb'
-  f=file(tf,'wb')
+  f=open(tf,'wb')
   f.write(pdbs['c_terminal_capping'])
   f.close()
   cmd = 'iotbx.python %s model_completion=False %s' % (
@@ -871,7 +873,7 @@ def test_capping_of_C_terminal():
 
 def test_helix():
   tf = 'helix.pdb'
-  f=file(tf, "wb")
+  f=open(tf, "wb")
   f.write(pdbs["helix"])
   f.close()
   pdb_inp=pdb.input(tf)
@@ -1039,7 +1041,7 @@ def test_capping_of_cluster_complete(only_i=None):
         '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
 def test_short_gap():
-  f=file('test_short_gap.pdb', 'wb')
+  f=open('test_short_gap.pdb', 'wb')
   f.write(pdbs['short_gap'])
   f.close()
   cmd = "phenix.python %s %s model_completion=False" % (
@@ -1052,7 +1054,7 @@ def test_short_gap():
   assert result_size==28
 
 def test_original_pdb():
-  f=file('test_original_pdb.pdb', 'wb')
+  f=open('test_original_pdb.pdb', 'wb')
   f.write(pdbs['2ona_short'])
   f.close()
   cmd = 'phenix.python %s %s %s %s' % (
@@ -1072,13 +1074,13 @@ def test_original_pdb():
   assert len(pdb_inp.atoms())==50
 
 def test_10_capping():
-  f=file('test_10_capping.pdb', 'wb')
+  f=open('test_10_capping.pdb', 'wb')
   f.write(pdbs['10_capping'])
   f.close()
   from qrefine import charges
   cc = charges.charges_class('test_10_capping.pdb')
   rc = cc.get_total_charge(list_charges=True)
-  if 0: print rc
+  if 0: print(rc)
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):
@@ -1088,7 +1090,7 @@ def test_10_capping():
       )
 
 def _run_go_cmd_on_pdb(code, cmd):
-  f=file('test_%s.pdb' % code, 'wb')
+  f=open('test_%s.pdb' % code, 'wb')
   f.write(pdbs[code])
   f.close()
   cmd += ' %s' % ('test_%s.pdb' % code)
@@ -1150,11 +1152,11 @@ def run(prefix, nproc=1):
         argss.append((i,p))
   for args, res, errstr in easy_mp.multi_core_run(get_test, argss, nproc):
     if errstr:
-      print '-'*80
-      print args
-      print 'RESULT - ERROR   : %s %s' % (tests[args[0]][0].func_name, args)
-      print errstr
-      print '-'*80
+      print('-'*80)
+      print(args)
+      print('RESULT - ERROR   : %s %s' % (tests[args[0]][0].__name__, args))
+      print(errstr)
+      print('-'*80)
       assert 0
 
 if(__name__ == "__main__"):

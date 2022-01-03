@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 import os, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 from qrefine.charges import charges_class
 
 def get_charge(fn, assert_correct_chain_terminii=True):
@@ -116,7 +117,7 @@ def run(prefix):
     for action, lines in item.items():
       #print code, action,
       fn = '%s_%s.pdb' % (code, action)
-      f=file(fn, 'wb')
+      f=open(fn, 'wb')
       f.write(lines)
       f.close()
       cmd = 'qr.charges verbose=True assert_correct_chain_terminii=False'

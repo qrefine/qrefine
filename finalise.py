@@ -1,3 +1,4 @@
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME phenix.development.ready_set
 import os
 import sys
@@ -39,8 +40,8 @@ def remove_alternative_locations(hierarchy):
 
 def run_fetch_pdb(code):
   cmd = 'phenix.fetch_pdb %s' % code
-  print 'Fetching files'
-  print cmd
+  print('Fetching files')
+  print(cmd)
   easy_run.call(cmd)
 
 def loop_over_dir(d):
@@ -48,9 +49,9 @@ def loop_over_dir(d):
   for filename in os.listdir(d):
     if not filename.endswith('.pdb'): continue
     i+=1
-    print '%s\n %3d %s\n%s' % ('*'*80, i, os.path.join(d, filename), '*'*80)
+    print('%s\n %3d %s\n%s' % ('*'*80, i, os.path.join(d, filename), '*'*80))
     if filename in skip:
-      print 'skipping'
+      print('skipping')
       continue
     if os.path.exists(filename.replace('.pdb', '.updated.pdb')):
       run(filename.replace('.pdb', '.updated.pdb'))
@@ -165,7 +166,7 @@ def run(pdb_filename,
       hetero_charges=hetero_charges,
       inter_residue_bonds=inter_residue_bonds,
     )
-    print "total_charge",total_charge
+    print("total_charge",total_charge)
 
   # Idealize H as riding
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
@@ -175,11 +176,11 @@ def run(pdb_filename,
   sel = asc.selection("element H or element D")
   model = mmtbx.model.manager(
     model_input               = None,
-    build_grm                 = True,
     pdb_hierarchy             = ppf.all_chain_proxies.pdb_hierarchy,
-    pdb_interpretation_params = params,
     crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     log                       = null_out())
+  model.process(make_restraints=True, grm_normalization=True,
+    pdb_interpretation_params = params)
   model.idealize_h_riding()
   model.set_occupancies(0, selection=sel)
 

@@ -1,5 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -57,11 +59,11 @@ ATOM     89  HG3 GLU A 336       5.069  26.321  14.303  0.00 56.63           H
 
 def run(prefix):
   fn='test_one_alt_loc.pdb'
-  f=file(fn, 'wb')
+  f=open(fn, 'wb')
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.charges %s verbose=1' % (fn)
-  if 0: print cmd
+  if 0: print(cmd)
   rc = easy_run.go(cmd)
   assert 'Charge: -2' in rc.stdout_lines
   os.remove(fn)

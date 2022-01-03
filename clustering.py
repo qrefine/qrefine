@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import absolute_import
 from boost_adaptbx import graph
 from boost_adaptbx.graph import clustering_algorithm
 from boost_adaptbx.graph import connected_component_algorithm as cca
@@ -24,7 +25,7 @@ class girvan_nweman_clustering(object):
     try:
       import networkx as nx
       import plugin.cmty as gn
-    except ImportError, e:
+    except ImportError as e:
       raise Sorry(str(e))
     Gx = nx.Graph()
     if self.size is not None:
@@ -43,7 +44,7 @@ class girvan_nweman_clustering(object):
     try:
       import networkx as nx
       import plugin.cmty as gn
-    except ImportError, e:
+    except ImportError as e:
       raise Sorry(str(e))
     if len(cluster) < self.maxnum_residues_in_cluster:
       final.append(cluster)

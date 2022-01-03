@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 import os
-import run_tests
+from qrefine.tests.unit import run_tests
 from ase import Atoms
 import warnings
 from libtbx.test_utils import approx_equal

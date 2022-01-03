@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import sys
-import ani
-from ani.ase_interface import aniensloader
-from ani.ase_interface import ANIENS
+from . import ani
+from .ani.ase_interface import aniensloader
+from .ani.ase_interface import ANIENS
 import numpy as np
 from ase.calculators.general import Calculator
 
@@ -16,7 +18,7 @@ class Ani(Calculator):
         self.forces = []
 
     def run_qr(self,atoms,coordinates,charge,pointcharges,define_str=None):
-        print " RUNNING ANI"
+        print(" RUNNING ANI")
         self.atoms=atoms
         self.coordinates=coordinates
         self.charge=charge
@@ -30,8 +32,8 @@ class Ani(Calculator):
         force = force.astype(np.float64)
         self.energy_free = energy
         self.forces = force
-        print('Final Energy: ', energy)
-        print('forces are : ',force)
+        print(('Final Energy: ', energy))
+        print(('forces are : ',force))
 	
   
     def get_command(self):

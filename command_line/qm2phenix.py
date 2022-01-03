@@ -1,3 +1,4 @@
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.development.qm_to_phenix_pdb
 import os, sys
 
@@ -32,7 +33,7 @@ def get_input_orientation(lines, start):
   return rc
 
 def read_cartesian_coordinates(filename):
-  f=file(filename, 'rb')
+  f=open(filename, 'rb')
   lines=f.read()
   f.close()
   #read_input_orientation=False
@@ -46,7 +47,7 @@ def read_cartesian_coordinates(filename):
   return coords
 
 def main(input_filename, master):
-  print input_filename, master
+  print(input_filename, master)
   coords = read_cartesian_coordinates(input_filename)
   pdb_inp = pdb.input(master)
   hierarchy = pdb_inp.construct_hierarchy()
@@ -54,10 +55,10 @@ def main(input_filename, master):
   for i in range(len(coords)):
     assert len(hierarchy.atoms())==len(coords[i])
     for atom, new in zip(hierarchy.atoms(), coords[i]):
-      print atom.quote(), atom.xyz, new
+      print(atom.quote(), atom.xyz, new)
       atom.xyz = new
     output_filename='%s_%05d.pdb' % (os.path.splitext(input_filename)[0], i+1)
-    print output_filename
+    print(output_filename)
     hierarchy.write_pdb_file(output_filename)
 
 if __name__ == '__main__':

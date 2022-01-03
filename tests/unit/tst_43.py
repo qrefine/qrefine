@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import random
@@ -12,7 +14,7 @@ from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm, from_cctbx
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
-import run_tests
+from qrefine.tests.unit import run_tests
 import mmtbx.model
 from libtbx.utils import null_out
 from qrefine import qr
@@ -50,7 +52,7 @@ def get_model():
 def run(maxnum_residues_in_cluster):
   result = []
   for clustering in [True, False]:
-    if 0: print "  clustering", clustering, "-"*30
+    if 0: print("  clustering", clustering, "-"*30)
     model = get_model()
     fq = from_cctbx(restraints_manager = model.get_restraints_manager())
     if(clustering):
@@ -82,5 +84,5 @@ def run(maxnum_residues_in_cluster):
 
 if(__name__ == "__main__"):
   for maxnum_residues_in_cluster in [2, 15]:
-    print "Using maxnum_residues_in_cluster:", maxnum_residues_in_cluster
+    print("Using maxnum_residues_in_cluster:", maxnum_residues_in_cluster)
     run(maxnum_residues_in_cluster=maxnum_residues_in_cluster)

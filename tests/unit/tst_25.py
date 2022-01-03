@@ -1,5 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -325,19 +327,19 @@ TER
 
 def run(prefix):
   fn='expansion.pdb'
-  f=file(fn, 'wb')
+  f=open(fn, 'wb')
   f.write(expansion)
   f.close()
   fn='test_alt_loc_original.pdb'
-  f=file(fn, 'wb')
+  f=open(fn, 'wb')
   f.write(pdb_lines)
   f.close()
   cmd = 'phenix.python %s/completion.py %s model_completion=False original_pdb_filename=expansion.pdb' % (qrefine_path, fn)
-  if 0: print cmd
+  if 0: print(cmd)
   easy_run.go(cmd)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
   cmd = 'phenix.pdb_interpretation %s' % fnc
-  if 0: print cmd
+  if 0: print(cmd)
   rc = easy_run.go(cmd)
   assert '     H      47      1.00' in rc.stdout_lines
   os.remove(fn)

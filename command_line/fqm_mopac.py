@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.fqm_mopac
 import sys
 import time
@@ -42,8 +43,8 @@ def get_qm_energy(qm_engine, fragments_extracted, index):
                        index=index)
     atoms = ase_atoms_from_pdb_hierarchy(ph)
     qm_engine.label = qm_pdb_file[:-4]
-    print 'LABEL',qm_engine.label
-    print 'qm_charge',qm_charge
+    print('LABEL',qm_engine.label)
+    print('qm_charge',qm_charge)
     qm_engine.run_qr(atoms,
                      charge=qm_charge,
                      pointcharges=None,
@@ -84,7 +85,7 @@ def run(pdb_file, log):
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
-  print >> log, '\n\tfragmenting "%s"' % pdb_file
+  print('\n\tfragmenting "%s"' % pdb_file, file=log)
   t0=time.time()
   #
   # use a pickle file of fragments so testing of parallel is snappy
@@ -97,14 +98,14 @@ def run(pdb_file, log):
       charge_embedding=True,
       debug=False,
       qm_engine_name="orca")
-    print >> log, '\n\tfragmenting took %0.1f\n' % (time.time()-t0)
-    print >> log, "Residue indices for each cluster:\n", fq.clusters
+    print('\n\tfragmenting took %0.1f\n' % (time.time()-t0), file=log)
+    print("Residue indices for each cluster:\n", fq.clusters, file=log)
     fq_ext = fragment_extracts(fq)
-    f=file(fq_fn, 'wb')
+    f=open(fq_fn, 'wb')
     pickle.dump(fq_ext, f)
     f.close()
   else:
-    f=file(fq_fn, 'rb')
+    f=open(fq_fn, 'rb')
     fq_ext = pickle.load(f)
     f.close()
   #
@@ -122,7 +123,7 @@ def run(pdb_file, log):
                  indices,
                  processes=6,
     )
-    print rc
+    print(rc)
   elif 0:
     #
     # use multi_core_run
@@ -131,33 +132,31 @@ def run(pdb_file, log):
     nproc=6
     argss = []
     results = []
-    #for i in xrange(len(fq.clusters)):
     for i in range(len(fq_ext.fragment_selections)):
       argss.append([qm_engine, fq_ext, i])
     for args, res, err_str in easy_mp.multi_core_run(get_qm_energy,
                                                       argss,
                                                       nproc,
                                                       ):
-      print '%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0)
-      print args[-1], res
+      print('%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0))
+      print(args[-1], res)
       if err_str:
-        print 'Error output from %s' % args
-        print err_str
-        print '_'*80
+        print('Error output from %s' % args)
+        print(err_str)
+        print('_'*80)
       results.append([args, res, err_str])
-    print '-'*80
+    print('-'*80)
     for args, res, err_str in results:
-      print args[-1], res
+      print(args[-1], res)
   else:
     #
     # serial
     #
-    #for i in xrange(len(fq.clusters)):
     for i in range(len(fq_ext.fragment_selections)):
       # add capping for the cluster and buffer
-      print >> log, "capping frag:", i
+      print("capping frag:", i, file=log)
       energy = get_qm_energy(qm_engine, fq_ext, i)
-      print >> log, " frag:", i, "  energy:", energy, ' time:', print_time(time.time()-t0)
+      print(" frag:", i, "  energy:", energy, ' time:', print_time(time.time()-t0), file=log)
       time.sleep(10)
 
 if (__name__ == "__main__"):
@@ -165,4 +164,4 @@ if (__name__ == "__main__"):
   args = sys.argv[1:]
   del sys.argv[1:]
   run(args[0], log)
-  print >> log, "Time: %s" % print_time(time.time() - t0)
+  print("Time: %s" % print_time(time.time() - t0), file=log)

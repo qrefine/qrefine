@@ -1,9 +1,10 @@
 from __future__ import division
+from __future__ import absolute_import
 
 import time, os
 from libtbx.test_utils import approx_equal
 import qrefine.clustering as clustering
-import run_tests
+from qrefine.tests.unit import run_tests
 
 def run(prefix):
   """
