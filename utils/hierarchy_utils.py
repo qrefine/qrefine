@@ -181,7 +181,7 @@ def add_hydrogens_using_ReadySet(pdb_filename,
   sys_std = None
   if 1:
     sys_std = sys.stdout
-    sys.stdout = StringIO.StringIO()
+    sys.stdout = StringIO()
     print('NOT'*20)
   rc = run_though_all_the_options(
     pdb_lines,
