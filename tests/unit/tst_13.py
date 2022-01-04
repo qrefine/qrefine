@@ -140,6 +140,7 @@ def qm_opt(restraints, file):
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   opt = lbfgs_gradient(sys, restraints)
   opt.run(5)
+  print("AFTER RUN")
   opt.write(file)
 
 if(__name__ == "__main__"):

@@ -393,7 +393,7 @@ def refine(fmodel,
   rst_data = restart_data(fmodel=fmodel,
     geometry_rmsd_manager=geometry_rmsd_manager)
   if(os.path.isfile(rst_file)):
-    with open(rst_file, 'rb') as handle:
+    with open(rst_file, 'r') as handle:
       rst_file_data = pickle.load(handle)
       weight_cycle_start = rst_file_data["weight_cycle"]
       refine_cycle_start = rst_file_data["refine_cycle"]

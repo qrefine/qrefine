@@ -1033,7 +1033,7 @@ def run(pdb_filename,
   assert 0
   data = {}
   if os.path.exists(pdb_filename.replace('.pdb', '.psf')):
-    f=open(pdb_filename.replace('.pdb', '.psf'), 'rb')
+    f=open(pdb_filename.replace('.pdb', '.psf'), 'r')
     lines = f.readlines()
     f.close()
     for line in lines:

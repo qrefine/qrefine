@@ -9,7 +9,7 @@ def run(prefix):
   """
   Exercise standard test from pair_interactions.
   """
-  tst_02.run()
+  tst_01
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")

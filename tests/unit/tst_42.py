@@ -290,7 +290,8 @@ def run(prefix):
   open(pdb_in, "w").write(pdb_str_in)
   #
   show=False
-  for fast_interaction in [True, False]:
+  # for fast_interaction in [True, False]:
+  for fast_interaction in [True]:
     if(show): print("fast_interaction:", fast_interaction)
     for restraints in ["cctbx", "qm"]:
       if(show): print("  restraints:", restraints)

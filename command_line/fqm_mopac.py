@@ -101,11 +101,11 @@ def run(pdb_file, log):
     print('\n\tfragmenting took %0.1f\n' % (time.time()-t0), file=log)
     print("Residue indices for each cluster:\n", fq.clusters, file=log)
     fq_ext = fragment_extracts(fq)
-    f=open(fq_fn, 'wb')
+    f=open(fq_fn, 'w')
     pickle.dump(fq_ext, f)
     f.close()
   else:
-    f=open(fq_fn, 'rb')
+    f=open(fq_fn, 'r')
     fq_ext = pickle.load(f)
     f.close()
   #

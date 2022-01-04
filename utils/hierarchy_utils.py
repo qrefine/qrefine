@@ -149,7 +149,7 @@ def write_hierarchy(pdb_filename, pdb_inp, hierarchy, underscore):
                           underscore,
                           )
   output = os.path.basename(output)
-  f=open(output, "wb")
+  f=open(output, "w")
   f.write(hierarchy.as_pdb_string(
     crystal_symmetry=pdb_inp.crystal_symmetry()),
           )
@@ -174,7 +174,7 @@ def add_hydrogens_using_ReadySet(pdb_filename,
                                  ligand_cache_directory=None,
                                  ):
   from elbow.command_line.ready_set import run_though_all_the_options
-  pdb_lines = open(pdb_filename, 'rb').read()
+  pdb_lines = open(pdb_filename, 'r').read()
   output_file_name=pdb_filename.replace('.pdb',
                                         '.updated.pdb',
                                         )
@@ -199,7 +199,7 @@ def add_hydrogens_using_ReadySet(pdb_filename,
     sys.stdout = sys_std
   if 0:
     #print 'overwriting',pdb_filename
-    f=open(pdb_filename, 'wb')
+    f=open(pdb_filename, 'w')
     for line in rc['cryst1']:
       f.write('%s\n' % line)
     f.write(rc['model_hierarchy'].as_pdb_string())

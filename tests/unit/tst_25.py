@@ -327,11 +327,11 @@ TER
 
 def run(prefix):
   fn='expansion.pdb'
-  f=open(fn, 'wb')
+  f=open(fn, 'w')
   f.write(expansion)
   f.close()
   fn='test_alt_loc_original.pdb'
-  f=open(fn, 'wb')
+  f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
   cmd = 'phenix.python %s/completion.py %s model_completion=False original_pdb_filename=expansion.pdb' % (qrefine_path, fn)

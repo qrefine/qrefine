@@ -93,6 +93,7 @@ def clean_up(prefix, mtz_name = None):
     except: pass
 
 def runner(function, prefix, disable=False):
+  import sys
   assert_folder_is_empty(prefix=prefix)
   rc = 0
   try:
@@ -102,11 +103,26 @@ def runner(function, prefix, disable=False):
       t0 = time.time()
       function(prefix = prefix)
       print(prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0))
+      clean_up(prefix)
   except Exception as e:
-    print(prefix, "FAILED", str(e))
-    traceback.print_exc()
-    rc=1
-  clean_up(prefix)
+      print(prefix, "FAILED", str(e))
+      exc_type, exc_value, exc_traceback = sys.exc_info() 
+      traceback_template = ''' ** qrefine exception handler: **
+      %(type)s => File "%(filename)s" \n line %(lineno)s, in %(name)s: \n %(message)s
+        \n'''
+      traceback_details = {
+                        'filename': exc_traceback.tb_frame.f_code.co_filename,
+                        'lineno'  : exc_traceback.tb_lineno,
+                        'name'    : exc_traceback.tb_frame.f_code.co_name,
+                        'type'    : exc_type.__name__,
+                        'message' : exc_value.args[0]
+                      }
+      del(exc_type, exc_value, exc_traceback)
+      print(traceback.format_exc())
+      print(traceback_template % traceback_details)
+    # traceback.print_exc()
+      rc=1
+  # clean_up(prefix)
   assert not rc, "%s rc: %s" % (prefix, rc)
   return rc
 
@@ -148,7 +164,7 @@ def run(nproc=6,
   if non_mopac_only:
     remove = []
     for i, file_name in enumerate(tests):
-      f=open(os.path.join(qr_unit_tests, file_name), 'rb')
+      f=open(os.path.join(qr_unit_tests, file_name), 'r')
       lines=f.read()
       del f
       if lines.lower().find('mopac')>-1:

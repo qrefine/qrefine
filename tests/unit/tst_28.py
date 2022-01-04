@@ -35,7 +35,7 @@ ATOM   1348  HG  CYSSS  33      53.249  93.248  95.132  0.00102.06           H
 
 def run(prefix):
   fn='test_cys_cys_sym.pdb'
-  f=open(fn, 'wb')
+  f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.finalise %s action="capping"' % (fn)
@@ -43,7 +43,7 @@ def run(prefix):
   rc = easy_run.go(cmd)
   os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  f=open(fnc, 'rb')
+  f=open(fnc, 'r')
   lines=f.read()
   f.close()
   assert ' HG  CYS A  12' not in lines

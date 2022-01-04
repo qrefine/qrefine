@@ -17,7 +17,7 @@ file_status = OrderedDict([
 
 def process_file(filename):
   print('process_file',filename)
-  f=open(filename, 'rb')
+  f=open(filename, 'r')
   lines = f.read()
   f.close()
   done=False

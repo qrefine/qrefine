@@ -277,7 +277,7 @@ class from_qm(object):
       method                     = 'rhf',
       basis                      = "sto-3g",
       memory                     = None,
-      nproc                      = None,
+      nproc                      = 1,
   ):
     self.fragment_extracts  = fragment_extracts
     self.method = method

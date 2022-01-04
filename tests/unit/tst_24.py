@@ -31,7 +31,7 @@ ANISOU 1832 CU    CU A 201      503   1903    690    -55    119      0      Cu
 
 def run(prefix):
   fn='test_cu_cys.pdb'
-  f=open(fn, 'wb')
+  f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.finalise %s action="capping"' % (fn)
@@ -39,7 +39,7 @@ def run(prefix):
   rc = easy_run.go(cmd)
   os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  f=open(fnc, 'rb')
+  f=open(fnc, 'r')
   lines=f.read()
   f.close()
   assert ' HG  CYS A  78' not in lines

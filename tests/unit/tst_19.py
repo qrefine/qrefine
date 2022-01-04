@@ -19,7 +19,8 @@ def run(prefix):
       -- using subtract vs using average
   """
   import multiprocessing
-  nproc = str(multiprocessing.cpu_count())
+  # nproc = str(multiprocessing.cpu_count())
+  nproc = 1
   for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
     for maxnum in ["15"]:
       common_args = ["stpmax=0.5", "restraints=cctbx", "mode=refine", "parallel.nproc="+nproc, "clustering=true"] +\

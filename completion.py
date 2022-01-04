@@ -8,6 +8,8 @@ import iotbx
 from mmtbx.monomer_library import server
 from scitbx import matrix
 from scitbx.math import dihedral_angle
+from libtbx.utils import Sorry
+from functools import cmp_to_key
 
 from iotbx.pdb import amino_acid_codes as aac
 
@@ -616,10 +618,12 @@ def use_electrons_to_add_hdyrogens(hierarchy,
     if a1.i_seq<a2.i_seq: return -1
     return 1
   if remove:
-    remove.sort(_atom_i_seq)
+    # remove.sort(key=(lambda r: r.i_seq))
+    remove.sort(key=cmp_to_key(_atom_i_seq))
     remove.reverse()
     for atom in remove:
       # this is a kludge
+      # print(atom,atom.i_seq)
       name = atom.name
       atom = hierarchy.atoms()[atom.i_seq]
       atom_group = atom.parent()

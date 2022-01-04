@@ -33,7 +33,7 @@ def get_input_orientation(lines, start):
   return rc
 
 def read_cartesian_coordinates(filename):
-  f=open(filename, 'rb')
+  f=open(filename, 'r')
   lines=f.read()
   f.close()
   #read_input_orientation=False
