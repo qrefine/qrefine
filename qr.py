@@ -556,7 +556,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     weights = rst_data["weights"]
     geometry_rmsd_manager = rst_data["geometry_rmsd_manager"]
     start_fmodel = rst_data["rst_fmodel"]
-    start_ph = model.pdb_hierarchy.deep_copy().adopt_xray_structure(
+    start_ph = model.get_hierarchy().deep_copy().adopt_xray_structure(
       start_fmodel.xray_structure)
   else:
     weights = None
@@ -576,7 +576,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       max_bond_rmsd           = params.refine.max_bond_rmsd,
       max_r_work_r_free_gap   = params.refine.max_r_work_r_free_gap,
       mode                    = params.refine.mode,
-      log                     = log,
       restraints_weight_scale = params.refine.restraints_weight_scale)
     if(params.rst_file is None):
       if(params.output_file_name_prefix is None):

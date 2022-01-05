@@ -3,9 +3,11 @@
 """
 from __future__ import division
 from __future__ import print_function
-import os
+import os,sys
 import mmtbx.utils
 from scitbx.array_family import flex
+
+log = sys.stdout
 
 def selxrs(xrss, s):
   tmp = []
@@ -17,11 +19,10 @@ def selxrs(xrss, s):
 class manager(object):
   def __init__(self, model, max_bond_rmsd,
                      restraints_weight_scale, max_r_work_r_free_gap,
-                     mode, log, r_work=None, r_free=None):
+                     mode, r_work=None, r_free=None):
     assert [r_work, r_free].count(None) in [0,2]
     xrs = model.get_xray_structure()
     self.mode = mode
-    self.log = log
     self.pdb_hierarchy = model.get_hierarchy()
     self.states = mmtbx.utils.states(pdb_hierarchy  = self.pdb_hierarchy)
     self.crystal_symmetry = xrs.crystal_symmetry()
@@ -125,13 +126,13 @@ class manager(object):
       i = self.r_works.size()-1
       print(fmt%(prefix, i, self.r_works[-1], self.r_frees[-1],
         self.r_frees[-1]-self.r_works[-1], self.bs[-1],
-        self.restraints_weight_scales[-1], self.n_fev), file=self.log)
+        self.restraints_weight_scales[-1], self.n_fev), file=log)
     else:
       fmt="%s %3d rmsd(b): %7.4f rws: %6.3f n_fev: %d"
       i = self.bs.size()-1
       print(fmt%(prefix, i, self.bs[-1],
-        self.restraints_weight_scales[-1], self.n_fev), file=self.log)
-    self.log.flush()
+        self.restraints_weight_scales[-1], self.n_fev), file=log)
+    log.flush()
 
   def write_final_pdb_files(self, output_file_name, output_folder_name):
     if(os.path.exists(output_folder_name) is False):
@@ -158,10 +159,10 @@ class manager(object):
     if(self.mode == "refine"):
       xrs_best, r_work, r_free, dummy = self.choose_best(use_r_work=use_r_work)
       if(xrs_best is not None):
-        print("Best r_work: %6.4f r_free: %6.4f"%(r_work, r_free), file=self.log)
+        print("Best r_work: %6.4f r_free: %6.4f"%(r_work, r_free), file=log)
       else:
-        print(" r_factor (best): None", file=self.log)
-        print(" take the last structure", file=self.log)
+        print(" r_factor (best): None", file=log)
+        print(" take the last structure", file=log)
         self.show(prefix="")
         xrs_best = self.xrss[0]
     if(self.mode == "opt"):
@@ -173,5 +174,6 @@ class manager(object):
     self.write_final_pdb_files(
       output_file_name   = file_name,
       output_folder_name = output_folder_name)
-    print("See %s in %s folder."%(file_name, output_folder_name), file=self.log)
+    print("See %s in %s folder."%(file_name, output_folder_name), file=log)
     return xrs_best
+    
