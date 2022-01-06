@@ -275,7 +275,8 @@ def run(prefix):
     pdb_in = "%s.pdb"%prefix
     open(pdb_in, "w").write(pdb_str_in)
     #
-    for fast_interaction in [True, False]:
+    # for fast_interaction in [True, False]:
+    for fast_interaction in [True]:
       print("fast_interaction:", fast_interaction)
       for restraints in ["cctbx", "qm"]:
         print("  restraints:", restraints)

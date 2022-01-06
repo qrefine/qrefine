@@ -549,10 +549,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   # RESTART
   if(os.path.isfile(str(rst_file))):
     print("restart info is loaded from %s" % params.rst_file, file=log)
-    rst_data = easy_pickle.load(params.rst_file)
+    with open(params.rst_file, 'rb') as handle:
+      rst_data = pickle.load(handle)
     fmodel = rst_data["fmodel"]
     results_manager = rst_data["results"]
-    results_manager.log = log
     weights = rst_data["weights"]
     geometry_rmsd_manager = rst_data["geometry_rmsd_manager"]
     start_fmodel = rst_data["rst_fmodel"]

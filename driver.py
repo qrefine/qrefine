@@ -399,6 +399,8 @@ def refine(fmodel,
   if(os.path.isfile(rst_file)):
     with open(rst_file, 'rb') as handle:
       rst_file_data = pickle.load(handle)
+    # with open(rst_file, 'wb') as handle:
+    #   pickle.dump(rst_data,file=handle)
       weight_cycle_start = rst_file_data["weight_cycle"]
       refine_cycle_start = rst_file_data["refine_cycle"]
       print(file=log)
@@ -407,6 +409,14 @@ def refine(fmodel,
         weight_cycle_start, refine_cycle_start), file=log)
       print("*"*50, file=log)
       print(file=log)
+    rst_data.write_rst_file(
+    rst_file     = rst_file,
+    refine_cycle = None,
+    weight_cycle = 0,
+    fmodel       = fmodel,
+    weights      = calculator.weights,
+    conv_test    = None,
+    results      = results)
   else:
     weight_cycle_start = 1
     refine_cycle_start = None

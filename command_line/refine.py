@@ -16,6 +16,7 @@ from libtbx import group_args
 from libtbx.utils import Sorry,Usage
 from scitbx.array_family import flex
 from iotbx import extract_xtal_data
+import faulthandler; faulthandler.enable()
 
 # phenix_source = os.path.dirname(libtbx.env.dist_path("phenix"))
 qrefine_path = libtbx.env.find_in_repositories("qrefine")

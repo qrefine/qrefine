@@ -103,6 +103,9 @@ class from_cluster(object):
         ncount=ncount+1
         energy_gradients=None
         print("check independent QM jobs")
+        # Sometimes the 'standard' traceback is not available.
+        # Below sort of forces the same information at the risk of doing things twice.
+        # It was needed to find some bugs, but perhaps needs to revisisted later.
         exc_type, exc_value, exc_traceback = sys.exc_info() 
         traceback_template = ''' ** qrefine exception handler: **
         %(type)s => File "%(filename)s" \n line %(lineno)s, in %(name)s: \n %(message)s
