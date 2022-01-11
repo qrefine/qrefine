@@ -14,6 +14,7 @@ import qrefine.completion as model_completion
 from . import completion
 from .charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
+from functools import cmp_to_key
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -192,7 +193,9 @@ class fragments(object):
       size = n_residues,
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster)
     clusters = self.clustering.get_clusters()
-    self.clusters=sorted(clusters, key=len, reverse=True)
+    # self.clusters=sorted(clusters, key=len, reverse=True)
+    self.clusters=sorted(clusters,
+     key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
     # self.clusters = sorted(clusters,
     #   lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
     # print "time taken for clustering", (time.time() - t0)

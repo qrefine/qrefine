@@ -16,7 +16,7 @@ from iotbx.pdb import amino_acid_codes as aac
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
-from .utils import hierarchy_utils
+from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 
 def d_squared(xyz1, xyz2):
@@ -618,7 +618,6 @@ def use_electrons_to_add_hdyrogens(hierarchy,
     if a1.i_seq<a2.i_seq: return -1
     return 1
   if remove:
-    # remove.sort(key=(lambda r: r.i_seq))
     remove.sort(key=cmp_to_key(_atom_i_seq))
     remove.reverse()
     for atom in remove:
