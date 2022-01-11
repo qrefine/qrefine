@@ -122,14 +122,6 @@ def run(args, log):
     sd = map_data.sample_standard_deviation()
     assert sd != 0
     map_data = map_data/sd
-    model = model.model#inp.model()
-    model = group_args(
-      model              = model,
-      processed_pdb_file = model._processed_pdb_file, # This must go, use model!
-      pdb_hierarchy      = model.get_hierarchy(),     # This must go, use model!
-      xray_structure     = model.get_xray_structure(),# This must go, use model!
-      cif_objects        = model._restraint_objects,  # This must go, use model!
-      has_hd             = model.has_hd)
   else:
     raise Sorry("Refinement requested (refine.mode==refine) but no data provided.")
   log.flush()

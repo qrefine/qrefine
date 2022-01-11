@@ -46,6 +46,7 @@ from qrefine.super_cell import expand
 import mmtbx.model.statistics
 from libtbx import Auto
 from ase.io import read as ase_io_read
+from cctbx import maptbx
 
 master_params_str ="""
 
@@ -283,10 +284,8 @@ def show_cc(map_data, xray_structure, log=None):
   from mmtbx.maps.correlation import five_cc
   xrs = xray_structure
   xrs.scattering_type_registry(table="electron")
-  mtriage = mmtbx.maps.mtriage.mtriage(
-    map_data         = map_data,
-    crystal_symmetry = xrs.crystal_symmetry())
-  d99 = mtriage.get_results().masked.d99
+  d99 = maptbx.d99(
+    map = map_data, crystal_symmetry = xrs.crystal_symmetry()).result.d99
   if(log is not None): print >> log, "Resolution of map is: %6.4f" %d99
   result = five_cc(
     map               = map_data,
@@ -599,13 +598,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
                start_fmodel = start_fmodel)
   else:
     if(map_data is not None and params.refine.mode == "refine"):
-      model.model.geometry_statistics(use_hydrogens=False).show()
+      model.geometry_statistics(use_hydrogens=False).show()
       show_cc(
         map_data        = map_data,
-        xray_structure  = model.xray_structure,
+        xray_structure  = model.get_xray_structure(),
         log             = log)
       O = calculator.sites_real_space(
-        model                 = model.model,
+        model                 = model,
         geometry_rmsd_manager = geometry_rmsd_manager,
         max_bond_rmsd         = params.refine.max_bond_rmsd,
         map_data              = map_data,
