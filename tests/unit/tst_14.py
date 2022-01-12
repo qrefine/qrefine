@@ -1,10 +1,12 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import time, os
 import iotbx.pdb
 from qrefine import super_cell
 from libtbx.test_utils import approx_equal
-import run_tests
+from qrefine.tests.unit import run_tests
 
 pdb_str = """
 CRYST1   10.000   10.000   10.000  90.00  90.00  90.00 P 1
@@ -33,7 +35,7 @@ def run(prefix):
   Exercise supercell.
   """
   of = open("%s.pdb"%prefix,"w")
-  print >> of, pdb_str
+  print(pdb_str, file=of)
   of.close()
   pdb_inp = iotbx.pdb.input(source_info=None, lines=pdb_str)
   ph = pdb_inp.construct_hierarchy()
@@ -54,6 +56,8 @@ def run(prefix):
   super_sphere = list(o.ph_super_sphere.atoms().extract_xyz().as_double())
   super_sphere_answer.sort()
   super_sphere.sort()
+  print(super_sphere_answer)
+  print(super_sphere)
   assert approx_equal(super_sphere_answer,super_sphere)
 
 if(__name__ == "__main__"):

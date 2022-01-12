@@ -1,7 +1,8 @@
 from __future__ import division
+from __future__ import absolute_import
 import os.path
 import libtbx.load_env
-from test_reg_00_base import test_base
+from .test_reg_00_base import test_base
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import string
 import numpy as np
@@ -35,13 +36,13 @@ class Pyscf(Calculator):
         Raises RuntimeError when wrong keyword is provided
         """
         for key in kwargs:
-            if key is "charge":
+            if key == "charge":
                 self.mol.charge = kwargs[key]
-            if key is "spin":
+            if key == "spin":
                 self.mol.spin = kwargs[key]
-            if key is "method":
+            if key == "method":
                 self.method = kwargs[key]
-            if key is "basis":
+            if key == "basis":
                 self.mol.basis = kwargs[key]
 
     def get_version(self):
@@ -77,8 +78,8 @@ class Pyscf(Calculator):
             self.forces = grad*(-(Hartree/Bohr)/(kcal / unit_mol))
 
             if 0:
-                print" energy", self.energy
-                print "gradients", self.forces
+                print(" energy", self.energy)
+                print("gradients", self.forces)
 
     def read_energy(self, fname):
         return self.energy

@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import time
 import copy
@@ -5,13 +7,14 @@ import itertools
 import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
-from utils import fragment_utils
+from .utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
 import qrefine.completion as model_completion
-import completion
-from charges import charges_class
+from . import completion
+from .charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
+from functools import cmp_to_key
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -24,14 +27,14 @@ def check_atoms_integrity(atoms, verbose=False):
       if atom.quote().find('GLY')==-1:
         rc[resid].append(atom.quote())
   for key, item in rc.items():
-    if verbose: print key, item
+    if verbose: print(key, item)
     assert len(item) in [0,2], 'error in cluster %s %s' % (key, item)
 
 def check_selection_integrity(atoms, indices, verbose=False):
   selection = []
   for j in indices:
     atom = atoms[j-1]
-    if verbose: print atom.quote()
+    if verbose: print(atom.quote())
     selection.append(atom)
   check_atoms_integrity(selection, verbose=verbose)
 
@@ -183,15 +186,18 @@ class fragments(object):
         if(len(contain_altlocs)==0):
           new_interaction_list.append(item)
       self.interaction_list = new_interaction_list
-    import clustering
+    from . import clustering
     # t0 = time.time()
     self.clustering = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size = n_residues,
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster)
     clusters = self.clustering.get_clusters()
-    self.clusters = sorted(clusters,
-      lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
+    # self.clusters=sorted(clusters, key=len, reverse=True)
+    self.clusters=sorted(clusters,
+     key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
+    # self.clusters = sorted(clusters,
+    #   lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
     # print "time taken for clustering", (time.time() - t0)
 
   def get_fragments(self):
@@ -260,7 +266,7 @@ class fragments(object):
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
         molecules_in_fragments.append(molecules_in_one_fragment)
         if(0):
-          print i, "atoms in cluster: ", atoms_in_one_cluster
+          print(i, "atoms in cluster: ", atoms_in_one_cluster)
         if True:
           atoms = self.pdb_hierarchy_super.atoms()
           check_selection_integrity(atoms, atoms_in_one_cluster)
@@ -293,7 +299,7 @@ class fragments(object):
     overlap_fragments_super = {}
     if(len(phs)>1):
       for i_cluster in range(len(clusters)):
-        for j_ph in xrange(1, len(phs)):
+        for j_ph in range(1, len(phs)):
           fragment_same = (set(fragment_super_atoms_in_phs[0][i_cluster])==
                set(fragment_super_atoms_in_phs[j_ph][i_cluster]))
           # two same fragments for same non-altloc clusters
@@ -502,7 +508,7 @@ def write_mm_charge_file(fragment_extracts, index):
     altlocs.sort()
     if(fragment_extracts.charge_cutoff is not None):
       if(fragment_extracts.debug):
-        print "charge_cutoff: ",fragment_extracts.charge_cutoff
+        print("charge_cutoff: ",fragment_extracts.charge_cutoff)
       xrs_super = fragment_extracts.pdb_hierarchy_super.extract_xray_structure()
       non_fragment_selection_super = xrs_super.selection_within(
         radius=fragment_extracts.charge_cutoff,
@@ -539,7 +545,7 @@ def write_mm_charge_file(fragment_extracts, index):
     sub_working_folder = fragment_extracts.working_folder + "/" + str(index) + "/"
     if (not os.path.isdir(sub_working_folder)):
       os.mkdir(sub_working_folder)
-    if(fragment_extracts.debug): print "write mm pdb file:", index
+    if(fragment_extracts.debug): print("write mm pdb file:", index)
     non_fragment_pdb_file = sub_working_folder + str(index) + "_mm.pdb"
     non_fragment_hierarchy.write_pdb_file(
       file_name=non_fragment_pdb_file,
@@ -631,9 +637,9 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
               crystal_symmetry=F.expansion_cs)
 
   log=open('fragment_info.txt','w')
-  print >> log, '~  # clusters  : ',len(F.cluster_atoms)
-  print >> log, '~  list of atoms per cluster:'
-  print >> log, '~   ',[len(x) for x in F.cluster_atoms]
-  print >> log, '~  list of atoms per fragment:'
-  print >> log, '~   ',[len(x) for x in F.fragment_super_atoms]
+  print('~  # clusters  : ',len(F.cluster_atoms), file=log)
+  print('~  list of atoms per cluster:', file=log)
+  print('~   ',[len(x) for x in F.cluster_atoms], file=log)
+  print('~  list of atoms per fragment:', file=log)
+  print('~   ',[len(x) for x in F.fragment_super_atoms], file=log)
   os.chdir(cwd)

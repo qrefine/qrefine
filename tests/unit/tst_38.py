@@ -1,10 +1,12 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import iotbx.pdb
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 import time, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx import easy_run
@@ -268,19 +270,20 @@ def run(prefix):
   Altlocs.
   """
   for i, pdb_str_in in enumerate([pdb_str_in1, pdb_str_in2]):
-    if(i==0): print "Altlocs present", "-"*30
-    else:     print "No altlocs", "-"*30
+    if(i==0): print("Altlocs present", "-"*30)
+    else:     print("No altlocs", "-"*30)
     pdb_in = "%s.pdb"%prefix
     open(pdb_in, "w").write(pdb_str_in)
     #
-    for fast_interaction in [True, False]:
-      print "fast_interaction:", fast_interaction
+    # for fast_interaction in [True, False]:
+    for fast_interaction in [True]:
+      print("fast_interaction:", fast_interaction)
       for restraints in ["cctbx", "qm"]:
-        print "  restraints:", restraints
+        print("  restraints:", restraints)
         for two_buffers in [False, True]:
-          print "    two_buffers=", two_buffers
+          print("    two_buffers=", two_buffers)
           for clustering in ["true", "false"]:
-            print "      clustering=", clustering
+            print("      clustering=", clustering)
 
             if(not clustering): expansion=True
             else:               expansion=False
@@ -311,8 +314,8 @@ def run(prefix):
           g1 = g1.as_double()
           g2 = g2.as_double()
           diff = flex.abs(g1-g2)
-          print "        min/max/mean of (gradient1 - gradient2):", \
-              diff.min_max_mean().as_tuple()
+          print("        min/max/mean of (gradient1 - gradient2):", \
+              diff.min_max_mean().as_tuple())
           os.remove("cluster_false.pkl")
           os.remove("cluster_true.pkl")
 

@@ -1,7 +1,8 @@
 from __future__ import division
+from __future__ import absolute_import
 
 import time, os
-import run_tests
+from qrefine.tests.unit import run_tests
 
 def run(prefix):
   """

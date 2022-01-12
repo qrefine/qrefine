@@ -1,4 +1,5 @@
-import run_tests
+from __future__ import absolute_import
+from qrefine.tests.unit import run_tests
 from ase import Atoms
 import warnings
 import unittest

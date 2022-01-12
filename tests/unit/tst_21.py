@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import  iotbx.pdb
 import time
 import sys
 import os
 
-import run_tests
+from qrefine.tests.unit import run_tests
 
 pdb_lines = '''
 CRYST1  100.846  117.207  186.414  90.00  90.00  90.00 P 1
@@ -1850,7 +1851,7 @@ if(__name__ == "__main__"):
   t0 = time.time()
   args = sys.argv[1:]
   if len(args)==0:
-    f=file('test_point_charges.pdb', 'wb')
+    f=open('test_point_charges.pdb', 'w')
     f.write(pdb_lines)
     f.close()
     args = ['test_point_charges.pdb']

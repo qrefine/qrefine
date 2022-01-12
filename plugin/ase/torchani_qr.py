@@ -14,12 +14,14 @@ We are using the ASE calculator interface:
 https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html
 
 """
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import numpy as np
 from sets import Set
 import ase.units as ase_units
 from ase.calculators.general import Calculator
-from ani.ani_interface import ANIRPCCalculator
+from .ani.ani_interface import ANIRPCCalculator
 
 
 class TorchAni(Calculator):
@@ -78,9 +80,9 @@ class TorchAni(Calculator):
     self.forces = atoms.get_forces().astype(np.float64)*unit_convert
 
     if 0: # we need debugging flag here to switch on and off.
-        print("Torch ANI: ",self.method)
-        print('Energy:',self.energy_free)
-        print('Force:', self.forces)
+        print(("Torch ANI: ",self.method))
+        print(('Energy:',self.energy_free))
+        print(('Force:', self.forces))
 
   def get_command(self):
     """

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.development.status
 import os, sys
 import time
@@ -15,8 +16,8 @@ file_status = OrderedDict([
   ])
 
 def process_file(filename):
-  print 'process_file',filename
-  f=file(filename, 'rb')
+  print('process_file',filename)
+  f=open(filename, 'r')
   lines = f.read()
   f.close()
   done=False
@@ -25,7 +26,7 @@ def process_file(filename):
     for lookup, answer in file_status.items():
       if line.find(lookup)>-1:
         done=answer
-  print line
+  print(line)
   return done
 
 def process_dir(d, engine_name='orca'):
@@ -59,8 +60,8 @@ def _cmp_mtime(f1, f2):
 def show_item(files):
   files.sort(_cmp_mtime)
   for f in files:
-    print '  %s : %s' % (f.replace(os.getcwd(), '.'),
-                         time.asctime(time.localtime(os.stat(f).st_mtime)))
+    print('  %s : %s' % (f.replace(os.getcwd(), '.'),
+                         time.asctime(time.localtime(os.stat(f).st_mtime))))
 
 def run(cwd=None):
   if cwd is None:
@@ -69,13 +70,13 @@ def run(cwd=None):
     os.chdir(cwd)
   for root, dirs, files in os.walk(cwd):
     if os.path.basename(root)=='ase_error':
-      print 'ASE error directory exists'
+      print('ASE error directory exists')
     elif root.find('ase_error')>-1:
       pass
     elif root.find('ase')>-1:
       try:
         i = int(os.path.basename(root))
-      except ValueError, e:
+      except ValueError as e:
         i = None
       if i is not None:
         process_dir(root)
@@ -83,36 +84,36 @@ def run(cwd=None):
     if os.path.basename(root)=='pdb':
       check_output_pdbs(root)
 
-  print '_'*80
-  print '\nResults'
-  print '_'*80
-  print
+  print('_'*80)
+  print('\nResults')
+  print('_'*80)
+  print()
   weight_dates = []
   refine_dates = []
   ase_files = []
   for key, item in sorted(results.items()):
     if key in ['restart']:
-      print key
+      print(key)
       show_item([item])
       continue
     if key in ['weight', 'refine', 'refined']:
-      print key
+      print(key)
       show_item(item)
       for f in item:
         if key=='weight': weight_dates.append(os.stat(f).st_mtime)
         if key=='refine': refine_dates.append(os.stat(f).st_mtime)
     else:
       ase_files.append(key)
-  if ase_files: print 'ase'
+  if ase_files: print('ase')
   ase_files.sort(_cmp_mtime)
   for key in ase_files:
-    print '  %s - %s : "%s"' % (key.replace(os.getcwd(),'.'),
+    print('  %s - %s : "%s"' % (key.replace(os.getcwd(),'.'),
                               time.asctime(time.localtime(os.stat(key).st_mtime)),
                               results[key],
-                              )
+                              ))
   if weight_dates and refine_dates:
     if max(weight_dates)>min(refine_dates):
-      print '\n\n  *** refine output models are older than weight models ***\n\n'
+      print('\n\n  *** refine output models are older than weight models ***\n\n')
 
 if __name__=='__main__':
   run(*tuple(sys.argv[1:]))

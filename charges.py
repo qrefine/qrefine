@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import sys
 from libtbx.utils import Sorry
@@ -5,7 +7,7 @@ import iotbx
 from mmtbx.chemical_components import get_cif_dictionary
 from mmtbx.monomer_library import server
 
-from utils import hierarchy_utils
+from .utils import hierarchy_utils
 from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
@@ -239,8 +241,8 @@ class charges_class:
     qxyz_file.close()
 
     if outl:
-      print 'WARNINGS'
-      print outl
+      print('WARNINGS')
+      print(outl)
       raise Sorry('point charges are not set.')
 
   def calculate_residue_charge(self,
@@ -252,7 +254,7 @@ class charges_class:
                                verbose=False,
                                ):
     if self.verbose: verbose=True
-    if verbose: print '-'*80
+    if verbose: print('-'*80)
     def _terminal(names, check):
       for name in check:
         if name not in names:
@@ -326,17 +328,17 @@ class charges_class:
     atom_names = []
     atom_i_seqs = []
     for atom in rg.atoms():
-      if verbose: print '...',atom.quote()
+      if verbose: print('...',atom.quote())
       if atom.element_is_hydrogen(): hs+=1
       atom_names.append(atom.name)
       atom_i_seqs.append(atom.i_seq)
-    if verbose: print get_class(resname)
+    if verbose: print(get_class(resname))
     if assert_contains_hydrogens:
       if hs==0:
         hydrogens = get_aa_polymer_hydrogens(resname)
         if len(hydrogens)!=0:
           if verbose:
-            for atom in rg.atoms(): print 'H',atom.quote()
+            for atom in rg.atoms(): print('H',atom.quote())
           raise Sorry("no hydrogens: %s" % hierarchy_utils.display_residue_group(rg))
     ag = rg.atom_groups()[0]
     charge = get_aa_charge(ag.resname)
@@ -345,93 +347,93 @@ class charges_class:
       rc=-1 # reporting only
     annot = ''
     if verbose:
-      print '%s\nstarting charge: %s' % ('*'*80, charge)
+      print('%s\nstarting charge: %s' % ('*'*80, charge))
     if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
          ag.resname in aac.three_letter_l_given_three_letter_d
          ):
       if verbose:
-        print ag.id_str()
-        print 'number of hydrogens',len(get_aa_polymer_hydrogens(ag.resname))
+        print(ag.id_str())
+        print('number of hydrogens',len(get_aa_polymer_hydrogens(ag.resname)))
       poly_hs = len(get_aa_polymer_hydrogens(ag.resname))-2
       diff_hs = hs-poly_hs
-      if verbose: print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+      if verbose: print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                                 poly_hs,
                                                                 diff_hs,
-                                                              )
-      if verbose: print atom_names
+                                                              ))
+      if verbose: print(atom_names)
       if n_terminal(ag.resname, atom_names):
         diff_hs-=1
         max_charge+=1
         if verbose:
-          print 'n_terminal'
-          print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+          print('n_terminal')
+          print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                         poly_hs,
                                                         diff_hs,
-          )
+          ))
         annot += 'N-term. '
       elif nh3_terminal(atom_names):
         diff_hs-=1
         max_charge+=1
-        if verbose: print 'nh3_terminal True'
+        if verbose: print('nh3_terminal True')
         annot += 'NH3-term. '
       elif nh2_terminal(atom_names):
         diff_hs-=1
         max_charge+=1
-        if verbose: print 'nh2_terminal True'
+        if verbose: print('nh2_terminal True')
         annot += 'NH2-term. '
       elif n_capping(ag.resname, atom_names):
         diff_hs-=1
-        if verbose: print 'n_capping True'
+        if verbose: print('n_capping True')
         annot += 'N-capp. '
       else:
-        if verbose: print 'no N term'
+        if verbose: print('no N term')
       if c_terminal(atom_names):
         diff_hs-=1
         max_charge+=1
         if verbose:
-          print 'c_terminal'
-          print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+          print('c_terminal')
+          print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                         poly_hs,
                                                         diff_hs,
-                                                      )
+                                                      ))
         annot += 'C-term. '
       elif c_capping(atom_names):
         diff_hs-=1
         #max_charge+=1
         if verbose:
-          print 'c_capping'
-          print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+          print('c_capping')
+          print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                         poly_hs,
                                                         diff_hs,
-                                                      )
+                                                      ))
         annot += 'C-capp. '
       else:
-        if verbose: print 'no C term'
+        if verbose: print('no C term')
       if covalent_bond(atom_i_seqs, inter_residue_bonds):
         diff_hs+=1
         if verbose:
-          print 'covalent_bond',atom_i_seqs#, inter_residue_bonds
+          print('covalent_bond',atom_i_seqs)#, inter_residue_bonds
         annot += 'Coval. '
       if hierarchy_utils.is_n_terminal_atom_group(ag):
-        if verbose: print 'subtracting due to N terminal'
+        if verbose: print('subtracting due to N terminal')
         diff_hs-=1
       if verbose:
-        print 'residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
+        print('residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
           ag.resname,
           charge,
           poly_hs,
           diff_hs,
           charge+diff_hs,
           annot,
-        )
+        ))
       charge+=diff_hs
       if charge: verbose=0
       if verbose:
-        print '  %s charge: %-2s poly_hs: %s diff_hs: %-2s' % (ag.id_str(),
+        print('  %s charge: %-2s poly_hs: %s diff_hs: %-2s' % (ag.id_str(),
                                                                charge,
                                                                poly_hs,
                                                                diff_hs,
-                                                             )
+                                                             ))
       assert abs(charge)<=max_charge, 'residue %s charge %s is greater than %s' % (
         rg.atoms()[0].quote(),
         charge,
@@ -517,15 +519,15 @@ class charges_class:
         charge = tmp
         break
       if check:
-        print residue
+        print(residue)
         key = 'PRO%s' % residue.parent().id
         key += '.%s' % residue.resseq.strip()
         key += '.%s' % residue.atom_groups()[0].resname
         key = key.replace('HIS', 'HSD')
-        print key
-        print ' CHARMM %f Phenix %f' % (check[key], tmp)
+        print(key)
+        print(' CHARMM %f Phenix %f' % (check[key], tmp))
         if 1:
-          print inter_residue_bonds
+          print(inter_residue_bonds)
         assert abs(check[key]-tmp)<0.001
         assert 0
       if list_charges:
@@ -546,7 +548,7 @@ class charges_class:
             assert abs(tmp-rc)<=2, outl
             outl += "\n%s" % atom.quote()
           outl += '\n%s' % ('-'*80)
-          print outl
+          print(outl)
     # check annotations
     if residue_types and assert_correct_chain_terminii:
       assert filter(None, annotations), 'No terminal or capping hydrogens found'
@@ -634,7 +636,7 @@ def calculate_residue_charge(rg,
                              inter_residue_bonds=None,
                              verbose=False,
                              ):
-  if verbose: print '-'*80
+  if verbose: print('-'*80)
   def _terminal(names, check):
     for name in check:
       if name not in names:
@@ -708,17 +710,17 @@ def calculate_residue_charge(rg,
   atom_names = []
   atom_i_seqs = []
   for atom in rg.atoms():
-    if verbose: print '...',atom.quote()
+    if verbose: print('...',atom.quote())
     if atom.element_is_hydrogen(): hs+=1
     atom_names.append(atom.name)
     atom_i_seqs.append(atom.i_seq)
-  if verbose: print get_class(resname)
+  if verbose: print(get_class(resname))
   if assert_contains_hydrogens:
     if hs==0:
       hydrogens = get_aa_polymer_hydrogens(resname)
       if len(hydrogens)!=0:
         if verbose:
-          for atom in rg.atoms(): print 'H',atom.quote()
+          for atom in rg.atoms(): print('H',atom.quote())
         raise Sorry("no hydrogens: %s" % hierarchy_utils.display_residue_group(rg))
   ag = rg.atom_groups()[0]
   charge = get_aa_charge(ag.resname)
@@ -727,92 +729,92 @@ def calculate_residue_charge(rg,
     rc=-1 # reporting only
   annot = ''
   if verbose:
-    print '%s\nstarting charge: %s' % ('*'*80, charge)
+    print('%s\nstarting charge: %s' % ('*'*80, charge))
   if ( get_class(ag.resname) in ["common_amino_acid", "modified_amino_acid"] or
        ag.resname in aac.three_letter_l_given_three_letter_d
        ):
     if verbose:
-      print ag.id_str()
-      print 'number of hydrogens',len(get_aa_polymer_hydrogens(ag.resname))
+      print(ag.id_str())
+      print('number of hydrogens',len(get_aa_polymer_hydrogens(ag.resname)))
     poly_hs = len(get_aa_polymer_hydrogens(ag.resname))-2
     diff_hs = hs-poly_hs
-    if verbose: print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+    if verbose: print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                               poly_hs,
                                                               diff_hs,
-                                                            )
-    if verbose: print atom_names
+                                                            ))
+    if verbose: print(atom_names)
     if n_terminal(ag.resname, atom_names):
       diff_hs-=1
       max_charge+=1
       if verbose:
-        print 'n_terminal'
-        print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+        print('n_terminal')
+        print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                       poly_hs,
                                                       diff_hs,
-        )
+        ))
       annot += 'N-term. '
     elif nh3_terminal(atom_names):
       diff_hs-=1
       max_charge+=1
-      if verbose: print 'nh3_terminal True'
+      if verbose: print('nh3_terminal True')
       annot += 'NH3-term. '
     elif nh2_terminal(atom_names):
       diff_hs-=1
       max_charge+=1
-      if verbose: print 'nh2_terminal True'
+      if verbose: print('nh2_terminal True')
       annot += 'NH2-term. '
     elif n_capping(ag.resname, atom_names):
       diff_hs-=1
-      if verbose: print 'n_capping True'
+      if verbose: print('n_capping True')
       annot += 'N-capp. '
     else:
-      if verbose: print 'no N term'
+      if verbose: print('no N term')
     if c_terminal(atom_names):
       diff_hs-=1
       max_charge+=1
       if verbose:
-        print 'c_terminal'
-        print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+        print('c_terminal')
+        print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                       poly_hs,
                                                       diff_hs,
-                                                    )
+                                                    ))
       annot += 'C-term. '
     elif c_capping(atom_names):
       diff_hs-=1
       #max_charge+=1
       if verbose:
-        print 'c_capping'
-        print 'charge: %s poly_hs: %s diff_hs: %s' % (charge,
+        print('c_capping')
+        print('charge: %s poly_hs: %s diff_hs: %s' % (charge,
                                                       poly_hs,
                                                       diff_hs,
-                                                    )
+                                                    ))
       annot += 'C-capp. '
     else:
-      if verbose: print 'no C term'
+      if verbose: print('no C term')
     if covalent_bond(atom_i_seqs, inter_residue_bonds):
       diff_hs+=1
       if verbose:
-        print 'covalent_bond',atom_i_seqs, inter_residue_bonds
+        print('covalent_bond',atom_i_seqs, inter_residue_bonds)
       annot += 'Coval. '
     if hierarchy_utils.is_n_terminal_atom_group(ag):
       diff_hs-=1
     if verbose:
-      print 'residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
+      print('residue: %s charge: %s poly_hs: %2s diff_hs: %2s total: %2s %s' % (
         ag.resname,
         charge,
         poly_hs,
         diff_hs,
         charge+diff_hs,
         annot,
-      )
+      ))
     charge+=diff_hs
     if charge: verbose=0
     if verbose:
-      print '  %s charge: %-2s poly_hs: %s diff_hs: %-2s' % (ag.id_str(),
+      print('  %s charge: %-2s poly_hs: %s diff_hs: %-2s' % (ag.id_str(),
                                                              charge,
                                                              poly_hs,
                                                              diff_hs,
-                                                           )
+                                                           ))
     assert abs(charge)<=max_charge, 'residue %s charge %s is greater than %s' % (
       rg.atoms()[0].quote(),
       charge,
@@ -979,11 +981,11 @@ def get_hetero_charges_DB(pdb_hierarchy):
   for atom_group in pdb_hierarchy.atom_groups():
     restraints = _get_restraints_from_resname(atom_group.resname)
     if restraints.is_peptide():
-      print 'PEPTIDE',atom_group.resname
+      print('PEPTIDE',atom_group.resname)
       continue
-    print atom_group.resname
-    print restraints
-    print dir(restraints)
+    print(atom_group.resname)
+    print(restraints)
+    print(dir(restraints))
     restraints.show()
     get_charge_from_restraints(atom_group.resname)
   assert 0
@@ -1016,7 +1018,7 @@ def get_inter_residue_bonds(ppf, verbose=False):
       if r1.id_str()!=r2.id_str():
         inter_residue_bonds[p.i_seqs] = True
         if verbose:
-          print 'bonding',atoms[p.i_seqs[0]].quote(), atoms[p.i_seqs[1]].quote()
+          print('bonding',atoms[p.i_seqs[0]].quote(), atoms[p.i_seqs[1]].quote())
         for i in range(2):
           inter_residue_bonds.setdefault(p.i_seqs[i], [])
           inter_residue_bonds[p.i_seqs[i]].append(inter_residue_bonds[p.i_seqs])
@@ -1031,7 +1033,7 @@ def run(pdb_filename,
   assert 0
   data = {}
   if os.path.exists(pdb_filename.replace('.pdb', '.psf')):
-    f=file(pdb_filename.replace('.pdb', '.psf'), 'rb')
+    f=open(pdb_filename.replace('.pdb', '.psf'), 'r')
     lines = f.readlines()
     f.close()
     for line in lines:
@@ -1060,4 +1062,4 @@ if __name__=="__main__":
   if len(args)>1 and args[1]:
     list_charges=True
   total_charge = run(*tuple(args), list_charges=list_charges)
-  print "total_charge",total_charge
+  print("total_charge",total_charge)

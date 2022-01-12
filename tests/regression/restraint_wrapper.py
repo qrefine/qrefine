@@ -1,11 +1,12 @@
 from __future__ import division
+from __future__ import print_function
 import iotbx.pdb
 from qrefine.restraints import from_qm
 
 class Restraints(object):
 
   def create(self):
-    print " creating "
+    print(" creating ")
     self.pdb_inp = iotbx.pdb.input(self.pdb)
     self.ph = self.pdb_inp.construct_hierarchy()
     self.cs = self.pdb_inp.crystal_symmetry()
@@ -22,7 +23,7 @@ class Restraints(object):
     return Result(self.pdb_code,energy, gradients)
 
   def __call__(self,pdb):
-    print "calling", pdb
+    print("calling", pdb)
     self.pdb= pdb
     self.create(pdb)
     return self.process(pdb)

@@ -5,6 +5,8 @@
    factor is halved.
 """
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import random, time
 from cctbx import xray
 from libtbx import adopt_init_args
@@ -12,7 +14,7 @@ from scitbx.array_family import flex
 import cctbx.maptbx.real_space_refinement_simple
 import scitbx.lbfgs
 from libtbx import group_args
-import qr
+from . import qr
 from mmtbx.validation.ramalyze import ramalyze
 from mmtbx.validation.cbetadev import cbetadev
 from mmtbx.validation.rotalyze import rotalyze
@@ -101,7 +103,7 @@ class weights(object):
     tc, gc = rm.target_and_gradients(sites_cart=xrs.sites_cart())
     x = gc.norm()
     y = gx.norm()
-    if verbose: print '>>> gradient norms c,x %0.2f %0.2f' % (x, y)
+    if verbose: print('>>> gradient norms c,x %0.2f %0.2f' % (x, y))
     # filter out large contributions
     gx_d = flex.sqrt(gx.dot())
     sel = gx_d>flex.mean(gx_d)*6
@@ -113,7 +115,7 @@ class weights(object):
     ################
     if(y != 0.0): self.data_weight = x/y
     else:         self.data_weight = 1.0 # ad hoc default fallback
-    if verbose: print '>>> data_weight %0.2f' % self.data_weight
+    if verbose: print('>>> data_weight %0.2f' % self.data_weight)
 
 class calculator(object):
   def __init__(self,
@@ -396,8 +398,8 @@ class sites_real_space(object):
     pdb_hierarchy = model.get_hierarchy(),
     keep_hydrogens = False,
     fast = True, condensed_probe = True).get_clashscore()
-    print "DEV: b_rmsd= %7.4f clash= %6.4f rota= %6.4f rama_fav= %5.4f cbeta= %6.4f"%(
-    b_rmsd, clash, rota, rama_fav, cbeta)
+    print("DEV: b_rmsd= %7.4f clash= %6.4f rota= %6.4f rama_fav= %5.4f cbeta= %6.4f"%(
+    b_rmsd, clash, rota, rama_fav, cbeta))
     return group_args(
       rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd, clash = clash)
 
@@ -410,7 +412,7 @@ class sites_real_space(object):
             abs(sc.clash-self.clash_best)>1.)
 
   def macro_cycle(self, weights):
-    print "RSR: weights to try:", weights
+    print("RSR: weights to try:", weights)
     weight_best = None
     i_best = None
     model_best = None
@@ -442,7 +444,7 @@ class sites_real_space(object):
           model_best = models[i_best]
           break
       #
-    print "RSR: weight_best:", weight_best
+    print("RSR: weight_best:", weight_best)
     return model_best, weight_best, i_best
 
   def run(self):
@@ -464,9 +466,9 @@ class sites_real_space(object):
     elif(weight == 0.01):
       new_weights = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09]
     else:
-      print "RSR: FALED TO FIND BEST WEIGHT"
+      print("RSR: FALED TO FIND BEST WEIGHT")
       STOP()
-    print "RSR: new_weights:", new_weights
+    print("RSR: new_weights:", new_weights)
     #
     model_, weight_, i_ = self.macro_cycle(weights = new_weights)
     self.model  = model
@@ -494,8 +496,8 @@ class sites_real_space(object):
     else:                        w = "%5s"%str(None)
     cc_mask = qr.show_cc(
       map_data=self.map_data, xray_structure=model.get_xray_structure())
-    print "RSR", prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
-      "cc_mask=%6.4f"%cc_mask
+    print("RSR", prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
+      "cc_mask=%6.4f"%cc_mask)
     with open("weight_%s.pdb"%w.strip(), "w") as of:
       of.write(model.model_as_pdb())
 

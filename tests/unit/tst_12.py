@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import time
 import iotbx
@@ -9,7 +11,7 @@ import qrefine.finalise
 import qrefine.charges
 import qrefine.completion
 from qrefine.utils import hierarchy_utils
-import run_tests
+from qrefine.tests.unit import run_tests
 
 ### TODO: after this test works, split it into charge|completion|finalise
 
@@ -719,7 +721,7 @@ HETATM   55 HD23 DLE A   4       5.391  -8.150  12.314  0.00 38.38           H
 
 def test_qxyz_non_zero():
   def _check_non_zero_charge(filename):
-    for line in open(filename, 'rb').readlines():
+    for line in open(filename, 'r').readlines():
       tmp = line.split()
       if len(tmp)<2: continue
       assert float(tmp[0])!=0, 'no partial charge %s' % line
@@ -727,7 +729,7 @@ def test_qxyz_non_zero():
                   'gly',
                   ]:
     tf='%s.pdb' % residue
-    f=file(tf, "wb")
+    f=open(tf, "w")
     f.write(pdbs[residue])
     f.close()
     pdb_inp = pdb.input(tf)
@@ -739,7 +741,7 @@ def test_qxyz_non_zero():
 
 def test_qxyz_xyzq():
   tf='water.pdb'
-  f=file(tf, "wb")
+  f=open(tf, "w")
   f.write(pdbs["water"])
   f.close()
   pdb_inp = pdb.input(tf)
@@ -760,7 +762,7 @@ def test_qxyz_xyzq():
 0.204  0.733  0.0  -0.296
 0.204  -0.524  0.0  0.593
 '''
-  lines = open('test_water.dat', 'rb').read()
+  lines = open('test_water.dat', 'r').read()
   lines = lines.strip().replace('\n','').replace(' ','')
   tst_str = tst_str.strip().replace('\n','').replace(' ','')
   #for a,b in zip(lines.strip(), tst_str.strip()): print '"%s" "%s"' % (a,b)
@@ -775,7 +777,7 @@ def test_qxyz_xyzq():
 -0.21  0.0  -0.296  -0.408
 0.733  0.0  -0.296  0.204
 -0.524  0.0  0.593  0.204'''
-  lines = open('test_water.dat', 'rb').read()
+  lines = open('test_water.dat', 'r').read()
   lines = lines.strip().replace('\n','').replace(' ','')
   tst_str = tst_str.strip().replace('\n','').replace(' ','')
   assert lines.strip()==tst_str, '%s'% (lines)
@@ -783,7 +785,7 @@ def test_qxyz_xyzq():
 
 def test_terminal_and_alt_loc(residue):
   tf = '%s_terminal.pdb' % residue
-  f=file(tf, "wb")
+  f=open(tf, "w")
   f.write(pdbs["%s_terminal" % residue])
   f.close()
   assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
@@ -816,7 +818,7 @@ def test_1yjp_charge():
   try:
     charge = charges.calculate_pdb_hierarchy_charge(hierarchy)
     assert 0
-  except Exception, e:
+  except Exception as e:
     assert e.message.find('no hydrogens')>-1
   cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
   easy_run.call(cmd)
@@ -853,7 +855,7 @@ def test_GLY_terminal_charge():
 
 def test_capping_of_C_terminal():
   tf = 'c_terminal_capping.pdb'
-  f=file(tf,'wb')
+  f=open(tf,'w')
   f.write(pdbs['c_terminal_capping'])
   f.close()
   cmd = 'iotbx.python %s model_completion=False %s' % (
@@ -871,7 +873,7 @@ def test_capping_of_C_terminal():
 
 def test_helix():
   tf = 'helix.pdb'
-  f=file(tf, "wb")
+  f=open(tf, "w")
   f.write(pdbs["helix"])
   f.close()
   pdb_inp=pdb.input(tf)
@@ -1039,7 +1041,7 @@ def test_capping_of_cluster_complete(only_i=None):
         '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
 def test_short_gap():
-  f=file('test_short_gap.pdb', 'wb')
+  f=open('test_short_gap.pdb', 'w')
   f.write(pdbs['short_gap'])
   f.close()
   cmd = "phenix.python %s %s model_completion=False" % (
@@ -1052,7 +1054,7 @@ def test_short_gap():
   assert result_size==28
 
 def test_original_pdb():
-  f=file('test_original_pdb.pdb', 'wb')
+  f=open('test_original_pdb.pdb', 'w')
   f.write(pdbs['2ona_short'])
   f.close()
   cmd = 'phenix.python %s %s %s %s' % (
@@ -1065,6 +1067,7 @@ def test_original_pdb():
                                               'charmm_pdbs',
                                               '2ona.pdb')
     )
+  print(cmd)
   rc = easy_run.go(cmd)
   pdb_inp = pdb.input('test_original_pdb.pdb')
   assert len(pdb_inp.atoms())==49
@@ -1072,13 +1075,13 @@ def test_original_pdb():
   assert len(pdb_inp.atoms())==50
 
 def test_10_capping():
-  f=file('test_10_capping.pdb', 'wb')
+  f=open('test_10_capping.pdb', 'w')
   f.write(pdbs['10_capping'])
   f.close()
   from qrefine import charges
   cc = charges.charges_class('test_10_capping.pdb')
   rc = cc.get_total_charge(list_charges=True)
-  if 0: print rc
+  if 0: print(rc)
   for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
                                             rc,
                                             ):
@@ -1088,7 +1091,7 @@ def test_10_capping():
       )
 
 def _run_go_cmd_on_pdb(code, cmd):
-  f=file('test_%s.pdb' % code, 'wb')
+  f=open('test_%s.pdb' % code, 'w')
   f.write(pdbs[code])
   f.close()
   cmd += ' %s' % ('test_%s.pdb' % code)
@@ -1150,11 +1153,11 @@ def run(prefix, nproc=1):
         argss.append((i,p))
   for args, res, errstr in easy_mp.multi_core_run(get_test, argss, nproc):
     if errstr:
-      print '-'*80
-      print args
-      print 'RESULT - ERROR   : %s %s' % (tests[args[0]][0].func_name, args)
-      print errstr
-      print '-'*80
+      print('-'*80)
+      print(args)
+      print('RESULT - ERROR   : %s %s' % (tests[args[0]][0].__name__, args))
+      print(errstr)
+      print('-'*80)
       assert 0
 
 if(__name__ == "__main__"):

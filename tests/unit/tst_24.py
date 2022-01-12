@@ -1,5 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -29,20 +31,20 @@ ANISOU 1832 CU    CU A 201      503   1903    690    -55    119      0      Cu
 
 def run(prefix):
   fn='test_cu_cys.pdb'
-  f=file(fn, 'wb')
+  f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.finalise %s action="capping"' % (fn)
-  if 0: print cmd
+  if 0: print(cmd)
   rc = easy_run.go(cmd)
   os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  f=file(fnc, 'rb')
+  f=open(fnc, 'r')
   lines=f.read()
   f.close()
   assert ' HG  CYS A  78' not in lines
   cmd = 'qr.charges %s verbose=1' % (fnc)
-  if 0: print cmd
+  if 0: print(cmd)
   rc = easy_run.go(cmd)
   assert 'Charge: 0' in rc.stdout_lines
   os.remove(fnc)

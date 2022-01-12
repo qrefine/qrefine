@@ -1,5 +1,6 @@
+from __future__ import print_function
 import os, sys
-import StringIO
+from io import StringIO
 import iotbx
 from libtbx.utils import Sorry
 from mmtbx import monomer_library
@@ -23,7 +24,7 @@ def display_residue_group_from_hierarchy(hierarchy,
   for rg in hierarchy.residue_groups():
     if rg.resseq.strip()==str(resseq):
       for atom in rg.atoms():
-        print atom.quote()
+        print(atom.quote())
 
 def display_atom_group(ag, verbose=False):
   if verbose:
@@ -45,12 +46,12 @@ def generate_residues_via_conformer(hierarchy,
   loop_hierarchy=hierarchy
   if backbone_only: loop_hierarchy=backbone_hierarchy
   for model in loop_hierarchy.models():
-    if verbose: print 'model: "%s"' % model.id
+    if verbose: print('model: "%s"' % model.id)
     for chain in model.chains():
-      if verbose: print 'chain: "%s"' % chain.id
+      if verbose: print('chain: "%s"' % chain.id)
       for conformer in chain.conformers():
-        if verbose: print '  conformer: altloc="%s"' % (
-          conformer.altloc)
+        if verbose: print('  conformer: altloc="%s"' % (
+          conformer.altloc))
 #        while threes: del threes[0]
 #        threes.start=None
 #        threes.end=None
@@ -58,9 +59,9 @@ def generate_residues_via_conformer(hierarchy,
         for residue in conformer.residues():
           if verbose:
             if residue.resname not in ["HOH"]:
-              print '    residue: resname="%s" resid="%s"' % (
-                residue.resname, residue.resid())
-          if verbose: print '      residue class : %s' % get_class(residue.resname)
+              print('    residue: resname="%s" resid="%s"' % (
+                residue.resname, residue.resid()))
+          if verbose: print('      residue class : %s' % get_class(residue.resname))
           if get_class(residue.resname) not in ["common_amino_acid",
                                                 'modified_amino_acid',
                                               ]:
@@ -100,9 +101,9 @@ def generate_protein_fragments(hierarchy,
                                                  verbose=verbose,
                                                  ):
     list.append(threes, residue)
-    if verbose: print 'THREE',threes
+    if verbose: print('THREE',threes)
     sub_unit = threes.provide_second_sub_unit_if_unlinked()
-    if verbose: print 'THREE, SUBUNIT',threes, sub_unit
+    if verbose: print('THREE, SUBUNIT',threes, sub_unit)
     if sub_unit:
       threes.start = True
       threes.end = True
@@ -148,7 +149,7 @@ def write_hierarchy(pdb_filename, pdb_inp, hierarchy, underscore):
                           underscore,
                           )
   output = os.path.basename(output)
-  f=file(output, "wb")
+  f=open(output, "w")
   f.write(hierarchy.as_pdb_string(
     crystal_symmetry=pdb_inp.crystal_symmetry()),
           )
@@ -173,15 +174,15 @@ def add_hydrogens_using_ReadySet(pdb_filename,
                                  ligand_cache_directory=None,
                                  ):
   from elbow.command_line.ready_set import run_though_all_the_options
-  pdb_lines = open(pdb_filename, 'rb').read()
+  pdb_lines = open(pdb_filename, 'r').read()
   output_file_name=pdb_filename.replace('.pdb',
                                         '.updated.pdb',
                                         )
   sys_std = None
   if 1:
     sys_std = sys.stdout
-    sys.stdout = StringIO.StringIO()
-    print 'NOT'*20
+    sys.stdout = StringIO()
+    print('NOT'*20)
   rc = run_though_all_the_options(
     pdb_lines,
     [], # args
@@ -194,11 +195,11 @@ def add_hydrogens_using_ReadySet(pdb_filename,
     output_file_name=output_file_name, # needed
     )
   if sys_std:
-    print 'NOT'*20
+    print('NOT'*20)
     sys.stdout = sys_std
   if 0:
     #print 'overwriting',pdb_filename
-    f=file(pdb_filename, 'wb')
+    f=open(pdb_filename, 'w')
     for line in rc['cryst1']:
       f.write('%s\n' % line)
     f.write(rc['model_hierarchy'].as_pdb_string())

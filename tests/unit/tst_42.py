@@ -1,10 +1,12 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import iotbx.pdb
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 import time, sys
-import run_tests
+from qrefine.tests.unit import run_tests
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx import easy_run
@@ -288,14 +290,15 @@ def run(prefix):
   open(pdb_in, "w").write(pdb_str_in)
   #
   show=False
-  for fast_interaction in [True, False]:
-    if(show): print "fast_interaction:", fast_interaction
+  # for fast_interaction in [True, False]:
+  for fast_interaction in [True]:
+    if(show): print("fast_interaction:", fast_interaction)
     for restraints in ["cctbx", "qm"]:
-      if(show): print "  restraints:", restraints
+      if(show): print("  restraints:", restraints)
       for two_buffers in [False, True]:
-        if(show): print "    two_buffers=", two_buffers
+        if(show): print("    two_buffers=", two_buffers)
         for clustering in ["true", "false"]:
-          if(show): print "      clustering=", clustering
+          if(show): print("      clustering=", clustering)
           cmd = " ".join([
             "qr.refine",
             pdb_in,
@@ -318,8 +321,8 @@ def run(prefix):
         g2 = g2.as_double()
         diff = flex.abs(g1-g2)
         if(show):
-          print "        min/max/mean of (gradient1 - gradient2):", \
-              diff.min_max_mean().as_tuple()
+          print("        min/max/mean of (gradient1 - gradient2):", \
+              diff.min_max_mean().as_tuple())
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")

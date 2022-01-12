@@ -1,3 +1,4 @@
+from __future__ import print_function
 from libtbx.utils import Sorry
 import numpy as np
 try:
@@ -8,8 +9,8 @@ try:
   from jpype import java
   from jpype import startJVM
   import jpype
-except ImportError, e:
-  print str(e)
+except ImportError as e:
+  print(str(e))
   jpype = None
 #  raise Sorry(str(e))
 
@@ -90,7 +91,7 @@ class PYoink(object):
   def write_result(self):
     if(self.out_file==None):
       self.out_file=self.input_file
-    print "self.out_file",self.out_file
+    print("self.out_file",self.out_file)
     self.jaxbFileWriter.write(JString(self.out_file), \
                               self.result.getInput().getValue())
 

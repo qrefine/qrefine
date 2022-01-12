@@ -1,4 +1,6 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import sys
@@ -9,7 +11,7 @@ import iotbx.pdb
 import mmtbx.command_line
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
-import run_tests
+from qrefine.tests.unit import run_tests
 
 from ase.io import write
 from ase.io import read as ase_io_read
@@ -50,7 +52,7 @@ def approx_equal2(v1,v2,tol):
   for i in range(v1.shape[0]):
     error=abs(v1[i]-v2[i])
     if( error>=vtol[i] ):
-      print 'oh dear!',i,error,vtol[i]
+      print('oh dear!',i,error,vtol[i])
       happy_bob=False
   return happy_bob
 
@@ -138,6 +140,7 @@ def qm_opt(restraints, file):
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   opt = lbfgs_gradient(sys, restraints)
   opt.run(5)
+  print("AFTER RUN")
   opt.write(file)
 
 if(__name__ == "__main__"):

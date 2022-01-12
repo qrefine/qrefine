@@ -1,10 +1,11 @@
 from __future__ import division
+from __future__ import absolute_import
 import iotbx.pdb
 import os
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 import time
-import run_tests
+from qrefine.tests.unit import run_tests
 from libtbx.test_utils import approx_equal
 import libtbx.load_env
 
@@ -18,7 +19,8 @@ def run(prefix):
       -- using subtract vs using average
   """
   import multiprocessing
-  nproc = str(multiprocessing.cpu_count())
+  # nproc = str(multiprocessing.cpu_count())
+  nproc = 1
   for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
     for maxnum in ["15"]:
       common_args = ["stpmax=0.5", "restraints=cctbx", "mode=refine", "parallel.nproc="+nproc, "clustering=true"] +\
