@@ -52,7 +52,17 @@ class from_cluster(object):
       fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
     self.restraints_manager.fragment_extracts = fragment_extracts_obj
     selection_and_sites_cart=[]
-    write_cluster_and_fragments_pdbs(fragments=fragment_extracts_obj,directory='frag_pdbs')
+
+    #
+    # This call is for debugging purposes. It used to be fast but at some point
+    # became very slow. BEWARE: enabling this call makes a simple optimization
+    # of a tiny molecule uisng CCTBX restraints about 110 times slower.
+    # This cunction calls completion and cmpletion calls ReadySet and many other
+    # specialized functions -- perhaps something became slower around there.
+    #
+    #write_cluster_and_fragments_pdbs(fragments=fragment_extracts_obj,directory='frag_pdbs')
+    #
+
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
       selection_and_sites_cart.append([selection_fragment, sites_cart,index])
@@ -106,7 +116,7 @@ class from_cluster(object):
         # Sometimes the 'standard' traceback is not available.
         # Below sort of forces the same information at the risk of doing things twice.
         # It was needed to find some bugs, but perhaps needs to revisisted later.
-        exc_type, exc_value, exc_traceback = sys.exc_info() 
+        exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback_template = ''' ** qrefine exception handler: **
         %(type)s => File "%(filename)s" \n line %(lineno)s, in %(name)s: \n %(message)s
          \n'''
