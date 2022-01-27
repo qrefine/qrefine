@@ -145,7 +145,7 @@ class Mopac(Calculator):
             mopac_input += ' %2s' % atom.symbol
             # write x, y, z
             for idir in range(3):
-                mopac_input += '    %16.5f %i' % (xyz[idir], f)
+                mopac_input += '    %20.12f %i' % (xyz[idir], f)
             mopac_input += '\n'
 
         if atoms.pbc.any():

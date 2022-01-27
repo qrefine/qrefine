@@ -86,7 +86,7 @@ class GFNxTB(Calculator):
         for i in range(len(atoms)):
             finput.write('%-10s' % symbols[i])
             for j in range(3):
-                finput.write('%20.10f' % coordinates[i, j])
+                finput.write('%20.12f' % coordinates[i, j])
             finput.write('\n')
         finput.close()
 
