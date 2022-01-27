@@ -29,7 +29,7 @@ class GFNxTB(Calculator):
                  charge='0',
                  version=2,
                  method='-gfn2',
-                 nproc='1',
+                 nproc=1,
                  atoms=None,
                  pointcharges=None,
                  **kwargs):
@@ -256,4 +256,4 @@ class GFNxTB(Calculator):
       self.label = label
 
     def set_nproc(self, nproc):
-      self.key_parameters['nproc'] = str(nproc)
+      self.key_parameters['nproc'] = int(nproc)

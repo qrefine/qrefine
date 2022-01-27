@@ -1028,7 +1028,7 @@ def test_capping_of_cluster_complete(only_i=None):
       if not os.path.exists(cluster_file):
         os.symlink(cluster_file_path, cluster_file)
       cluster_file_path = cluster_file
-      cmd = "phenix.python %s/qr-core/completion.py %s model_completion=False" % (
+      cmd = "qrefine.python %s/qr-core/completion.py %s model_completion=False" % (
         qr_repo_parent,
         cluster_file_path,
         )
@@ -1044,7 +1044,7 @@ def test_short_gap():
   f=open('test_short_gap.pdb', 'w')
   f.write(pdbs['short_gap'])
   f.close()
-  cmd = "phenix.python %s %s model_completion=False" % (
+  cmd = "qrefine.python %s %s model_completion=False" % (
     os.path.join(qrefine_d, 'completion.py'),
     'test_short_gap.pdb',
   )
@@ -1057,7 +1057,7 @@ def test_original_pdb():
   f=open('test_original_pdb.pdb', 'w')
   f.write(pdbs['2ona_short'])
   f.close()
-  cmd = 'phenix.python %s %s %s %s' % (
+  cmd = 'qrefine.python %s %s %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
     'test_original_pdb.pdb',
     'model_completion=0',

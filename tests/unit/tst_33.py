@@ -39,7 +39,7 @@ if(__name__ == "__main__"):
     from pyscf import gto, scf, grad, dft
     pyscf_installed = True
   except ImportError:
-    #"Pyscf not installed. Please run: phenix.python pip -m  install pyscf"
+    #"Pyscf not installed. Please run: qrefine.python pip -m  install pyscf"
     pass
   prefix = os.path.basename(__file__).replace(".py","")
   run_tests.runner(function=run, prefix=prefix, disable=not pyscf_installed)

@@ -143,7 +143,7 @@ def run(nproc=6,
       if not os.path.exists(fn):
         os.mkdir(fn)
       os.chdir(fn)
-    rc = easy_run.call("cctbx.python %s"%(
+    rc = easy_run.call("qrefine.python %s"%(
       os.path.join(qr_unit_tests,file_name)))
     if in_separate_directory:
       os.chdir('..')

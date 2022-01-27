@@ -153,17 +153,17 @@ We need to install pytorch https://github.com/pytorch/pytorch
 
 ``export CMAKE_PREFIX_PATH=/phenix/path/build``
 
-``phenix.python -m pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing``
+``qrefine.python -m pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing``
 
 ``git clone --recursive https://github.com/pytorch/pytorch.git``
 
 ``cd pytorch``
 
-``MACOSX_DEPLOYMENT_TARGET=10.14 CC=clang CXX=clang++ NO_CUDA=1 NO_NNPACK=1 phenix.python setup.py install`` (Mac)
+``MACOSX_DEPLOYMENT_TARGET=10.14 CC=clang CXX=clang++ NO_CUDA=1 NO_NNPACK=1 qrefine.python setup.py install`` (Mac)
 
 Please change MACOSX_DEPLOYMENT_TARGET as same as your Mac version
 
-``NO_NNPACK=1 USE_CUDNN=0 NO_DISTRIBUTED=1 phenix.python setup.py install`` (Centos)
+``NO_NNPACK=1 USE_CUDNN=0 NO_DISTRIBUTED=1 qrefine.python setup.py install`` (Centos)
 
 If you have a cmake error cmake:command not found, that is probably because cmake path not in PATH, (bash)
 
@@ -179,11 +179,11 @@ We need to install the qrefine branch.
 
 ``cd torchani``
 
-``phenix.python -m pip install .``
+``qrefine.python -m pip install .``
 
 ``cd examples``
 
-``phenix.python energy_force.py``
+``qrefine.python energy_force.py``
 
 Then you should see the energy and forces printed out.
 
@@ -209,7 +209,7 @@ engine_name
 
 requirements
 
-    ``phenix.python -m pip install pyscf``
+    ``qrefine.python -m pip install pyscf``
 
     More information: https://sunqm.github.io/pyscf/install.html
 
