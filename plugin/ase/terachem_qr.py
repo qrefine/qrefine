@@ -66,7 +66,7 @@ class TeraChem(Calculator):
                 else:
                   key_parameters["guess"] = None
                 key_parameters["guess"] = None # possibly remove in the future
-                for key, value in key_parameters.iteritems():
+                for key, value in key_parameters.items():
                         if(value!=None):
                                 if  not isinstance(value, str):
                                         value = str(value)
