@@ -64,6 +64,8 @@ def run(pdb_filename,
         skip_validation=False,
         calculate_charge=False,
         append_to_end_of_model=False,
+        neutron_option=None,
+        hydrogen_atom_occupancies=0.,
         ):
   #
   # do all *.pdb in a directory
@@ -171,6 +173,7 @@ def run(pdb_filename,
   # Idealize H as riding
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
+  params.pdb_interpretation.restraints_library.cdl = False
   h = ppf.all_chain_proxies.pdb_hierarchy
   asc = h.atom_selection_cache()
   sel = asc.selection("element H or element D")
@@ -182,7 +185,10 @@ def run(pdb_filename,
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
   model.idealize_h_riding()
-  model.set_occupancies(0, selection=sel)
+  if neutron_option=='all_d':
+    from mmtbx.ligands.ready_set_utils import perdeuterate_model_ligands
+    perdeuterate_model_ligands(ppf.all_chain_proxies.pdb_hierarchy)
+  model.set_occupancies(hydrogen_atom_occupancies, selection=sel)
 
   ## after no error getting total charge, write the completed pdb file
   hierarchy_utils.write_hierarchy(pdb_filename, # uses to get output filename

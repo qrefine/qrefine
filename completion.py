@@ -907,10 +907,10 @@ def complete_pdb_hierarchy(hierarchy,
     if get_class(ag.resname) in ['common_rna_dna']:
       raise Sorry('')
   from mmtbx.building import extend_sidechains
-  params=None
   original_hierarchy = None
+  params = hierarchy_utils.get_pdb_interpretation_params()
+  params.restraints_library.cdl=False
   if use_capping_hydrogens:
-    params = hierarchy_utils.get_pdb_interpretation_params()
     params.link_distance_cutoff=1.8 # avoid linking across a single missing AA
     if original_pdb_filename:
       original_pdb_inp = iotbx.pdb.input(original_pdb_filename)

@@ -37,6 +37,13 @@ calculate_charge = False
   .help = Will calculate total charge of molecule.
 append_to_end_of_model = False
   .type = bool
+options
+{
+  neutron = *all_h all_d
+    .type = choice
+  hydrogen_atom_occupancies = 0.
+    .type = float
+}
 """
 
 def master_params():
@@ -86,6 +93,8 @@ def run(args, log):
                skip_validation=params.skip_validation,
                calculate_charge=params.calculate_charge,
                append_to_end_of_model=params.append_to_end_of_model,
+               neutron_option=params.options.neutron,
+               hydrogen_atom_occupancies=params.options.hydrogen_atom_occupancies,
                )
 
 if __name__ == '__main__':
