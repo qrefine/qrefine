@@ -78,13 +78,11 @@ def run(args, log):
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
 
-  # Read atomic model
-  # XXX This is not Oleg's model !!!
-  # need to validate the input args
   model = qr.process_model_file(
     pdb_file_name    = cmdline.pdb_file_names[0],
     cif_objects      = cmdline.cif_objects,
-    crystal_symmetry = cmdline.crystal_symmetry)
+    crystal_symmetry = cmdline.crystal_symmetry,
+    scattering_table = params.scattering_table)
   map_data = None
   fmodel = None
   if(params.refine.mode=="opt" or params.refine.mode=='gtest'):

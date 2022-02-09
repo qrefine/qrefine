@@ -58,6 +58,9 @@ max_atoms = 15000
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
+scattering_table = wk1995  it1992  *n_gaussian electron neutron
+  .type = choice
+  .help = Choices of scattering table for structure factors calculations
 cluster{
   fast_interaction = True
     .type = bool
@@ -315,7 +318,8 @@ def create_fmodel(cmdline, log):
   log.flush()
   return fmodel
 
-def process_model_file(pdb_file_name, cif_objects=None, crystal_symmetry=None):
+def process_model_file(pdb_file_name, scattering_table, log=null_out(), cif_objects=None,
+                       crystal_symmetry=None):
   import iotbx.pdb
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
@@ -326,9 +330,13 @@ def process_model_file(pdb_file_name, cif_objects=None, crystal_symmetry=None):
     model_input       = pdb_inp,
     crystal_symmetry  = crystal_symmetry,
     restraint_objects = cif_objects,
-    log               = null_out())
+    log               = log)
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
+  model.setup_scattering_dictionaries(
+    scattering_table  = scattering_table,
+    d_min             = 1.0,
+    log               = log)
   return model
 
 def create_fragment_manager(
