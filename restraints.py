@@ -460,4 +460,8 @@ def ase_atoms_from_pdb_hierarchy(ph, crystal_symmetry, qm_engine_name):
     unit_cell = crystal_symmetry.unit_cell().parameters()
     return Atoms(symbols=symbols, positions=positions, pbc=True, cell=unit_cell)
   else:
+    #
+    # XXX Ugly work-around to by-pass inability of ASE to handle D atoms.
+    #
+    symbols = ["H" if symbol=="D" else symbol for symbol in symbols]
     return Atoms(symbols=symbols, positions=positions)
