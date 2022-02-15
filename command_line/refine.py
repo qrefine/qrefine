@@ -78,6 +78,9 @@ def run(args, log):
   cmdline.params.show(out=log, prefix="   ")
   params = cmdline.params.extract()
 
+  if len(cmdline.pdb_file_names)==0:
+    raise Sorry('PDB model files not provided and/or not found')
+
   model = qr.process_model_file(
     pdb_file_name    = cmdline.pdb_file_names[0],
     cif_objects      = cmdline.cif_objects,

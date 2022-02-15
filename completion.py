@@ -88,6 +88,19 @@ def _add_atom_to_residue_group(atom, ag, icode=None):
   atom.tmp = i
   return rg
 
+def is_perdeuterated(ag):
+  protons = {}
+  for atom in ag.atoms():
+    if atom.element_is_hydrogen():
+      protons.setdefault(atom.element, 0)
+      protons[atom.element]+=1
+  if len(protons)==1:
+    if 'D' in protons:
+      return True
+    else:
+      return False
+  assert 0
+
 def get_atoms_by_names(ag, l=None, all_or_nothing=True):
   assert l
   rc = []
@@ -113,7 +126,10 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
     if ca is None: return 'no CA'
     c = ag.get_atom("C")
     if c is None: return 'no C'
-  atom = ag.get_atom('H')
+  proton_element='H'
+  if is_perdeuterated(ag):
+    proton_element='D'
+  atom = ag.get_atom(proton_element) # just so happens that the atom is named H/D
   dihedral=120.
   if atom:
     dihedral = dihedral_angle(sites=[atom.xyz,
@@ -126,6 +142,9 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
   else:
     if ag.get_atom("H"): # maybe needs to be smarter or actually work
       ag.remove_atom(ag.get_atom('H'))
+    if ag.get_atom("D"): # maybe needs to be smarter or actually work
+      ag.remove_atom(ag.get_atom('D'))
+      proton_element='D'
   #if use_capping_hydrogens and 0:
   #  for i, atom in enumerate(ag.atoms()):
   #    if atom.name == ' H3 ':
@@ -137,7 +156,10 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
                       c, dihedral,
                      )
   # this could be smarter
-  possible = ['H', 'H1', 'H2', 'H3', 'HT1', 'HT2']
+  if proton_element=='H':
+    possible = ['H', 'H1', 'H2', 'H3', 'HT1', 'HT2']
+  elif proton_element=='D':
+    possible = ['D', 'D1', 'D2', 'D3'] #, 'HT1', 'HT2']
   h_count = 0
   for h in possible:
     if ag.get_atom(h): h_count+=1
@@ -149,7 +171,7 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
     #  # should name the hydrogens correctly
   if h_count>=number_of_hydrogens: return []
   for i in range(0, number_of_hydrogens):
-    name = " H%d " % (i+1)
+    name = " %s%d " % (proton_element, i+1)
     if retain_original_hydrogens:
       if i==0 and ag.get_atom('H'): continue
     if ag.get_atom(name.strip()): continue
@@ -158,7 +180,7 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
         continue
     atom = iotbx.pdb.hierarchy.atom()
     atom.name = name
-    atom.element = "H"
+    atom.element = proton_element
     atom.xyz = rh3[i]
     atom.occ = n.occ
     atom.b = n.b
@@ -835,7 +857,10 @@ def _h_h2_on_N(hierarchy,
     for i, residue in enumerate(three):
       if not i: continue
       residue = get_residue_group(residue)
-      h = get_atom_from_residue_group(residue, 'H')
+      proton_name=proton_element='H'
+      if is_perdeuterated(residue):
+        proton_name=proton_element='D'
+      h = get_atom_from_residue_group(residue, proton_name)
       if h is None:
         for ag, (n, ca, c) in generate_atom_group_atom_names(residue,
                                                              ['N', 'CA', 'C'],
@@ -849,8 +874,8 @@ def _h_h2_on_N(hierarchy,
                               c, dihedral,
                             )
           atom = iotbx.pdb.hierarchy.atom()
-          atom.name = ' H  '
-          atom.element = "H"
+          atom.name = ' %s  ' % proton_name
+          atom.element = proton_element
           atom.xyz = rh3[0]
           atom.occ = n.occ
           atom.b = n.b
