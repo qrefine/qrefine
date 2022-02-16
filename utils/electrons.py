@@ -421,15 +421,8 @@ def run(pdb_filename=None,
     model_input = inp,
     log = log,
   )
-
-  # XXX BEGIN--- FOR DEBUGGING. PLEASE REMOVE ONCE DONE WITH DEBUGGING.
-  with open("ThisIsWhereItCrashes.pdb","w") as fo:
-    fo.write(model.model_as_pdb())
-  # XXX ---END
-
   model.process(make_restraints=True,
     pdb_interpretation_params = working_params)
-
   # get xray structure
   xrs = model.get_xray_structure()
   grm = model.get_restraints_manager()
