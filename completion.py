@@ -421,7 +421,7 @@ def add_cys_hg_to_residue_group(rg,
   return rc
 
 def remove_cys_hg_from_residue_group(rg):
-  proton_element, proton_name = get_proton_info(ag)
+  proton_element, proton_name = get_proton_info(rg)
   for ag in rg.atom_groups():
     if ag.resname not in ['CYS']: continue
     for atom in ag.atoms():
@@ -617,7 +617,7 @@ def use_electrons_to_add_hdyrogens(hierarchy,
   )
   charged_atoms = charges.get_charged_atoms()
   remove=[]
-  proton_element, proton_name = get_proton_info(ag)
+  proton_element, proton_name = get_proton_info(hierarchy)
   for atom, electrons in charged_atoms:
     atom_group = atom.parent()
     #if atom_group.resname=='CYS' and atom.name==' SG ':
@@ -758,7 +758,7 @@ def _eta_peptide_h(hierarchy,
                    geometry_restraints_manager,
                    verbose=False,
                    ):
-  proton_element, proton_name = get_proton_info(ag)
+  proton_element, proton_name = get_proton_info(hierarchy)
   atoms = hierarchy.atoms()
   ###
   def get_residue_group(residue):
