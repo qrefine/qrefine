@@ -101,6 +101,12 @@ def is_perdeuterated(ag):
       return False
   assert 0
 
+def get_proton_info(ag):
+  proton_name=proton_element='H'
+  if is_perdeuterated(ag):
+    proton_name=proton_element='D'
+  return proton_element, proton_name
+
 def get_atoms_by_names(ag, l=None, all_or_nothing=True):
   assert l
   rc = []
@@ -126,9 +132,7 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
     if ca is None: return 'no CA'
     c = ag.get_atom("C")
     if c is None: return 'no C'
-  proton_element='H'
-  if is_perdeuterated(ag):
-    proton_element='D'
+  proton_element, proton_name = get_proton_info(ag)
   atom = ag.get_atom(proton_element) # just so happens that the atom is named H/D
   dihedral=120.
   if atom:
@@ -140,11 +144,8 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
                               deg=True)
   if retain_original_hydrogens: pass
   else:
-    if ag.get_atom("H"): # maybe needs to be smarter or actually work
-      ag.remove_atom(ag.get_atom('H'))
-    if ag.get_atom("D"): # maybe needs to be smarter or actually work
-      ag.remove_atom(ag.get_atom('D'))
-      proton_element='D'
+    if ag.get_atom(proton_name): # maybe needs to be smarter or actually work
+      ag.remove_atom(ag.get_atom(proton_name))
   #if use_capping_hydrogens and 0:
   #  for i, atom in enumerate(ag.atoms()):
   #    if atom.name == ' H3 ':
@@ -173,7 +174,7 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
   for i in range(0, number_of_hydrogens):
     name = " %s%d " % (proton_element, i+1)
     if retain_original_hydrogens:
-      if i==0 and ag.get_atom('H'): continue
+      if i==0 and ag.get_atom(proton_name): continue
     if ag.get_atom(name.strip()): continue
     if ag.resname=='PRO':
       if i==0:
@@ -241,14 +242,15 @@ def add_c_terminal_oxygens_to_atom_group(ag,
   #
   # do we need ANISOU
   #
+  proton_element, proton_name = get_proton_info(ag)
   rc = []
   atom_name=' OXT'
   atom_element = 'O'
   bond_length=1.231
   if use_capping_hydrogens:
     if ag.get_atom(atom_name.strip()): return []
-    atom_name=" HC "
-    atom_element="H"
+    atom_name=" %sC " % proton_element
+    atom_element=proton_element
     bond_length=1.
   if ag.get_atom(atom_name.strip()): return []
   if c_ca_n is not None:
@@ -389,6 +391,9 @@ def add_cys_hg_to_atom_group(ag,
   #
   # do we need ANISOU
   #
+  proton_name=proton_element='H'
+  if is_perdeuterated(ag):
+    proton_name=proton_element='D'
   rc = _add_hydrogens_to_atom_group_using_bad(
     ag,
     ' HG ',
@@ -416,10 +421,11 @@ def add_cys_hg_to_residue_group(rg,
   return rc
 
 def remove_cys_hg_from_residue_group(rg):
+  proton_element, proton_name = get_proton_info(ag)
   for ag in rg.atom_groups():
     if ag.resname not in ['CYS']: continue
     for atom in ag.atoms():
-      if atom.name==' HG ':
+      if atom.name==' %sG ' % proton_element:
         ag.remove_atom(atom)
         break
 
@@ -611,6 +617,7 @@ def use_electrons_to_add_hdyrogens(hierarchy,
   )
   charged_atoms = charges.get_charged_atoms()
   remove=[]
+  proton_element, proton_name = get_proton_info(ag)
   for atom, electrons in charged_atoms:
     atom_group = atom.parent()
     #if atom_group.resname=='CYS' and atom.name==' SG ':
@@ -626,8 +633,8 @@ def use_electrons_to_add_hdyrogens(hierarchy,
     # this does not even work
     rc = _add_hydrogens_to_atom_group_using_bad(
       atom.parent(),
-      ' H1 ',
-      'H',
+      ' %s1 ' % proton_element,
+      proton_element,
       atom.name.strip(),
       'C4',
       'C3',
@@ -733,8 +740,9 @@ def _add_atoms_from_residue_groups_to_end_of_hierarchy(hierarchy, rgs):
     model.append_chain(chain)
 
 def remove_acid_side_chain_hydrogens(hierarchy):
-  removes = {"GLU" : "HE2",
-             "ASP" : "HD2",
+  proton_element, proton_name = get_proton_info(hierarchy)
+  removes = {"GLU" : "%sE2" % proton_element,
+             "ASP" : "%sD2" % proton_element,
              }
   for ag in hierarchy.atom_groups():
     r = removes.get(ag.resname, None)
@@ -750,6 +758,7 @@ def _eta_peptide_h(hierarchy,
                    geometry_restraints_manager,
                    verbose=False,
                    ):
+  proton_element, proton_name = get_proton_info(ag)
   atoms = hierarchy.atoms()
   ###
   def get_residue_group(residue):
@@ -784,7 +793,7 @@ def _eta_peptide_h(hierarchy,
         rc = _add_hydrogens_to_atom_group_using_bad(
           ag,
           atom_name,
-          'H',
+          proton_element,
           'N',
           previous_c, #'CA',
           previous_o, #'CB',
