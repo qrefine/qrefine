@@ -18,11 +18,16 @@ from __future__ import print_function
 from __future__ import absolute_import
 import os
 import numpy as np
-from sets import Set
 import ase.units as ase_units
 from ase.calculators.general import Calculator
 from .ani.ani_interface import ANIRPCCalculator
+import torch
 
+ANImodel_file = os.path.join(os.path.dirname(__file__), "ani/aniqr-210405.pt")
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+model = torch.jit.load(ANImodel_file, map_location=device)
+for p in model.parameters():
+    p.requires_grad_(False)
 
 class TorchAni(Calculator):
   """
@@ -49,13 +54,14 @@ class TorchAni(Calculator):
     self.method = method
     self.energy_free = None
     self.forces = []
+    self.calc = ANIRPCCalculator(model)
 
   def check_trained_atoms(self):
       """
       The ANN models are only trained on H,C,N,O
       """
-      trained_atoms = Set(['C', 'H', 'N', 'O', 'S', 'F', 'Cl'])
-      if not Set(self.atoms.get_chemical_symbols()).issubset(trained_atoms):
+      trained_atoms = set(['C', 'H', 'N', 'O', 'S', 'F', 'Cl'])
+      if not set(self.atoms.get_chemical_symbols()).issubset(trained_atoms):
           raise NotImplementedError("Unfortunately, we do not have a trained model for all elements in your system.")
 
   def run_qr(self, atoms, coordinates, charge, pointcharges, define_str=None):
@@ -73,8 +79,7 @@ class TorchAni(Calculator):
   
     self.atoms = atoms
     self.check_trained_atoms()
-    calc = ANIRPCCalculator()
-    atoms.set_calculator(calc)
+    atoms.calc = self.calc
     unit_convert = ase_units.kcal/ase_units.mol
     self.energy_free = atoms.get_potential_energy()*unit_convert
     self.forces = atoms.get_forces().astype(np.float64)*unit_convert
