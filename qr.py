@@ -365,18 +365,18 @@ def create_fragment_manager(
 def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(params = params, model = model)
   if(params.expansion):
-    if(model.model.altlocs_present()):
+    if(model.altlocs_present()):
       return restraints.from_altlocs(
         restraints_source = restraints_source,
-        pdb_hierarchy     = model.model.get_hierarchy(),
-        crystal_symmetry  = model.crystal_symmetry,
+        pdb_hierarchy     = model.get_hierarchy(),
+        crystal_symmetry  = model.crystal_symmetry(),
         method            = params.cluster.altloc_method)
     else:
       return restraints.from_expansion(
         params           = params,
         restraints_source = restraints_source,
-        pdb_hierarchy     = model.model.get_hierarchy(),
-        crystal_symmetry  = model.crystal_symmetry)
+        pdb_hierarchy     = model.get_hierarchy(),
+        crystal_symmetry  = model.crystal_symmetry())
   else:
     if(params.cluster.clustering):
       fragment_manager = create_fragment_manager(params = params, model = model)
