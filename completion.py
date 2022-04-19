@@ -18,6 +18,7 @@ get_class = iotbx.pdb.common_residue_names_get_class
 
 from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
+from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
 
 def d_squared(xyz1, xyz2):
   d2 = 0
@@ -65,28 +66,6 @@ def construct_xyz(ba, bv,
                     math.cos(alpha)*e0)
     rh_list.append(rh)
   return rh_list
-
-def _add_atom_to_chain(atom, ag, icode=None):
-  rg = _add_atom_to_residue_group(atom, ag, icode=icode)
-  chain = ag.parent().parent()
-  tc = iotbx.pdb.hierarchy.chain()
-  tc.id = chain.id
-  tc.append_residue_group(rg)
-  return tc
-
-def _add_atom_to_residue_group(atom, ag, icode=None):
-  tag = iotbx.pdb.hierarchy.atom_group()
-  tag.resname = ag.resname
-  tag.append_atom(atom)
-  rg = iotbx.pdb.hierarchy.residue_group()
-  rg.resseq = ag.parent().resseq
-  if icode is not None: rg.icode=icode
-  rg.append_atom_group(tag)
-  for i, c in enumerate(ascii_letters):
-    if c==ag.parent().parent().id:
-      break
-  atom.tmp = i
-  return rg
 
 def is_perdeuterated(ag):
   protons = {}
@@ -429,19 +408,6 @@ def remove_cys_hg_from_residue_group(rg):
         ag.remove_atom(atom)
         break
 
-def conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
-                                            rg,
-                                            ):
-  sgs = None
-  for atom in rg.atoms():
-    if atom.name.strip()=='SG' and atom.parent().resname=='CYS':
-      sgs = atom.i_seq
-      break
-  if sgs:
-    sg_bonds = generate_bonded_i_seqs(geometry_restraints_manager, rg, sgs)
-    if len(sg_bonds)>2:
-      remove_cys_hg_from_residue_group(rg)
-
 def generate_bonded_i_seqs(geometry_restraints_manager, rg, j_seq):
   def _not_j_seq(j_seq, i_seqs):
     i_seqs.remove(j_seq)
@@ -483,11 +449,20 @@ def iterate_over_threes(hierarchy,
     if use_capping_hydrogens:
       for i in range(len(three)):
         rg = get_residue_group(three[i])
-        conditional_add_cys_hg_to_atom_group(geometry_restraints_manager, rg)
+        rc = conditional_add_cys_hg_to_atom_group(
+          geometry_restraints_manager,
+          rg,
+          append_to_end_of_model=append_to_end_of_model,
+          )
+        if rc:
+          additional_hydrogens.append(rc)
     else:
       for i in range(len(three)):
         rg = get_residue_group(three[i])
-        conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager, rg)
+        conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
+                                                rg,
+                                                append_to_end_of_model=append_to_end_of_model,
+                                                )
     # check if N-term residue - FVA
     n_term_done = False
     if three[0].resname in ['FVA',
@@ -573,7 +548,8 @@ def iterate_using_original(hierarchy,
     else: continue
     rg = slots[i]
     conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
-                                         rg)
+                                         rg,
+                                         append_to_end_of_model=append_to_end_of_model)
     if start:
       ptr+=1
       assert ptr==1
