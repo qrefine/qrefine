@@ -1100,9 +1100,7 @@ def run(pdb_filename=None,
     append_to_end_of_model=append_to_end_of_model, # needed for clustering
                                                    # code and Molprobity
     pdb_filename=pdb_filename,   # used just for naming of debug output
-    pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why?
-    original_pdb_filename=original_pdb_filename, # used to define breaks in
-                                                 # main chain for capping
+    pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why
     verbose=False,
   )
   if pdb_filename:
