@@ -18,6 +18,7 @@ get_class = iotbx.pdb.common_residue_names_get_class
 
 from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
+from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_remove_cys_hg_to_atom_group
 from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
 
 def d_squared(xyz1, xyz2):
@@ -461,7 +462,6 @@ def iterate_over_threes(hierarchy,
         rg = get_residue_group(three[i])
         conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
                                                 rg,
-                                                append_to_end_of_model=append_to_end_of_model,
                                                 )
     # check if N-term residue - FVA
     n_term_done = False
@@ -915,7 +915,7 @@ def complete_pdb_hierarchy(hierarchy,
   """
   for ag in hierarchy.atom_groups():
     if get_class(ag.resname) in ['common_rna_dna']:
-      raise Sorry('')
+      raise Sorry('Nucleotides are not currently supported. e.g. %s' % ag.resname)
   from mmtbx.building import extend_sidechains
   original_hierarchy = None
   params = hierarchy_utils.get_pdb_interpretation_params()
