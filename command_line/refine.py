@@ -98,8 +98,7 @@ def run(args, log):
       reflection_files = cmdline.reflection_files)
     determine_data_and_flags_result = extract_xtal_data.run(
       reflection_file_server  = rfs,
-      keep_going              = True,
-      log                     = log)
+      keep_going              = True)
     f_obs = determine_data_and_flags_result.f_obs
     number_of_reflections = f_obs.indices().size()
     r_free_flags = determine_data_and_flags_result.r_free_flags
