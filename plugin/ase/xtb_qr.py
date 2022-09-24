@@ -164,7 +164,7 @@ class GFNxTB(Calculator):
                 os.remove(f)
 
         self.run_command(command)
-        self.read_energy()
+        self.read_energy_output()
         self.read_forces()
         self.energy_zero= self.energy_free
         os.chdir(working_dir)
@@ -196,6 +196,21 @@ class GFNxTB(Calculator):
         self.e_total = energy_tmp * Hartree/(kcal / mol)
         self.energy_free = self.e_total
 
+    def read_energy_output(self):
+        """Read Energy from xtb output file."""
+        text = open('xtb.out', 'r').read()
+        lines = iter(text.split('\n'))
+
+        # Energy:
+        energy_tmp = 0
+        for line in lines:
+            if 'TOTAL ENERGY' in line:
+                energy_tmp = float(line.split()[3])
+
+        # update energy units
+        self.e_au=energy_tmp
+        self.e_total = energy_tmp * Hartree/(kcal / mol)
+        self.energy_free = self.e_total
 
     def read_forces(self):
         """xTB uses turbomole format gradients. We read forces and energy from it"""
