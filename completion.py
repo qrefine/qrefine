@@ -409,19 +409,6 @@ def remove_cys_hg_from_residue_group(rg):
         ag.remove_atom(atom)
         break
 
-def generate_bonded_i_seqs(geometry_restraints_manager, rg, j_seq):
-  def _not_j_seq(j_seq, i_seqs):
-    i_seqs.remove(j_seq)
-    return i_seqs[0]
-  bonds = []
-  for bond in geometry_restraints_manager.pair_proxies().bond_proxies.simple:
-    if j_seq in bond.i_seqs:
-      bonds.append(_not_j_seq(j_seq, list(bond.i_seqs)))
-  for bond in geometry_restraints_manager.pair_proxies().bond_proxies.asu:
-    if j_seq in [bond.i_seq, bond.j_seq]:
-      bonds.append(_not_j_seq(j_seq, [bond.i_seq, bond.j_seq]))
-  return bonds
-
 def iterate_over_threes(hierarchy,
                         geometry_restraints_manager,
                         use_capping_hydrogens=False,
