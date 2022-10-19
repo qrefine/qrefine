@@ -74,6 +74,7 @@ def is_perdeuterated(ag):
     if atom.element_is_hydrogen():
       protons.setdefault(atom.element, 0)
       protons[atom.element]+=1
+  if len(protons) in [0,2]: return False
   if len(protons)==1:
     if 'D' in protons:
       return True
