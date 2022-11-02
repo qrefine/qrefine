@@ -1,1 +1,1 @@
-__version__=" v1.1-18-g5621b9  "
+__version__=" b'v1.1-26-g2d84fa'  "

@@ -45,6 +45,7 @@ class fragments(object):
 
   def __init__(self,
       working_folder             = "ase",
+      make_working_folder        = True, # A way to not make it if not needed
       clustering_method          = None,
       altloc_method              = None,
       maxnum_residues_in_cluster = 20,
@@ -84,7 +85,8 @@ class fragments(object):
         raw_records           = raw_records,
         ligand_cif_file_names = cif_objects)
     if(os.path.exists(self.working_folder) is not True):
-      os.mkdir(self.working_folder)
+      if(make_working_folder):
+        os.mkdir(self.working_folder)
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
     self.get_altloc_molecular_indices()
@@ -465,12 +467,12 @@ class fragments(object):
       s = fragment_selection==cluster_selection
       buffer_selection = fragment_selection.deep_copy().set_selected(s, False)
       self.buffer_selections.append(buffer_selection)
-      # if(self.debug):
-      #   fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
-      #     crystal_symmetry=self.expansion.cs_box)
-      #   cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
-      #   cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
-      #     crystal_symmetry=self.expansion.cs_box)
+      if(self.debug):
+        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
+          crystal_symmetry=self.expansion.cs_box)
+        cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
+        cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
+          crystal_symmetry=self.expansion.cs_box)
       check_hierarchy(fragment_super_hierarchy)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
