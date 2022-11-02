@@ -133,7 +133,7 @@ def add_n_terminal_hydrogens_to_atom_group(ag,
   #      ag.remove_atom(i)
   #      break
   # add H1
-  rh3 = construct_xyz(n, 0.9,
+  rh3 = construct_xyz(n, 1.0,
                       ca, 109.5,
                       c, dihedral,
                      )
@@ -842,7 +842,7 @@ def _h_h2_on_N(hierarchy,
           if n in n_done: continue
           n_done.append(n)
           dihedral = 0
-          rh3 = construct_xyz(n, 0.9,
+          rh3 = construct_xyz(n, 1.0,
                               ca, 109.5,
                               c, dihedral,
                             )
