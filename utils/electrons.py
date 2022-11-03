@@ -19,6 +19,8 @@ atom_database = {'H' : {'valence' : 1},
                  'S' : {'valence' : 2, 'lone pairs' : 2},
                  'Cl': {'valence' : 1},
                  'Ca' : {'valence' : -2, 'metal' : True},
+                 #
+                 'Se' : {'valence' : 2},
                  'Cu' : {'valence' : -2,
                          #'charge' : 2,
                          'metal' : True},
