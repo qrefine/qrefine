@@ -131,10 +131,6 @@ def run(nproc=6,
         non_mopac_only=False):
   cwd = os.getcwd()
   assert cwd.find(' ')==-1, 'test do not work in directory with a space " "'
-  try:
-    only_i=only_i
-    nproc=1
-  except: only_i=None
   t0=time.time()
   print('Running tests on %d processors' % nproc)
   def _run_test(file_name, in_separate_directory=True):
@@ -154,6 +150,7 @@ def run(nproc=6,
     if(fn.startswith("tst_") and fn.endswith(".py")):
       # i_test = int(fn[:].replace("tst_","").replace(".py",""))
       i_test = fn[:].replace("tst_","").replace(".py","")
+      i_test = i_test[0].replace('0','')+i_test[1]
       # print(i_test,only_i)
       if(only_i is not None):
         if(only_i == i_test):
