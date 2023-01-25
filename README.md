@@ -24,33 +24,31 @@ quantum-refinement of bio-macromolecules.
 
 ### Quickstart
 
-Please first install PHENIX, see https://www.phenix-online.org/
+Please first install Phenix, see https://www.phenix-online.org/
  
-Once you have PHENIX installed, go to the directory where you installed PHENIX.
+Once you have Phenix installed, go to the directory where you installed Phenix.
 
 ```
- source phenix_env.sh
- phenix.python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=qrefine --use-conda --nproc=8
+ source phenix_env.sh # source phenix_env.csh
+ phenix.python -m pip install ase==3.17.0
+ phenix.python -m pip install pymongo
+ mkdir modules
+ mkdir build
+ cd modules
+ git clone https://github.com/qrefine/qrefine.git
+ cd ../build
+ libtbx.configure qrefine
+ source setpaths.sh # source setpaths.csh
  ```
- Note: adding --nproc=N can speedup the compilation step.
-
- Note: you may need to use sudo depending on the permissions of your PHENIX installation.
+ Note: you may need to use sudo depending on the permissions of your Phenix installation.
 
  ###### Using the Git repository of *cctbx*.
+
+NOT UP TO DATE
 
 To remain up-to-date with the changes in the *cctbx* project that contains many
 of the functions used in Q|R, remove the **cctbx_project** directory in the
 modules directory. The above command will clone it from *GitHub*.
-
- ###### In case the quickstart command fails
-
- Clone the qrefine repo in the modules directory of the Phenix installation.
-```
-  phenix.python -m pip install ase==3.17.0
-  phenix.python -m pip install pymongo
-  git clone https://github.com/qrefine/qrefine.git
-  libtbx.configure qrefine
-```
 
  ### Run Tests 
 
