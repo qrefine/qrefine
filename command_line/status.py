@@ -57,8 +57,11 @@ def _cmp_mtime(f1, f2):
     return -1
   return 1
 
+def _mtime(f1):
+  return os.stat(f1).st_mtime
+
 def show_item(files):
-  files.sort(_cmp_mtime)
+  files.sort(key=_mtime)
   for f in files:
     print('  %s : %s' % (f.replace(os.getcwd(), '.'),
                          time.asctime(time.localtime(os.stat(f).st_mtime))))
@@ -105,7 +108,7 @@ def run(cwd=None):
     else:
       ase_files.append(key)
   if ase_files: print('ase')
-  ase_files.sort(_cmp_mtime)
+  ase_files.sort(key=_mtime)
   for key in ase_files:
     print('  %s - %s : "%s"' % (key.replace(os.getcwd(),'.'),
                               time.asctime(time.localtime(os.stat(key).st_mtime)),

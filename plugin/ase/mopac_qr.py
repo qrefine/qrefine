@@ -160,7 +160,9 @@ class Mopac(Calculator):
 
     def get_command(self):
         """Return command string if program installed, otherwise None.  """
-        command = None
+        from mmtbx.geometry_restraints import mopac_manager
+        command = mopac_manager.get_exe()
+        if command: return command
         if ('MOPAC_COMMAND' in os.environ):
           command = os.environ['MOPAC_COMMAND']
         return command
