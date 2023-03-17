@@ -25,6 +25,7 @@ quantum-refinement of bio-macromolecules.
 ### Quickstart
 
 Please first install Phenix, see https://www.phenix-online.org/
+
 Note: Python 3.7 installer with the "modules" directory phenix-installer-<version>-intel-linux-x86_64.tar.xz starts from version 1.21rc1-4904.
 
 Once you have Phenix installed, go to the directory where you installed Phenix.
