@@ -658,7 +658,7 @@ def add_terminal_hydrogens(
     if get_class(atom_group.resname) not in ['common_amino_acid']:
       non_protein=True
       break
-  if non_protein or 1:
+  if non_protein and 0:
     rc = use_electrons_to_add_hdyrogens(
       hierarchy,
       geometry_restraints_manager,
@@ -1025,8 +1025,22 @@ def complete_pdb_hierarchy(hierarchy,
                          original_hierarchy=original_hierarchy,
                          verbose=verbose,
                         ) # in place
+  if debug:
+    output = hierarchy_utils.write_hierarchy(
+      pdb_filename,
+      pdb_inp,
+      ppf.all_chain_proxies.pdb_hierarchy,
+      'temp8',
+    )
   ppf.all_chain_proxies.pdb_hierarchy.atoms().set_chemical_element_simple_if_necessary()
   ppf.all_chain_proxies.pdb_hierarchy.sort_atoms_in_place()
+  if debug:
+    output = hierarchy_utils.write_hierarchy(
+      pdb_filename,
+      pdb_inp,
+      ppf.all_chain_proxies.pdb_hierarchy,
+      'temp9',
+    )
   #display_hierarchy_atoms(ppf.all_chain_proxies.pdb_hierarchy)
   #ppf.all_chain_proxies.pdb_hierarchy.atoms_reset_serial()
   #ppf.all_chain_proxies.pdb_hierarchy.atoms().reset_i_seq()
