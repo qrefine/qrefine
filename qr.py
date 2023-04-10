@@ -385,7 +385,9 @@ def create_restraints_manager(params, model):
         fragment_manager   = fragment_manager,
         parallel_params    = params.parallel)
     else:
+      # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
+
 
 def create_calculator(weights, params, restraints_manager, fmodel=None,
                       model=None):
