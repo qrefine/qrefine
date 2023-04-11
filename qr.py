@@ -270,26 +270,30 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       expected_n=1,
       exact_count=True,
       raise_sorry=True)
-    self.data_manager.has_miller_arrays(
+    self.has_data = self.data_manager.has_miller_arrays(
       expected_n=1,
       exact_count=True,
-      raise_sorry=True)
+      raise_sorry=False)
 
   def run(self):
     self.header("Refinement start")
     # fmodel stuff
-    self.header("Extracting fmodel")
-    self.fmodel = self.data_manager.get_fmodel(
-      scattering_table = self.params.scattering_table)
-    self.fmodel.update_all_scales(log=self.logger)
-    self.fmodel.show(log=self.logger, show_header=False)
-    self.header("Starting r-factors:")
-    print("r_work=%6.4f r_free=%6.4f"%(
-      self.fmodel.r_work(), self.fmodel.r_free()), file=self.logger)
-    self.header("Setting refinement target")
-    print(self.params.refine.refinement_target_name, file=self.logger)
-    self.fmodel.set_target_name(
-      target_name=self.params.refine.refinement_target_name)
+    self.fmodel=None
+    if(self.has_data):
+      self.header("Extracting fmodel")
+      self.fmodel = self.data_manager.get_fmodel(
+        scattering_table = self.params.scattering_table)
+      self.fmodel.update_all_scales(log=self.logger)
+      self.fmodel.show(log=self.logger, show_header=False)
+      self.header("Starting r-factors:")
+      print("r_work=%6.4f r_free=%6.4f"%(
+        self.fmodel.r_work(), self.fmodel.r_free()), file=self.logger)
+      self.header("Setting refinement target")
+      print(self.params.refine.refinement_target_name, file=self.logger)
+      self.fmodel.set_target_name(
+        target_name=self.params.refine.refinement_target_name)
+    if(not self.has_data):
+      self.params.refine.mode="opt"
     # model stuff
     self.header("Extracting model")
     model_file_name = self.data_manager.get_model_names()[0]
@@ -304,7 +308,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       pdb_interpretation_params = params)
     self.model.setup_scattering_dictionaries(
       scattering_table  = self.params.scattering_table,
-      d_min             = self.fmodel.f_obs().d_min(),
+      d_min             = 1.0,
       log               = self.logger)
     # run qrefine
     refine.run(

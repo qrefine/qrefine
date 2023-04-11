@@ -320,27 +320,6 @@ def create_fmodel(cmdline, log):
   log.flush()
   return fmodel
 
-def process_model_file(pdb_file_name, scattering_table, log=null_out(), cif_objects=None,
-                       crystal_symmetry=None):
-  import iotbx.pdb
-  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
-  params.pdb_interpretation.use_neutron_distances = True
-  params.pdb_interpretation.restraints_library.cdl = False
-  params.pdb_interpretation.sort_atoms = False
-  pdb_inp = iotbx.pdb.input(file_name=pdb_file_name)
-  model = mmtbx.model.manager(
-    model_input       = pdb_inp,
-    crystal_symmetry  = crystal_symmetry,
-    restraint_objects = cif_objects,
-    log               = log)
-  model.process(make_restraints=True, grm_normalization=True,
-    pdb_interpretation_params = params)
-  model.setup_scattering_dictionaries(
-    scattering_table  = scattering_table,
-    d_min             = 1.0,
-    log               = log)
-  return model
-
 def create_fragment_manager(
       model,
       params,
@@ -665,22 +644,3 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         output_file_name_prefix = params.output_file_name_prefix,
         output_folder_name      = params.output_folder_name,
         use_r_work              = params.refine.choose_best_use_r_work)
-
-if (__name__ == "__main__"):
-  t0 = time.time()
-  log = sys.stdout
-  args = sys.argv[1:]
-  print('_'*80, file=log)
-  print('Command line arguments', file=log)
-  outl = '  '
-  for arg in args:
-    outl += '"%s"' % arg
-  print('%s\n' % outl, file=log)
-  print('_'*80, file=log)
-  cmdline = mmtbx.command_line.load_model_and_data(
-      args          = args,
-      master_phil   = get_master_phil(),
-      create_fmodel = False,
-      out           = log)
-  run(cmdline=cmdline, log = log)
-  print("Time: %6.4f"%(time.time()-t0), file=log)
