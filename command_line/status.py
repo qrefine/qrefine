@@ -49,8 +49,9 @@ def check_output_pdbs(d):
       results.setdefault('refined', [])
       results['refined'].append(os.path.join(d, filename))
     elif filename.find('rst.pickle')>-1:
-      results.setdefault('restart', None)
-      results['restart']=os.path.join(d, filename)
+      # results.setdefault('restart', None)
+      results.setdefault('restart', [])
+      results['restart'].append(os.path.join(d, filename))
 
 def _cmp_mtime(f1, f2):
   if os.stat(f1).st_mtime<os.stat(f2).st_mtime:
@@ -67,10 +68,8 @@ def show_item(files):
                          time.asctime(time.localtime(os.stat(f).st_mtime))))
 
 def run(cwd=None):
-  if cwd is None:
-    cwd=os.getcwd()
-  else:
-    os.chdir(cwd)
+  if cwd: os.chdir(cwd)
+  cwd=os.getcwd()
   for root, dirs, files in os.walk(cwd):
     if os.path.basename(root)=='ase_error':
       print('ASE error directory exists')
@@ -94,16 +93,21 @@ def run(cwd=None):
   weight_dates = []
   refine_dates = []
   ase_files = []
+  cmds = []
+  cmds.append('phenix.start_coot')
+  cmds.append('phenix.start_coot')
   for key, item in sorted(results.items()):
-    if key in ['restart']:
+    if key in ['restart'] and 0:
       print(key)
       show_item([item])
       continue
-    if key in ['weight', 'refine', 'refined']:
+    if key in ['weight', 'refine', 'refined', 'restart']:
       print(key)
       show_item(item)
       for f in item:
-        if key=='weight': weight_dates.append(os.stat(f).st_mtime)
+        if key=='weight':
+          weight_dates.append(os.stat(f).st_mtime)
+          cmds[1] += ' %s' % f
         if key=='refine': refine_dates.append(os.stat(f).st_mtime)
     else:
       ase_files.append(key)
@@ -114,6 +118,9 @@ def run(cwd=None):
                               time.asctime(time.localtime(os.stat(key).st_mtime)),
                               results[key],
                               ))
+    cmds[0] += ' %s' % (key.replace('.out', '.pdb'))
+  print('\n\n\t%s\n\n' % cmds[0])
+  print('\n\n\t%s\n\n' % cmds[1])
   if weight_dates and refine_dates:
     if max(weight_dates)>min(refine_dates):
       print('\n\n  *** refine output models are older than weight models ***\n\n')

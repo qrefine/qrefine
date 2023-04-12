@@ -9,6 +9,7 @@ import iotbx.pdb
 import libtbx.load_env
 import mmtbx.command_line
 import qrefine.qr as qr
+from qrefine.utils import hierarchy_utils
 from qrefine import __version__
 from qrefine.restraints import from_qm, from_cctbx
 from libtbx.utils import Sorry,Usage
@@ -78,7 +79,7 @@ def run(args, log):
         master_phil=get_master_phil(),
         create_fmodel=False,
         out=log)
-  model = qr.process_model_file(
+  model = hierarchy_utils.process_model_file(
     pdb_file_name    = cmdline.pdb_file_names[0],
     cif_objects      = cmdline.cif_objects,
     crystal_symmetry = cmdline.crystal_symmetry)

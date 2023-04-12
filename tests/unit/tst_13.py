@@ -149,6 +149,6 @@ if(__name__ == "__main__"):
   update instructions.
   """
   disable = False
-  if(os.environ.get("MOPAC_COMMAND") is None): disable = True
+  # if(os.environ.get("MOPAC_COMMAND") is None): disable = True
   prefix = os.path.basename(__file__).replace(".py","")
   run_tests.runner(function=run, prefix=prefix, disable=disable)

@@ -276,3 +276,53 @@ def is_n_terminal_residue(residue_group):
 def is_n_terminal_atom_group(atom_group):
   if atom_group.resname in n_terminal_amino_acid_codes: return True
   return False
+
+def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
+  import mmtbx
+  import iotbx.pdb
+  from libtbx.utils import null_out
+  from libtbx import group_args
+  from ase.io import read as ase_io_read
+  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.use_neutron_distances = True
+  params.pdb_interpretation.restraints_library.cdl = False
+  params.pdb_interpretation.sort_atoms = False
+  pdb_inp = iotbx.pdb.input(file_name=pdb_file_name)
+  model = mmtbx.model.manager(
+    model_input               = pdb_inp,
+    crystal_symmetry          = crystal_symmetry,
+    restraint_objects         = cif_objects,
+    log                       = null_out())
+  model.process(make_restraints=True,
+                grm_normalization=False,
+                pdb_interpretation_params = params)
+  return group_args(
+    model              = model,
+    pdb_hierarchy      = model.get_hierarchy(),
+    xray_structure     = model.get_xray_structure(),
+    cif_objects        = cif_objects,
+    ase_atoms          = ase_io_read(pdb_file_name), # To be able to use ASE LBFGS
+    crystal_symmetry   = model.get_xray_structure().crystal_symmetry()
+    )
+
+# def process_model_file(pdb_file_name, scattering_table, log=null_out(), cif_objects=None,
+#                        crystal_symmetry=None):
+#   import iotbx.pdb
+#   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+#   params.pdb_interpretation.use_neutron_distances = True
+#   params.pdb_interpretation.restraints_library.cdl = False
+#   params.pdb_interpretation.sort_atoms = False
+#   pdb_inp = iotbx.pdb.input(file_name=pdb_file_name)
+#   validate_model_via_hierarchy(pdb_inp.construct_hierarchy())
+#   model = mmtbx.model.manager(
+#     model_input       = pdb_inp,
+#     crystal_symmetry  = crystal_symmetry,
+#     restraint_objects = cif_objects,
+#     log               = log)
+#   model.process(make_restraints=True, grm_normalization=True,
+#     pdb_interpretation_params = params)
+#   model.setup_scattering_dictionaries(
+#     scattering_table  = scattering_table,
+#     d_min             = 1.0,
+#     log               = log)
+#   return model

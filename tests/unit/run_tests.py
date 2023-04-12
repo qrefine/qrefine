@@ -175,7 +175,7 @@ def run(nproc=6,
   print(" ".join(tests))
   #
   failed = 0
-  in_separate_directory = not(nproc==1)
+  in_separate_directory=True # not(nproc==1)
   for i, file_name in enumerate(tests):
     tests[i]=tuple([file_name, in_separate_directory])
   for args, res, err_str in easy_mp.multi_core_run( _run_test,

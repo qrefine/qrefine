@@ -7,6 +7,7 @@ import libtbx.load_env
 from scitbx.array_family import flex
 import mmtbx.model
 from qrefine import qr
+from qrefine.utils import hierarchy_utils
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -14,7 +15,7 @@ qr_unit_tests = os.path.join(qrefine, "tests","unit")
 def get_model(file_name):
   file_name = os.path.join(qr_unit_tests,"data_files",file_name)
   pdb_inp = iotbx.pdb.input(file_name)
-  model = qr.process_model_file(
+  model = hierarchy_utils.process_model_file(
     pdb_file_name = file_name,
     cif_objects = None,
     crystal_symmetry=pdb_inp.crystal_symmetry())

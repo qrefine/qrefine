@@ -17,6 +17,7 @@ from qrefine.clustering import betweenness_centrality_clustering
 from qrefine.tests.unit import run_tests
 import mmtbx.model
 from qrefine import qr
+from qrefine.utils import hierarchy_utils
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -42,7 +43,7 @@ def get_master_phil():
 def get_model():
   file_name = os.path.join(qr_unit_tests,"data_files","helix.pdb")
   pdb_inp = iotbx.pdb.input(file_name)
-  model = qr.process_model_file(
+  model = hierarchy_utils.process_model_file(
     pdb_file_name = file_name,
     cif_objects = None,
     crystal_symmetry=pdb_inp.crystal_symmetry()).model
