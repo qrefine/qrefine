@@ -81,7 +81,7 @@ expansion = False
   .type = bool
   .help = Expand input model into super-sphere
 quantum {
-  engine_name = *mopac ani torchani terachem turbomole pyscf orca gaussian xtb
+  engine_name = *mopac aimnet2 torchani terachem turbomole pyscf orca gaussian xtb
     .type = choice(multi=False)
     .help = choose the QM program
   basis = Auto
