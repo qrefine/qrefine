@@ -336,12 +336,11 @@ class from_qm(object):
       calculator = Orca()
     elif(self.qm_engine_name == "gaussian"):
       calculator = Gaussian()
-    elif(self.qm_engine_name == "ani"):
-      from .plugin.ase.ani_qr import Ani
-      calculator = Ani()
     elif(self.qm_engine_name == "torchani"):
+      from .plugin.ase.torchani_qr import TorchAni
+      calculator = TorchAni()
+    elif(self.qm_engine_name == "aimnet2"):
       from .plugin.ase.aimnet2_qr import AIMNet2Calculator
-      calculator = AIMNet2Calculator()
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
     else:
