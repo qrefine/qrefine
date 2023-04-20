@@ -95,7 +95,8 @@ class ANI_interface(object):
         return arrays
         
 
-class ANIRPCCalculator(calculator.Calculator):
+# class ANIRPCCalculator(calculator.Calculator):
+class ANIRPCCalculator(Calculator):
     implemented_properties = ['energy', 'forces', 'stress', 'free_energy']
 
     def __init__(self,model):
@@ -118,7 +119,8 @@ class ANIRPCCalculator(calculator.Calculator):
         Z = self.atoms.get_atomic_numbers()[None, ...].astype(np.uint8)
         pbc = self.atoms.get_pbc().astype(np.bool_)
         cell = self.atoms.get_cell(complete=True).astype(np.float32)
-        
+        pbc = False
+        print(pbc,cell)
 
         results = self.interface.run(calc_type, R, Z, pbc, cell)
         self.results['energy'] = self.results['free_energy'] = results[0][0] * units.Hartree

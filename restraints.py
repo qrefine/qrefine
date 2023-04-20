@@ -14,6 +14,7 @@ from .plugin.ase.turbomole_qr import Turbomole
 from .plugin.ase.orca_qr import Orca
 from .plugin.ase.gaussian_qr import Gaussian
 from .plugin.ase.xtb_qr import GFNxTB
+from .plugin.ase.server_qr import RestAPICalculator
 from .plugin.tools import qr_tools
 from libtbx import group_args
 import math
@@ -66,6 +67,7 @@ class restraints(object):
         qm_addon_method  = self.params.quantum.qm_addon_method,
         memory           = self.params.quantum.memory,
         nproc            = self.params.quantum.nproc,
+        url              = self.params.quantum.server_url,
         crystal_symmetry = crystal_symmetry,
         clustering       = self.params.cluster.clustering)
     return self.restraints_manager
@@ -288,6 +290,7 @@ class from_qm(object):
       basis                      = "sto-3g",
       memory                     = None,
       nproc                      = 1,
+      url                        = None
   ):
     self.fragment_extracts  = fragment_extracts
     self.method = method
@@ -296,6 +299,7 @@ class from_qm(object):
     self.nproc = nproc
     self.qm_addon = qm_addon
     self.qm_addon_method = qm_addon_method
+    self.url = url
 
     self.crystal_symmetry = crystal_symmetry
     self.pdb_hierarchy = pdb_hierarchy
@@ -343,6 +347,8 @@ class from_qm(object):
       from .plugin.ase.aimnet2_qr import AIMNet2Calculator
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
+    elif(self.qm_engine_name == "server"):
+      calculator = RestAPICalculator(url=self.url)
     else:
       raise Sorry("qm_calculator needs to be specified.")
     #

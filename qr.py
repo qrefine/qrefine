@@ -81,7 +81,7 @@ expansion = False
   .type = bool
   .help = Expand input model into super-sphere
 quantum {
-  engine_name = *mopac aimnet2 torchani terachem turbomole pyscf orca gaussian xtb
+  engine_name = *mopac aimnet2 torchani terachem turbomole pyscf orca gaussian xtb server
     .type = choice(multi=False)
     .help = choose the QM program
   basis = Auto
@@ -99,6 +99,9 @@ quantum {
   nproc = 1
     .type = int
     .help = number of parallel processes for the QM program
+  server_url =  http://127.0.0.1:8000
+    .type = str
+    .help = address (http://address:port) of the server API if engine_name=server
   qm_addon = gcp dftd3 gcp-d3
     .type = choice(multi=False)
     .help = allows additional calculations of the gCP and/or DFT-D3 corrections using their stand-alone programs
