@@ -255,6 +255,7 @@ class restart_data(object):
   def __init__(self, geometry_rmsd_manager, fmodel=None, xray_structure=None):
     assert [xray_structure, fmodel].count(None) == 1
     rst_data = {}
+    fmodel._origin = None # Need for pickling! MTZ object cannot be pickled.
     if(fmodel is not None): rst_data["fmodel"] = fmodel
     else:                   rst_data["xrs"] = xray_structure
     rst_data["geometry_rmsd_manager"] = geometry_rmsd_manager
@@ -266,6 +267,7 @@ class restart_data(object):
     self.rst_data["weight_cycle"] = weight_cycle
     self.rst_data["refine_cycle"] = refine_cycle
     self.rst_data["micro_cycle"] = micro_cycle
+    fmodel._origin = None # Need for pickling! MTZ object cannot be pickled.
     self.rst_data["rst_fmodel"] = fmodel
     self.rst_data["rst_xray_structure"] = xray_structure
     self.rst_data["weights"] = weights
