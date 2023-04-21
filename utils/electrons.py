@@ -6,7 +6,7 @@ import mmtbx.model
 import sys
 import time
 from functools import cmp_to_key
-
+assert 0
 atom_database = {'H' : {'valence' : 1},
                  'D' : {'valence' : 1},
                  #
@@ -398,75 +398,6 @@ class electron_distribution(dict):
       if electrons:
         rc.append([ atoms[key],electrons])
     return rc
-
-def run(pdb_filename=None,
-        raw_records=None,
-        return_formal_charges=False,
-        verbose=False,
-        ):
-  if pdb_filename:
-    # Read file into pdb_input class
-    inp = iotbx.pdb.input(file_name=pdb_filename)
-  elif raw_records:
-    inp = iotbx.pdb.input(lines=raw_records, source_info='lines from PDB')
-  else:
-    assert 0
-
-  # create a model manager
-  from io import StringIO
-  log = StringIO()
-  default_scope = mmtbx.model.manager.get_default_pdb_interpretation_scope()
-  working_params = default_scope.extract()
-  # optional???
-  working_params.pdb_interpretation.automatic_linking.link_metals=True
-  model = mmtbx.model.manager(
-    model_input = inp,
-    log = log,
-  )
-  model.process(make_restraints=True,
-    pdb_interpretation_params = working_params)
-  # get xray structure
-  xrs = model.get_xray_structure()
-  grm = model.get_restraints_manager()
-  t0=time.time()
-  atom_valences = electron_distribution(
-    model.get_hierarchy(), # needs to be altloc free
-    model.get_restraints_manager().geometry,
-    verbose=verbose,
-  )
-  if verbose: print(atom_valences)
-  total_charge = atom_valences.get_total_charge()
-  #print 'total_charge',total_charge
-  #print 'time %0.1f' % (time.time()-t0)
-  rc = atom_valences.validate_atomic_formal_charges()
-  if return_formal_charges: return atom_valences
-  return total_charge
-
-  # get number of atoms in the input model
-  n_atoms = model.get_number_of_atoms()
-
-  # extract atom coordinates
-  old_sites_cart = model.get_sites_cart()
-  # generate random additions
-  random_addition = flex.vec3_double(
-    flex.random_double(size=n_atoms*3)-0.5)
-  # actually add them to old coordinates
-  new_xyz = old_sites_cart + random_addition
-
-  # Update coordinates in model manager
-  model.set_sites_cart(sites_cart=new_xyz)
-
-
-  # reset B-factors (min=1, max=20)
-  # generate array of new B-factors
-  new_b = flex.random_double(size=n_atoms, factor=19) + 1
-  # set them in xray structure
-  xrs.set_b_iso(values=new_b)
-  # update model manager with this xray structure
-  model.set_xray_structure(xrs)
-  # output result in PDB format to the screen
-  print(model.model_as_pdb())
-  print("END")
 
 if (__name__ == "__main__"):
   run(args=sys.argv[1:])

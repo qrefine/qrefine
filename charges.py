@@ -149,7 +149,7 @@ class charges_class:
                        verbose=False,
                       ):
     if self.electrons:
-      from qrefine.utils import electrons
+      from mmtbx.ligands import electrons
       if self.pdb_filename is None and self.raw_records is None:
         self.raw_records = hierarchy_utils.get_raw_records(
           pdb_hierarchy=self.pdb_hierarchy,

@@ -569,7 +569,7 @@ def use_electrons_to_add_hdyrogens(hierarchy,
                                    append_to_end_of_model=False,
                                    ):
   if not use_capping_hydrogens: return
-  from qrefine.utils import electrons
+  from mmtbx.ligands import electrons
   rc=[]
   raw_records = hierarchy_utils.get_raw_records(
     pdb_hierarchy=hierarchy,

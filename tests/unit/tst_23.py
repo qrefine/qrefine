@@ -120,9 +120,6 @@ def run(prefix):
       f=open(fn, 'w')
       f.write(lines)
       f.close()
-      cmd = 'qr.charges verbose=True assert_correct_chain_terminii=False'
-      cmd += ' %s' % fn
-      #print '\n\t~> %s\n' % cmd
 
       rc = get_charge(fn,
                       assert_correct_chain_terminii=False,
