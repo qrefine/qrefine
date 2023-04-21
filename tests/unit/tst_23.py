@@ -3,10 +3,11 @@ import os, sys
 from qrefine.tests.unit import run_tests
 from qrefine.charges import charges_class
 
-def get_charge(fn, assert_correct_chain_terminii=True):
+def get_charge(fn, assert_correct_chain_terminii=True, verbose=False):
   cc=charges_class(fn)
   return cc.get_total_charge(
-    assert_correct_chain_terminii=assert_correct_chain_terminii)
+    assert_correct_chain_terminii=assert_correct_chain_terminii,
+    verbose=verbose)
 
 pdbs = {
   'ACY' : {
@@ -115,7 +116,7 @@ results = {'ACY':{'ph_7': -1},
 def run(prefix):
   for code, item in pdbs.items():
     for action, lines in item.items():
-      #print code, action,
+      print (code, action)
       fn = '%s_%s.pdb' % (code, action)
       f=open(fn, 'w')
       f.write(lines)
@@ -123,16 +124,17 @@ def run(prefix):
 
       rc = get_charge(fn,
                       assert_correct_chain_terminii=False,
-                      #verbose=1,
+                      # verbose=1,
       )
       ans = None
       level1 = results.get(code, None)
       if level1:
         ans = level1.get(action, None)
       if ans is not None:
-        assert ans==rc, 'calculated charge %d not equal to expected %s' % (
+        assert ans==rc, 'calculated charge %d not equal to expected %s for %s' % (
             rc,
             ans,
+            fn,
             )
         os.remove(fn)
 
