@@ -334,7 +334,7 @@ class from_qm(object):
                             scf="diis+a")
     elif(self.qm_engine_name == "mopac"):
       calculator = Mopac()
-    elif(self.qm_engine_name == "pyscf"):calculator = AIMNet2Calculator()
+    elif(self.qm_engine_name == "pyscf"):
       calculator = Pyscf()
     elif(self.qm_engine_name == "orca"):
       calculator = Orca()
