@@ -334,7 +334,7 @@ class from_qm(object):
                             scf="diis+a")
     elif(self.qm_engine_name == "mopac"):
       calculator = Mopac()
-    elif(self.qm_engine_name == "pyscf"):
+    elif(self.qm_engine_name == "pyscf"):calculator = AIMNet2Calculator()
       calculator = Pyscf()
     elif(self.qm_engine_name == "orca"):
       calculator = Orca()
@@ -345,6 +345,7 @@ class from_qm(object):
       calculator = TorchAni()
     elif(self.qm_engine_name == "aimnet2"):
       from .plugin.ase.aimnet2_qr import AIMNet2Calculator
+      calculator = AIMNet2Calculator()
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
     elif(self.qm_engine_name == "server"):
