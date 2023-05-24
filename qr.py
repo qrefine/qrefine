@@ -263,7 +263,7 @@ Example:
 qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
 """
 
-  datatypes = ['model', 'phil', 'miller_array', 'restraint']
+  datatypes = ['model', 'phil', 'miller_array', 'restraint', 'real_map']
 
   master_phil_str = master_phil_str
 
@@ -273,16 +273,21 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       expected_n=1,
       exact_count=True,
       raise_sorry=True)
-    self.has_data = self.data_manager.has_miller_arrays(
+    self.has_ma = self.data_manager.has_miller_arrays(
       expected_n=1,
       exact_count=True,
       raise_sorry=False)
+    self.has_map = self.data_manager.has_real_maps(
+      expected_n=1,
+      exact_count=True,
+      raise_sorry=False)
+    self.has_data = self.has_ma or self.has_map
 
   def run(self):
     self.header("Refinement start")
     # fmodel stuff
     self.fmodel=None
-    if(self.has_data):
+    if(self.has_ma):
       self.header("Extracting fmodel")
       self.fmodel = self.data_manager.get_fmodel(
         scattering_table = self.params.scattering_table)
@@ -295,6 +300,13 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       print(self.params.refine.refinement_target_name, file=self.logger)
       self.fmodel.set_target_name(
         target_name=self.params.refine.refinement_target_name)
+    # real map
+    map_data = None
+    if(self.has_map):
+      map_data = self.data_manager.get_real_map().map_data()
+      if(map_data is not None):
+        self.params.refine.mode="refine"
+    #
     if(not self.has_data):
       self.params.refine.mode="opt"
     # model stuff
@@ -317,7 +329,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     refine.run(
       model    = self.model,
       fmodel   = self.fmodel,
-      map_data = None, #map_data, # XXX This feature is temporarily broken
+      map_data = map_data,
       params   = self.params,
       rst_file = self.params.rst_file,
       prefix   = model_file_name[:-4],

@@ -14,7 +14,7 @@ from scitbx.array_family import flex
 import cctbx.maptbx.real_space_refinement_simple
 import scitbx.lbfgs
 from libtbx import group_args
-from . import qr
+from . import refine
 from mmtbx.validation.ramalyze import ramalyze
 from mmtbx.validation.cbetadev import cbetadev
 from mmtbx.validation.rotalyze import rotalyze
@@ -494,7 +494,7 @@ class sites_real_space(object):
     dist = self.get_shift(other=model.get_xray_structure())
     if(self.weight is not None): w = "%5.2f"%self.weight
     else:                        w = "%5s"%str(None)
-    cc_mask = qr.show_cc(
+    cc_mask = refine.show_cc(
       map_data=self.map_data, xray_structure=model.get_xray_structure())
     print("RSR", prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
       "cc_mask=%6.4f"%cc_mask)
