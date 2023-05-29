@@ -448,7 +448,7 @@ class sites_real_space(object):
     return model_best, weight_best, i_best
 
   def run(self):
-    weights = [0.1, 1.0, 10, 20, 30, 40, 50,  200]
+    weights = [0.000001, 0.01, 0.1, 1.0, 10, 20, 30, 40, 50,  200]
     model, weight, i = self.macro_cycle(weights = weights)
     #
     if(weight==50.):
@@ -461,6 +461,10 @@ class sites_real_space(object):
         new_weights.append(w)
     elif(weight == 1.0):
       new_weights = [1,2,3,4,5,6,7,8,9]
+    elif(weight == 0.000001):
+      new_weights = [0.0001,0.0001,0.001,0.002,0.005,0.007]
+    elif(weight == 0.01):
+      new_weights = [0.01,0.02,0.05,0.07]
     elif(weight == 0.1):
       new_weights = [0.1,0.2,0.5,0.7]
     elif(weight == 0.01):
