@@ -20,6 +20,7 @@ from mmtbx.validation.cbetadev import cbetadev
 from mmtbx.validation.rotalyze import rotalyze
 from mmtbx.validation.clashscore import clashscore
 from libtbx.utils import null_out
+from cctbx import maptbx
 
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
@@ -349,7 +350,7 @@ class sites_real_space(object):
     self.max_iterations = 100
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
-    self.show(model=self.model)
+    self.show(model=self.model, weight = data_weight)
     #
     self.rama_fav_best = None
     self.cbeta_best    = None
@@ -378,6 +379,11 @@ class sites_real_space(object):
   def get_shift(self, other):
     s1 = self.sites_cart_start
     s2 = other.sites_cart()
+    return flex.mean(flex.sqrt((s1 - s2).dot()))
+
+  def get_shift2(self, m1, m2):
+    s1 = m1.get_sites_cart()
+    s2 = m2.get_sites_cart()
     return flex.mean(flex.sqrt((s1 - s2).dot()))
 
   def get_scores(self, model):
@@ -411,101 +417,77 @@ class sites_real_space(object):
            (sc.clash > self.clash_best and
             abs(sc.clash-self.clash_best)>1.)
 
-  def macro_cycle(self, weights):
-    print("RSR: weights to try:", weights)
-    weight_best = None
-    i_best = None
-    model_best = None
-    models = []
-    for i, w in enumerate(weights):
-      self.weight = w
-      m = self.run_one()
-      models.append(m.deep_copy())
-      sc = self.get_scores(model = m)
-      if(i==0 and self.rama_fav_best is None): # we assume best Rama favored with smallest weight
-        self.rama_fav_best = sc.rama_fav
-        self.cbeta_best    = sc.cbeta
-        self.rota_best     = sc.rota
-        self.clash_best    = sc.clash
-      elif(i==0): # 2nd round: fine-tuning
-        if(self.ready_to_stop(sc)):
-          break
-      if(sc.b_rmsd<self.max_bond_rmsd):
-        weight_best = w
-        i_best = i
-        model_best = models[i_best]
+  def geometry_is_good(self, stats):
+    b, a = stats.bond().mean, stats.angle().mean
+    return b < 0.025 and a < 2.5
+
+  def macro_cycle(self, weight):
+    up   = 0
+    down = 0
+    previous_good = None
+    while True: # Endless loop!
+      model = self.run_one(weight = weight)
+      stats = self.show(model = model, weight = weight, prefix="  ")
+      if(self.geometry_is_good(stats)):
+        up += 1
+        previous_good = weight
+        weight = weight*2
+        self.model.set_sites_cart(sites_cart = model.get_sites_cart())
+      else:
+        down += 1
+        weight = weight/2
+      if(up>0 and down>0): break
+    for it in [1,2,3,4,5]:
+      model = self.run_one(weight = previous_good)
+      stats = self.show(model = model, weight = previous_good, prefix="  ")
+      if(self.geometry_is_good(stats)):
+        shift = self.get_shift2(model, self.model)
+        self.model.set_sites_cart(sites_cart = model.get_sites_cart())
+        if(shift<0.01): break
       else:
         break
-      #
-      if(i>0):
-        if(self.ready_to_stop(sc)):
-          i_best = i-1
-          weight_best = weights[i_best]
-          model_best = models[i_best]
-          break
-      #
-    print("RSR: weight_best:", weight_best)
-    return model_best, weight_best, i_best
 
-  def run(self):
-    weights = [0.000001, 0.01, 0.1, 1.0, 10, 20, 30, 40, 50,  200]
-    model, weight, i = self.macro_cycle(weights = weights)
-    #
-    if(weight==50.):
-      new_weights = [50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
-    elif(weight>1 and i!=len(weights)-1):
-      new_weights = []
-      w=weights[i]
-      while w<weights[i+1]:
-        w+=1
-        new_weights.append(w)
-    elif(weight == 1.0):
-      new_weights = [1,2,3,4,5,6,7,8,9]
-    elif(weight == 0.000001):
-      new_weights = [0.0001,0.0001,0.001,0.002,0.005,0.007]
-    elif(weight == 0.01):
-      new_weights = [0.01,0.02,0.05,0.07]
-    elif(weight == 0.1):
-      new_weights = [0.1,0.2,0.5,0.7]
-    elif(weight == 0.01):
-      new_weights = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09]
-    else:
-      print("RSR: FALED TO FIND BEST WEIGHT")
-      STOP()
-    print("RSR: new_weights:", new_weights)
-    #
-    model_, weight_, i_ = self.macro_cycle(weights = new_weights)
-    self.model  = model
-    self.weight = weight
-    if(weight_ is not None):
-      self.model  = model_
-      self.weight = weight_
-    #
-    rmsd = get_bonds_rmsd(
-      restraints_manager = self.geometry_rmsd_manager.geometry,
-      xrs                = self.model.get_xray_structure())
-    self.show(model=self.model, prefix="(start macro-cycles)")
-    #
-    for mc in [1,2,3,4,5]:
-      self.model = self.run_one()
-    #
-    return self.model
-
-  def show(self, model, prefix=""):
-    s = model.geometry_statistics(use_hydrogens=False).show_short()
+  def show(self, model, weight, prefix=""):
+    stats = model.geometry_statistics(use_hydrogens=False)
+    s = stats.show_short()
     s = s.split()
     s = " ".join(s)
     dist = self.get_shift(other=model.get_xray_structure())
-    if(self.weight is not None): w = "%5.2f"%self.weight
-    else:                        w = "%5s"%str(None)
+    if(weight is not None): w = "%8.4f"%weight
+    else:                   w = "%5s"%str(None)
     cc_mask = refine.show_cc(
       map_data=self.map_data, xray_structure=model.get_xray_structure())
     print("RSR", prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
       "cc_mask=%6.4f"%cc_mask)
-    with open("weight_%s.pdb"%w.strip(), "w") as of:
-      of.write(model.model_as_pdb())
+    return stats
 
-  def run_one(self):
+  def get_weight(self):
+    o = maptbx.target_and_gradients_simple(
+      unit_cell     = self.model.crystal_symmetry().unit_cell(),
+      map_target    = self.map_data,
+      sites_cart    = self.model.get_sites_cart(),
+      selection     = flex.bool(True, self.model.size()),
+      interpolation = "tricubic")
+    hd_sel = self.model.get_xray_structure().hd_selection()
+    g_map = o.gradients().select(~hd_sel)
+    _, g_geo = self.restraints_manager.target_and_gradients(
+      sites_cart = self.model.get_sites_cart())
+    g_geo = g_geo.select(~hd_sel)
+    #
+    y = g_map.norm()
+    x = g_geo.norm()
+    ################
+    if(y != 0.0): return x/y
+    else:         return 1.0 # ad hoc default fallback
+
+  def run(self):
+    for it in [1,2]:
+      weight = self.get_weight()
+      print("%d: Initial weight estimate from ratio of grad norms:"%it, weight)
+      self.macro_cycle(weight = weight)
+    return self.model
+
+  def run_one(self, weight):
     model = self.model.deep_copy()
     xrs = model.get_xray_structure()
     uc = xrs.crystal_symmetry().unit_cell()
@@ -515,7 +497,7 @@ class sites_real_space(object):
       sites_cart                      = xrs.sites_cart(),
       density_map                     = self.map_data,
       geometry_restraints_manager     = self.restraints_manager,
-      real_space_target_weight        = self.weight,
+      real_space_target_weight        = weight,
       real_space_gradients_delta      = 0.25,
       gradient_only                   = self.gradient_only,
       line_search                     = self.line_search,
@@ -523,9 +505,4 @@ class sites_real_space(object):
       lbfgs_termination_params        = self.lbfgs_termination_params,
       lbfgs_exception_handling_params = self.lbfgs_exception_handling_params)
     model.set_sites_cart(sites_cart=refined.sites_cart)
-    ####
-    #rmsd = get_bonds_rmsd(
-    #  restraints_manager = self.geometry_rmsd_manager.geometry,
-    #  xrs                = model.get_xray_structure())
-    self.show(model = model)
     return model
