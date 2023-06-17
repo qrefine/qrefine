@@ -16,7 +16,7 @@ from qrefine import refine
 
 master_phil_str = """
 
-max_atoms = 15000
+max_atoms = 50000
   .type = int
   .help = maximum number of atoms
 debug = False
