@@ -304,6 +304,10 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     map_data = None
     if(self.has_map):
       map_data = self.data_manager.get_real_map().map_data()
+      map_data = map_data - flex.mean(map_data)
+      sd = map_data.sample_standard_deviation()
+      if sd is not None and sd != 0:
+        map_data = map_data/sd
       if(map_data is not None):
         self.params.refine.mode="refine"
     #

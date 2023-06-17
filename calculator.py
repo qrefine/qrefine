@@ -419,24 +419,45 @@ class sites_real_space(object):
 
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean
-    return b < 0.025 and a < 2.5
+    return b < 0.01 and a < 1.5
 
   def macro_cycle(self, weight):
+    def stalled(x):
+      for it in x:
+        if x.count(it) > 2: return True
+      return False
     up   = 0
     down = 0
+    slow_down = 0
     previous_good = None
+    bond_rmsds = []
     while True: # Endless loop!
       model = self.run_one(weight = weight)
       stats = self.show(model = model, weight = weight, prefix="  ")
+      b = stats.bond().mean
+      bond_rmsds.append(round(b,3))
+      if(stalled(bond_rmsds)): break
       if(self.geometry_is_good(stats)):
         up += 1
         previous_good = weight
-        weight = weight*2
+        if(b<0.03 or stalled(bond_rmsds)): weight = weight*2
+        else:
+          weight = weight + 0.3*weight
         self.model.set_sites_cart(sites_cart = model.get_sites_cart())
       else:
         down += 1
-        weight = weight/2
+        if(b>0.03):
+          weight = weight/2
+        else:
+          slow_down += 1
+          if(slow_down<3):
+            weight = weight - 0.3*weight
+          else:
+            weight = weight/2
+            slow_down = 0
       if(up>0 and down>0): break
+    print()
+    if(previous_good is None): return
     for it in [1,2,3,4,5]:
       model = self.run_one(weight = previous_good)
       stats = self.show(model = model, weight = previous_good, prefix="  ")
@@ -466,37 +487,48 @@ class sites_real_space(object):
       unit_cell     = self.model.crystal_symmetry().unit_cell(),
       map_target    = self.map_data,
       sites_cart    = self.model.get_sites_cart(),
-      selection     = flex.bool(True, self.model.size()),
-      interpolation = "tricubic")
+      selection     = flex.bool(self.model.size(), True),
+      interpolation = "tricubic"
+      )
     hd_sel = self.model.get_xray_structure().hd_selection()
     g_map = o.gradients().select(~hd_sel)
     _, g_geo = self.restraints_manager.target_and_gradients(
       sites_cart = self.model.get_sites_cart())
     g_geo = g_geo.select(~hd_sel)
     #
-    y = g_map.norm()
-    x = g_geo.norm()
+    g_map_d = flex.sqrt(g_map.dot())
+    sel = g_map_d>flex.mean(g_map_d)*3
+    y = g_map.select(~sel).norm()
+    #-
+    g_geo_d = flex.sqrt(g_geo.dot())
+    sel = g_geo_d>flex.mean(g_geo_d)*3
+    x = g_geo.select(~sel).norm()
+    #
+    #y = g_map.norm()
+    #
+    #x = g_geo.norm()
     ################
     if(y != 0.0): return x/y
     else:         return 1.0 # ad hoc default fallback
 
   def run(self):
-    for it in [1,2]:
-      weight = self.get_weight()
-      print("%d: Initial weight estimate from ratio of grad norms:"%it, weight)
-      self.macro_cycle(weight = weight)
+    weight = self.get_weight()
+    print("Initial weight estimate from ratio of grad norms:", weight)
+    self.macro_cycle(weight = weight)
     return self.model
 
   def run_one(self, weight):
     model = self.model.deep_copy()
     xrs = model.get_xray_structure()
     uc = xrs.crystal_symmetry().unit_cell()
+    not_hd_sel = ~model.selection(string = "element H or element D")
     refined = cctbx.maptbx.real_space_refinement_simple.lbfgs(
       unit_cell                       = uc,
       gradients_method                = "tricubic",
       sites_cart                      = xrs.sites_cart(),
       density_map                     = self.map_data,
       geometry_restraints_manager     = self.restraints_manager,
+      selection_variable_real_space   = not_hd_sel,
       real_space_target_weight        = weight,
       real_space_gradients_delta      = 0.25,
       gradient_only                   = self.gradient_only,
