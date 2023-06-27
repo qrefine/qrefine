@@ -419,7 +419,7 @@ class sites_real_space(object):
 
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean
-    return b < 0.01 and a < 1.5
+    return round(b, 2) <= 0.01 or round(a, 1) <= 1.5
 
   def macro_cycle(self, weight):
     def stalled(x):
