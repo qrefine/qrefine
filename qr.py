@@ -325,6 +325,8 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     params.pdb_interpretation.sort_atoms = False
     self.model.process(make_restraints=True, grm_normalization=True,
       pdb_interpretation_params = params)
+    if(self.params.scattering_table == "electron"):
+      self.model.neutralize_scatterers()
     self.model.setup_scattering_dictionaries(
       scattering_table  = self.params.scattering_table,
       d_min             = 1.0,
