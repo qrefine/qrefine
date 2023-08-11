@@ -216,6 +216,9 @@ refine {
     .type = choice(multi=False)
     .help = Choice of minimizer to use. LBFGS-B requires target and gradients.\
             LBFGS can use either gradients only or both, target and gradients.
+  shift_evaluation = max *mean
+    .type = choice(multi=False)
+    .help = Use mean or max coordinate shift to decide on convergence
 }
 
 parallel {
@@ -317,16 +320,15 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     self.header("Extracting model")
     model_file_name = self.data_manager.get_model_names()[0]
     model_names = self.data_manager.get_model_names()
-    self.model = self.data_manager.get_model(
-      filename = model_file_name)
+    self.model = self.data_manager.get_model(filename = model_file_name)
+    if(self.params.scattering_table == "electron"):
+      self.model.neutralize_scatterers()
     params = mmtbx.model.manager.get_default_pdb_interpretation_params()
     params.pdb_interpretation.use_neutron_distances = True
     params.pdb_interpretation.restraints_library.cdl = False
     params.pdb_interpretation.sort_atoms = False
     self.model.process(make_restraints=True, grm_normalization=True,
       pdb_interpretation_params = params)
-    if(self.params.scattering_table == "electron"):
-      self.model.neutralize_scatterers()
     self.model.setup_scattering_dictionaries(
       scattering_table  = self.params.scattering_table,
       d_min             = 1.0,

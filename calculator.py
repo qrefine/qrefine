@@ -157,7 +157,7 @@ class sites_opt(object):
   dump_gradients is used for debugging.
   """
 
-  def __init__(self, model, max_shift, restraints_manager=None,
+  def __init__(self, model, max_shift, restraints_manager, shift_eval,
                dump_gradients=False, convergence_threshold=1.e-3,
                convergence_reached_times=3):
     self.model = model
@@ -176,6 +176,10 @@ class sites_opt(object):
     self.bound_flags = flex.int(self.n, 2)
     self.lower_bound = flex.double([-1*max_shift]*self.n)
     self.upper_bound = flex.double([   max_shift]*self.n)
+    self.shift_eval = shift_eval
+    assert self.shift_eval in ["max", "mean"]
+    if(self.shift_eval == "mean"): self.shift_eval_func = flex.mean
+    else:                          self.shift_eval_func = flex.max
 
   def target_and_gradients(self):
     sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
@@ -191,7 +195,7 @@ class sites_opt(object):
     if(self.f_start is None):
       self.f_start = self.f
 
-    self.max_shift_between_resets = flex.max(flex.sqrt((
+    self.max_shift_between_resets = self.shift_eval_func(flex.sqrt((
       self.sites_cart - sites_plus_x).dot()))
 
     return self.f, self.g
@@ -386,29 +390,6 @@ class sites_real_space(object):
     s2 = m2.get_sites_cart()
     return flex.mean(flex.sqrt((s1 - s2).dot()))
 
-  def get_scores(self, model):
-    rama_fav = ramalyze(
-      pdb_hierarchy = model.get_hierarchy(),
-      outliers_only = False).percent_favored
-    cbeta = cbetadev(
-      pdb_hierarchy = model.get_hierarchy(),
-      outliers_only = True,
-      out           = null_out()).get_outlier_percent()
-    rota = rotalyze(
-      pdb_hierarchy = model.get_hierarchy(),
-      outliers_only = False).percent_outliers
-    b_rmsd = get_bonds_rmsd(
-      restraints_manager = self.geometry_rmsd_manager.geometry,
-      xrs                = model.get_xray_structure())
-    clash = clashscore(
-    pdb_hierarchy = model.get_hierarchy(),
-    keep_hydrogens = False,
-    fast = True, condensed_probe = True).get_clashscore()
-    print("DEV: b_rmsd= %7.4f clash= %6.4f rota= %6.4f rama_fav= %5.4f cbeta= %6.4f"%(
-    b_rmsd, clash, rota, rama_fav, cbeta))
-    return group_args(
-      rama_fav = rama_fav, cbeta = cbeta, rota = rota, b_rmsd = b_rmsd, clash = clash)
-
   def ready_to_stop(self, sc):
     return (sc.rama_fav < self.rama_fav_best and
             abs(sc.rama_fav-self.rama_fav_best)>1.) or \
@@ -419,24 +400,31 @@ class sites_real_space(object):
 
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean
-    return round(b, 2) <= 0.01 or round(a, 1) <= 1.5
+    #return round(b, 2) <= 0.01 or round(a, 1) <= 1.5
+    return round(b, 2) <= 0.01 and round(a, 1) <= 1.5
 
   def macro_cycle(self, weight):
     def stalled(x):
       for it in x:
-        if x.count(it) > 2: return True
+        if x.count(it) > 3: return True
       return False
     up   = 0
     down = 0
     slow_down = 0
     previous_good = None
     bond_rmsds = []
+    cntr = 0
     while True: # Endless loop!
+      print("cycle:", cntr)
+      cntr+=1
+      stats = self.show(model = self.model, weight = weight, prefix="  start:")
       model = self.run_one(weight = weight)
-      stats = self.show(model = model, weight = weight, prefix="  ")
+      stats = self.show(model = model, weight = weight, prefix="  final:")
       b = stats.bond().mean
       bond_rmsds.append(round(b,3))
-      if(stalled(bond_rmsds)): break
+      if(stalled(bond_rmsds)):
+        print("<<<<< weight optimization stalled: quitting >>>>>")
+        break
       if(self.geometry_is_good(stats)):
         up += 1
         previous_good = weight
@@ -455,17 +443,23 @@ class sites_real_space(object):
           else:
             weight = weight/2
             slow_down = 0
-      if(up>0 and down>0): break
+      if(up>0 and down>0):
+        print("<<<<< weight optimization oscillates: quitting >>>>>")
+        break
     print()
     if(previous_good is None): return
     for it in [1,2,3,4,5]:
+      stats = self.show(model = self.model, weight = previous_good, prefix="  start:")
       model = self.run_one(weight = previous_good)
-      stats = self.show(model = model, weight = previous_good, prefix="  ")
+      stats = self.show(model = model, weight = previous_good, prefix="  final:")
       if(self.geometry_is_good(stats)):
         shift = self.get_shift2(model, self.model)
         self.model.set_sites_cart(sites_cart = model.get_sites_cart())
-        if(shift<0.01): break
+        if(shift<0.01):
+          print("<<<<< shift fell below 0.01: quitting >>>>>")
+          break
       else:
+        print("<<<<< geometry got worse: quitting >>>>>")
         break
 
   def show(self, model, weight, prefix=""):
@@ -478,7 +472,7 @@ class sites_real_space(object):
     else:                   w = "%5s"%str(None)
     cc_mask = refine.show_cc(
       map_data=self.map_data, xray_structure=model.get_xray_structure())
-    print("RSR", prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
+    print(prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
       "cc_mask=%6.4f"%cc_mask)
     return stats
 

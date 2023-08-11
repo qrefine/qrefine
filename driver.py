@@ -622,7 +622,9 @@ def opt(model, params, results, calculator):
       minimized = minimizers.lbfgsb(
         calculator     = calculator,
         max_iterations = params.refine.max_iterations_refine)
-    prefix="cycle: %3d max_shift: %.6f "%(micro_cycle,
+    if(calculator.shift_eval == "max"): prefix = "max_shift"
+    else:                               prefix = "mean_shift"
+    prefix="cycle: %3d %s: %.6f "%(micro_cycle, prefix,
       calculator.max_shift_between_resets)
     minimized.show(log = log_switch, prefix=prefix)
     calculator.apply_x()
