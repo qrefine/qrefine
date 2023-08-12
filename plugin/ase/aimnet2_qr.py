@@ -166,6 +166,7 @@ class AIMNet2Calculator(Calculator):
             self._nblist['idx_j'], self._nblist['nb_pad_mask'] = self._nblist_cuda(conn_mat)
         else:
             self._nblist['idx_j'], self._nblist['nb_pad_mask'] = self._nblist_cpu(conn_mat)
+        self._nblist['idx_j'][self._nblist['nb_pad_mask']] = self._nblist['idx_j'].shape[0] - 1
         if self.use_coulomb:
             conn_mat = dmat < self.coulomb_cutoff
             conn_mat.fill_diagonal_(False)
@@ -173,6 +174,7 @@ class AIMNet2Calculator(Calculator):
                 self._nblist['idx_j_coul'], self._nblist['nb_pad_mask_coul'] = self._nblist_cuda(conn_mat)
             else:
                 self._nblist['idx_j_coul'], self._nblist['nb_pad_mask_coul'] = self._nblist_cpu(conn_mat)
+            self._nblist['idx_j_coul'][self._nblist['nb_pad_mask_coul']] = self._nblist['idx_j_coul'].shape[0] - 1    
         return self._nblist
 
     def _nblist_cpu(self, conn_mat):
@@ -210,6 +212,7 @@ class AIMNet2Calculator(Calculator):
         else:
             mat_idxj, mat_pad, mat_S = self._nblist_pbc_cpu(conn_mat, shifts)
         self._nblist['idx_j'], self._nblist['nb_pad_mask'], self._nblist['shifts'] = mat_idxj, mat_pad, mat_S
+        self._nblist['idx_j'][self._nblist['nb_pad_mask']] = self.nblists['idx_j'].shape[0] - 1
         if self.use_coulomb:
             shifts = self._calc_shifts(inv_distances, self.coulomb_cutoff)
             d = torch.cdist(coord.unsqueeze(0), coord.unsqueeze(0) + (shifts @ cell).unsqueeze(1))
@@ -219,6 +222,7 @@ class AIMNet2Calculator(Calculator):
             else:
                 mat_idxj, mat_pad, mat_S = self._nblist_pbc_cpu(conn_mat, shifts)
             self._nblist['idx_j_coul'], self._nblist['nb_pad_mask_coul'], self._nblist['shifts_coul'] = mat_idxj, mat_pad, mat_S
+            self._nblist['idx_j_coul'][self._nblist['nb_pad_mask_coul']] = self._nblist['idx_j_coul'].shape[0] - 1
         return self._nblist, coord
 
     def _calc_shifts(self, inv_distances, cutoff):
@@ -312,3 +316,4 @@ class AIMNet2Calculator(Calculator):
             print(('Energy:',self.energy_free))
             print(('Force:', self.forces))
             
+
