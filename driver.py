@@ -14,7 +14,7 @@ from ase.optimize.lbfgs import LBFGS
 import numpy
 from libtbx.test_utils import approx_equal
 from scitbx import minimizers
-import sys
+import sys, math
 
 log = sys.stdout
 
@@ -599,6 +599,7 @@ def refine(fmodel,
   results.show(prefix="  ")
 
 def opt(model, params, results, calculator):
+  assert model == calculator.model
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=log
   # start = model.geometry_statistics().show_short()
@@ -609,7 +610,13 @@ def opt(model, params, results, calculator):
       params.cluster.re_calculate_rmsd_tolerance)
     print("\ninteracting pairs number:  ",\
       len(calculator.restraints_manager.fragment_manager.interaction_list), file=log)
+  F = flex.double()
   for micro_cycle in range(0, params.refine.number_of_micro_cycles):
+
+    stats1 = model.geometry_statistics(use_hydrogens=True)
+    print("     ",stats1.show_short())
+
+    assert model == calculator.model
     if(params.cluster.clustering):
       cluster_qm_update.re_clustering(calculator)
     if(params.refine.minimizer == "lbfgs"):
@@ -622,12 +629,17 @@ def opt(model, params, results, calculator):
       minimized = minimizers.lbfgsb(
         calculator     = calculator,
         max_iterations = params.refine.max_iterations_refine)
+    F.append(calculator.f)
     if(calculator.shift_eval == "max"): prefix = "max_shift"
     else:                               prefix = "mean_shift"
-    prefix="cycle: %3d %s: %.6f "%(micro_cycle, prefix,
-      calculator.max_shift_between_resets)
+    prefix="cycle: %3d %s: %.6f all_shift: %.4f "%(micro_cycle, prefix,
+      calculator.max_shift_between_resets, calculator.mean_shift_from_start())
     minimized.show(log = log_switch, prefix=prefix)
     calculator.apply_x()
+
+    stats2 = model.geometry_statistics(use_hydrogens=True)
+    print("     ",stats2.show_short())
+
     if(calculator.converged()):
       print("Convergence reached. Stopping now.", file=log)
       break

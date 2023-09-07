@@ -173,6 +173,7 @@ class sites_opt(object):
     self.f_start = None
     self.max_shift_between_resets = 0
     self.sites_cart = self.model.get_sites_cart()
+    self.sites_cart_start = self.sites_cart.deep_copy()
     self.bound_flags = flex.int(self.n, 2)
     self.lower_bound = flex.double([-1*max_shift]*self.n)
     self.upper_bound = flex.double([   max_shift]*self.n)
@@ -216,6 +217,11 @@ class sites_opt(object):
     if(self.meat_convergence_criteria >= self.convergence_reached_times):
       return True
     return False
+
+  def mean_shift_from_start(self):
+    # Assumes apply_x has been called before so that self.sites_cart are updated
+    return flex.mean(flex.sqrt((
+      self.sites_cart - self.sites_cart_start).dot()))
 
   def __call__(self):
     f, g = self.target_and_gradients()
@@ -390,13 +396,13 @@ class sites_real_space(object):
     s2 = m2.get_sites_cart()
     return flex.mean(flex.sqrt((s1 - s2).dot()))
 
-  def ready_to_stop(self, sc):
-    return (sc.rama_fav < self.rama_fav_best and
-            abs(sc.rama_fav-self.rama_fav_best)>1.) or \
-           sc.cbeta > self.cbeta_best or \
-           sc.rota > self.rota_best   or \
-           (sc.clash > self.clash_best and
-            abs(sc.clash-self.clash_best)>1.)
+  #def ready_to_stop(self, sc):
+  #  return (sc.rama_fav < self.rama_fav_best and
+  #          abs(sc.rama_fav-self.rama_fav_best)>1.) or \
+  #         sc.cbeta > self.cbeta_best or \
+  #         sc.rota > self.rota_best   or \
+  #         (sc.clash > self.clash_best and
+  #          abs(sc.clash-self.clash_best)>1.)
 
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean

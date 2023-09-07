@@ -117,6 +117,7 @@ class fragments(object):
     self.expansion = self.expansion.update_xyz(
                                  sites_cart=sites_cart)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
+
     new_atoms=[ atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
     #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size):
     if(pre_atoms!=new_atoms):

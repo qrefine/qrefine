@@ -36,28 +36,35 @@ class expand(object):
     self.ph_super_cell   = None
     self.cs_box          = None
     self.ph_super_sphere = None
+    self.SCM = cctbx_super_cell.manager(
+      pdb_hierarchy        = self.pdb_hierarchy,
+      crystal_symmetry     = self.crystal_symmetry,
+      select_within_radius = self.select_within_radius)
+    self.ph_super_sphere = self.SCM.super_sphere_hierarchy
+    self.cs_box = self.SCM.cs_super_sphere
     #
     self.update()
 
-  def update(self, sites_cart=None, siiu=None):
+  def update(self, sites_cart=None, redo_super_cell=False):
     if(sites_cart is not None):
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    o = cctbx_super_cell.run(
-      pdb_hierarchy        = self.pdb_hierarchy,
-      crystal_symmetry     = self.crystal_symmetry,
-      select_within_radius = self.select_within_radius,
-      siiu                 = siiu)
-    self.ph_super_sphere = o.hierarchy
-    self.ph_super_cell = self.ph_super_sphere.deep_copy() # nonsense, we don't have super-cell anymore
-    self.cs_box = o.crystal_symmetry
-    self.siiu = o.siiu
+      if(not redo_super_cell):
+        self.ph_super_sphere = self.SCM.update(sites_cart=sites_cart)
+    if(redo_super_cell):
+      self.SCM = cctbx_super_cell.manager(
+        pdb_hierarchy        = self.pdb_hierarchy,
+        crystal_symmetry     = self.crystal_symmetry,
+        select_within_radius = self.select_within_radius)
+      self.ph_super_sphere = self.SCM.super_sphere_hierarchy.deep_copy()
+      self.cs_box = self.SCM.cs_super_sphere
     if(self.create_restraints_manager):
-      if(siiu is None): self.update_super_sphere_geometry_restraints_manager()
+      if(self.super_sphere_geometry_restraints_manager is None or redo_super_cell):
+        self.update_super_sphere_geometry_restraints_manager()
     return self
 
   def update_xyz(self, sites_cart=None):
     # keep the selection of super_sphere, update its coordinates
-    self.update(sites_cart=sites_cart, siiu=self.siiu)
+    self.update(sites_cart=sites_cart)
     return self
 
   def update_super_sphere_geometry_restraints_manager(self):
@@ -83,7 +90,7 @@ class expand(object):
       assume_hydrogens_all_missing = not has_hd,
       plain_pairs_radius           = 5.0)
     self.super_sphere_geometry_restraints_manager = mmtbx.restraints.manager(
-       geometry = geometry, normalization = False)
+       geometry = geometry, normalization = True)
 
   def write_super_cell_selected_in_sphere(self, file_name="super_sphere.pdb"):
     self.ph_super_sphere.write_pdb_file(file_name = file_name,

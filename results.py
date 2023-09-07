@@ -137,6 +137,7 @@ class manager(object):
   def write_final_pdb_files(self, output_file_name, output_folder_name):
     if(os.path.exists(output_folder_name) is False):
       os.mkdir(output_folder_name)
+    output_file_name = os.path.basename(output_file_name)
     self.pdb_hierarchy.write_pdb_file(
       file_name        = "%s" % os.path.join(output_folder_name, output_file_name),
       crystal_symmetry = self.crystal_symmetry)
@@ -176,4 +177,3 @@ class manager(object):
       output_folder_name = output_folder_name)
     print("See %s in %s folder."%(file_name, output_folder_name), file=log)
     return xrs_best
-    
