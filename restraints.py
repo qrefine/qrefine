@@ -83,6 +83,7 @@ class from_expansion(object):
     self.selection = None
     self.size = self.pdb_hierarchy.atoms().size()
     self.crystal_symmetry_ss = None
+    self.expansion = None
     self._expand()
     self.sites_cart_previous = self.pdb_hierarchy.atoms().extract_xyz()
 
@@ -106,31 +107,31 @@ class from_expansion(object):
       target    = tg[0],
       gradients = tg[1])
 
-  def _update(self, sites_cart, threshold = 0.1):
+  def _update(self, sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
 
     xyz = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
     xyz = xyz.set_selected(self.selection, sites_cart)
     self.pdb_hierarchy_super_completed.atoms().set_xyz(xyz)
 
-    shift_max = flex.max(
-      flex.sqrt((sites_cart - self.sites_cart_previous).dot()))
-    if(shift_max > threshold):
-      self._expand()
-      self.sites_cart_previous = sites_cart
+    self._expand()
+    self.sites_cart_previous = sites_cart
 
   def _expand(self):
     #self.selection = flex.bool(self.pdb_hierarchy.atoms().size(), True)
     #self.pdb_hierarchy_super_completed = self.pdb_hierarchy#.deep_copy()
     #return
-    expansion = expand(
-      pdb_hierarchy        = self.pdb_hierarchy,
-      crystal_symmetry     = self.crystal_symmetry,
-      select_within_radius = self.params.cluster.select_within_radius)
-    pdb_hierarchy_super = expansion.ph_super_sphere
+    if(self.expansion is None):
+      self.expansion = expand(
+        pdb_hierarchy        = self.pdb_hierarchy,
+        crystal_symmetry     = self.crystal_symmetry,
+        select_within_radius = self.params.cluster.select_within_radius)
+    else:
+      self.expansion.update(sites_cart = self.pdb_hierarchy.atoms().extract_xyz())
+    pdb_hierarchy_super = self.expansion.ph_super_sphere
     pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
-      crystal_symmetry = expansion.cs_box)
-    self.crystal_symmetry_ss = expansion.cs_box
+      crystal_symmetry = self.expansion.cs_box)
+    self.crystal_symmetry_ss = self.expansion.cs_box
     # Use same route for CCTBX and QM !
     # if(self.restraints_source.source_of_restraints_qm()):
     if 0:
@@ -148,7 +149,7 @@ class from_expansion(object):
       flex.size_t(range(self.pdb_hierarchy.atoms().size())), True)
     self.restraints_manager = self.restraints_source.update(
       pdb_hierarchy    = self.pdb_hierarchy_super_completed,
-      crystal_symmetry = expansion.cs_box)
+      crystal_symmetry = self.expansion.cs_box)
 
 #-------------------------------------------------------------------------------
 
