@@ -179,7 +179,7 @@ class Mopac(Calculator):
         if command == '':
             raise RuntimeError('no command for run_command :(')
         # print 'Running: ', command #debug
-        proc = Popen([command], shell=True, stderr=PIPE)
+        proc = Popen([command], shell=True, stderr=PIPE, stdout=PIPE)
         proc.wait()
         exitcode = proc.returncode
         if exitcode != 0:
@@ -195,20 +195,20 @@ class Mopac(Calculator):
         import subprocess, shlex
         from threading import Timer
 
-        def run_timeout(cmd, timeout_sec):
-          proc = subprocess.Popen(shlex.split(cmd),
-          # proc = subprocess.Popen(cmd, 
-                                  stdout=subprocess.PIPE,
-                                  shell=True,
-                                  stderr=subprocess.PIPE)
-          kill_proc = lambda p: p.kill()
-          timer = Timer(timeout_sec, kill_proc, [proc])
-          try:
-            timer.start()
-            stdout,stderr = proc.communicate()
-            print(stdout,stderr)
-          finally:
-            timer.cancel()
+        # def run_timeout(cmd, timeout_sec):
+        #   proc = subprocess.Popen(shlex.split(cmd),
+        #   # proc = subprocess.Popen(cmd, 
+        #                           stdout=subprocess.PIPE,
+        #                           shell=True,
+        #                           stderr=subprocess.PIPE)
+        #   kill_proc = lambda p: p.kill()
+        #   timer = Timer(timeout_sec, kill_proc, [proc])
+        #   try:
+        #     timer.start()
+        #     stdout,stderr = proc.communicate()
+        #     print(stdout,stderr)
+        #   finally:
+        #     timer.cancel()
 
         """
         Writes input in label.mop

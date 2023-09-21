@@ -34,25 +34,25 @@ def is_amino_acid(residue):
 def backbone_nitrogen(residue):
   if(is_amino_acid(residue) is True):
     for atom in residue.atoms():
-      if(atom.name.strip() is "N"):
+      if(atom.name.strip() == "N"):
         return list(atom.xyz)
 
 def backbone_nitrogen_H(residue):
   if(is_amino_acid(residue) is True):
     for atom in residue.atoms():
-      if(atom.name.strip() is "H"):
+      if(atom.name.strip() == "H"):
         return list(atom.xyz)
 
 def backbone_carbon(residue):
   if(is_amino_acid(residue) is True):
     for atom in residue.atoms():
-      if(atom.name.strip() is "C"):
+      if(atom.name.strip() == "C"):
         return list(atom.xyz)
 
 def backbone_carbon_O(residue):
   if(is_amino_acid(residue) is True):
     for atom in residue.atoms():
-      if(atom.name.strip() is "O"):
+      if(atom.name.strip() == "O"):
         return list(atom.xyz)
 
 def is_nterminal_residue(chain_id, residue_id, pdb_hierarchy):

@@ -168,19 +168,19 @@ def create_calculator(weights, params, restraints_manager, fmodel=None,
       restraints_manager = restraints_manager,
       weights            = weights)
 
-def validate(model, fmodel, params, rst_file, prefix, log):
-  # set defaults
+# def validate(model, fmodel, params, rst_file, prefix, log):
+def set_qm_defaults(params, log):
   outl = ''
   if params.quantum.engine_name=='mopac':
     if params.quantum.method==Auto:
       params.quantum.method='PM7'
-      outl += '  Setting QM method to PM7\n'
+      outl += '  Setting QM method to PM7 (mopac)\n'
     if params.quantum.basis==Auto:
       params.quantum.basis=''
   if params.quantum.engine_name=='xtb':
     if params.quantum.method==Auto:
       params.quantum.method=' --gfn 2 --etemp 500 --acc 0.1 --gbsa h2o'
-      print('  Default method for xtb is %s' % (
+      print(' Default method for xtb is %s' % (
           params.quantum.method,
           ), file=log)
       params.quantum.basis = ''
@@ -192,7 +192,7 @@ def validate(model, fmodel, params, rst_file, prefix, log):
       params.quantum.basis='6-31g'
       outl += '  Setting QM basis to 6-31g\n'
   if outl:
-    print('\nSetting QM defaults', file=log)
+    print(' Setting QM defaults', file=log)
     print(outl, file=log)
 
   if params.quantum.engine_name=='mopac':
@@ -203,108 +203,13 @@ def validate(model, fmodel, params, rst_file, prefix, log):
         ), file=log)
       params.quantum.basis = ''
     if params.quantum.method=='hf': # default
-      print('  Default method set as PM7', file=log)
+      print(' Default method set as PM7 (mopac)', file=log)
       params.quantum.method='PM7'
 
-def run_g_test(params, model, weights, start_fmodel, log):
-  # needs to be moved! Perhaps also to driver
-  import numpy as np
-  from .fragment import fragment_extracts, write_cluster_and_fragments_pdbs
-  from .utils.mathbox import get_grad_mad, get_grad_angle
-
-  # determine what kind of buffer to calculate
-  g_mode=[]
-  if params.cluster.g_mode is None:
-    g_mode.append(1)
-    if params.cluster.charge_embedding:
-      g_mode.append(2)
-    if params.cluster.two_buffers:
-      g_mode.append(3)
-    if params.cluster.two_buffers and params.cluster.charge_embedding:
-      g_mode.append(4)
-  else:
-    g_mode.append(params.cluster.g_mode)
-
-
-  # reset flags
-  params.cluster.clustering=True
-  params.cluster.save_clusters=True
-  params.cluster.charge_embedding=False
-  params.cluster.two_buffers=False
-  grad=[]
-  idx=0
-  idl=[]
-
-  # input for cluster size
-  cluster_scan=sorted([int(x) for x in params.cluster.g_scan.split()])
-  # cluster_scan=[2,10]
-
-  if g_mode[0]==0:
-    print('warning: supersphere calculation!', file=log)
-    params.cluster.clustering=False
-    params.expansion=True
-    cluster_scan=[0]
-    clusters=[]
-
-  n_grad=len(cluster_scan)*len(g_mode)
-  print('Calculating %3i gradients \n' % (n_grad), file=log)
-  print('Starting loop over different fragment sizes', file=log)
-  for ig in g_mode:
-
-    print('loop for g_mode = %i ' % (ig), file=log)
-    if ig == 2:
-      print('pc on', file=log)
-      params.cluster.charge_embedding=True
-    if ig == 3:
-      print('two_buffers on, pc off', file=log)
-      params.cluster.charge_embedding=False
-      params.cluster.two_buffers=True
-    if ig == 4:
-      print('two_buffers on, pc on', file=log)
-      params.cluster.charge_embedding=True
-      params.cluster.two_buffers=True
-
-    for max_cluster in cluster_scan:
-      idl.append([ig,max_cluster])
-      print('g_mode: %s' % (" - ".join(map(str,idl[idx]))), file=log)
-      t0 = time.time()
-      print("~max cluster size ",max_cluster, file=log)
-      params.cluster.maxnum_residues_in_cluster=max_cluster
-      fragment_manager = create_fragment_manager(params = params, model = model)
-      restraints_manager = create_restraints_manager(params, model)
-      rm = restraints_manager
-      if(fragment_manager is not None):
-        print("time taken for fragments",(time.time() - t0))
-        frags=fragment_manager
-        print('~  # clusters  : ',len(frags.clusters), file=log)
-        print('~  list of atoms per cluster:', file=log)
-        print('~   ',[len(x) for x in frags.cluster_atoms], file=log)
-        print('~  list of atoms per fragment:', file=log)
-        print('~   ',[len(x) for x in frags.fragment_super_atoms], file=log)
-
-        # save fragment data. below works
-        # better way is to make a single PDB file with chain IDs
-        label="-".join(map(str,idl[idx]))
-        write_cluster_and_fragments_pdbs(fragments=fragment_extracts(frags),directory=label)
-
-      calculator_manager = create_calculator(
-        weights            = weights,
-        fmodel             = start_fmodel,
-        model              = model,
-        params             = params,
-        restraints_manager = rm)
-      grad=list(calculator_manager.target_and_gradients())[1]
-      print('~   gnorm',np.linalg.norm(grad), file=log)
-      print('~   max_g', max(abs(i) for i in grad), ' min_g',min(abs(i) for i in grad), file=log)
-      name="-".join(map(str,idl[idx]))
-      np.save(name,grad)
-      idx+=1
-      print("total time for gradient",(time.time() - t0),'\n\n', file=log)
-
-  print('ready to run qr.granalyse!', file=log)
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
-  validate(model, fmodel, params, rst_file, prefix, log)
+  # validate(model, fmodel, params, rst_file, prefix, log)
+  set_qm_defaults(params,log)
   if(params.cluster.clustering):
     params.refine.gradient_only = True
     print(" params.gradient_only", params.refine.gradient_only, file=log)
@@ -356,62 +261,58 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
 
   restraints_manager = create_restraints_manager(params, model)
 
-  if(params.refine.mode == "gtest"):
-    run_g_test(params=params, log=log, model=model, weights=weights,
-               start_fmodel = start_fmodel)
+  if(map_data is not None and params.refine.mode == "refine"):
+    model.geometry_statistics(use_hydrogens=False).show()
+    show_cc(
+      map_data        = map_data,
+      xray_structure  = model.get_xray_structure(),
+      log             = log)
+    O = calculator.sites_real_space(
+      model                 = model,
+      geometry_rmsd_manager = geometry_rmsd_manager,
+      max_bond_rmsd         = params.refine.max_bond_rmsd,
+      map_data              = map_data,
+      data_weight           = params.refine.data_weight,
+      refine_cycles         = params.refine.number_of_refine_cycles,
+      skip_weight_search    = params.refine.skip_weight_search,
+      stpmax                = params.refine.stpmax,
+      gradient_only         = params.refine.gradient_only,
+      line_search           = params.refine.line_search,
+      restraints_manager    = restraints_manager,
+      max_iterations        = params.refine.max_iterations_refine,
+      log                   = log)
+    model = O.run()
+    of = open("real_space_refined.pdb", "w")
+    print(model.model_as_pdb(output_cs=True), file=of)
+    of.close()
+    model.geometry_statistics(use_hydrogens=False).show()
+    show_cc(
+      map_data=map_data,
+      xray_structure=model.get_xray_structure(),
+      log=log)
+    return
   else:
-    if(map_data is not None and params.refine.mode == "refine"):
-      model.geometry_statistics(use_hydrogens=False).show()
-      show_cc(
-        map_data        = map_data,
-        xray_structure  = model.get_xray_structure(),
-        log             = log)
-      O = calculator.sites_real_space(
-        model                 = model,
+    calculator_manager = create_calculator(
+      weights=weights,
+      fmodel=start_fmodel,
+      model=model,
+      params=params,
+      restraints_manager=restraints_manager)
+    if(params.refine.mode == "refine"):
+      driver.refine(
+        params                = params,
+        fmodel                = fmodel,
         geometry_rmsd_manager = geometry_rmsd_manager,
-        max_bond_rmsd         = params.refine.max_bond_rmsd,
-        map_data              = map_data,
-        data_weight           = params.refine.data_weight,
-        refine_cycles         = params.refine.number_of_refine_cycles,
-        skip_weight_search    = params.refine.skip_weight_search,
-        stpmax                = params.refine.stpmax,
-        gradient_only         = params.refine.gradient_only,
-        line_search           = params.refine.line_search,
-        restraints_manager    = restraints_manager,
-        max_iterations        = params.refine.max_iterations_refine,
-        log                   = log)
-      model = O.run()
-      of = open("real_space_refined.pdb", "w")
-      print(model.model_as_pdb(output_cs=True), file=of)
-      of.close()
-      model.geometry_statistics(use_hydrogens=False).show()
-      show_cc(
-        map_data=map_data,
-        xray_structure=model.get_xray_structure(),
-        log=log)
-      return
+        calculator            = calculator_manager,
+        results               = results_manager)
     else:
-      calculator_manager = create_calculator(
-        weights=weights,
-        fmodel=start_fmodel,
-        model=model,
-        params=params,
-        restraints_manager=restraints_manager)
-      if(params.refine.mode == "refine"):
-        driver.refine(
-          params                = params,
-          fmodel                = fmodel,
-          geometry_rmsd_manager = geometry_rmsd_manager,
-          calculator            = calculator_manager,
-          results               = results_manager)
-      else:
-        driver.opt(
-          params     = params,
-          model      = model,
-          calculator = calculator_manager,
-          results    = results_manager)
-      xrs_best = results_manager.finalize(
-        input_file_name_prefix  = prefix,
-        output_file_name_prefix = params.output_file_name_prefix,
-        output_folder_name      = params.output_folder_name,
-        use_r_work              = params.refine.choose_best_use_r_work)
+      driver.opt(
+        params     = params,
+        model      = model,
+        calculator = calculator_manager,
+        results    = results_manager)
+    xrs_best = results_manager.finalize(
+      input_file_name_prefix  = prefix,
+      output_file_name_prefix = params.output_file_name_prefix,
+      output_folder_name      = params.output_folder_name,
+      use_r_work              = params.refine.choose_best_use_r_work)

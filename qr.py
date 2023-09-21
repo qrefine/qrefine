@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function
-from phenix.program_template import ProgramTemplate
+from libtbx.program_template import ProgramTemplate
 from libtbx import group_args
 import iotbx.pdb
 import iotbx.pdb.fetch
@@ -56,12 +56,6 @@ cluster{
     .help = two strategies on how to join energies from multiple energy and \
             gradient calculations are performed for alternate locations.\
             altloc_method=average does not work! (known issue).
-  g_scan  = 10 15 20
-    .type = str
-    .help = sequence of numbers specifying maxnum_residues_in_cluster for gradient convergence test (mode=gtest), treat as string!
-  g_mode = None
-    .type = int
-    .help = manual control over gradient test loops (0=expansion ,1=standard, 2=standard + point-charges, 3=two buffer 4=two_buffer+ point-charges)
   save_clusters = True
     .type = bool
     .help = save currently used fragments and clusters to disk as PDBs.
@@ -288,6 +282,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
 
   def run(self):
     self.header("Refinement start")
+    
     # fmodel stuff
     self.fmodel=None
     if(self.has_ma):
@@ -317,6 +312,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     if(not self.has_data):
       self.params.refine.mode="opt"
     # model stuff
+    self._print(self.get_program_phil_str())
     self.header("Extracting model")
     model_file_name = self.data_manager.get_model_names()[0]
     model_names = self.data_manager.get_model_names()
