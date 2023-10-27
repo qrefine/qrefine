@@ -124,6 +124,13 @@ DOI：[10.1107/S2059798320013194](https://doi.org/10.1107/S2059798320013194)
 bioRxiv 2020.05.25.115386. 
 DOI:[0.1101/2020.05.25.115386](https://www.biorxiv.org/content/10.1101/2020.05.25.115386v1)
 
+Yaru Wang, Holger Kruse, Mark P. Waller, Pavel V. Afonine, and Malgorzata Biczysko,
+Optimal clustering for quantum refinement of biomolecular structures: Q|R#4
+(2023) Theor. Chem. Acc. 142, 100.
+DOI: [10.1007/s00214-023-03046-0](https://doi.org/10.1007/s00214-023-03046-0)
+bioRxiv 2022.11.24.517825
+DOI:[10.1101/2022.11.24.517825](doi: https://doi.org/10.1101/2022.11.24.517825)
+
 
 #### Clustering
 
