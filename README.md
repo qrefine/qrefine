@@ -102,12 +102,12 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 
 ### Citations:
 
-Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel Afonine,
+Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel V. Afonine,
 Q|R: Quantum-based Refinement, 
 (2017) Acta Cryst. D73, 45-52.
 DOI: [10.1107/S2059798316019847](http://scripts.iucr.org/cgi-bin/paper?S2059798316019847)
 
-Min Zheng, Nigel W. Moriarty, Yanting Xu, Jeffrey Reimers,  Pavel Afonine, and Mark P. Waller,
+Min Zheng, Nigel W. Moriarty, Yanting Xu, Jeffrey Reimers,  Pavel V. Afonine, and Mark P. Waller,
 Solving the scalability issue in quantum-based refinement: Q|R#1
 (2017) Acta Cryst. D73, 1020-1028.
 DOI: [10.1107/S2059798317016746](http://scripts.iucr.org/cgi-bin/paper?S2059798317016746)
