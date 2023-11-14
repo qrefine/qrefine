@@ -128,7 +128,7 @@ Optimal clustering for quantum refinement of biomolecular structures: Q|R#4
 (2023) Theor. Chem. Acc. 142, 100.
 DOI: [10.1007/s00214-023-03046-0](https://doi.org/10.1007/s00214-023-03046-0)
 bioRxiv 2022.11.24.517825
-DOI:[10.1101/2022.11.24.517825](doi: https://doi.org/10.1101/2022.11.24.517825)
+DOI:[10.1101/2022.11.24.517825](https://doi.org/10.1101/2022.11.24.517825)
 
 
 #### Clustering
