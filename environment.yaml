@@ -1,0 +1,26 @@
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - cctbx-nightly
+dependencies:
+  - cctbx
+  - pytorch=2.1
+  - pytorch-cuda
+  - cudatoolkit
+  - cuda-python
+  - torchani=2.2
+  - numba
+  - numpy
+  - python=3.10
+  - "blas=*=mkl"
+  - networkx
+  - pymongo
+  - ase
+  - cxx-compiler
+  - c-compiler
+  - subversion
+  - make
+  - mopac
+  - xtb
+  - xtb-python
