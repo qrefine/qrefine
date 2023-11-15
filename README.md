@@ -1,7 +1,7 @@
 # Quantum Refinement Module
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Code Health](https://landscape.io/github/qrefine/qrefine/master/landscape.svg?style=flat)](https://landscape.io/github/qrefine/qrefine/master)
+[![Dockerhub](https://img.shields.io/badge/dockerhub-images-important.svg?logo=Docker")](https://hub.docker.com/repository/docker/qrefine/cctbx-ani-qr/general)
 
 
 Quantum Chemistry can improve bio-macromolecular structures,
