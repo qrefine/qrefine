@@ -1,0 +1,36 @@
+name: Publish image to public repository on dockerhub
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: 'qrefine'
+  REPOSITORY: 'cctbx-ani-qr'
+  
+jobs:
+
+  push:
+
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}  
+
+      - name: Build, tag, and push docker image to Dockerhub
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG  .
+          docker push -a $REGISTRY/$REPOSITORY     
+  
