@@ -2,8 +2,8 @@ FROM condaforge/mambaforge:23.3.1-1
 SHELL ["/bin/bash", "--login", "-c"]
 
 # Base environment setup
-COPY cuda.yaml .
-RUN mamba env create --name cctbx-cuda -f cuda.yaml && mamba clean --all
+COPY environment.yaml .
+RUN mamba env create --name cctbx-cuda -f environment.yaml && mamba clean --all
 
 
 # Activate conda and clean up
