@@ -26,9 +26,10 @@ jobs:
       with:
         environment-file: environment.yaml      
         cache-environment: true
+
     - run: |
-        conda info
-        conda list
+         pwd
+         ls 
         
     - name: Install CCTBX
       run: |
