@@ -1,3 +1,4 @@
+name: qrefine-ci-mamba
 channels:
   - pytorch
   - nvidia
