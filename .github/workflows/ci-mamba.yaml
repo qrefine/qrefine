@@ -78,8 +78,13 @@ jobs:
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
 
-        which xtb
-        which mopac
+
+
+        # Pull in latest code from mmtbx:
+        cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
+        wget https://raw.githubusercontent.com/cctbx/cctbx_project/master/mmtbx
+    
+        libtbx.configure mmtbx
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
