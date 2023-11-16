@@ -67,7 +67,7 @@ jobs:
         mkdir build 
         cd build 
         mkdir -p probe/exe/
-        cp ../modules/probe/probe probe/exe/. 
+        cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
