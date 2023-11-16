@@ -35,6 +35,7 @@ jobs:
       with:
         environment-file: environment.yaml      
         cache-environment: true
+        use-only-tar-bz2: true 
         activate-environment: qrefine-ci-mamba
 
     - run: |
