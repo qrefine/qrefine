@@ -67,18 +67,17 @@ jobs:
     #  run: micromamba activate qrefine-ci-mamba
 
     - run: |
-        cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/
+        cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
         mkdir build 
         cd build 
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
-        micromamba activate qrefine-ci-mamba
       
-        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure probe 
-        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure qrefine 
-        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure reduce 
-        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mmtbx.rebuild_rotarama_cache
-        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mmtbx.rebuild_cablam_cache
+        libtbx.configure probe 
+        libtbx.configure qrefine 
+        libtbx.configure reduce 
+        mmtbx.rebuild_rotarama_cache
+        mmtbx.rebuild_cablam_cache
     
     - name: smoke test
       run: |
@@ -86,7 +85,7 @@ jobs:
         qr.refine --help
     - name: qr.test
       run: |
-        source cctbx/build/setpaths.sh
+        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/cctbx/build/setpaths.sh
         qr.test > qr_test.txt
     - name: Archive qr test output
       if: always()
