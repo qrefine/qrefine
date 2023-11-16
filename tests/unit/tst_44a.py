@@ -6,11 +6,12 @@ import iotbx.pdb
 import libtbx.load_env
 from scitbx.array_family import flex
 import mmtbx.model
-from qrefine import qr
+from qrefine import qr, refine
 
 from qrefine.fragment import fragment_extracts
 from qrefine import  cluster_restraints
 from qrefine.utils import hierarchy_utils
+from libtbx.utils import null_out
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -18,15 +19,13 @@ qr_unit_tests = os.path.join(qrefine, "tests","unit")
 def get_model(file_name):
   file_name = os.path.join(qr_unit_tests,"data_files",file_name)
   pdb_inp = iotbx.pdb.input(file_name)
-  model = hierarchy_utils.process_model_file(
-    pdb_file_name = file_name,
-    cif_objects = None,
-    crystal_symmetry=pdb_inp.crystal_symmetry())
+  model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
+  model.process(make_restraints = True)
   return model
 
 def get_restraints_manager(expansion, file_name):
   model = get_model(file_name=file_name)
-  params = qr.get_master_phil().extract()
+  params = qr.get_default_params()
   params.restraints="qm"
   params.expansion = expansion
   if(not expansion):
@@ -41,11 +40,17 @@ def get_restraints_manager(expansion, file_name):
   #params.cluster.maxnum_residues_in_cluster=6
   params.cluster.maxnum_residues_in_cluster=2
 
-  result = qr.create_restraints_manager(params=params, model=model), \
-         model.model.get_sites_cart()
+  result = refine.create_restraints_manager(params=params, model=model), \
+         model.get_sites_cart()
   return result
 
 def run():
+  """
+  Exercise expansion=False / expansion=True
+  
+  XXX TEST LIKELY FAILS (expansion=False/True). No result checks.
+  
+  """
   path = qr_unit_tests+"/data_files/"
   files = ["m2_complete_box_large.pdb", ]#"m2_complete_box_large.pdb",
            #"p212121.pdb", "p1_box_small.pdb", "p1_box_large.pdb"]

@@ -7,31 +7,26 @@ import iotbx.pdb
 import libtbx.load_env
 from scitbx.array_family import flex
 import mmtbx.model
-from qrefine import qr
+from qrefine import qr, refine
 from qrefine.fragment import fragment_extracts
 from qrefine import cluster_restraints
 from qrefine.tests.unit import run_tests
 from qrefine.utils import hierarchy_utils
+from libtbx.utils import null_out
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-def get_master_phil():
-  return mmtbx.command_line.generate_master_phil_with_inputs(
-    phil_string=master_params_str)
-
 def get_model(file_name):
   file_name = os.path.join(qr_unit_tests,"data_files",file_name)
   pdb_inp = iotbx.pdb.input(file_name)
-  model = hierarchy_utils.process_model_file(
-    pdb_file_name = file_name,
-    cif_objects = None,
-    crystal_symmetry=pdb_inp.crystal_symmetry())
+  model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
+  model.process(make_restraints = True)
   return model
 
 def get_restraints_manager(expansion, file_name, altloc_method):
   model = get_model(file_name=file_name)
-  params = get_master_phil().extract()
+  params = qr.get_default_params()
   params.restraints="cctbx"
   params.expansion = expansion
   if(not expansion):
@@ -48,11 +43,17 @@ def get_restraints_manager(expansion, file_name, altloc_method):
   #params.cluster.maxnum_residues_in_cluster=6
   params.cluster.maxnum_residues_in_cluster=999
 
-  result = qr.create_restraints_manager(params=params, model=model), \
-         model.model.get_sites_cart()
+  result = refine.create_restraints_manager(params=params, model=model), \
+         model.get_sites_cart()
   return result
 
 def run(prefix, verbose=False):
+  """
+  Exercise expansion=False / expansion=True
+  
+  XXX TEST FAILS (expansion=False / expansion=True)
+  
+  """
   for altloc_method in ["average", "subtract"]:
     path = qr_unit_tests+"/data_files/"
     files = ["gly2_1.pdb", "altlocs2.pdb", "altlocs.pdb", "gly2_2.pdb"]
@@ -83,7 +84,8 @@ def run(prefix, verbose=False):
       for a, b in zip(g1.as_double(), g2.as_double()):
         r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
         rs.append(r)
-      assert flex.max(flex.abs(rs)) < 1.e-6
+      result = flex.max(flex.abs(rs))
+      assert result < 1.e-6, result
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
