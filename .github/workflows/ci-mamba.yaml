@@ -29,7 +29,48 @@ jobs:
     - run: |
         conda info
         conda list
+        
+    - name: Install CCTBX
+      run: |
+        mkdir cctbx
+        cd cctbx
+        wget https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py
+        python ./bootstrap.py --python 39 --builder=cctbx --use-conda update
+        sed -i s/"#if PTHREAD_STACK_MIN > 0"/"#ifdef PTHREAD_STACK_MIN"/ ./modules/boost/boost/thread/pthread/thread_data.hpp
+        python bootstrap.py --python 39 --builder=cctbx --use-conda base
+        python bootstrap.py --python 39 --builder=cctbx --use-conda  --nproc 2 build
 
+    - name: Install qrefine
+      uses: actions/checkout@v3
+      with:
+        path: ./cctbx/modules/qrefine
+        
+    - name: Install restraints library
+      run: |
+        cd ./cctbx/modules/
+        mkdir chem_data
+        cd chem_data
+        svn --quiet --non-interactive --trust-server-cert co https://github.com/phenix-project/geostd/trunk geostd
+        svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
+    - name: Install dependencies
+      run: |
+        source cctbx/build/setpaths.sh
+        cctbx.python -m pip install ase pymongo
+        libtbx.configure qrefine
+    - name: smoke test
+      run: |
+        source cctbx/build/setpaths.sh
+        qr.refine --help
+    - name: qr.test
+      run: |
+        source cctbx/build/setpaths.sh
+        qr.test > qr_test.txt
+    - name: Archive qr test output
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: qr-test-output
+        path: qr_test.txt
 
 
 
