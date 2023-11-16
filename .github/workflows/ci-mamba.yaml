@@ -51,15 +51,16 @@ jobs:
          cd reduce 
          make
         
-     
-  
-    - name: checkout code
-      uses: actions/checkout@v3
-      with: 
-        path: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
-
+    - name: copy qreinfe code
+      run: | 
+       cd 
+       cp -r /home/runner/qrefine/qrfine/ /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
+       ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
+       
     - run: rm /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
 
+    - name: activate enviroment
+      run: micromamba activate qrefine-ci-mamba
     
     - name: smoke test
       run: |
