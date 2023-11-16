@@ -268,6 +268,9 @@ def run(prefix):
   """
   Exercise gradients match: using clustering vs not using clustering.
   Altlocs.
+  
+  XXX TEST FAILS
+  
   """
   for i, pdb_str_in in enumerate([pdb_str_in1, pdb_str_in2]):
     if(i==0): print("Altlocs present", "-"*30)
