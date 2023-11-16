@@ -82,7 +82,7 @@ jobs:
 
         # Pull in latest code from mmtbx:
         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
-        wget https://raw.githubusercontent.com/cctbx/cctbx_project/master/mmtbx
+        wget https://raw.githubusercontent.com/cctbx/cctbx_project/tree/master/mmtbx
     
         libtbx.configure mmtbx
         libtbx.configure probe 
