@@ -59,8 +59,19 @@ jobs:
        
     - run: rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
 
-    - name: activate enviroment
-      run: micromamba activate qrefine-ci-mamba
+    #- name: activate enviroment
+    #  run: micromamba activate qrefine-ci-mamba
+
+    - run: |
+        cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/
+        RUN mkdir build 
+        cd build 
+        mkdir -p probe/exe/ && cp ../modules/probe/probe probe/exe/. 
+        libtbx.configure probe 
+        libtbx.configure qrefine 
+        libtbx.configure reduce 
+        mmtbx.rebuild_rotarama_cache
+        mmtbx.rebuild_cablam_cache
     
     - name: smoke test
       run: |
