@@ -23,7 +23,7 @@ from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
 from mmtbx.ligands.hierarchy_utils import is_hierarchy_altloc_consistent
 from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_group
 from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
-from mmtbx.ligands.hierarchy_utils import generate_protein_fragments
+from mmtbx.ligands.ready_set_utils import generate_protein_fragments
 
 def d_squared(xyz1, xyz2):
   d2 = 0
@@ -652,8 +652,6 @@ def complete_pdb_hierarchy(hierarchy,
                            debug=False,
                           ):
   """Complete PDB hierarchy with hydrogen atoms as needed
-
-       This needs to move to Phenix with better functionality
 
   Args:
       hierarchy (hierarchy): Starting model
