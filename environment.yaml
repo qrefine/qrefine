@@ -1,11 +1,10 @@
 name: qrefine-ci-mamba
 channels:
+  - conda-forge
   - pytorch
   - nvidia
-  - conda-forge
-  - cctbx-nightly
 dependencies:
-  - cctbx
+  - cctbx-nightly::cctbx
   - pytorch=2.1
   - pytorch-cuda
   - cudatoolkit
