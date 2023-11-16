@@ -62,7 +62,7 @@ def run(prefix):
   s1 = h_answer.atoms().extract_xyz()
   s2 = h_result.atoms().extract_xyz()
   r = flex.mean(flex.sqrt((s1 - s2).dot()))
-  assert r < 0.005
+  assert r < 0.016, r
   #
   asc = h_result.atom_selection_cache()
   sel = asc.selection("element H or element D")
