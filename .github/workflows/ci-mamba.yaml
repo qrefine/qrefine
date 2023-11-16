@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  MOPAC_COMMAND: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
+  MOPAC_DIR: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
   XTB_HOME: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/xtb
 
 permissions:
