@@ -52,6 +52,9 @@ def get_model():
 def run(prefix):
   """
   Exercise combined energy and gradients from cluster qm.
+  
+  XXX TEST FAILS, BOTH: ["cctbx","qm"]. Is this related to tst_02 failing???? XXX
+  
   """
   for restraints in ["cctbx","qm"]:
     if 0:
@@ -95,9 +98,11 @@ def run(prefix):
       result.append(gradients.deep_copy())
     #
     diff = flex.abs(result[0] - result[1])
+    for d in diff:
+      print(d)
     max_diff = flex.max(diff)
-    #print "  max(diff_grad):", max_diff
-    #assert max_diff < 1.e-9
+    print("  max(diff_grad):", max_diff)
+    assert max_diff < 1.e-9
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
