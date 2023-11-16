@@ -19,9 +19,6 @@ jobs:
 
     steps:
 
-    - name: checkout code
-      uses: actions/checkout@v3
-
     - uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: environment.yaml      
@@ -30,39 +27,38 @@ jobs:
     - run: |
          pwd
          cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
-         pwd
-         ls 
-        
-    - name: Install CCTBX
-      run: |
-        mkdir cctbx
-        cd cctbx
-        wget https://raw.githubusercontent.com/cctbx/cctbx_project/master/libtbx/auto_build/bootstrap.py
-        python ./bootstrap.py --python 39 --builder=cctbx --use-conda update
-        sed -i s/"#if PTHREAD_STACK_MIN > 0"/"#ifdef PTHREAD_STACK_MIN"/ ./modules/boost/boost/thread/pthread/thread_data.hpp
-        python bootstrap.py --python 39 --builder=cctbx --use-conda base
-        python bootstrap.py --python 39 --builder=cctbx --use-conda  --nproc 2 build
-
-    - name: Install qrefine
+         mkdir chem_data 
+         cd chem_data 
+         svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd 
+         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib 
+         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
+         rm -rf rotarama_data/.svn
+         svn --quiet --non-interactive --trust-server-cert --force co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data 
+         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data 
+         cd ..
+         mkdir modules
+         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules
+         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+         cd probe 
+         make 
+         cp hybrid_36_c.c /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/iotbx/pdb/hybrid_36_c.c
+         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+         cd reduce 
+         make
+         cp  -r /home/runner/work/qrefine/qrefine/        
+     
+  
+    - name: checkout code
       uses: actions/checkout@v3
-      with:
-        path: ./cctbx/modules/qrefine
-        
-    - name: Install restraints library
-      run: |
-        cd ./cctbx/modules/
-        mkdir chem_data
-        cd chem_data
-        svn --quiet --non-interactive --trust-server-cert co https://github.com/phenix-project/geostd/trunk geostd
-        svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
-    - name: Install dependencies
-      run: |
-        source cctbx/build/setpaths.sh
-        cctbx.python -m pip install ase pymongo
-        libtbx.configure qrefine
+      with: 
+        path: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
+
+    - run: rm /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
+
+    
     - name: smoke test
       run: |
-        source cctbx/build/setpaths.sh
+        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/cctbx/build/setpaths.sh
         qr.refine --help
     - name: qr.test
       run: |
