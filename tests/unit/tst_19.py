@@ -18,12 +18,10 @@ def run(prefix):
   -- pdbs with altlocs
       -- using subtract vs using average
   """
-  import multiprocessing
-  # nproc = str(multiprocessing.cpu_count())
   nproc = 1
   for data_file_prefix in ["h_altconf_complete", "h_altconf_2_complete"]:
     for maxnum in ["15"]:
-      common_args = ["stpmax=0.5", "restraints=cctbx", "mode=refine", "parallel.nproc="+nproc, "clustering=true"] +\
+      common_args = ["stpmax=0.5", "restraints=cctbx", "mode=refine", "parallel.nproc=%s"%str(nproc), "clustering=true"] +\
         ["gradient_only=true", "maxnum_residues_in_cluster="+maxnum]
       r = run_tests.run_cmd(prefix,
         args     = common_args+["altloc_method=subtract", "output_file_name_prefix=subtract-"+data_file_prefix],
