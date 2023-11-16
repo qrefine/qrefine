@@ -29,7 +29,11 @@ jobs:
 
     - run: |
          pwd
+         cd /home/runner/micromamba/
+         pwd
          ls 
+         cd envs/
+         ls
         
     - name: Install CCTBX
       run: |
