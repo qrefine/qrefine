@@ -1,10 +1,6 @@
 name: Publish image to public repository on dockerhub
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 env:
