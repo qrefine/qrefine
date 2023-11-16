@@ -18,16 +18,18 @@ def run(prefix):
   Exercise gradients match:
     - small vs large box:
       -- using clustering vs not using clustering.
+
+  XXX TEST FAILS with "cctbx" option. This is indicative of some serious problem!
+
   """
   for restraints in ["cctbx","qm"]:
   #for restraints in ["cctbx",]:
   # XXX qm option is not supposed to work fulfull the test with 2ona_box_S
   # XXX qm option is currently suspected to be broken for 2ona_box_L
     for data_file_prefix in ["2ona_box_L", "2ona_box_S"]:
-      if(restraints is "qm" and data_file_prefix is "2ona_box_S"): continue
+      if(restraints == "qm" and data_file_prefix == "2ona_box_S"): continue
       common_args = ["restraints=%s"%restraints,
                      "mode=opt",
-                     #"fast_interaction=true", # this works!
                      "parallel.nproc=1",
                      "quantum.engine_name=mopac",
                      "two_buffers=true"]
@@ -46,7 +48,7 @@ def run(prefix):
       #
       g1 = easy_pickle.load("cluster_false.pkl")
       g2 = easy_pickle.load("cluster_true.pkl")
-      if(restraints is "cctbx"):
+      if(restraints == "cctbx"):
         ##tight comparison
         ## clustering cctbx should match the atomic gradients
         ## at x,y,z directions
@@ -54,7 +56,7 @@ def run(prefix):
         g2 = g2.as_double()
         assert g1.size() == g2.size()
         diff = g1-g2
-        if(0):
+        if(1):
           for i, diff_i in enumerate(diff):
             print(i+1, diff_i, g1[i], g2[i])
           print()
