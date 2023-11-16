@@ -79,7 +79,6 @@ jobs:
 
         which xtb
         which mopac
-        which xtb-python
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
