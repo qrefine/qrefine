@@ -81,11 +81,11 @@ jobs:
     
     - name: smoke test
       run: |
-        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/cctbx/build/setpaths.sh
+        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
         qr.refine --help
     - name: qr.test
       run: |
-        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/cctbx/build/setpaths.sh
+        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
         qr.test > qr_test.txt
     - name: Archive qr test output
       if: always()
