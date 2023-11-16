@@ -18,6 +18,7 @@ import mmtbx.restraints
 from mmtbx import monomer_library
 import libtbx.load_env
 from qrefine.tests.unit import run_tests
+from qrefine import restraints as qr_restraints
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
 ener_lib    = mmtbx.monomer_library.server.ener_lib()
@@ -26,29 +27,8 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
 def get_grm(ph, cs):
-  # XXX Nth copy-paste
-  params = mmtbx.monomer_library.pdb_interpretation.master_params.extract()
-  params.use_neutron_distances = True
-  params.restraints_library.cdl = False
-  params.sort_atoms = False
-  processed_pdb_file = mmtbx.monomer_library.pdb_interpretation.process(
-    mon_lib_srv              = mon_lib_srv,
-    ener_lib                 = ener_lib,
-    params                   = params,
-    crystal_symmetry         = cs,
-    pdb_inp                  = ph.as_pdb_input(),
-    strict_conflict_handling = False,
-    force_symmetry           = True,
-    log                      = null_out())
-  xrs = processed_pdb_file.xray_structure()
-  sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
-  has_hd = "H" in sctr_keys or "D" in sctr_keys
-  geometry = processed_pdb_file.geometry_restraints_manager(
-    show_energies                = False,
-    assume_hydrogens_all_missing = not has_hd,
-    plain_pairs_radius           = 5.0)
-  return mmtbx.restraints.manager(
-     geometry = geometry, normalization = False)
+  return qr_restraints.get_cctbx_gradients(
+    ph=ph, cs=cs).model.get_restraints_manager()
 
 def get_grads(sel_f_str, sel_buffer_str, file_name):
   pdb_inp = iotbx.pdb.input(file_name=file_name)
