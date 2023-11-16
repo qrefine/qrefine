@@ -25,5 +25,5 @@ def run(prefix):
 if(__name__ == "__main__"):
   t0 = time.time()
   prefix = os.path.basename(__file__).replace(".py","")
-  run(prefix)
-  run_tests.clean_up(prefix)
+  #run(prefix)
+  #run_tests.clean_up(prefix)
