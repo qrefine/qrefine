@@ -69,7 +69,7 @@ jobs:
         cd build 
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
-       
+        micromamba activate qrefine-ci-mamba
       
         /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure probe 
         /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure qrefine 
