@@ -8,6 +8,9 @@ import iotbx.pdb
 def run(prefix):
   """
   Exercise altlocs.
+  
+  XXX Very weak test. Just makes sure all runs. No results checking!
+  
   """
   run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example(
