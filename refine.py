@@ -52,10 +52,6 @@ from libtbx import Auto
 from ase.io import read as ase_io_read
 from cctbx import maptbx
 
-def get_master_phil():
-  return mmtbx.command_line.generate_master_phil_with_inputs(
-    phil_string=master_params_str)
-
 def show_cc(map_data, xray_structure, log=None):
   import mmtbx.maps.mtriage
   from mmtbx.maps.correlation import five_cc
