@@ -70,7 +70,7 @@ jobs:
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
        
-        #source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/cctbx/build/setpaths.sh
+        ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/cctbx/
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
