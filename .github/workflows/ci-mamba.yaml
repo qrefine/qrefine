@@ -29,7 +29,7 @@ jobs:
 
     - run: |
          pwd
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba
+         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
          pwd
          ls 
         
