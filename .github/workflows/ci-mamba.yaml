@@ -57,7 +57,7 @@ jobs:
        cp -r /home/runner/work/qrefine/qrefine /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
        ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
        
-    - run: rm /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
+    - run: rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
 
     - name: activate enviroment
       run: micromamba activate qrefine-ci-mamba
