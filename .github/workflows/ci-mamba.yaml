@@ -1,0 +1,36 @@
+# Basic Mamba CI pipeline on top of CCTBX
+
+name: CI pipeline on Mamba
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: checkout code
+      uses: actions/checkout@v3
+
+    - uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml      
+        cache-environment: true
+    - run: |
+        mamba info
+        mamba list
+
+
+
+
+    
