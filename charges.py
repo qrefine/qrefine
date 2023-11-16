@@ -12,6 +12,9 @@ from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
+from phenix.ligands.hierarchy_utils import attempt_to_squash_alt_loc
+from phenix.ligands.hierarchy_utils import merge_atoms_at_end_to_residues
+
 default_ion_charges = {
   "PT" : 2,
   "CL" : -1,
@@ -496,7 +499,7 @@ class charges_class:
     if inter_residue_bonds is None: inter_residue_bonds=[]
     if assert_no_alt_loc:
       # see if we can squash into a single conf.
-      hierarchy = hierarchy_utils.attempt_to_squash_alt_loc(hierarchy)
+      hierarchy = attempt_to_squash_alt_loc(hierarchy)
       if hierarchy is None: raise Sorry('too many alt locs to squash')
     residue_types = []
     for residue in hierarchy_utils.generate_residue_groups(

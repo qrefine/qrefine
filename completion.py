@@ -20,6 +20,10 @@ from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_remove_cys_hg_to_atom_group
 from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
+from mmtbx.ligands.hierarchy_utils import is_hierarchy_altloc_consistent
+from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_group
+from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
+from phenix.ligands.hierarchy_utils import generate_protein_fragments
 
 def d_squared(xyz1, xyz2):
   d2 = 0
@@ -68,252 +72,15 @@ def construct_xyz(ba, bv,
     rh_list.append(rh)
   return rh_list
 
-def is_perdeuterated(ag):
-  protons = {}
-  for atom in ag.atoms():
-    if atom.element_is_hydrogen():
-      protons.setdefault(atom.element, 0)
-      protons[atom.element]+=1
-  if len(protons) in [0,2]: return False
-  if len(protons)==1:
-    if 'D' in protons:
-      return True
-    else:
-      return False
-  assert 0
-
-def get_proton_info(ag):
-  proton_name=proton_element='H'
-  if is_perdeuterated(ag):
-    proton_name=proton_element='D'
-  return proton_element, proton_name
-
 def get_atoms_by_names(ag, l=None, all_or_nothing=True):
   assert l
+  assert 0
   rc = []
   for name in l:
     atom = ag.get_atom(name)
     rc.append(atom)
   if len(l)!=len(filter(None, rc)): return None
   return rc
-
-def add_n_terminal_hydrogens_to_atom_group(ag,
-                                           use_capping_hydrogens=False,
-                                           append_to_end_of_model=False,
-                                           retain_original_hydrogens=True,
-                                           n_ca_c=None,
-                                          ):
-  rc=[]
-  if n_ca_c is not None:
-    n, ca, c = n_ca_c
-  else:
-    n = ag.get_atom("N")
-    if n is None: return 'no N'
-    ca = ag.get_atom("CA")
-    if ca is None: return 'no CA'
-    c = ag.get_atom("C")
-    if c is None: return 'no C'
-  proton_element, proton_name = get_proton_info(ag)
-  atom = ag.get_atom(proton_element) # just so happens that the atom is named H/D
-  dihedral=120.
-  if atom:
-    dihedral = dihedral_angle(sites=[atom.xyz,
-                                     n.xyz,
-                                     ca.xyz,
-                                     c.xyz,
-                                   ],
-                              deg=True)
-  if retain_original_hydrogens: pass
-  else:
-    if ag.get_atom(proton_name): # maybe needs to be smarter or actually work
-      ag.remove_atom(ag.get_atom(proton_name))
-  #if use_capping_hydrogens and 0:
-  #  for i, atom in enumerate(ag.atoms()):
-  #    if atom.name == ' H3 ':
-  #      ag.remove_atom(i)
-  #      break
-  # add H1
-  rh3 = construct_xyz(n, 1.0,
-                      ca, 109.5,
-                      c, dihedral,
-                     )
-  # this could be smarter
-  if proton_element=='H':
-    possible = ['H', 'H1', 'H2', 'H3', 'HT1', 'HT2']
-  elif proton_element=='D':
-    possible = ['D', 'D1', 'D2', 'D3'] #, 'HT1', 'HT2']
-  h_count = 0
-  for h in possible:
-    if ag.get_atom(h): h_count+=1
-  number_of_hydrogens=3
-  if use_capping_hydrogens:
-    number_of_hydrogens-=1
-    #if ag.atoms()[0].parent().resname=='PRO':
-    #  number_of_hydrogens=-1
-    #  # should name the hydrogens correctly
-  if h_count>=number_of_hydrogens: return []
-  for i in range(0, number_of_hydrogens):
-    name = " %s%d " % (proton_element, i+1)
-    if retain_original_hydrogens:
-      if i==0 and ag.get_atom(proton_name): continue
-    if ag.get_atom(name.strip()): continue
-    if ag.resname=='PRO':
-      if i==0:
-        continue
-    atom = iotbx.pdb.hierarchy.atom()
-    atom.name = name
-    atom.element = proton_element
-    atom.xyz = rh3[i]
-    atom.occ = n.occ
-    atom.b = n.b
-    atom.segid = ' '*4
-    if append_to_end_of_model and i+1==number_of_hydrogens:
-      rg = _add_atom_to_chain(atom,
-                              ag,
-                              icode=n.parent().parent().icode)
-      rc.append(rg)
-    else:
-      ag.append_atom(atom)
-  return rc
-
-def add_n_terminal_hydrogens_to_residue_group(residue_group,
-                                              use_capping_hydrogens=False,
-                                              append_to_end_of_model=False,
-                                             ):
-  rc=[]
-  for ag, (n, ca, c) in generate_atom_group_atom_names(residue_group,
-                                                       ['N', 'CA', 'C'],
-                                                       ):
-    tmp = add_n_terminal_hydrogens_to_atom_group(
-      ag,
-      use_capping_hydrogens=use_capping_hydrogens,
-      append_to_end_of_model=append_to_end_of_model,
-      n_ca_c=[n,ca,c],
-    )
-    assert type(tmp)!=type(''), 'not string "%s" %s' % (tmp, type(tmp))
-    rc += tmp
-  return rc
-
-def add_n_terminal_hydrogens(hierarchy,
-                             #residue_selection=None,
-                             add_to_chain_breaks=False,
-                            ):
-  assert 0
-  # add N terminal hydrogens because Reduce only does it to resseq=1
-  # needs to be alt.loc. aware for non-quantum-refine
-  for chain_i, chain in enumerate(hierarchy.chains()):
-    for res_i, residue_group in enumerate(chain.residue_groups()):
-      if len(residue_group.atom_groups())>1: continue
-      atom_group = residue_group.atom_groups()[0]
-      if get_class(atom_group.resname) not in ["common_amino_acid",
-                                               "modified_amino_acid",
-                                             ]:
-        continue
-      if res_i==0: # need better switch
-        add_n_terminal_hydrogens_to_atom_group(atom_group)
-  hierarchy.atoms_reset_serial()
-  hierarchy.atoms().reset_i_seq()
-  return hierarchy
-
-def add_c_terminal_oxygens_to_atom_group(ag,
-                                         use_capping_hydrogens=False,
-                                         append_to_end_of_model=False,
-                                         c_ca_n=None,
-                                        ):
-  #
-  # do we need ANISOU
-  #
-  proton_element, proton_name = get_proton_info(ag)
-  rc = []
-  atom_name=' OXT'
-  atom_element = 'O'
-  bond_length=1.231
-  if use_capping_hydrogens:
-    if ag.get_atom(atom_name.strip()): return []
-    atom_name=" %sC " % proton_element
-    atom_element=proton_element
-    bond_length=1.
-  if ag.get_atom(atom_name.strip()): return []
-  if c_ca_n is not None:
-    c, ca, n = c_ca_n
-  else:
-    c = ag.get_atom("C")
-    if c is None: return
-    ca = ag.get_atom("CA")
-    if ca is None: return
-    n = ag.get_atom("N")
-    if n is None: return
-  atom = ag.get_atom('O')
-  dihedral = dihedral_angle(sites=[atom.xyz,
-                                   c.xyz,
-                                   ca.xyz,
-                                   n.xyz,
-                                 ],
-                            deg=True)
-  ro2 = construct_xyz(c, bond_length,
-                      ca, 120.,
-                      n, dihedral,
-                      period=2,
-                     )
-  oxys = [' O  ', atom_name]
-  for i in range(0,2):
-    name = oxys[i]
-    atom = ag.get_atom(name.strip())
-    if atom:
-      pass #atom.xyz = ro2[i]
-    else:
-      atom = iotbx.pdb.hierarchy.atom()
-      atom.name = name
-      atom.element = atom_element
-      atom.occ = c.occ
-      atom.b = c.b
-      atom.segid = ' '*4
-      atom.xyz = ro2[i]
-      if append_to_end_of_model:
-        chain = _add_atom_to_chain(atom,
-                                   ag,
-                                   icode=c.parent().parent().icode)
-        rc.append(chain)
-      else:
-        # add the atom to the hierarchy
-        ag.append_atom(atom)
-  return rc
-
-def add_c_terminal_oxygens_to_residue_group(residue_group,
-                                            use_capping_hydrogens=False,
-                                            append_to_end_of_model=False,
-                                          ):
-  rc=[]
-  for ag, (c, ca, n) in generate_atom_group_atom_names(residue_group,
-                                                       ['C', 'CA', 'N'],
-                                                       ):
-    tmp = add_c_terminal_oxygens_to_atom_group(
-      ag,
-      use_capping_hydrogens=use_capping_hydrogens,
-      append_to_end_of_model=append_to_end_of_model,
-      c_ca_n = [c, ca, n],
-    )
-    rc += tmp
-  return rc
-
-def add_c_terminal_oxygens(hierarchy,
-                          ):
-  assert 0
-  for chain_i, chain in enumerate(hierarchy.chains()):
-    for res_i, residue_group in enumerate(chain.residue_groups()):
-      if len(residue_group.atom_groups())>1: continue
-      atom_group = residue_group.atom_groups()[0]
-      if get_class(atom_group.resname) not in ["common_amino_acid",
-                                               "modified_amino_acid",
-                                             ]:
-        continue
-      if capping_hydrogens:
-        assert 0
-      if res_i==len(chain.residue_groups())-1: # need better switch
-        add_c_terminal_oxygens_to_atom_group(atom_group)
-  hierarchy.atoms_reset_serial()
-  hierarchy.atoms().reset_i_seq()
-  return hierarchy
 
 def _add_hydrogens_to_atom_group_using_bad(ag,
                                            atom_name,
@@ -425,7 +192,7 @@ def iterate_over_threes(hierarchy,
     return atom.parent().parent()
   ###
   additional_hydrogens=hierarchy_utils.smart_add_atoms()
-  for three in hierarchy_utils.generate_protein_fragments(
+  for three in generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,
     backbone_only=False,
@@ -444,6 +211,7 @@ def iterate_over_threes(hierarchy,
           append_to_end_of_model=append_to_end_of_model,
           )
         if rc:
+          print('rc1',rc)
           additional_hydrogens.append(rc)
     else:
       for i in range(len(three)):
@@ -484,6 +252,7 @@ def iterate_over_threes(hierarchy,
         use_capping_hydrogens=use_capping_hydrogens,
         append_to_end_of_model=append_to_end_of_model,
       )
+      print(rc)
       if rc: additional_hydrogens.append(rc)
       #hierarchy.reset_i_seq_if_necessary()
     else:
@@ -704,6 +473,7 @@ def _add_atoms_from_residue_groups_to_end_of_hierarchy(hierarchy, rgs):
     model.append_chain(chain)
 
 def remove_acid_side_chain_hydrogens(hierarchy):
+  from mmtbx.ligands.ready_set_utils import get_proton_info
   proton_element, proton_name = get_proton_info(hierarchy)
   removes = {"GLU" : "%sE2" % proton_element,
              "ASP" : "%sD2" % proton_element,
@@ -731,7 +501,7 @@ def _eta_peptide_h(hierarchy,
       break
     return atom.parent().parent()
   ###
-  for three in hierarchy_utils.generate_protein_fragments(
+  for three in generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,
     backbone_only=False,
@@ -804,6 +574,7 @@ def _h_h2_on_N(hierarchy,
                geometry_restraints_manager,
                verbose=False,
                ):
+  from mmtbx.ligands.ready_set_utils import is_perdeuterated
   atoms = hierarchy.atoms()
   ###
   def get_residue_group(residue):
@@ -820,7 +591,7 @@ def _h_h2_on_N(hierarchy,
     return h
   ###
   n_done = []
-  for three in hierarchy_utils.generate_protein_fragments(
+  for three in generate_protein_fragments(
     hierarchy,
     geometry_restraints_manager,
     backbone_only=False,
@@ -901,9 +672,15 @@ def complete_pdb_hierarchy(hierarchy,
   Raises:
       Sorry: Description
   """
+  #
+  # some validations
+  #
   for ag in hierarchy.atom_groups():
     if get_class(ag.resname) in ['common_rna_dna']:
       raise Sorry('Nucleotides are not currently supported. e.g. %s' % ag.resname)
+  if not is_hierarchy_altloc_consistent(hierarchy):
+    is_hierarchy_altloc_consistent(hierarchy, verbose=True)
+    raise Sorry('Altloc structure of model not consistent. Make each altloc the same depth or remove completely.')
   from mmtbx.building import extend_sidechains
   original_hierarchy = None
   params = hierarchy_utils.get_pdb_interpretation_params()
