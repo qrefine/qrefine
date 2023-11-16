@@ -36,6 +36,9 @@ def run(prefix):
   """
   Exercise standard (cctbx-based restraints) optimization.
   Assert mode=opt is approximately equivalent to data_weight=0.
+  
+  XXX VERY SLOW XXX
+  
   """
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   # Run optimization
