@@ -70,12 +70,12 @@ jobs:
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
        
-        ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/cctbx/
-        libtbx.configure probe 
-        libtbx.configure qrefine 
-        libtbx.configure reduce 
-        mmtbx.rebuild_rotarama_cache
-        mmtbx.rebuild_cablam_cache
+      
+        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure probe 
+        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure qrefine 
+        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/libtbx.configure reduce 
+        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mmtbx.rebuild_rotarama_cache
+        /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mmtbx.rebuild_cablam_cache
     
     - name: smoke test
       run: |
