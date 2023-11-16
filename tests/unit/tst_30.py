@@ -15,7 +15,7 @@ def run(prefix):
   """
   Exercise standard (cctbx-based restraints) optimization (no data required).
 
-  XXX VERY SLOW
+  XXX VERY SLOW (360 seconds on PVA's laptop)
 
   """
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
