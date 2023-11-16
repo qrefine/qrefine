@@ -148,7 +148,5 @@ if(__name__ == "__main__"):
   If this test hangs then MOPAC needs to be updated. Run MOPAC command for 
   update instructions.
   """
-  disable = False
-  # if(os.environ.get("MOPAC_COMMAND") is None): disable = True
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=disable)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
