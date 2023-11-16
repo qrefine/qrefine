@@ -249,6 +249,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         params.output_file_name_prefix = prefix
       if(os.path.exists(params.output_folder_name) is False):
         os.mkdir(params.output_folder_name)
+      params.output_file_name_prefix = os.path.basename(params.output_file_name_prefix)
       params.rst_file = os.path.abspath(params.output_folder_name + "/" + \
         params.output_file_name_prefix + ".rst.pickle")
     if os.path.isfile(params.rst_file):
