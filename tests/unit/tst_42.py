@@ -285,6 +285,9 @@ def run(prefix):
   Exercise gradients match: using clustering vs not using clustering.
   This is the case of several CYS coordinating ZN. Gradients match if two
   buffers are used, and they don't if one buffer is used.
+  
+  XXX EXTREMELY SLOW TEST!!! Perhaps the slowest test!
+  
   """
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
