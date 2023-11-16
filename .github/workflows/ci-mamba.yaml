@@ -27,8 +27,8 @@ jobs:
         environment-file: environment.yaml      
         cache-environment: true
     - run: |
-        mamba info
-        mamba list
+        conda info
+        conda list
 
 
 
