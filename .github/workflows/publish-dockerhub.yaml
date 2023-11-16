@@ -8,9 +8,7 @@ env:
   REPOSITORY: 'cctbx-ani-qr'
   
 jobs:
-
   push:
-
     runs-on: ubuntu-latest
     steps:
 
