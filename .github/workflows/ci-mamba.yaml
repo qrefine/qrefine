@@ -50,7 +50,7 @@ jobs:
          svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
          cd reduce 
          make
-         cp  -r /home/runner/work/qrefine/qrefine/        
+        
      
   
     - name: checkout code
