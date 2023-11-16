@@ -11,7 +11,7 @@ on:
 
 env:
   MOPAC_COMMAND: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
-  XTB_HOME: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/xtb
+  XTBHOME: /home/runner/micromamba/envs/qrefine-ci-mamba
 
 permissions:
   contents: read
