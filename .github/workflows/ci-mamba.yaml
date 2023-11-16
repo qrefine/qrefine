@@ -28,6 +28,7 @@ jobs:
       with:
         environment-file: environment.yaml      
         cache-environment: true
+        activate-environment: qrefine-ci-mamba
 
     - run: |
          pwd
@@ -68,6 +69,7 @@ jobs:
         cd build 
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
+        ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/cctbx/build/
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/cctbx/build/setpaths.sh
         libtbx.configure probe 
         libtbx.configure qrefine 
