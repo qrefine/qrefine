@@ -19,6 +19,9 @@ jobs:
 
     steps:
 
+    - name: checkout code
+      uses: actions/checkout@v3
+
     - uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: anaconda-client-env
