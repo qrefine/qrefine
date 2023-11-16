@@ -29,11 +29,9 @@ jobs:
 
     - run: |
          pwd
-         cd /home/runner/micromamba/
+         cd /home/runner/micromamba/envs/qrefine-ci-mamba
          pwd
          ls 
-         cd envs/
-         ls
         
     - name: Install CCTBX
       run: |
