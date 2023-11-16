@@ -31,6 +31,12 @@ TER
 '''
 
 def run(prefix):
+  """
+  Exercise qr.charges
+
+  XXX TEST FAILS (qr.charges). Nigel?
+
+  """
   fn='test_zn_his_charge.pdb'
   f=open(fn, 'w')
   f.write(pdb_lines)

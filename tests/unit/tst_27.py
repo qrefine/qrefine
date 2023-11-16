@@ -559,6 +559,9 @@ TER
 '''
 
 def run(prefix):
+  """
+  Exercise qr.finalise + capping
+  """
   fn='test_remove_hg_from_zn_cys.pdb'
   f=open(fn, 'w')
   f.write(pdb_lines)

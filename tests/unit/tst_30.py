@@ -14,6 +14,9 @@ from libtbx.test_utils import approx_equal
 def run(prefix):
   """
   Exercise standard (cctbx-based restraints) optimization (no data required).
+
+  XXX VERY SLOW
+
   """
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   run_tests.run_cmd(
@@ -23,8 +26,8 @@ def run(prefix):
   # Check results
   pdb_inp = iotbx.pdb.input(
     file_name = os.path.join(prefix,"m00_poor_refined.pdb"))
-  model_1 = mmtbx.model.manager(model_input = pdb_inp, build_grm=True,
-    log=null_out())
+  model_1 = mmtbx.model.manager(model_input = pdb_inp, log=null_out())
+  model_1.process(make_restraints=True)
   s1 = model_1.geometry_statistics().result()
   assert s1.bond.mean < 0.005
   ##########################
@@ -35,8 +38,8 @@ def run(prefix):
   # Check results
   pdb_inp = iotbx.pdb.input(
     file_name = os.path.join(prefix,"m00_poor_refined.pdb"))
-  model_2 = mmtbx.model.manager(model_input = pdb_inp, build_grm=True,
-    log=null_out())
+  model_2 = mmtbx.model.manager(model_input = pdb_inp, log=null_out())
+  model_2.process(make_restraints=True)
   s2 = model_2.geometry_statistics().result()
   assert s2.bond.mean < 0.005
   ###########################

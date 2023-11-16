@@ -34,6 +34,12 @@ ATOM   1348  HG  CYSSS  33      53.249  93.248  95.132  0.00102.06           H
 '''
 
 def run(prefix):
+  """
+  Exercise qr.finalise + capping
+
+  XXX TEST FAILS (qr.finalise + capping). Nigel?
+
+  """
   fn='test_cys_cys_sym.pdb'
   f=open(fn, 'w')
   f.write(pdb_lines)

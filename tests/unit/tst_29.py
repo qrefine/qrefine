@@ -58,6 +58,12 @@ ATOM     89  HG3 GLU A 336       5.069  26.321  14.303  0.00 56.63           H
 '''
 
 def run(prefix):
+  """
+  Exercise qr.charges
+
+  XXX TEST FAILS (qr.charges). Nigel?
+
+  """
   fn='test_one_alt_loc.pdb'
   f=open(fn, 'w')
   f.write(pdb_lines)

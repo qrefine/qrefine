@@ -18,6 +18,9 @@ qr_unit_tests = os.path.join(qrefine, "tests","unit")
 def run(prefix):
   """
   Exercise structure completion by finalise.py
+  
+  XXX TEST DISABLED!!! FAILS IF ENABLED.
+  
   """
   pdb_dir_cluster=os.path.join(qr_unit_tests,"babel_pdbs","clusters")
   expected_list_cluster = []
