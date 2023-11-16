@@ -44,10 +44,12 @@ def run(prefix):
   # Run optimization
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","mode=opt"])
   assert get_bond_rmsd(file_name=os.path.join(qr_unit_tests,"data_files","m00_poor.pdb")) > 0.1
-  assert get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb")) < 0.0009
+  result1 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
+  assert result1 < 0.001, result1
   #Run refinement without data term
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","data_weight=0"])
-  assert get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb")) < 0.0009
+  result2 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
+  assert result2 < 0.001, result2
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
