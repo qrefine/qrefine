@@ -19,16 +19,15 @@ jobs:
 
     steps:
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: anaconda-client-env
-          environment-file: environment.yml
-          auto-activate-base: false
-      - run: |
-          conda info
-          conda list
-    
-
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: anaconda-client-env
+        environment-file: environment.yml
+        auto-activate-base: false
+   
+    - run: |
+        conda info
+        conda list
     
     - name: Install CCTBX
       run: |
