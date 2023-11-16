@@ -269,7 +269,8 @@ def run(prefix):
   Exercise gradients match: using clustering vs not using clustering.
   Altlocs.
   
-  XXX TEST FAILS
+  XXX TEST FAILS DUE TO MOPAC ERROR
+  XXX Same test with xtb (properly set) is OK
   
   """
   for i, pdb_str_in in enumerate([pdb_str_in1, pdb_str_in2]):
