@@ -165,7 +165,7 @@ def get_cctbx_gradients(ph, cs):
       crystal_symmetry          = crystal_symmetry,
       restraint_objects         = cif_objects,
       log                       = null_out())
-    model.process(make_restraints=True, grm_normalization=True,
+    model.process(make_restraints=True, grm_normalization=False,
       pdb_interpretation_params = params,)
     return model
   model = process_model_file(ph=ph, crystal_symmetry=cs)

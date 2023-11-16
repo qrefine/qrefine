@@ -21,10 +21,6 @@ qr_unit_tests = os.path.join(qrefine, "tests","unit")
 def run(prefix):
   """
   CCTBX gradients in presence of altlocs
-  
-  XXX TEST FAILS. CRITICAL TO FIX. The test exercises the fundamental logic of
-  XXX handling gradients in presence of alternative conformations.
-  
   """
   for file_name in ["gly2_1.pdb", "gly2_2.pdb", "h_altconf_complete.pdb",
                     "h_altconf_2_complete.pdb", "altlocs2.pdb", "altlocs.pdb"]:
