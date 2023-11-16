@@ -9,6 +9,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  MOPAC_COMMAND: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
+
 permissions:
   contents: read
 
