@@ -18,6 +18,9 @@ def run(prefix):
   -- pdbs with altlocs
       -- using clustering with less clusters vs not using clustering.
       -- using clustering with more clusters vs not using clustering.
+
+  XXX TEST FAILS. SOMETHING IS FUNDAMENTALLY WRONG WITH CLUSTERING?
+
   """
   import multiprocessing
   nproc = str(multiprocessing.cpu_count())
@@ -26,8 +29,8 @@ def run(prefix):
     mtz_name = os.path.join(qr_unit_tests_data,"%s.mtz"%data_file_prefix)
     for maxnum in ["15", "2"]:
       common_args = [
-        "restraints=cctbx", 
-        "mode=opt", 
+        "restraints=cctbx",
+        "mode=opt",
         "altloc_method=subtract",
         "maxnum_residues_in_cluster="+maxnum]
       r = run_tests.run_cmd(prefix,
