@@ -84,6 +84,9 @@ TER
 def run(prefix):
   """
   This used to fail due to capping issue. The test indirectly exercises the fix.
+  
+  XXX TEST FAILS. BUG IN: ../cctbx_project/mmtbx/model/statistics.py (Pavel)
+  
   """
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
@@ -97,6 +100,7 @@ def run(prefix):
     "number_of_micro_cycles=1",
     "max_iterations_refine=5",
     "> %s.log"%prefix])
+  print(cmd)
   assert easy_run.call(cmd)==0
 
 if(__name__ == "__main__"):
