@@ -19,8 +19,6 @@ def run(prefix):
     - small vs large box:
       -- using clustering vs not using clustering.
   Non-P1 case (P212121)
-
-  XXX TEST FAILS. SOMETHING IS FUNDAMENTALLY WRONG WITH CLUSTERING...
   """
   data_file_prefix = "2olx"
   common_args = ["restraints=cctbx", "mode=opt", "parallel.nproc=1"]
@@ -48,4 +46,4 @@ def run(prefix):
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
