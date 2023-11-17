@@ -104,7 +104,7 @@ def runner(function, prefix, disable=False):
       function(prefix = prefix)
       print(prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0))
       # Turning this off to get some output from CI pipeline
-      if environ.get('CLEANUP_TESTS') is not None:
+      if os.environ.get('CLEANUP_TESTS') is not None:
           print("not cleaning up tests")
       else:  
         clean_up(prefix)
