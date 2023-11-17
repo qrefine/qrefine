@@ -12,6 +12,7 @@ on:
 env:
   MOPAC_COMMAND: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
   XTBHOME: /home/runner/micromamba/envs/qrefine-ci-mamba
+  CLEANUP_TESTS: 'FALSE'
 
 permissions:
   contents: read
