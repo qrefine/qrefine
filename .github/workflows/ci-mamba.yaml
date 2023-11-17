@@ -87,7 +87,6 @@ jobs:
         unzip master.zip
         cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
         
-        libtbx.configure mmtbx
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
