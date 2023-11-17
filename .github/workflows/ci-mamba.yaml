@@ -108,7 +108,6 @@ jobs:
     - name: qr.test
       run: |
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
-        cd /home/runner/work/qrefine/qrefine/
         qr.test > qr_test.txt
     - name: Archive qr test output
       if: always()
@@ -122,7 +121,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: qr-test-logs
-        path: /home/runner/work/qrefine/qrefine/*.log
+        path: tst_00.log
         
 
 
