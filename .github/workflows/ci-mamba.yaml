@@ -110,7 +110,17 @@ jobs:
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
         ls 
         pwd
+        mkdir testing_workdir
+        cd  testing_workdir
         qr.test > qr_test.txt
+    
+    - name: looks at testing_workdir
+      if: always()
+      run: |
+         pwd
+         ls
+        
+
          
         
     - name: Archive qr test output
