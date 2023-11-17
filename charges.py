@@ -12,8 +12,8 @@ from iotbx.pdb import amino_acid_codes as aac
 
 get_class = iotbx.pdb.common_residue_names_get_class
 
-from phenix.ligands.hierarchy_utils import attempt_to_squash_alt_loc
-from phenix.ligands.hierarchy_utils import merge_atoms_at_end_to_residues
+from mmtbx.ligands.hierarchy_utils import attempt_to_squash_alt_loc
+from mmtbx.ligands.hierarchy_utils import merge_atoms_at_end_to_residues
 
 default_ion_charges = {
   "PT" : 2,
