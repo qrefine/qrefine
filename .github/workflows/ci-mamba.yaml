@@ -112,12 +112,13 @@ jobs:
         ls 
         pwd
         mkdir testing_workdir
-        cd  testing_workdir
+        cd  /home/runner/work/qrefine/qrefine/testing_workdir
         qr.test > qr_test.txt
     
     - name: looks at testing_workdir
       if: always()
       run: |
+         cd  /home/runner/work/qrefine/qrefine/testing_workdir
          pwd
          ls
         
