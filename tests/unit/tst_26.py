@@ -9,25 +9,27 @@ qrefine_path = libtbx.env.find_in_repositories("qrefine")
 
 pdb_lines = '''
 CRYST1   72.470   66.336   68.552  90.00  90.00  90.00 P 1
-ATOM    387  N   HIS A  30      62.619  25.986  37.359  1.00 66.84           N
-ATOM    388  CA  HIS A  30      63.258  26.030  36.050  1.00 70.57           C
-ATOM    389  C   HIS A  30      64.699  26.498  36.196  1.00 70.51           C
-ATOM    390  O   HIS A  30      64.980  27.444  36.921  1.00 73.92           O
-ATOM    391  CB  HIS A  30      62.568  26.958  35.058  1.00 70.79           C
-ATOM    392  CG  HIS A  30      61.106  26.715  34.861  1.00 68.99           C
-ATOM    393  ND1 HIS A  30      60.132  27.545  35.365  1.00 77.35           N
-ATOM    394  CD2 HIS A  30      60.459  25.708  34.234  1.00 70.51           C
-ATOM    395  CE1 HIS A  30      58.941  27.084  35.013  1.00 79.15           C
-ATOM    396  NE2 HIS A  30      59.114  25.973  34.318  1.00 70.69           N
-ATOM    397  H   HIS A  30      61.945  26.509  37.464  0.00 66.84           H
-ATOM    398  HA  HIS A  30      63.202  25.127  35.700  0.00 70.57           H
-ATOM    399  HB2 HIS A  30      62.691  27.873  35.355  0.00 70.79           H
-ATOM    400  HB3 HIS A  30      63.012  26.877  34.200  0.00 70.79           H
-ATOM    401  HD2 HIS A  30      60.851  24.972  33.822  0.00 70.51           H
-ATOM    402  HE1 HIS A  30      58.123  27.475  35.220  0.00 79.15           H
-ATOM    403  HE2 HIS A  30      58.487  25.495  33.975  0.00 70.69           H
-HETATM  541 ZN    ZN A 101      60.278  29.235  36.302  1.00 76.89          ZN
-TER
+ATOM      1  N   HIS A  30      62.619  25.986  37.359  1.00 66.84           N
+ATOM      2  CA  HIS A  30      63.258  26.030  36.050  1.00 70.57           C
+ATOM      3  C   HIS A  30      64.699  26.498  36.196  1.00 70.51           C
+ATOM      4  O   HIS A  30      64.980  27.444  36.921  1.00 73.92           O
+ATOM      5  CB  HIS A  30      62.568  26.958  35.058  1.00 70.79           C
+ATOM      6  CG  HIS A  30      61.106  26.715  34.861  1.00 68.99           C
+ATOM      7  ND1 HIS A  30      60.132  27.545  35.365  1.00 77.35           N
+ATOM      8  CD2 HIS A  30      60.459  25.708  34.234  1.00 70.51           C
+ATOM      9  CE1 HIS A  30      58.941  27.084  35.013  1.00 79.15           C
+ATOM     10  NE2 HIS A  30      59.114  25.973  34.318  1.00 70.69           N
+ATOM     11  OXT HIS A  30      65.598  25.924  35.581  1.00 70.51           O
+ATOM     12  H   HIS A  30      61.823  26.617  37.454  0.00 66.84           H
+ATOM     13  H2  HIS A  30      62.284  25.060  37.536  0.00 66.84           H
+ATOM     14  H3  HIS A  30      63.282  26.241  38.063  0.00 66.84           H
+ATOM     15  HA  HIS A  30      63.199  25.023  35.638  0.00 70.57           H
+ATOM     16  HB2 HIS A  30      62.682  27.983  35.411  0.00 70.79           H
+ATOM     17  HB3 HIS A  30      63.050  26.842  34.087  0.00 70.79           H
+ATOM     18  HD2 HIS A  30      60.915  24.854  33.756  0.00 70.51           H
+ATOM     19  HE1 HIS A  30      57.991  27.538  35.253  0.00 79.15           H
+ATOM     20  HE2 HIS A  30      58.371  25.406  33.911  0.00 70.69           H
+HETATM   21 ZN    ZN A 101      60.278  29.235  36.302  1.00 76.89          Zn
 '''
 
 def run(prefix):
@@ -42,12 +44,12 @@ def run(prefix):
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.charges %s verbose=1' % (fn)
-  if 0: print(cmd)
+  if 1: print(cmd)
   rc = easy_run.go(cmd)
-  assert 'Charge: 0' in rc.stdout_lines
+  assert 'Charge: 2' in rc.stdout_lines
   os.remove(fn)
   return rc
 
 if(__name__=='__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
