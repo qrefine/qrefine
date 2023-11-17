@@ -17,7 +17,12 @@ def get_model(file_name):
   file_name = os.path.join(qr_unit_tests,"data_files",file_name)
   pdb_inp = iotbx.pdb.input(file_name)
   model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
-  model.process(make_restraints = True)
+  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.use_neutron_distances = True
+  params.pdb_interpretation.restraints_library.cdl = False
+  params.pdb_interpretation.sort_atoms = False
+  model.process(make_restraints=True, grm_normalization=False,
+    pdb_interpretation_params = params)
   return model
 
 def get_restraints_manager(expansion, clustering, file_name):
@@ -32,9 +37,6 @@ def get_restraints_manager(expansion, clustering, file_name):
 def run(clustering):
   """
   Exercise expansion=False / expansion=True
-  
-  XXX TEST FAILS only if clustering=True
-  
   """
   path = qr_unit_tests+"/data_files/"
   for fn in os.listdir(path):
@@ -53,9 +55,9 @@ def run(clustering):
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
     diff = flex.abs(g1.as_double()-g2.as_double())
-    #print(diff.min_max_mean().as_tuple())
-    # Turn test off
-    #assert flex.max(diff) < 1.e-6, flex.max(diff)
+    print(diff.min_max_mean().as_tuple())
+    #
+    assert flex.max(diff) < 1.e-6, flex.max(diff)
 
 if(__name__ == "__main__"):
   for clustering in [False, True]:
