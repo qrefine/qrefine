@@ -92,9 +92,9 @@ jobs:
         cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
         
 
-    - name: configure    
+    - name: configure   
+      working-directory: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build
       run: |     
-        cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build 
         libtbx.configure mmtbx
         libtbx.configure probe 
         libtbx.configure qrefine 
@@ -106,24 +106,18 @@ jobs:
       run: |
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
         qr.refine --help
+        
     - name: qr.test
       run: |
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
-        ls 
-        pwd
         mkdir testing_workdir
         cd  /home/runner/work/qrefine/qrefine/testing_workdir
         qr.test > qr_test.txt
     
     - name: looks at testing_workdir
       if: always()
-      run: |
-         cd  /home/runner/work/qrefine/qrefine/testing_workdir
-         pwd
-         ls
-        
-
-         
+      run: ls -R
+      working-directory: ./testing_workdir
         
     - name: Archive qr test output
       if: always()
@@ -137,7 +131,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: qr-test-logs
-        path: tst_00.log
+        path: ./testing_workdir
         
 
 
