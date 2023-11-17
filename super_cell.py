@@ -90,7 +90,7 @@ class expand(object):
       assume_hydrogens_all_missing = not has_hd,
       plain_pairs_radius           = 5.0)
     self.super_sphere_geometry_restraints_manager = mmtbx.restraints.manager(
-       geometry = geometry, normalization = True)
+       geometry = geometry, normalization = False)
 
   def write_super_cell_selected_in_sphere(self, file_name="super_sphere.pdb"):
     self.ph_super_sphere.write_pdb_file(file_name = file_name,
