@@ -159,10 +159,15 @@ class Mopac(Calculator):
         self.mopac_input = mopac_input
 
     def get_command(self):
-        """Return command string if program installed, otherwise None.  """
+        """Return command string if program installed, otherwise None.
+            Search order: 1. Phenix-mopac 2. $PATH 3. MOPAC_COMMAND  """
+        from shutil import which
         from mmtbx.geometry_restraints import mopac_manager
         command = mopac_manager.get_exe()
         if command: return command
+        command = which('mopac')
+        if command is not None:
+            return command
         if ('MOPAC_COMMAND' in os.environ):
           command = os.environ['MOPAC_COMMAND']
         return command

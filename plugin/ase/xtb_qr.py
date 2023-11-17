@@ -91,13 +91,17 @@ class GFNxTB(Calculator):
         finput.close()
 
     def get_command(self):
-        """Return command string if program installed, otherwise None.  """
-        command = None
+        """Return command string if program installed, otherwise None.
+           XTBHOME would overwrite location in $PATH    """
+        import shutil
         if ('XTBHOME' in os.environ):
           command = os.environ['XTBHOME']+'/bin/xtb '
+
+        command = shutil.which('xtb')
         if command is None:
             raise RuntimeError('$XTBHOME not set')
         return command
+
 
     def run_qr(self,
                atoms,   
