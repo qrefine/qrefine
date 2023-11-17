@@ -36,22 +36,23 @@ def run(prefix):
   """
   Exercise standard (cctbx-based restraints) optimization.
   Assert mode=opt is approximately equivalent to data_weight=0.
-  
-  XXX VERY SLOW XXX
-  
   """
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   # Run optimization
-  run_tests.run_cmd(prefix,args = ["restraints=cctbx","mode=opt"])
+  run_tests.run_cmd(prefix,args = ["restraints=cctbx","mode=opt",
+    "clustering=False","minimizer=lbfgsb", "number_of_micro_cycles=3",
+    "max_iterations_refine=100"])
   assert get_bond_rmsd(file_name=os.path.join(qr_unit_tests,"data_files","m00_poor.pdb")) > 0.1
   result1 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
   assert result1 < 0.001, result1
   #Run refinement without data term
-  run_tests.run_cmd(prefix,args = ["restraints=cctbx","data_weight=0"])
+  run_tests.run_cmd(prefix,args = ["restraints=cctbx","data_weight=0",
+    "clustering=False","minimizer=lbfgsb", "number_of_micro_cycles=3",
+    "max_iterations_refine=100"])
   result2 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
   assert result2 < 0.001, result2
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
 
