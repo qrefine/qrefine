@@ -116,6 +116,14 @@ jobs:
         name: qr-test-output
         path: qr_test.txt
 
+    - name: Archive qr-log files output
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: qr-test-logs
+        path: /*.log
+        
+
 
 
     
