@@ -45,17 +45,17 @@ def run(prefix):
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.finalise %s action="capping"' % (fn)
-  if 0: print(cmd)
+  if 1: print(cmd)
   rc = easy_run.go(cmd)
-  os.remove(fn)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
   f=open(fnc, 'r')
   lines=f.read()
   f.close()
+  print(lines)
   assert ' HG  CYS A  12' not in lines
   assert ' HG  CYSSS  33' not in lines
   cmd = 'qr.charges %s verbose=1' % (fnc)
-  if 0: print(cmd)
+  if 1: print(cmd)
   rc = easy_run.go(cmd)
   assert 'Charge: 0' in rc.stdout_lines
   os.remove(fnc)
@@ -63,4 +63,4 @@ def run(prefix):
 
 if(__name__=='__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

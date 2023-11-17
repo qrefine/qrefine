@@ -50,6 +50,7 @@ def construct_xyz(ba, bv,
                   da, dv,
                   period=3,
                   ):
+  assert 0
   assert ba is not None
   assert aa is not None
   assert da is not None
@@ -171,6 +172,7 @@ def add_cys_hg_to_residue_group(rg,
   return rc
 
 def remove_cys_hg_from_residue_group(rg):
+  assert 0
   proton_element, proton_name = get_proton_info(rg)
   for ag in rg.atom_groups():
     if ag.resname not in ['CYS']: continue
@@ -218,6 +220,7 @@ def iterate_over_threes(hierarchy,
     else:
       for i in range(len(three)):
         rg = get_residue_group(three[i])
+        assert 0
         conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
                                                 rg,
                                                 )
@@ -394,7 +397,7 @@ def use_electrons_to_add_hdyrogens(hierarchy,
       atom_group.remove_atom(atom)
   return rc
 
-def add_terminal_hydrogens(
+def add_terminal_hydrogens_qr(
     hierarchy,
     geometry_restraints_manager,
     add_to_chain_breaks=False,
@@ -405,6 +408,7 @@ def add_terminal_hydrogens(
     occupancy=1.,
     verbose=False,
     ):
+  assert 0
   # add N terminal hydrogens because Reduce only does it to resseq=1
   # needs to be alt.loc. aware for non-quantum-refine
   if original_hierarchy:
@@ -475,7 +479,7 @@ def _add_atoms_from_residue_groups_to_end_of_hierarchy(hierarchy, rgs):
     model.append_chain(chain)
 
 def remove_acid_side_chain_hydrogens(hierarchy):
-  from mmtbx.ligands.ready_set_utils import get_proton_info
+  from mmtbx.ligands.ready_set_basics import get_proton_info
   proton_element, proton_name = get_proton_info(hierarchy)
   removes = {"GLU" : "%sE2" % proton_element,
              "ASP" : "%sD2" % proton_element,
@@ -576,7 +580,7 @@ def _h_h2_on_N(hierarchy,
                geometry_restraints_manager,
                verbose=False,
                ):
-  from mmtbx.ligands.ready_set_utils import is_perdeuterated
+  from mmtbx.ligands.ready_set_basics import is_perdeuterated
   atoms = hierarchy.atoms()
   ###
   def get_residue_group(residue):
@@ -801,11 +805,15 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # moved to mmtbx.ligands
   #
+  from mmtbx.ligands.ready_set_utils import add_terminal_hydrogens
+  assert original_hierarchy is None
   add_terminal_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
                          ppf.geometry_restraints_manager(),
                          use_capping_hydrogens=use_capping_hydrogens,
                          append_to_end_of_model=append_to_end_of_model,
-                         original_hierarchy=original_hierarchy,
+                         # original_hierarchy=original_hierarchy,
+                         terminate_all_N_terminals=True,
+                         terminate_all_C_terminals=True,
                          verbose=verbose,
                         ) # in place
   if debug:
