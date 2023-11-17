@@ -269,7 +269,7 @@ def run(prefix):
   Exercise gradients match: using clustering vs not using clustering.
   Altlocs.
   
-  XXX TEST FAILS DUE TO MOPAC ERROR
+  XXX TEST FAILS DUE TO MOPAC ERROR (no results check)
   XXX Same test with xtb (properly set) is OK
   
   """

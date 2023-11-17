@@ -286,46 +286,40 @@ def run(prefix):
   This is the case of several CYS coordinating ZN. Gradients match if two
   buffers are used, and they don't if one buffer is used.
   
-  XXX EXTREMELY SLOW TEST!!! Perhaps the slowest test!
+  XXX EXTREMELY SLOW TEST (and fails) !!!
   
   """
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
   #
-  show=False
-  # for fast_interaction in [True, False]:
-  for fast_interaction in [True]:
-    if(show): print("fast_interaction:", fast_interaction)
-    for restraints in ["cctbx", "qm"]:
-      if(show): print("  restraints:", restraints)
-      for two_buffers in [False, True]:
-        if(show): print("    two_buffers=", two_buffers)
-        for clustering in ["true", "false"]:
-          if(show): print("      clustering=", clustering)
-          cmd = " ".join([
-            "qr.refine",
-            pdb_in,
-            "mode=opt",
-            "fast_interaction=%s"%fast_interaction,
-            "stpmax=0.2",
-            "gradient_only=true",
-            "clustering=%s"%clustering,
-            "dump_gradients=cluster_%s.pkl"%clustering,
-            "restraints=%s"%restraints,
-            "quantum.engine_name=mopac",
-            "number_of_micro_cycles=1",
-            "max_iterations_refine=5",
-            "two_buffers=%s"%str(two_buffers),
-            "> %s.log"%prefix])
-          assert easy_run.call(cmd)==0
-        g1 = easy_pickle.load("cluster_false.pkl")
-        g2 = easy_pickle.load("cluster_true.pkl")
-        g1 = g1.as_double()
-        g2 = g2.as_double()
-        diff = flex.abs(g1-g2)
-        if(show):
-          print("        min/max/mean of (gradient1 - gradient2):", \
-              diff.min_max_mean().as_tuple())
+  for restraints in ["cctbx", "qm"]:
+    print("  restraints:", restraints)
+    for two_buffers in [False, True]:
+      print("    two_buffers=", two_buffers)
+      for clustering in ["true", "false"]:
+        print("      clustering=", clustering)
+        cmd = " ".join([
+          "qr.refine",
+          pdb_in,
+          "mode=opt",
+          "stpmax=0.2",
+          "gradient_only=true",
+          "clustering=%s"%clustering,
+          "dump_gradients=cluster_%s.pkl"%clustering,
+          "restraints=%s"%restraints,
+          "quantum.engine_name=mopac",
+          "number_of_micro_cycles=1",
+          "max_iterations_refine=5",
+          "two_buffers=%s"%str(two_buffers),
+          "> %s.log"%prefix])
+        assert easy_run.call(cmd)==0
+      g1 = easy_pickle.load("cluster_false.pkl")
+      g2 = easy_pickle.load("cluster_true.pkl")
+      g1 = g1.as_double()
+      g2 = g2.as_double()
+      diff = flex.abs(g1-g2)
+      print("        min/max/mean of (gradient1 - gradient2):", \
+        diff.min_max_mean().as_tuple())
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
