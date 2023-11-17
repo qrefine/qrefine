@@ -94,6 +94,7 @@ jobs:
     - name: configure    
       run: |     
         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build 
+        libtbx.configure mmtbx
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
