@@ -84,9 +84,6 @@ TER
 def run(prefix):
   """
   This used to fail due to capping issue. The test indirectly exercises the fix.
-  
-  XXX TEST FAILS. BUG IN: ../cctbx_project/mmtbx/model/statistics.py (Pavel)
-  
   """
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
@@ -105,4 +102,4 @@ def run(prefix):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
