@@ -103,7 +103,11 @@ def runner(function, prefix, disable=False):
       t0 = time.time()
       function(prefix = prefix)
       print(prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0))
-      clean_up(prefix)
+      # Turning this off to get some output from CI pipeline
+      if os.environ['CLEANUP_TESTS'] == 'FALSE':
+          print("not cleaning up tests")
+      else:  
+        clean_up(prefix)
   except Exception as e:
       print(prefix, "FAILED", str(e))
       exc_type, exc_value, exc_traceback = sys.exc_info() 
