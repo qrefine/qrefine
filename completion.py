@@ -45,36 +45,6 @@ def get_bond_vector(a1,a2,unit=False):
       vector[i] /= l
   return tuple(vector)
 
-def construct_xyz(ba, bv,
-                  aa, av,
-                  da, dv,
-                  period=3,
-                  ):
-  assert 0
-  assert ba is not None
-  assert aa is not None
-  assert da is not None
-  rn = matrix.col(ba.xyz)
-  rca = matrix.col(aa.xyz)
-  rc = matrix.col(da.xyz)
-  rcca = rc -rca
-
-  e0 = (rn - rca).normalize()
-  e1 = (rcca - (rcca.dot(e0))*e0).normalize()
-  e2 = e0.cross(e1)
-
-  pi = math.pi
-  alpha = math.radians(av)
-  phi = math.radians(dv)
-
-  rh_list = []
-  for n in range(0, period):
-    rh = rn + bv * (math.sin(alpha)*(math.cos(phi + n*2*pi/period)*e1 +
-                                     math.sin(phi + n*2*pi/period)*e2) -
-                    math.cos(alpha)*e0)
-    rh_list.append(rh)
-  return rh_list
-
 def get_atoms_by_names(ag, l=None, all_or_nothing=True):
   assert l
   assert 0
@@ -84,102 +54,6 @@ def get_atoms_by_names(ag, l=None, all_or_nothing=True):
     rc.append(atom)
   if len(l)!=len(filter(None, rc)): return None
   return rc
-
-def _add_hydrogens_to_atom_group_using_bad(ag,
-                                           atom_name,
-                                           atom_element,
-                                           bond_atom,
-                                           angle_atom,
-                                           dihedral_atom,
-                                           bond_length,
-                                           angle,
-                                           dihedral,
-                                           append_to_end_of_model=False,
-                                           ):
-  rc = []
-  if ag.get_atom(atom_name.strip()): return []
-  if type(bond_atom)==type(''):
-    ba = ag.get_atom(bond_atom.strip())
-    #print bond_atom,ba.quote()
-    if ba is None: return
-  else: ba = bond_atom
-  if type(angle_atom)==type(''):
-    aa = ag.get_atom(angle_atom.strip())
-    #print angle_atom,aa.quote()
-    if aa is None: return
-  else: aa = angle_atom
-  if type(dihedral_atom)==type(''):
-    da = ag.get_atom(dihedral_atom.strip())
-    #print dihedral_atom, da.quote()
-    if da is None: return
-  else: da = dihedral_atom
-  ro2 = construct_xyz(ba, bond_length,
-                      aa, angle,
-                      da, dihedral,
-                      period=1,
-                     )
-  atom = iotbx.pdb.hierarchy.atom()
-  atom.name = atom_name
-  atom.element = atom_element
-  atom.occ = ba.occ
-  atom.b = ba.b
-  # altloc???
-  atom.hetero = ba.hetero
-  atom.segid = ' '*4
-  atom.xyz = ro2[0]
-  if append_to_end_of_model:
-    chain = _add_atom_to_chain(atom,
-                               ag,
-                               icode=ba.parent().parent().icode)
-    rc.append(chain)
-  else:
-    ag.append_atom(atom)
-  return rc
-
-def add_cys_hg_to_atom_group(ag,
-                             append_to_end_of_model=False,
-                            ):
-  #
-  # do we need ANISOU
-  #
-  proton_name=proton_element='H'
-  if is_perdeuterated(ag):
-    proton_name=proton_element='D'
-  rc = _add_hydrogens_to_atom_group_using_bad(
-    ag,
-    ' HG ',
-    'H',
-    'SG',
-    'CB',
-    'CA',
-    1.2,
-    120.,
-    160.,
-    append_to_end_of_model=append_to_end_of_model,
-   )
-  return rc
-
-def add_cys_hg_to_residue_group(rg,
-                                append_to_end_of_model=False,
-                               ):
-  rc=[]
-  for ag in rg.atom_groups():
-    if ag.resname not in ['CYS']: continue
-    rc += add_cys_hg_to_atom_group(
-      ag,
-      append_to_end_of_model=append_to_end_of_model,
-    )
-  return rc
-
-def remove_cys_hg_from_residue_group(rg):
-  assert 0
-  proton_element, proton_name = get_proton_info(rg)
-  for ag in rg.atom_groups():
-    if ag.resname not in ['CYS']: continue
-    for atom in ag.atoms():
-      if atom.name==' %sG ' % proton_element:
-        ag.remove_atom(atom)
-        break
 
 def iterate_over_threes(hierarchy,
                         geometry_restraints_manager,
@@ -449,35 +323,6 @@ def add_terminal_hydrogens_qr(
         tmp.append(chain)
     _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, tmp)
 
-def _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, chains):
-  lookup = {}
-  for chain in chains:
-    lookup.setdefault(chain.id, [])
-    lookup[chain.id].append(chain)
-  model = hierarchy.models()[0]
-  for i, chain_group in sorted(lookup.items()):
-    tc = iotbx.pdb.hierarchy.chain()
-    tc.id = i
-    for chain in chain_group:
-      for rg in chain.residue_groups():
-        tc.append_residue_group(rg.detached_copy())
-    model.append_chain(tc)
-
-def _add_atoms_from_residue_groups_to_end_of_hierarchy(hierarchy, rgs):
-  assert 0
-  chains = {}
-  for rg in rgs:
-    for atom in rg.atoms():
-      # this is a bad idea
-      cid = atom.tmp
-      if cid not in chains:
-        chains[cid] = iotbx.pdb.hierarchy.chain()
-        chains[cid].id = ascii_letters[cid]
-      chains[cid].append_residue_group(rg)
-  model = hierarchy.models()[0]
-  for i, chain in sorted(chains.items()):
-    model.append_chain(chain)
-
 def remove_acid_side_chain_hydrogens(hierarchy):
   from mmtbx.ligands.ready_set_basics import get_proton_info
   proton_element, proton_name = get_proton_info(hierarchy)
@@ -493,60 +338,6 @@ def remove_acid_side_chain_hydrogens(hierarchy):
   hierarchy.atoms_reset_serial()
   hierarchy.atoms().reset_i_seq()
   return hierarchy
-
-def _eta_peptide_h(hierarchy,
-                   geometry_restraints_manager,
-                   verbose=False,
-                   ):
-  proton_element, proton_name = get_proton_info(hierarchy)
-  atoms = hierarchy.atoms()
-  ###
-  def get_residue_group(residue):
-    for atom in residue.atoms():
-      atom = atoms[atom.i_seq]
-      break
-    return atom.parent().parent()
-  ###
-  for three in generate_protein_fragments(
-    hierarchy,
-    geometry_restraints_manager,
-    backbone_only=False,
-    #use_capping_hydrogens=use_capping_hydrogens,
-    ):
-    if len(three)==1: continue
-    if three[-1].resname!='ETA': continue
-    print(three)
-    eta = get_residue_group(three[-1])
-    print(dir(eta))
-    previous = get_residue_group(three[-2])
-    print(previous)
-    print(dir(previous))
-    for ag in previous.atom_groups(): # smarter?
-      previous_c = ag.get_atom('C')
-      previous_o = ag.get_atom('O')
-    for ag in eta.atom_groups(): # needs to be conformers...
-      atom_name = ' H  '
-      if ag.get_atom(atom_name):
-        assert 0
-      else:
-        for atom in ag.atoms(): print(atom.format_atom_record())
-        rc = _add_hydrogens_to_atom_group_using_bad(
-          ag,
-          atom_name,
-          proton_element,
-          'N',
-          previous_c, #'CA',
-          previous_o, #'CB',
-          1.,
-          120.,
-          180.,
-          #append_to_end_of_model=append_to_end_of_model,
-        )
-        assert rc is not None
-        print('-'*80)
-        for atom in ag.atoms(): print(atom.format_atom_record())
-  #      hierarchy.show()
-  #assert 0
 
 def generate_atom_group_atom_names(rg, names):
   '''
@@ -638,7 +429,6 @@ def special_case_hydrogens(hierarchy,
                            verbose=False,
                           ):
   for special_case in [
-      #_eta_peptide_h,
       _h_h2_on_N,
                        ]:
     rc = special_case(hierarchy,

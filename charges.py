@@ -13,7 +13,6 @@ from iotbx.pdb import amino_acid_codes as aac
 get_class = iotbx.pdb.common_residue_names_get_class
 
 from mmtbx.ligands.hierarchy_utils import attempt_to_squash_alt_loc
-from mmtbx.ligands.hierarchy_utils import merge_atoms_at_end_to_residues
 
 default_ion_charges = {
   "PT" : 2,
@@ -109,9 +108,7 @@ class charges_class:
     #  for key, item in self.inter_residue_bonds.items():
     #    if type(key)!=type(0) and len(key)==2: print key, item
     # merge atoms from clustering
-    self.pdb_hierarchy = merge_atoms_at_end_to_residues(
-      self.pdb_hierarchy,
-      )
+    self.pdb_hierarchy.merge_atoms_at_end_to_residues()
     self.mon_lib_server = ppf.mon_lib_srv
 
     self.electrons = electrons
@@ -139,9 +136,7 @@ class charges_class:
     self.crystal_symmetry = crystal_symmetry
     if hasattr(self, 'pdb_inp'): self.pdb_inp = None
     # merge atoms from clustering
-    self.pdb_hierarchy = merge_atoms_at_end_to_residues(
-      self.pdb_hierarchy,
-      )
+    self.pdb_hierarchy.merge_atoms_at_end_to_residues()
     self.pdb_filename = None
     self.raw_records = None
 
