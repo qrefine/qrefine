@@ -86,6 +86,8 @@ jobs:
         curl -LO https://github.com/cctbx/cctbx_project/archive/refs/heads/master.zip
         unzip master.zip
         cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
+        cd /home/runner/work/qrefine/qrefine/
+        ls 
         
         libtbx.configure probe 
         libtbx.configure qrefine 
