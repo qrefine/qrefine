@@ -109,6 +109,9 @@ jobs:
       run: |
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
         qr.test > qr_test.txt
+        ls 
+        pwd
+        
     - name: Archive qr test output
       if: always()
       uses: actions/upload-artifact@v3
