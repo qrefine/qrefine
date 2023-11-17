@@ -282,7 +282,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
 
   def run(self):
     self.header("Refinement start")
-    
+
     # fmodel stuff
     self.fmodel=None
     if(self.has_ma):
@@ -323,7 +323,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     params.pdb_interpretation.use_neutron_distances = True
     params.pdb_interpretation.restraints_library.cdl = False
     params.pdb_interpretation.sort_atoms = False
-    self.model.process(make_restraints=True, grm_normalization=True,
+    self.model.process(make_restraints=True, grm_normalization=False,
       pdb_interpretation_params = params)
     self.model.setup_scattering_dictionaries(
       scattering_table  = self.params.scattering_table,
