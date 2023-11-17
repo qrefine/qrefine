@@ -60,7 +60,7 @@ jobs:
          cd reduce 
          make
         
-    - name: copy qreinfe code
+    - name: copy qrefine code
       run: | 
        cd 
        cp -r /home/runner/work/qrefine/qrefine /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
@@ -71,14 +71,16 @@ jobs:
     #- name: activate enviroment
     #  run: micromamba activate qrefine-ci-mamba
 
-    - run: |
+    - name: build probe
+      run: |
         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
         mkdir build 
         cd build 
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
 
-
+    - name: downloaded latest mmtbx
+      run: |
 
         # Pull in latest code from mmtbx:
         #cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
@@ -88,7 +90,9 @@ jobs:
         cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
         cd /home/runner/work/qrefine/qrefine/
         ls 
-        
+
+    - name: configure    
+      run: |     
         libtbx.configure probe 
         libtbx.configure qrefine 
         libtbx.configure reduce 
