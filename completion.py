@@ -25,6 +25,8 @@ from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_gr
 from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
 from mmtbx.ligands.ready_set_utils import generate_protein_fragments
 
+log = sys.stdout
+
 def d_squared(xyz1, xyz2):
   d2 = 0
   for i in range(3):
@@ -650,6 +652,7 @@ def complete_pdb_hierarchy(hierarchy,
                            original_pdb_filename=None,
                            verbose=False,
                            debug=False,
+                           use_reduce=True
                           ):
   """Complete PDB hierarchy with hydrogen atoms as needed
 
@@ -729,7 +732,12 @@ def complete_pdb_hierarchy(hierarchy,
       ppf.all_chain_proxies.pdb_hierarchy,
       'readyset_input',
     )
-    hierarchy = hierarchy_utils.add_hydrogens_using_ReadySet(output)
+    if(use_reduce):
+      print("Using reduce to add hydrogens",file=log)
+      hierarchy = hierarchy_utils.add_hydrogens_using_reduce(output)
+    else:
+      print("Using ReadySet to add hydrogens",file=log)
+      hierarchy = hierarchy_utils.add_hydrogens_using_ReadySet(output)
   #
   # remove side chain acid hydrogens - maybe not required since recent changes
   #
@@ -827,6 +835,7 @@ def run(pdb_filename=None,
         model_completion=True,
         original_pdb_filename=None,
         append_to_end_of_model=True,
+        use_reduce=True
         ):
   #
   # function as be used in two main modes
@@ -843,10 +852,10 @@ def run(pdb_filename=None,
   #
   if model_completion:
     use_capping_hydrogens=False
-    fname = 'complete'
+    fname = 'complete' # only this uses reduce/ReadySet
   else:
     use_capping_hydrogens=True
-    fname = 'capping'
+    fname = 'capping' 
   #
   # adjust parameters
   #
@@ -879,6 +888,7 @@ def run(pdb_filename=None,
     pdb_filename=pdb_filename,   # used just for naming of debug output
     pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why
     verbose=False,
+    use_reduce=use_reduce
   )
   if pdb_filename:
     output = hierarchy_utils.write_hierarchy(

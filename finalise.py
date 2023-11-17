@@ -66,6 +66,7 @@ def run(pdb_filename,
         append_to_end_of_model=False,
         neutron_option=None,
         hydrogen_atom_occupancies=0.,
+        use_reduce=True
         ):
   #
   # do all *.pdb in a directory
@@ -151,6 +152,7 @@ def run(pdb_filename,
     pdb_inp=ppf.all_chain_proxies.pdb_inp,
     use_capping_hydrogens=use_capping_hydrogens,
     append_to_end_of_model=append_to_end_of_model,
+    use_reduce=use_reduce
   )
 
   if calculate_charge:
