@@ -14,9 +14,6 @@ qr_unit_tests = os.path.join(qrefine, "tests","unit")
 def run(prefix):
   """
   test execution of mode=gtest
-
-  XXX TEST FAILS (gtest)
-
   """
   run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()

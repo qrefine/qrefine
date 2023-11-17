@@ -7,9 +7,7 @@ import iotbx.pdb
 
 def run(prefix):
   """
-  Exercise altlocs.
-  
-  XXX Very weak test. Just makes sure all runs. No results checking!
+  Exercise altlocs: just makes sure all runs.
   
   """
   run_tests.assert_folder_is_empty(prefix=prefix)
@@ -25,5 +23,5 @@ def run(prefix):
 if(__name__ == "__main__"):
   t0 = time.time()
   prefix = os.path.basename(__file__).replace(".py","")
-  #run(prefix)
-  #run_tests.clean_up(prefix)
+  run(prefix)
+  run_tests.clean_up(prefix)

@@ -14,14 +14,14 @@ from libtbx.test_utils import approx_equal
 def run(prefix):
   """
   Exercise standard (cctbx-based restraints) optimization (no data required).
-
-  XXX VERY SLOW (360 seconds on PVA's laptop)
-
   """
+  args = ["restraints=cctbx mode=opt use_convergence_test=False",
+          "number_of_micro_cycles=3",
+          "max_iterations_refine=100"]
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   run_tests.run_cmd(
     prefix   = prefix,
-    args     = ["restraints=cctbx mode=opt use_convergence_test=False"],
+    args     = args,
     mtz_name = "")
   # Check results
   pdb_inp = iotbx.pdb.input(
@@ -30,21 +30,7 @@ def run(prefix):
   model_1.process(make_restraints=True)
   s1 = model_1.geometry_statistics().result()
   assert s1.bond.mean < 0.005
-  ##########################
-  xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
-  run_tests.run_cmd(
-    prefix   = prefix,
-    args     = ["restraints=cctbx mode=opt use_convergence_test=False"])
-  # Check results
-  pdb_inp = iotbx.pdb.input(
-    file_name = os.path.join(prefix,"m00_poor_refined.pdb"))
-  model_2 = mmtbx.model.manager(model_input = pdb_inp, log=null_out())
-  model_2.process(make_restraints=True)
-  s2 = model_2.geometry_statistics().result()
-  assert s2.bond.mean < 0.005
-  ###########################
-  assert approx_equal(s1.bond.mean, s2.bond.mean, 0.001)
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
