@@ -19,11 +19,11 @@ def run(prefix):
     - small vs large box:
       -- using clustering vs not using clustering.
 
-  XXX TEST FAILS with "cctbx" option. This is indicative of some serious problem!
+  XXX TEST FAILS with "qm" option (pass with cctbx)
 
   """
-  for restraints in ["cctbx","qm"]:
-  #for restraints in ["cctbx",]:
+  #for restraints in ["cctbx","qm"]:
+  for restraints in ["qm",]:
   # XXX qm option is not supposed to work fulfull the test with 2ona_box_S
   # XXX qm option is currently suspected to be broken for 2ona_box_L
     for data_file_prefix in ["2ona_box_L", "2ona_box_S"]:
@@ -56,7 +56,7 @@ def run(prefix):
         g2 = g2.as_double()
         assert g1.size() == g2.size()
         diff = g1-g2
-        if(1):
+        if(0):
           for i, diff_i in enumerate(diff):
             print(i+1, diff_i, g1[i], g2[i])
           print()
@@ -65,12 +65,22 @@ def run(prefix):
         ## loose comparison
         ## clustering qm just checks the norm of gradients from
         ## x, y, z directions
-        assert approx_equal(g1.norm(), g2.norm(), g1.norm()*0.05)
-        g1_norms = flex.sqrt(g1.dot())
-        g2_norms = flex.sqrt(g2.dot())
-        for i in range(g1_norms.size()):
-          #print i+1, g1_norms[i], g2_norms[i], g1_norms[i]*0.2
-          assert approx_equal(g1_norms[i], g2_norms[i], g1_norms[i]*0.2)
+
+        #assert approx_equal(g1.norm(), g2.norm(), g1.norm()*0.05)
+        #g1_norms = flex.sqrt(g1.dot())
+        #g2_norms = flex.sqrt(g2.dot())
+        #for i in range(g1_norms.size()):
+        #  assert approx_equal(g1_norms[i], g2_norms[i], g1_norms[i]*0.2)
+
+        g1 = g1.as_double()
+        g2 = g2.as_double()
+        assert g1.size() == g2.size()
+        diff = g1-g2
+        if(1):
+          for i, diff_i in enumerate(diff):
+            print(i+1, diff_i, g1[i], g2[i])
+          print()
+        assert approx_equal(flex.max(diff), 0, 1.0E-4)
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
