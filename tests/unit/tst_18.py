@@ -18,9 +18,6 @@ def run(prefix):
   -- pdbs with altlocs
       -- using clustering with less clusters vs not using clustering.
       -- using clustering with more clusters vs not using clustering.
-
-  XXX TEST FAILS. SOMETHING IS FUNDAMENTALLY WRONG WITH CLUSTERING?
-
   """
   import multiprocessing
   nproc = str(multiprocessing.cpu_count())
@@ -50,4 +47,4 @@ def run(prefix):
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
