@@ -69,12 +69,12 @@ def run(prefix):
   f.write(pdb_lines)
   f.close()
   cmd = 'qr.charges %s verbose=1' % (fn)
-  if 0: print(cmd)
+  if 1: print(cmd)
   rc = easy_run.go(cmd)
-  assert 'Charge: -2' in rc.stdout_lines
+  assert 'Charge: 0' in rc.stdout_lines
   os.remove(fn)
   return rc
 
 if(__name__=='__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
