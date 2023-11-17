@@ -56,8 +56,8 @@ def run(prefix):
   super_sphere = list(o.ph_super_sphere.atoms().extract_xyz().as_double())
   super_sphere_answer.sort()
   super_sphere.sort()
-  print(super_sphere_answer)
-  print(super_sphere)
+  #print(super_sphere_answer)
+  #print(super_sphere)
   assert approx_equal(super_sphere_answer,super_sphere)
 
 if(__name__ == "__main__"):
