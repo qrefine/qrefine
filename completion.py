@@ -473,8 +473,8 @@ def complete_pdb_hierarchy(hierarchy,
   for ag in hierarchy.atom_groups():
     if get_class(ag.resname) in ['common_rna_dna']:
       raise Sorry('Nucleotides are not currently supported. e.g. %s' % ag.resname)
-  if not is_hierarchy_altloc_consistent(hierarchy):
-    is_hierarchy_altloc_consistent(hierarchy, verbose=True)
+  if not hierarchy.is_hierarchy_altloc_consistent():
+    hierarchy.is_hierarchy_altloc_consistent(verbose=True)
     raise Sorry('Altloc structure of model not consistent. Make each altloc the same depth or remove completely.')
   from mmtbx.building import extend_sidechains
   original_hierarchy = None
