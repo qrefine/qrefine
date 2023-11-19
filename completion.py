@@ -20,7 +20,6 @@ from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_remove_cys_hg_to_atom_group
 from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
-from mmtbx.ligands.hierarchy_utils import is_hierarchy_altloc_consistent
 from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_group
 from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
 from mmtbx.ligands.ready_set_utils import generate_protein_fragments

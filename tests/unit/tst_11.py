@@ -83,14 +83,14 @@ def complete_pdbs(expected_list, pdb_dir):
     print('"%s"' % pdb_dir)
     no_error_list = batch_run_finalise.run(pdb_dir,
                                            nproc=1,
-                                           #only_code='1il5',
+                                          #  only_code='1il5',
     )
-    print(no_error_list)
+    # print(no_error_list)
     #shutil.rmtree("./tmp")
     expected_list.sort()
     no_error_list.sort()
-    print(expected_list)
-    print(no_error_list)
+    print("expected",expected_list)
+    print("no error list",no_error_list)
     assert approx_equal(expected_list, no_error_list),'%s has different pdbs passing finalise.py'%pdb_dir
   else:
     print("skip")

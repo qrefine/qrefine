@@ -37,7 +37,7 @@ def _process_pdb_filename(pdb_file):
   complete_file=pdb_file[:-4]+"_complete.pdb"
   rc=0
   if ( pdb_file.endswith("pdb") and not os.path.exists(complete_file) ):
-    cmd = "qr.finalise %s | tee %s" % (
+    cmd = "qr.finalise %s reduce=true | tee %s" % (
       pdb_file,
       pdb_file.replace('.pdb', ".log"),
       )
