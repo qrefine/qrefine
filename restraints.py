@@ -133,13 +133,11 @@ class from_expansion(object):
       crystal_symmetry = self.expansion.cs_box)
     self.crystal_symmetry_ss = self.expansion.cs_box
     # Use same route for CCTBX and QM !
-    # if(self.restraints_source.source_of_restraints_qm()):
-    if 0:
+    if(self.restraints_source.source_of_restraints_qm()):
       self.pdb_hierarchy_super_completed = model_completion.run(
-        #pdb_hierarchy         = pdb_hierarchy_super,
-        crystal_symmetry      = expansion.cs_box,
+        pdb_hierarchy         = pdb_hierarchy_super,
+        crystal_symmetry      = self.expansion.cs_box,
         model_completion      = False,
-        pdb_filename          = "supersphere.pdb",
         original_pdb_filename = None)
     else:
       self.pdb_hierarchy_super_completed = pdb_hierarchy_super
