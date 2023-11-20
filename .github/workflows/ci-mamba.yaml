@@ -113,16 +113,8 @@ jobs:
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
         mkdir /home/runner/work/qrefine/qrefine/testing_workdir
         cd  /home/runner/work/qrefine/qrefine/testing_workdir
-        pwd
-        ls -a
-        rm -rf *
-        pwd
-        ls -a
-        python /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/tst_00.py
         
-        #qr.refine m00_good.mtz /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/data_files/m00_poor.pdb restraints=cctbx output_folder_name=tst_00  
-        
-        #qr.test >> qr_test.txt
+        qr.test >> qr_test.txt
     
     - name: looks at testing_workdir
       if: always()
