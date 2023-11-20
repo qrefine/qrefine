@@ -23,6 +23,7 @@ from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
 from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_group
 from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
 from mmtbx.ligands.ready_set_utils import generate_protein_fragments
+from mmtbx.ligands.ready_set_basics import construct_xyz
 
 log = sys.stdout
 
