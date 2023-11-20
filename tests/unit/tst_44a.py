@@ -42,25 +42,28 @@ def get_restraints_manager(expansion, file_name):
   params.quantum.method='PM7'
   params.quantum.basis=''
   params.cluster.two_buffers=False
-  #params.cluster.maxnum_residues_in_cluster=6
   params.cluster.maxnum_residues_in_cluster=2
 
   result = refine.create_restraints_manager(params=params, model=model), \
          model.get_sites_cart()
   return result
 
-def run():
+def run(prefix, verbose=False):
   """
   Exercise expansion=False / expansion=True
   
-  XXX TEST LIKELY FAILS (expansion=False/True). No result checks.
+  XXX RESULTS ARE NOT CHECKED 
   
   """
   path = qr_unit_tests+"/data_files/"
-  files = ["m2_complete_box_large.pdb", ]#"m2_complete_box_large.pdb",
-           #"p212121.pdb", "p1_box_small.pdb", "p1_box_large.pdb"]
+  files = ["m2_complete_box_large.pdb",
+           "p212121.pdb", 
+           "p1_box_small.pdb", 
+           "p1_box_large.pdb"
+           ]
   for f in files:
     fn = path + f
+    if(verbose): print(fn)
     ph = iotbx.pdb.input(fn).construct_hierarchy()
     if list(ph.altloc_indices()) != ['']: continue
     #
@@ -70,7 +73,7 @@ def run():
     rm2, sites_cart = get_restraints_manager(expansion=True, file_name=fn)
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
-    if 1:
+    if(verbose): 
       atoms = ph.atoms()
       ds = flex.sqrt((g1 - g2).dot())
       for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):
@@ -81,9 +84,9 @@ def run():
     rs = flex.double()
     for a, b in zip(g1.as_double(), g2.as_double()):
       r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
-      #print r
       rs.append(r)
-    print(f, "min/max/mean:", rs.min_max_mean().as_tuple())
+    if(verbose): print(f, "min/max/mean:", rs.min_max_mean().as_tuple())
 
 if(__name__ == "__main__"):
-    run()
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

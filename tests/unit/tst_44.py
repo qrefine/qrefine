@@ -34,7 +34,7 @@ def get_restraints_manager(expansion, clustering, file_name):
   return refine.create_restraints_manager(params=params, model=model), \
          model.get_sites_cart()
 
-def run(clustering):
+def run(clustering, verbose=False):
   """
   Exercise expansion=False / expansion=True
   """
@@ -44,7 +44,7 @@ def run(clustering):
     fn = path + fn
     ph = iotbx.pdb.input(fn).construct_hierarchy()
     if list(ph.altloc_indices()) != ['']: continue
-    print(fn)
+    if(verbose): print(fn)
     #
     rm1, sites_cart = get_restraints_manager(
       expansion=False, clustering=clustering, file_name=fn)
@@ -55,11 +55,11 @@ def run(clustering):
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
     diff = flex.abs(g1.as_double()-g2.as_double())
-    print(diff.min_max_mean().as_tuple())
+    if(verbose):  print(diff.min_max_mean().as_tuple())
     #
     assert flex.max(diff) < 1.e-6, flex.max(diff)
 
 if(__name__ == "__main__"):
-  for clustering in [False, True]:
-    print("clustering=", clustering, "-"*40)
+  for clustering in [False,True]:
+    if(verbose): print("clustering=", clustering, "-"*40)
     run(clustering=clustering)
