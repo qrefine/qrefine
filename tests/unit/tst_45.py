@@ -49,16 +49,14 @@ def get_restraints_manager(expansion, file_name, altloc_method):
 
 def run(prefix, verbose=False):
   """
-  Exercise expansion=False / expansion=True
-  
-  XXX TEST FAILS (expansion=False / expansion=True)
-  
+  Exercise expansion=False / expansion=True with altlocs
   """
   for altloc_method in ["average", "subtract"]:
+    if(verbose): print("altloc_method", altloc_method, "-"*20)
     path = qr_unit_tests+"/data_files/"
     files = ["gly2_1.pdb", "altlocs2.pdb", "altlocs.pdb", "gly2_2.pdb"]
     for f in files:
-      print(f)
+      if(verbose): print(f)
       fn = path + f
       ph = iotbx.pdb.input(fn).construct_hierarchy()
       #
@@ -89,4 +87,4 @@ def run(prefix, verbose=False):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

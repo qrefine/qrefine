@@ -61,6 +61,8 @@ def run():
     print(diff.min_max_mean().as_tuple())
     #
     assert flex.max(diff) < 1.e-6, flex.max(diff)
+    #
+    done = True
   assert done
 
 if(__name__ == "__main__"):
