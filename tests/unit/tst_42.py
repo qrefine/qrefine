@@ -285,42 +285,39 @@ def run(prefix):
   Exercise gradients match: using clustering vs not using clustering.
   This is the case of several CYS coordinating ZN. Gradients match if two
   buffers are used, and they don't if one buffer is used.
-  
-  XXX EXTREMELY SLOW TEST (and fails) !!!
-  
+  CCTBX only.
   """
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
   #
-  for restraints in ["cctbx", "qm"]:
-    print("  restraints:", restraints)
-    for two_buffers in [False, True]:
-      print("    two_buffers=", two_buffers)
-      for clustering in ["true", "false"]:
-        print("      clustering=", clustering)
-        cmd = " ".join([
-          "qr.refine",
-          pdb_in,
-          "mode=opt",
-          "stpmax=0.2",
-          "gradient_only=true",
-          "clustering=%s"%clustering,
-          "dump_gradients=cluster_%s.pkl"%clustering,
-          "restraints=%s"%restraints,
-          "quantum.engine_name=mopac",
-          "number_of_micro_cycles=1",
-          "max_iterations_refine=5",
-          "two_buffers=%s"%str(two_buffers),
-          "> %s.log"%prefix])
-        assert easy_run.call(cmd)==0
-      g1 = easy_pickle.load("cluster_false.pkl")
-      g2 = easy_pickle.load("cluster_true.pkl")
-      g1 = g1.as_double()
-      g2 = g2.as_double()
-      diff = flex.abs(g1-g2)
-      print("        min/max/mean of (gradient1 - gradient2):", \
-        diff.min_max_mean().as_tuple())
+  for two_buffers in [False, True]:
+    print("    two_buffers=", two_buffers)
+    for clustering in ["true", "false"]:
+      print("      clustering=", clustering)
+      cmd = " ".join([
+        "qr.refine",
+        pdb_in,
+        "mode=opt",
+        "stpmax=0.2",
+        "gradient_only=true",
+        "clustering=%s"%clustering,
+        "dump_gradients=cluster_%s.pkl"%clustering,
+        "restraints=cctbx",
+        "quantum.engine_name=mopac",
+        "number_of_micro_cycles=1",
+        "max_iterations_refine=5",
+        "two_buffers=%s"%str(two_buffers),
+        "> %s.log"%prefix])
+      assert easy_run.call(cmd)==0
+    g1 = easy_pickle.load("cluster_false.pkl")
+    g2 = easy_pickle.load("cluster_true.pkl")
+    g1 = g1.as_double()
+    g2 = g2.as_double()
+    diff = flex.abs(g1-g2)
+    print("        min/max/mean of (gradient1 - gradient2):", \
+      diff.min_max_mean().as_tuple())
+    assert flex.max(diff) < 1.e-5, flex.max(diff)
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
