@@ -12,10 +12,10 @@ on:
 env:
   MOPAC_COMMAND: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
   XTBHOME: /home/runner/micromamba/envs/qrefine-ci-mamba
-  CLEANUP_TESTS: 'FALSE'
+  #CLEANUP_TESTS: 'FALSE'
 
 permissions:
-  contents:  write
+  contents:  read
 
 jobs:
   build:
@@ -80,17 +80,18 @@ jobs:
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
 
-    - name: downloaded latest mmtbx
+    - name: downloaded latest cctbx
       run: |
 
         # Pull in latest code from mmtbx:
         #cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
-        cd /home/runner/work/qrefine/qrefine 
-        curl -LO https://github.com/cctbx/cctbx_project/archive/refs/heads/master.zip
-        unzip master.zip
-        rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
-        cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
+        #cd /home/runner/work/qrefine/qrefine 
+        #curl -LO https://github.com/cctbx/cctbx_project/archive/refs/heads/master.zip
+        #unzip master.zip
+        #rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
+        #cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
         
+        conda update cctbx -c cctbx-nightly
 
     - name: configure   
       working-directory: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build
