@@ -43,6 +43,7 @@ def run(prefix):
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","mode=opt",
     "clustering=False","minimizer=lbfgsb", "number_of_micro_cycles=3",
     "max_iterations_refine=100"])
+  print(prefix)
   print("run_test_done")
   assert get_bond_rmsd(file_name=os.path.join(qr_unit_tests,"data_files","m00_poor.pdb")) > 0.1
   result1 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
