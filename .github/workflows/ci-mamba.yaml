@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash -el {0}
+        shell: bash -leo pipefail {0} {0}
 
     steps:
 
@@ -36,13 +36,11 @@ jobs:
       with:
         environment-file: environment.yaml      
         cache-environment: true
-        use-only-tar-bz2: true 
         activate-environment: qrefine-ci-mamba
 
     - name:  build chem_data, probe, and reduce
-      working-directory: $CONDA_PREFIX/lib/$PY/site-packages
       run: |
-         pwd
+         cd $CONDA_PREFIX/lib/$PY/site-packages
          mkdir chem_data 
          cd chem_data 
          svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd 
@@ -74,8 +72,8 @@ jobs:
     #  run: micromamba activate qrefine-ci-mamba
 
     - name: make build dir and set probe exe
-      working-directory: $CONDA_PREFIX/lib/$PY/site-packages
       run: |
+        cd $CONDA_PREFIX/lib/$PY/site-packages
         mkdir build 
         cd build 
         mkdir -p probe/exe/
@@ -94,8 +92,8 @@ jobs:
     #     conda update cctbx -c cctbx-nightly
 
     - name: configure  modules  
-      working-directory: $CONDA_PREFIX/lib/$PY/site-packages/build
       run: |     
+        cd $CONDA_PREFIX/lib/$PY/site-packages/build
         # libtbx.configure mmtbx
         libtbx.configure probe qrefine reduce
         mmtbx.rebuild_rotarama_cache
@@ -108,7 +106,6 @@ jobs:
         
     - name: qr.test
       run: |
-        # cd /home/runner/work/qrefine/qrefine/
         mkdir testing_workdir
         cd testing_workdir
         source $CONDA_PREFIX/lib/$PY/site-packages/build/setpaths.sh        
