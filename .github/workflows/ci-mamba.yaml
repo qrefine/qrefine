@@ -10,8 +10,9 @@ on:
   workflow_dispatch:
 
 env:
-  MOPAC_COMMAND: /home/runner/micromamba/envs/qrefine-ci-mamba/bin/mopac
-  XTBHOME: /home/runner/micromamba/envs/qrefine-ci-mamba
+  # MOPAC_COMMAND: $CONDA_PREFIX/bin/mopac
+  # XTBHOME: $CONDA_PREFIX
+  PY: 3.10
   #CLEANUP_TESTS: 'FALSE'
 
 permissions:
@@ -27,7 +28,6 @@ jobs:
 
     steps:
 
-
     - name: checkout code
       uses: actions/checkout@v3
 
@@ -40,9 +40,9 @@ jobs:
         activate-environment: qrefine-ci-mamba
 
     - name:  build chem_data, probe, and reduce
+      working-directory: $CONDA_PREFIX/lib/$PY/site-packages
       run: |
          pwd
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
          mkdir chem_data 
          cd chem_data 
          svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd 
@@ -53,71 +53,65 @@ jobs:
          svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data 
          cd ..
          mkdir modules
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules
+         cd $CONDA_PREFIX/lib/$PY/site-packages/modules
          svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
          cd probe 
          make 
-         cp hybrid_36_c.c /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/iotbx/pdb/hybrid_36_c.c
+         cp hybrid_36_c.c CONDA_PREFIX/lib/$PY/site-packages/iotbx/pdb/hybrid_36_c.c
          cd ..
          svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
          cd reduce 
          make
         
     - name: copy qrefine code to modules dir.
-      run: | 
-       cd 
-       cp -r /home/runner/work/qrefine/qrefine /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
-       #ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
+      run: |  
+       cp -r $GITHUB_WORKSPACE/../qrefine $CONDA_PREFIX/lib/$PY/site-packages/modules/qrefine
        
     - name: delete old yoink code
-      run: rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
+      run: rm -rf $CONDA_PREFIX/lib/$PY/site-packages/modules/qrefine/plugin/yoink
 
     #- name: activate enviroment
     #  run: micromamba activate qrefine-ci-mamba
 
-    - name: build probe
-      working-directory: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
+    - name: make build dir and set probe exe
+      working-directory: $CONDA_PREFIX/lib/$PY/site-packages
       run: |
         mkdir build 
         cd build 
         mkdir -p probe/exe/
-        cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
+        cp -r $CONDA_PREFIX/lib/$PY/site-packages/modules/probe/probe probe/exe/ 
 
-    - name: update to latest cctbx-nightly
-      run: |
+    # - name: (force) update to latest cctbx-nightly
+    #   run: |
 
-        # Pull in latest code from mmtbx:
-        #cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
-        #cd /home/runner/work/qrefine/qrefine 
-        #curl -LO https://github.com/cctbx/cctbx_project/archive/refs/heads/master.zip
-        #unzip master.zip
-        #rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
-        #cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/mmtbx
-        
-        conda update cctbx -c cctbx-nightly
+    #     # Pull in latest code from mmtbx:
+    #     #cd $CONDA_PREFIX/lib/$PY/site-packages/mmtbx
+    #     #cd /home/runner/work/qrefine/qrefine 
+    #     #curl -LO https://github.com/cctbx/cctbx_project/archive/refs/heads/master.zip
+    #     #unzip master.zip
+    #     #rm -rf $CONDA_PREFIX/lib/$PY/site-packages/mmtbx
+    #     #cp -r /home/runner/work/qrefine/qrefine/cctbx_project-master/mmtbx $CONDA_PREFIX/lib/$PY/site-packages/mmtbx        
+    #     conda update cctbx -c cctbx-nightly
 
     - name: configure  modules  
-      working-directory: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build
+      working-directory: $CONDA_PREFIX/lib/$PY/site-packages/build
       run: |     
-        libtbx.configure mmtbx
-        libtbx.configure probe 
-        libtbx.configure qrefine 
-        libtbx.configure reduce 
+        # libtbx.configure mmtbx
+        libtbx.configure probe qrefine reduce
         mmtbx.rebuild_rotarama_cache
         mmtbx.rebuild_cablam_cache
     
     - name: smoke test
       run: |
-        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
+        source $CONDA_PREFIX/lib/$PY/site-packages/build/setpaths.sh
         qr.refine --help
         
     - name: qr.test
       run: |
-        cd /home/runner/work/qrefine/qrefine/
+        # cd /home/runner/work/qrefine/qrefine/
         mkdir testing_workdir
         cd testing_workdir
-        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh        
-        #python /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/tst_01.py > ../qr_test.txt
+        source $CONDA_PREFIX/lib/$PY/site-packages/build/setpaths.sh        
         qr.test > ../qr_test.txt
     
     - name: looks at testing_workdir
