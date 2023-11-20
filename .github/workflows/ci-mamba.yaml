@@ -113,7 +113,7 @@ jobs:
         mkdir testing_workdir
         cd  /home/runner/work/qrefine/qrefine/testing_workdir
         ls
-        rm rf *
+        rm -rf *
         pwd
         ls
         python /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/tst_00.py >  qr_test.txt
