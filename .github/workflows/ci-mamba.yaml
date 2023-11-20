@@ -114,7 +114,7 @@ jobs:
         cd  /home/runner/work/qrefine/qrefine/testing_workdir
         pwd
         ls
-        rm -rf *
+        rm -rfa *
         pwd
         ls
         python /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/tst_00.py >  qr_test.txt
