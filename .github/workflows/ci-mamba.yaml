@@ -58,6 +58,7 @@ jobs:
          cd probe 
          make 
          cp hybrid_36_c.c /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/iotbx/pdb/hybrid_36_c.c
+         cd..
          svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
          cd reduce 
          make
