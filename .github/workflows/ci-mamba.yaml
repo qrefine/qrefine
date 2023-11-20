@@ -39,7 +39,8 @@ jobs:
         use-only-tar-bz2: true 
         activate-environment: qrefine-ci-mamba
 
-    - run: |
+    - name:  build chem_data, probe, and reduce
+      run: |
          pwd
          cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
          mkdir chem_data 
@@ -61,26 +62,27 @@ jobs:
          cd reduce 
          make
         
-    - name: copy qrefine code
+    - name: copy qrefine code to modules dir.
       run: | 
        cd 
        cp -r /home/runner/work/qrefine/qrefine /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
-       ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
+       #ls /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine
        
-    - run: rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
+    - name: delete old yoink code
+      run: rm -rf /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/plugin/yoink
 
     #- name: activate enviroment
     #  run: micromamba activate qrefine-ci-mamba
 
     - name: build probe
+      working-directory: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
       run: |
-        cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages
         mkdir build 
         cd build 
         mkdir -p probe/exe/
         cp -r /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/probe/probe probe/exe/ 
 
-    - name: downloaded latest cctbx
+    - name: update to latest cctbx-nightly
       run: |
 
         # Pull in latest code from mmtbx:
@@ -93,7 +95,7 @@ jobs:
         
         conda update cctbx -c cctbx-nightly
 
-    - name: configure   
+    - name: configure  modules  
       working-directory: /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build
       run: |     
         libtbx.configure mmtbx
@@ -109,12 +111,10 @@ jobs:
         qr.refine --help
         
     - name: qr.test
+      working-directory: /home/runner/work/qrefine/qrefine/testing_workdir
       run: |
-        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh
-        mkdir /home/runner/work/qrefine/qrefine/testing_workdir
-        cd  /home/runner/work/qrefine/qrefine/testing_workdir
-        
-        qr.test >> qr_test.txt
+        source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh        
+        qr.test > ../qr_test.txt
     
     - name: looks at testing_workdir
       if: always()
@@ -126,7 +126,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: qr-test-output
-        path: ./testing_workdir/qr_test.txt
+        path: ./qr_test.txt
 
     - name: Archive qr-log files output
       if: always()
