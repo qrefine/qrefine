@@ -111,8 +111,10 @@ jobs:
         qr.refine --help
         
     - name: qr.test
-      working-directory: /home/runner/work/qrefine/qrefine/testing_workdir
       run: |
+        cd /home/runner/work/qrefine/qrefine/
+        mkdir testing_workdir
+        cd testing_workdir
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh        
         qr.test > ../qr_test.txt
     
