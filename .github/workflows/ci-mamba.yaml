@@ -12,7 +12,7 @@ on:
 env:
   # MOPAC_COMMAND: $CONDA_PREFIX/bin/mopac
   # XTBHOME: $CONDA_PREFIX
-  PY: 3.10
+  PY: "python3.10"
   #CLEANUP_TESTS: 'FALSE'
 
 permissions:
