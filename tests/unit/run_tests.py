@@ -58,7 +58,12 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
   cmd.append("output_folder_name=%s"%test_folder_name)
   cmd.append("> %s.log"%prefix)
   if(1): print(" ".join(cmd))
-  return easy_run.go(" ".join(cmd))
+  rc = easy_run.go(" ".join(cmd))
+  if rc.return_code != 0:
+    rc.show_stderr()
+    rc.show_stdout()
+    raise SystemExit(f"A command within a test failed!")
+  return rc.return_code
 
 def clean_up(prefix, mtz_name = None):
   test_folder_name = prefix
@@ -110,27 +115,13 @@ def runner(function, prefix, disable=False):
         clean_up(prefix)
   except Exception as e:
       print(prefix, "FAILED", str(e))
-      exc_type, exc_value, exc_traceback = sys.exc_info() 
-      traceback_template = ''' ** qrefine exception handler: **
-      %(type)s => File "%(filename)s" \n line %(lineno)s, in %(name)s: \n %(message)s
-        \n'''
-      traceback_details = {
-                        'filename': exc_traceback.tb_frame.f_code.co_filename,
-                        'lineno'  : exc_traceback.tb_lineno,
-                        'name'    : exc_traceback.tb_frame.f_code.co_name,
-                        'type'    : exc_type.__name__,
-                        'message' : exc_value.args[0]
-                      }
-      del(exc_type, exc_value, exc_traceback)
       print(traceback.format_exc())
-      print(traceback_template % traceback_details)
-    # traceback.print_exc()
       rc=1
   # clean_up(prefix)
   assert not rc, "%s rc: %s" % (prefix, rc)
   return rc
 
-def run(nproc=6,
+def run(nproc=1,
         only_i=None,
         non_mopac_only=False):
   cwd = os.getcwd()
@@ -143,19 +134,20 @@ def run(nproc=6,
       if not os.path.exists(fn):
         os.mkdir(fn)
       os.chdir(fn)
-    rc = easy_run.call("qrefine.python %s"%(
+    rc = easy_run.go("qrefine.python %s"%(
       os.path.join(qr_unit_tests,file_name)))
+    if rc.return_code != 0:
+      rc.show_stderr()
+      rc.show_stdout()
     if in_separate_directory:
       os.chdir('..')
-    return rc
+    return rc.return_code
   # Collect test files
   tests = []
   for fn in os.listdir(qr_unit_tests):
     if(fn.startswith("tst_") and fn.endswith(".py")):
-      # i_test = int(fn[:].replace("tst_","").replace(".py",""))
       i_test = fn[:].replace("tst_","").replace(".py","")
       i_test = i_test[0].replace('0','')+i_test[1]
-      # print(i_test,only_i)
       if(only_i is not None):
         if(only_i == i_test):
           tests.append(fn)

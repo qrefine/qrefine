@@ -13,6 +13,7 @@ def run(prefix):
   Exercise standard (cctbx-based restraints) refinement with all defaults.
   """
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
+  # run_tests.run_cmd(prefix, args = ["restraints=cctbx stpmax=0.000000001"]) # force to fail for testing
   run_tests.run_cmd(prefix, args = ["restraints=cctbx"])
   # Check results
   xrs_refined = iotbx.pdb.input(
