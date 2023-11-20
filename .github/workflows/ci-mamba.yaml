@@ -117,8 +117,8 @@ jobs:
         mkdir testing_workdir
         cd testing_workdir
         source /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/build/setpaths.sh        
-        python /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/tst_01.py > ../qr_test.txt
-        #qr.test > ../qr_test.txt
+        #python /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/modules/qrefine/tests/unit/tst_01.py > ../qr_test.txt
+        qr.test > ../qr_test.txt
     
     - name: looks at testing_workdir
       if: always()
