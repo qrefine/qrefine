@@ -268,10 +268,10 @@ def run(prefix):
   """
   Exercise gradients match: using clustering vs not using clustering.
   Altlocs.
-  
-  XXX TEST FAILS DUE TO MOPAC ERROR (no results check)
-  XXX Same test with xtb (properly set) is OK
-  
+
+  XXX TEST FAILS in mmtbx/ligands/ready_set_utils.py
+  XXX Results are not checked
+
   """
   for i, pdb_str_in in enumerate([pdb_str_in1, pdb_str_in2]):
     if(i==0): print("Altlocs present", "-"*30)
@@ -279,49 +279,45 @@ def run(prefix):
     pdb_in = "%s.pdb"%prefix
     open(pdb_in, "w").write(pdb_str_in)
     #
-    # for fast_interaction in [True, False]:
-    for fast_interaction in [True]:
-      print("fast_interaction:", fast_interaction)
-      for restraints in ["cctbx", "qm"]:
-        print("  restraints:", restraints)
-        for two_buffers in [False, True]:
-          print("    two_buffers=", two_buffers)
-          for clustering in ["true", "false"]:
-            print("      clustering=", clustering)
+    for restraints in ["cctbx", "qm"]:
+      print("  restraints:", restraints)
+      for two_buffers in [False, True]:
+        print("    two_buffers=", two_buffers)
+        for clustering in ["true", "false"]:
+          print("      clustering=", clustering)
 
-            if(not clustering): expansion=True
-            else:               expansion=False
+          if(not clustering): expansion=True
+          else:               expansion=False
 
-            cmd = " ".join([
-              "qr.refine",
-              pdb_in,
-
-              "expansion=%s"%str(expansion),
-
-              "mode=opt",
-              "altloc_method=subtract",
-              "fast_interaction=%s"%fast_interaction,
-              "stpmax=0.2",
-              "gradient_only=true",
-              "clustering=%s"%clustering,
-              "dump_gradients=cluster_%s.pkl"%clustering,
-              "restraints=%s"%restraints,
-              "quantum.engine_name=mopac",
-              "number_of_micro_cycles=1",
-              "max_iterations_refine=5",
-              "two_buffers=%s"%str(two_buffers),
-              "> %s.log"%prefix])
-            #print cmd
-            assert easy_run.call(cmd)==0
-          g1 = easy_pickle.load("cluster_false.pkl")
-          g2 = easy_pickle.load("cluster_true.pkl")
-          g1 = g1.as_double()
-          g2 = g2.as_double()
-          diff = flex.abs(g1-g2)
-          print("        min/max/mean of (gradient1 - gradient2):", \
-              diff.min_max_mean().as_tuple())
-          os.remove("cluster_false.pkl")
-          os.remove("cluster_true.pkl")
+          cmd = " ".join([
+            "qr.refine",
+            pdb_in,
+            "expansion=%s"%str(expansion),
+            "mode=opt",
+            "altloc_method=subtract",
+            "stpmax=0.2",
+            "gradient_only=true",
+            "clustering=%s"%clustering,
+            "dump_gradients=cluster_%s.pkl"%clustering,
+            "restraints=%s"%restraints,
+            "quantum.engine_name=mopac",
+            "number_of_micro_cycles=1",
+            "max_iterations_refine=5",
+            "two_buffers=%s"%str(two_buffers),
+            "> %s.log"%prefix])
+          print()
+          print(cmd)
+          print()
+          assert easy_run.call(cmd)==0
+        g1 = easy_pickle.load("cluster_false.pkl")
+        g2 = easy_pickle.load("cluster_true.pkl")
+        g1 = g1.as_double()
+        g2 = g2.as_double()
+        diff = flex.abs(g1-g2)
+        print("        min/max/mean of (gradient1 - gradient2):", \
+            diff.min_max_mean().as_tuple())
+        os.remove("cluster_false.pkl")
+        os.remove("cluster_true.pkl")
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
