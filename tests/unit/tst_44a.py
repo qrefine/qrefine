@@ -20,7 +20,12 @@ def get_model(file_name):
   file_name = os.path.join(qr_unit_tests,"data_files",file_name)
   pdb_inp = iotbx.pdb.input(file_name)
   model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
-  model.process(make_restraints = True)
+  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.use_neutron_distances = True
+  params.pdb_interpretation.restraints_library.cdl = False
+  params.pdb_interpretation.sort_atoms = False
+  model.process(make_restraints=True, grm_normalization=False,
+    pdb_interpretation_params = params)
   return model
 
 def get_restraints_manager(expansion, file_name):
