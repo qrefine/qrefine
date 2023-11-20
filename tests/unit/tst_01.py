@@ -39,9 +39,11 @@ def run(prefix):
   """
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
   # Run optimization
+  print("setup_helix_done")
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","mode=opt",
     "clustering=False","minimizer=lbfgsb", "number_of_micro_cycles=3",
     "max_iterations_refine=100"])
+  print("run_test_done")
   assert get_bond_rmsd(file_name=os.path.join(qr_unit_tests,"data_files","m00_poor.pdb")) > 0.1
   result1 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
   assert result1 < 0.001, result1
