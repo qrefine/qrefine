@@ -137,7 +137,7 @@ def run(nproc=1,
         os.mkdir(fn)
       os.chdir(fn)
     full_test_file_name = os.path.join(qr_unit_tests,file_name)
-    print("Running test: %s in folder: %s"%(full_test_file_name,file_name),fn)
+    print("Running test: %s in folder: %s"%(full_test_file_name,fn))
     rc = easy_run.go("qrefine.python %s"%(full_test_file_name))
     if rc.return_code != 0:
       rc.show_stderr()
