@@ -334,11 +334,11 @@ def run(prefix):
   f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
-  cmd = 'phenix.python %s/completion.py %s model_completion=False original_pdb_filename=expansion.pdb' % (qrefine_path, fn)
+  cmd = 'qrefine.python %s/completion.py %s model_completion=False original_pdb_filename=expansion.pdb' % (qrefine_path, fn)
   if 0: print(cmd)
   easy_run.go(cmd)
   fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  cmd = 'phenix.pdb_interpretation %s' % fnc
+  cmd = 'mmtbx.pdb_interpretation %s' % fnc
   if 0: print(cmd)
   rc = easy_run.go(cmd)
   assert '     H      47      1.00' in rc.stdout_lines

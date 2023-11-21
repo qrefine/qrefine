@@ -124,7 +124,7 @@ def run(prefix):
 
       rc = get_charge(fn,
                       assert_correct_chain_terminii=False,
-                      # verbose=1,
+                      verbose=1,
       )
       ans = None
       level1 = results.get(code, None)
