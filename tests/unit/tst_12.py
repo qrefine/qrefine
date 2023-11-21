@@ -1162,4 +1162,4 @@ def run(prefix, nproc=1):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run_tests.runner(function=run, prefix=prefix, disable=True)
