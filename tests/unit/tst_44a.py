@@ -53,9 +53,6 @@ def get_restraints_manager(expansion, file_name):
 def run(prefix, verbose=False):
   """
   Exercise expansion=False / expansion=True
-  
-  XXX RESULTS ARE NOT CHECKED 
-  
   """
   path = qr_unit_tests+"/data_files/"
   files = ["m2_complete_box_large.pdb",
@@ -90,7 +87,8 @@ def run(prefix, verbose=False):
     if(verbose): print(f, "min/max/mean:", rs.min_max_mean().as_tuple())
     
     d = max(granalyse.get_grad_wdelta(ref=g1, g=g2))
-    print(d, "get_grad_wdelta")
+    if(verbose): print(d, "get_grad_wdelta")
+    assert d < 10. # XXX Is this reasonable?
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
