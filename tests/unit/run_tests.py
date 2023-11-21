@@ -128,14 +128,16 @@ def run(nproc=1,
   assert cwd.find(' ')==-1, 'test do not work in directory with a space " "'
   t0=time.time()
   print('Running tests on %d processors' % nproc)
+  # Individual test runner
   def _run_test(file_name, in_separate_directory=True):
     if in_separate_directory:
       fn = file_name.split('.')[0]
       if not os.path.exists(fn):
         os.mkdir(fn)
       os.chdir(fn)
-    rc = easy_run.go("qrefine.python %s"%(
-      os.path.join(qr_unit_tests,file_name)))
+    full_test_file_name = os.path.join(qr_unit_tests,file_name)
+    print("Running test: %s in folder: %s"%(full_test_file_name,file_name),fn)
+    rc = easy_run.go("qrefine.python %s"%(full_test_file_name))
     if rc.return_code != 0:
       rc.show_stderr()
       rc.show_stdout()
@@ -174,11 +176,12 @@ def run(nproc=1,
   in_separate_directory=True # not(nproc==1)
   for i, file_name in enumerate(tests):
     tests[i]=tuple([file_name, in_separate_directory])
+  #    
   for args, res, err_str in easy_mp.multi_core_run( _run_test,
                                                     tests,
                                                     nproc,
                                                     ):
-    print('%sTotal time: %6.2f (s)' % (' '*7, time.time()-t0))
+    print('%sTotal time since started: %6.2f (s)' % (' '*7, time.time()-t0))
     if err_str:
       print('Error output from %s' % args)
       print(err_str)

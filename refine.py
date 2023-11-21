@@ -224,7 +224,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   else:
     weights = None
     if (model.size() > params.max_atoms):
-      raise Sorry("Too many atoms.")
+      print("Too many atoms. Can take forever or crash."*50, file=log)
     geometry_rmsd_manager = model.get_restraints_manager()
     #
     if(params.refine.dry_run): return

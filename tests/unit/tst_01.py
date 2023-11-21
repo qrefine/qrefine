@@ -51,7 +51,7 @@ def run(prefix):
   #Run refinement without data term
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","data_weight=0",
     "clustering=False","minimizer=lbfgsb", "number_of_micro_cycles=3",
-    "max_iterations_refine=100"])
+    "max_iterations_refine=100", "stpmax=999"])
   result2 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
   assert result2 < 0.001, result2
 
