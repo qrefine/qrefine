@@ -1839,21 +1839,19 @@ HETATM  637  H3  ACYdD 202      22.774   2.547  17.857  0.00 17.69           H
 TER
 '''
 
-log = sys.stdout
-
-def run(pdb_file, log):
+def run(prefix):
+  """
+  Looks like this exercises charges.
+  XXX NO RESULT CHECKING.
+  """
+  pdb_file = 'test_point_charges.pdb'
+  f=open(pdb_file, 'w')
+  f.write(pdb_lines)
+  f.close()
   from qrefine.charges import charges_class
   cc = charges_class(pdb_filename=pdb_file)
   cc.write_pdb_hierarchy_qxyz_file(file_name="q.xyz", exclude_water=False)
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  t0 = time.time()
-  args = sys.argv[1:]
-  if len(args)==0:
-    f=open('test_point_charges.pdb', 'w')
-    f.write(pdb_lines)
-    f.close()
-    args = ['test_point_charges.pdb']
-  run(args[0], log)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

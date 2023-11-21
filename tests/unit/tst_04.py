@@ -66,4 +66,5 @@ def run():
   assert done
 
 if(__name__ == "__main__"):
-  run()
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)

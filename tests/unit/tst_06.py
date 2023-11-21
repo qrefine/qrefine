@@ -8,7 +8,7 @@ import iotbx.pdb
 def run(prefix):
   """
   Exercise altlocs: just makes sure all runs.
-  
+
   """
   run_tests.assert_folder_is_empty(prefix=prefix)
   xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example(
@@ -21,7 +21,5 @@ def run(prefix):
   run_tests.clean_up(prefix,mtz_name = "altlocs.mtz")
 
 if(__name__ == "__main__"):
-  t0 = time.time()
   prefix = os.path.basename(__file__).replace(".py","")
-  run(prefix)
-  run_tests.clean_up(prefix)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

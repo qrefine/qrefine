@@ -50,40 +50,48 @@ def get_model():
     crystal_symmetry=pdb_inp.crystal_symmetry()).model
   return model
 
-def run(maxnum_residues_in_cluster):
-  result = []
-  for clustering in [True, False]:
-    if 0: print("  clustering", clustering, "-"*30)
-    model = get_model()
-    fq = from_cctbx(restraints_manager = model.get_restraints_manager())
-    if(clustering):
-      fm = fragments(
-       working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
-       clustering_method          = betweenness_centrality_clustering,
-       maxnum_residues_in_cluster = maxnum_residues_in_cluster,
-       altloc_method              = "subtract",
-       charge_embedding           = False,
-       two_buffers                = False,
-       clustering                 = clustering,
-       pdb_hierarchy              = model.get_hierarchy().deep_copy(),
-       qm_engine_name             = "mopac",
-       fast_interaction           = True,
-       crystal_symmetry           = model.crystal_symmetry())
-    else:
-      fc = fq
-    fc = from_cluster(
-      restraints_manager = fq,
-      fragment_manager   = fm,
-      parallel_params    = get_master_phil().extract())
-    energy, gradients = fc.target_and_gradients(sites_cart=model.get_sites_cart())
-    gradients = gradients.as_double()
-    result.append(gradients.deep_copy())
-  diff = flex.abs(result[0] - result[1])
-  max_diff = flex.max(diff)
-  #print "  max(diff_grad):", max_diff
-  assert max_diff < 1.e-9
+def run(prefix):
+  """
+  Test raw calls for gradeients from fragment with and w/o clustering.
 
-if(__name__ == "__main__"):
+  XXX TEST FAILS: mmtbx/ligands/ready_set_utils.py. Behaviour of fragments call
+  XXX isn't clear in case of altlocs. Did it work before?
+  """
   for maxnum_residues_in_cluster in [2, 15]:
     print("Using maxnum_residues_in_cluster:", maxnum_residues_in_cluster)
-    run(maxnum_residues_in_cluster=maxnum_residues_in_cluster)
+    result = []
+    for clustering in [False, True]:
+      print("  clustering", clustering, "-"*30)
+      model = get_model()
+      fq = from_cctbx(restraints_manager = model.get_restraints_manager())
+      if(clustering):
+        fm = fragments(
+         working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
+         clustering_method          = betweenness_centrality_clustering,
+         maxnum_residues_in_cluster = maxnum_residues_in_cluster,
+         altloc_method              = "subtract",
+         charge_embedding           = False,
+         two_buffers                = False,
+         clustering                 = clustering,
+         pdb_hierarchy              = model.get_hierarchy().deep_copy(),
+         qm_engine_name             = "mopac",
+         fast_interaction           = True,
+         crystal_symmetry           = model.crystal_symmetry())
+      else:
+        fc = fq
+      if(clustering):
+        fc = from_cluster(
+          restraints_manager = fq,
+          fragment_manager   = fm,
+          parallel_params    = get_master_phil().extract())
+      energy, gradients = fc.target_and_gradients(sites_cart=model.get_sites_cart())
+      gradients = gradients.as_double()
+      result.append(gradients.deep_copy())
+    diff = flex.abs(result[0] - result[1])
+    max_diff = flex.max(diff)
+    print("  max(diff_grad):", max_diff)
+    assert max_diff < 1.e-9
+
+if(__name__ == "__main__"):
+  prefix = os.path.basename(__file__).replace(".py","")
+  run_tests.runner(function=run, prefix=prefix, disable=False)
