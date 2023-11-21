@@ -13,6 +13,7 @@ from qrefine import  cluster_restraints
 from qrefine.utils import hierarchy_utils
 from libtbx.utils import null_out
 from qrefine.tests.unit import run_tests
+from qrefine.command_line import granalyse
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -87,6 +88,9 @@ def run(prefix, verbose=False):
       r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
       rs.append(r)
     if(verbose): print(f, "min/max/mean:", rs.min_max_mean().as_tuple())
+    
+    d = max(granalyse.get_grad_wdelta(ref=g1, g=g2))
+    print(d, "get_grad_wdelta")
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
