@@ -130,6 +130,7 @@ def run(nproc=1,
   print('Running tests on %d processors' % nproc)
   # Individual test runner
   def _run_test(file_name, in_separate_directory=True):
+    t00=time.time()
     if in_separate_directory:
       fn = file_name.split('.')[0]
       if not os.path.exists(fn):
@@ -143,6 +144,7 @@ def run(nproc=1,
       rc.show_stdout()
     if in_separate_directory:
       os.chdir('..')
+    print('%sTime (this test): %6.2f (s)' % (' '*7, time.time()-t00))
     return rc.return_code
   # Collect test files
   tests = []
@@ -181,7 +183,7 @@ def run(nproc=1,
                                                     tests,
                                                     nproc,
                                                     ):
-    print('%sTotal time since started: %6.2f (s)' % (' '*7, time.time()-t0))
+    print('%sTime (total)    : %6.2f (s)' % (' '*7, time.time()-t0))
     if err_str:
       print('Error output from %s' % args)
       print(err_str)
