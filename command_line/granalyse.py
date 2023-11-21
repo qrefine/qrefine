@@ -9,7 +9,7 @@ import sys
 from qrefine.utils.mathbox import get_grad_mad, get_grad_angle
 from libtbx.utils import Usage
 import iotbx.pdb
-
+from scitbx.array_family import flex
 
 def get_help():
     raise Usage(
@@ -19,12 +19,12 @@ def get_help():
     The reference gradient is found automatically if not explicitly specified.
 
     Examples:
-    i)  qr.granalyse model.pdb  
+    i)  qr.granalyse model.pdb
     ii) qr.granalyse model.pdb --ref 3-15.npy
 
     Options:
       --ref <npy files> (set reference gradient)
-      --occ write to occupancy field (instead of beta) 
+      --occ write to occupancy field (instead of beta)
       --grad (write gradient instead of difference gradient into pdb)
       --help  (print this help)
     """
@@ -68,7 +68,17 @@ def get_grad_delta(ref_grad, grad):
 
 
 # error sccore aka weighted delta gradient (final paper version)
-def get_grad_wdelta(ref, g, name, do_debug):
+def get_grad_wdelta(ref, g, name=None, do_debug=False):
+    # Annoying type conversions..
+    if isinstance(ref, flex.vec3_double):
+      ref = np.array(ref.as_double())
+    if isinstance(g, flex.vec3_double):
+      g = np.array(g.as_double())
+    if isinstance(ref, flex.double):
+      ref = np.array(ref)
+    if isinstance(g, flex.double):
+      g = np.array(g)
+    #
     dim3 = int(ref.shape[0])
     dim = int(dim3 / 3)
     d = np.zeros(dim)
@@ -114,6 +124,7 @@ def get_grad_wdelta(ref, g, name, do_debug):
             ]
         )
     if do_debug:
+        assert name is not None
         np.savetxt(
             name + "-delta.txt",
             data,

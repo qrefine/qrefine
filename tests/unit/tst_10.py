@@ -24,6 +24,7 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from mmtbx import monomer_library
+from qrefine.command_line import granalyse
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -118,19 +119,14 @@ def run(prefix, verbose=False):
       else:
         fc = fq
       energy, gradients = fc.target_and_gradients(sites_cart=h.atoms().extract_xyz())
-      if(restraints=="qm"):
-        energy = energy*(kcal/mol)*(kcal/mol)/Hartree
-        gradients = gradients*(kcal/mol)*(kcal/mol)*(Bohr/Hartree)
-      gradients = gradients.as_double()
       result.append(gradients.deep_copy())
     #
-    diff = flex.abs(result[0] - result[1])
-    max_diff = flex.max(diff)
-    if verbose:  print("  max(diff_grad):", max_diff)
+    d = max(granalyse.get_grad_wdelta(ref=result[0], g=result[1]))
+    print("get_grad_wdelta:", d)
     if(restraints=="cctbx"):
-      assert max_diff < 1.e-9
+      assert d < 1.e-9
     else:
-      assert max_diff < 5.e-5
+      assert d < 0.5
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
