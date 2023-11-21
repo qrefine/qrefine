@@ -264,7 +264,7 @@ ATOM    127  HA3 GLY A  99      12.572   9.633  23.783  1.00 80.00           H
 TER
 """
 
-def run(prefix):
+def run(prefix, verbose=False):
   """
   Exercise gradients match: using clustering vs not using clustering.
   Altlocs.
@@ -272,20 +272,21 @@ def run(prefix):
 
   """
   for i, pdb_str_in in enumerate([pdb_str_in1, pdb_str_in2]):
-    if(i==0): print("Altlocs present", "-"*30)
-    else:     print("No altlocs", "-"*30)
+    if verbose:
+      if(i==0): print("Altlocs present", "-"*30)
+      else:     print("No altlocs", "-"*30)
     pdb_in = "%s.pdb"%prefix
     open(pdb_in, "w").write(pdb_str_in)
     #
     #for restraints in ["cctbx", "qm"]:
     for restraints in ["cctbx", ]:
-      print("  restraints:", restraints)
+      if verbose: print("  restraints:", restraints)
       #for two_buffers in [False, True]:
       for two_buffers in [False, ]:
-        print("    two_buffers=", two_buffers)
+        if verbose: print("    two_buffers=", two_buffers)
         #for clustering in ["true", "false"]:
         for clustering in ["false",]:
-          print("      clustering=", clustering)
+          if verbose: print("      clustering=", clustering)
 
           if(not clustering): expansion="true"
           else:               expansion="false"
@@ -307,17 +308,18 @@ def run(prefix):
             "max_iterations_refine=5",
             "two_buffers=%s"%str(two_buffers),
             "> %s.log"%prefix])
-          print()
-          print(cmd)
-          print()
+          if verbose: print()
+          if verbose: print(cmd)
+          if verbose: print()
           assert easy_run.call(cmd)==0
         g1 = easy_pickle.load("cluster_%s.pkl"%expansion)
         g2 = easy_pickle.load("cluster_%s.pkl"%expansion)
         g1 = g1.as_double()
         g2 = g2.as_double()
         diff = flex.abs(g1-g2)
-        print("        min/max/mean of (gradient1 - gradient2):", \
+        if verbose: print("        min/max/mean of (gradient1 - gradient2):", \
             diff.min_max_mean().as_tuple())
+        assert flex.max(diff) < 1.e-4, flex.max(diff)
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
