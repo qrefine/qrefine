@@ -4,20 +4,15 @@ from __future__ import absolute_import
 
 import os
 import random
-from ase.units import Hartree, Bohr, mol, kcal
 import iotbx.pdb
 import mmtbx.command_line
 import libtbx.load_env
 from scitbx.array_family import flex
-from libtbx.test_utils import approx_equal
 from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm, from_cctbx
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
 from qrefine.tests.unit import run_tests
-import mmtbx.model
-from qrefine import qr
-from qrefine.utils import hierarchy_utils
 from libtbx.utils import null_out
 
 import mmtbx.monomer_library.server
