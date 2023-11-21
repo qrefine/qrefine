@@ -9,8 +9,7 @@ import numpy as np
 from ase.io import write
 from ase.units import kcal, mol
 from ase.units import Hartree, Bohr
-from ase.calculators.general import Calculator
-
+from ase.calculators.calculator import Calculator
 import copy
 
 key_parameters = {
@@ -102,20 +101,22 @@ class GFNxTB(Calculator):
             raise RuntimeError('$XTBHOME not set')
         return command
 
+    # def run_qr(self, atoms_new, **kwargs):
+    #     self.atoms = atoms_new.copy()
+    #     self.run(self.atoms,coordinates=kwargs["coordinates"],charge=kwargs["charge"],pointcharges=kwargs["pointcharges"])
 
     def run_qr(self,
                atoms,   
                coordinates,
                charge,
-               pointcharges,
-               define_str=None):
+               pointcharges,**kwargs):
         import subprocess
         """
         Handels GFN-xTB calculations
         """
         # set the input file name
         self.atoms = atoms
-        method=self.key_parameters['method']
+        # method=self.key_parameters['method']
         self.coordinates = coordinates
         self.key_parameters['charge'] = charge
         foutput = self.label + '.out'
@@ -151,8 +152,8 @@ class GFNxTB(Calculator):
                 binary,
                 str(self.coordinates),
                 str(self.key_parameters["charge"]),
-                str(method),
-                str(nproc))
+                str(self.key_parameters['method']),
+                str(self.key_parameters['nproc']))
 
         # use this  block if xtb has trouble with charges on the commandline (again)
         # command='%s %s %s --grad --parallel %s > xtb.out' % (
