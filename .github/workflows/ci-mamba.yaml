@@ -78,8 +78,11 @@ jobs:
         cd $CONDA_PREFIX/lib/$PY/site-packages
         mkdir build 
         cd build 
+        # Use copy (cp) as scripts use os.path.isfile for detection, which fails on sys links
         mkdir -p probe/exe/
-        cp -r $CONDA_PREFIX/lib/$PY/site-packages/modules/probe/probe probe/exe/ 
+        cp $CONDA_PREFIX/lib/$PY/site-packages/modules/probe/probe probe/exe/ 
+        mkdir -p reduce/exe
+        cp $CONDA_PREFIX/lib/$PY/site-packages/modules/reduce/reduce_src/reduce reduce/exe/
 
     # - name: (force) update to latest cctbx-nightly
     #   run: |
