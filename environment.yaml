@@ -16,7 +16,7 @@ dependencies:
   - "blas=*=mkl"
   - networkx
   - pymongo
-  - ase
+  - ase==3.17.0
   - cxx-compiler
   - c-compiler
   - subversion
