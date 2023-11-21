@@ -37,7 +37,7 @@ calculate_charge = False
   .help = Will calculate total charge of molecule.
 append_to_end_of_model = False
   .type = bool
-reduce = False
+reduce = True
   .type = bool
   .help = Use reduce to add hydrogens or fall back to Phenix.elbow
 options
