@@ -78,17 +78,15 @@ def get_model():
   return mmtbx.restraints.manager(
      geometry = geometry, normalization = False), pdb_inp.crystal_symmetry(),h
 
-def run(prefix):
+def run(prefix, verbose=False):
   """
   Exercise combined energy and gradients from cluster qm.
   """
   for restraints in ["cctbx","qm"]:
-    if 0:
-      print("Using restraints:", restraints)
+    if verbose: print("Using restraints:", restraints)
     result = []
     for clustering in [True, False]:
-      if 0:
-        print("  clustering", clustering, "-"*30)
+      if verbose: print("  clustering", clustering, "-"*30)
       rm, cs, h = get_model()
       if(restraints=="qm"):
         fq = from_qm(
@@ -103,17 +101,20 @@ def run(prefix):
         fm = fragments(
           working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
           clustering_method          = betweenness_centrality_clustering,
-          maxnum_residues_in_cluster = 8,
+          maxnum_residues_in_cluster = 2,
           charge_embedding           = False,
           two_buffers                = False,
           fast_interaction           = True,
-          pdb_hierarchy              = h.deep_copy(), # deep copy just in case
+          pdb_hierarchy              = h,#.deep_copy(), # deep copy just in case
           qm_engine_name             = "mopac",
           crystal_symmetry           = cs)
+        fragment_sizes = [f.iselection().size() for f in fm.fragment_selections]
+        fragment_sizes.sort()
+        assert fragment_sizes == [44, 57, 65, 85]
         fc = from_cluster(
           restraints_manager = fq,
           fragment_manager   = fm,
-          parallel_params    =get_master_phil().extract())
+          parallel_params    = get_master_phil().extract())
       else:
         fc = fq
       energy, gradients = fc.target_and_gradients(sites_cart=h.atoms().extract_xyz())
@@ -124,10 +125,8 @@ def run(prefix):
       result.append(gradients.deep_copy())
     #
     diff = flex.abs(result[0] - result[1])
-    #for d in diff:
-    #  print(d)
     max_diff = flex.max(diff)
-    print("  max(diff_grad):", max_diff)
+    if verbose:  print("  max(diff_grad):", max_diff)
     if(restraints=="cctbx"):
       assert max_diff < 1.e-9
     else:
