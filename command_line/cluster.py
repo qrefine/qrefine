@@ -17,7 +17,7 @@ legend = """\
 Cluster a system into many small pieces
 """
 
-def run(pdb_file, log,  maxnum_residues_in_cluster=15):
+def run(pdb_file, log,  maxnum_residues_in_cluster=4):
   print("max number of residues in each cluster:\n", maxnum_residues_in_cluster, file=log)
   pdb_inp = iotbx.pdb.input(pdb_file)
   ph = pdb_inp.construct_hierarchy()
@@ -29,6 +29,7 @@ def run(pdb_file, log,  maxnum_residues_in_cluster=15):
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
     qm_run=False)# not run qm_calculation, just the clustering result
   print("Residue indices for each cluster:\n", fq.clusters, file=log)
+  print('# clusters  : ',len(fq.clusters), file=log)
 
 
 if (__name__ == "__main__"):
