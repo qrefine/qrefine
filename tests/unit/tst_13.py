@@ -87,18 +87,11 @@ def run(prefix):
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files","helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
-  ## compare the absolute value of gradients
-  # full
   restraints_entire = generate_restraints(cs, ph, clustering=False)
+  ## compare the absolute value of gradients
   g_entire = qm_gradient(ph, restraints_entire)
-  # cluster
   restraints_cluster = generate_restraints(cs, ph, clustering=True)
   g_cluster = qm_gradient(ph, restraints_cluster)
-
-  print(list(g_entire)[0])
-  print(list(g_cluster)[0])
-  diff = g_entire.as_double() - g_cluster.as_double()
-  print(f" MAX DIFF CHECK {flex.max(diff)}")
   assert approx_equal2(list(g_entire.as_double()),list(g_cluster.as_double()),0.05)
   #old & wrong, but kept to know the original intention: assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
   ## compare the geometry rmsd after 5 steps optimization
@@ -117,18 +110,17 @@ def generate_restraints(cs, ph, clustering=False):
   fq = from_qm(
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
-    # method= '--gfn1 -a 0.01 --gbsa water',
     crystal_symmetry=cs,
     clustering=clustering)
   if(clustering):
     fm = fragments(
      working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
      clustering_method          = betweenness_centrality_clustering,
-     maxnum_residues_in_cluster = 4,
+     maxnum_residues_in_cluster = 8,
      charge_embedding           = False,
-     two_buffers                = False,
+     two_buffers                = True,
      pdb_hierarchy              = ph,
-     qm_engine_name             = "xtb",
+     qm_engine_name             = "mopac",
      fast_interaction           = True,
      crystal_symmetry           = cs)
     restraints = from_cluster(
@@ -142,16 +134,10 @@ def generate_restraints(cs, ph, clustering=False):
 def qm_gradient(ph, restraints):
   sites_cart = ph.atoms().extract_xyz()
   e,g = restraints.target_and_gradients(sites_cart)
-  print(list(g)[0])
   return g
 
 def qm_opt(restraints, file):
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
-  # Later ASE versions require to have the Calculator on the Atoms object
-  # if isinstance(restraints,from_cluster):
-  #   sys.calc = restraints.restraints_manager.qm_engine
-  # else:
-  #   sys.calc= restraints.qm_engine
   opt = lbfgs_gradient(sys, restraints)
   opt.run(5)
   print("AFTER RUN")
