@@ -15,12 +15,10 @@ from qrefine.tests.unit import run_tests
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
-def run(prefix):
+def run(prefix, verbose=False, only_code='3'):
   """
   Exercise structure completion by finalise.py
-  
-  XXX TEST DISABLED!!! FAILS IF ENABLED.
-  
+  Runs only one example out of long list.
   """
   pdb_dir_cluster=os.path.join(qr_unit_tests,"babel_pdbs","clusters")
   expected_list_cluster = []
@@ -69,32 +67,31 @@ def run(prefix):
                        "1lzt",
                        "1ly2",
                        "1i07",
-                       "1a7y"]
-  pdb_dir_p1 = os.path.join(qrefine,"regression","datasets","p1")
-  complete_pdbs(expected_list_cluster, pdb_dir_cluster)
-  complete_pdbs(expected_list_p1, pdb_dir_p1)
+                       "1a7y"
+                       ]
+  pdb_dir_p1 = os.path.join(qrefine,"tests", "regression","datasets","p1")
+  complete_pdbs(expected_list_cluster, pdb_dir_cluster, only_code, verbose)
+  complete_pdbs(expected_list_p1, pdb_dir_p1, only_code, verbose)
 
-def complete_pdbs(expected_list, pdb_dir):
+def complete_pdbs(expected_list, pdb_dir, only_code, verbose):
   if(not (os.path.isdir(pdb_dir))):
     raise Sorry(pdb_dir + " not exist.  Please get its repository on GitHub")
-  #input_var = str(
-  #  raw_input("run finalise.py for all pdbs in %s will take quite a while (30~60 minutes), continue Y/N : " % pdb_dir))
-  if 1: #(input_var == "Y") or 1:
-    print('"%s"' % pdb_dir)
-    no_error_list = batch_run_finalise.run(pdb_dir,
-                                           nproc=1,
-                                          #  only_code='1il5',
-    )
-    # print(no_error_list)
-    #shutil.rmtree("./tmp")
-    expected_list.sort()
-    no_error_list.sort()
-    print("expected",expected_list)
-    print("no error list",no_error_list)
-    assert approx_equal(expected_list, no_error_list),'%s has different pdbs passing finalise.py'%pdb_dir
+  if 1:
+    if verbose: print('"%s"' % pdb_dir)
+    no_error_list = batch_run_finalise.run(
+      pdb_dir, nproc=1, only_code=only_code, verbose=verbose)
+    if verbose: print(no_error_list)
+    if only_code is not None:
+      assert only_code in no_error_list, only_code
+    else:
+      expected_list.sort()
+      no_error_list.sort()
+      assert approx_equal(expected_list, no_error_list),'%s has different pdbs passing finalise.py'%pdb_dir
+    if verbose: print("expected",expected_list)
+    if verbose: print("no error list",no_error_list)
   else:
-    print("skip")
+    if verbose: print("skip")
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
