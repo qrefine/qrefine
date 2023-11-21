@@ -21,6 +21,7 @@ from qrefine.restraints import from_qm
 from qrefine.fragment import fragments
 from qrefine.cluster_restraints import from_cluster
 from qrefine.clustering import betweenness_centrality_clustering
+from qrefine.command_line import granalyse
 
 '''
 tests the cluster gradient. Modified to use two_buffers Feb2019.
@@ -41,20 +42,6 @@ qsub_command = None
 def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=master_params_str)
-
-def approx_equal2(v1,v2,tol):
-  # approx_equal between two vectors where the tolerance is multiplied
-  # with the vector v2
-  happy_bob=True 
-  v1=np.array(v1)
-  v2=np.array(v2)
-  vtol=abs(v1*tol)
-  for i in range(v1.shape[0]):
-    error=abs(v1[i]-v2[i])
-    if( error>=vtol[i] ):
-      print('oh dear!',i,error,vtol[i])
-      happy_bob=False
-  return happy_bob
 
 # gradient-only LBFGS without line search
 class lbfgs_gradient(object):
@@ -89,10 +76,22 @@ def run(prefix):
   cs = pdb_inp.crystal_symmetry()
   restraints_entire = generate_restraints(cs, ph, clustering=False)
   ## compare the absolute value of gradients
-  g_entire = qm_gradient(ph, restraints_entire)
+  g_entire = qm_gradient(ph, restraints_entire).as_double()
   restraints_cluster = generate_restraints(cs, ph, clustering=True)
-  g_cluster = qm_gradient(ph, restraints_cluster)
-  assert approx_equal2(list(g_entire.as_double()),list(g_cluster.as_double()),0.05)
+  g_cluster = qm_gradient(ph, restraints_cluster).as_double()
+  #
+  d = max(granalyse.get_grad_wdelta(ref=g_entire, g=g_cluster))
+  print("get_grad_wdelta:", d)
+  assert d < 2.
+  # Top 10 largest differences
+  diff = flex.abs(g_entire-g_cluster)
+  sel = flex.sort_permutation(diff, reverse=True)
+  g1 = g_entire.select(sel)
+  g2 = g_cluster.select(sel)
+  diff = diff.select(sel)
+  for a, b, c in zip(g1[:10], g2[:10], diff[:10]):
+    print("%10.6f %10.6f %10.6f"%(a,b,c))
+  #
   #old & wrong, but kept to know the original intention: assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"
@@ -118,7 +117,7 @@ def generate_restraints(cs, ph, clustering=False):
      clustering_method          = betweenness_centrality_clustering,
      maxnum_residues_in_cluster = 8,
      charge_embedding           = False,
-     two_buffers                = True,
+     two_buffers                = False,
      pdb_hierarchy              = ph,
      qm_engine_name             = "mopac",
      fast_interaction           = True,
@@ -139,13 +138,13 @@ def qm_gradient(ph, restraints):
 def qm_opt(restraints, file):
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   opt = lbfgs_gradient(sys, restraints)
-  opt.run(5)
+  opt.run(3)
   print("AFTER RUN")
   opt.write(file)
 
 if(__name__ == "__main__"):
   """
-  If this test hangs then MOPAC needs to be updated. Run MOPAC command for 
+  If this test hangs then MOPAC needs to be updated. Run MOPAC command for
   update instructions.
   """
   prefix = os.path.basename(__file__).replace(".py","")

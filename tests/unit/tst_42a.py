@@ -10,6 +10,7 @@ from qrefine.tests.unit import run_tests
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
 from libtbx import easy_run
+from qrefine.command_line import granalyse
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
@@ -120,6 +121,9 @@ def run(prefix):
     diff = flex.abs(g1-g2)
     print("        min/max/mean of (gradient1 - gradient2):", \
       diff.min_max_mean().as_tuple())
+    d = max(granalyse.get_grad_wdelta(ref=g1, g=g2))
+    print("get_grad_wdelta:", d)
+    assert d < 1.e-4
 
 if(__name__ == '__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
