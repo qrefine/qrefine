@@ -32,17 +32,24 @@ quantum-refinement of bio-macromolecules.
  git clone https://github.com/qrefine/qrefine.git qrefine && cd qrefine
  ```
  3. Use the provided `environmental.yaml` to generate a new conda environment called `qrefine`. After installation activate the enviroment. The activation (unless set to automatic) has to be done for every new shell.
- ```
- mamba env create -n qrefine -f environmental.yaml
- mamba activate qrefine
- ```
+
+    * For a basic installation:
+         ```
+         mamba create -n qrefine qrefine cctbx networkx xtb mopac -c qrefine -c cctbx-nightly
+         ```
+
+    * for a (large) installation with pytorch/cuda
+         ```
+         mamba env create -n qrefine -f environmental.yaml
+         mamba activate qrefine
+         ```
  4. We need to install missing restraints libraries and the `reduce` and `probe` programs. This is handled by a bash script.
  ```
  bash ./build_into_conda.sh
  ```
  5. run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
- Expert users proficient with installing cctbx via bootstrap.py can extract the needed snippets from the bash  script to install the missing parts.
+ Expert users proficient with installing cctbx via bootstrap.py have to extract the needed snippets from the bash  script to install the missing parts.
 
 <!-- ### conda package
 A conda package is provided for qrefine. We currently make use of the nightly build of cctbx.
