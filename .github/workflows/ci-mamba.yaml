@@ -7,6 +7,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  # run daily to ensure that changes to dependenices are not breaking tests  
+  schedule:
+    - cron:  '30 21 * * *'  
   workflow_dispatch:
 
 env:
@@ -140,14 +143,15 @@ jobs:
         name: tests-dir
         path: ./testing_workdir
 
-    - name: Report Status
-      if: always()
-      uses: ravsamhq/notify-slack-action@v2
-      with:
-        status: ${{ job.status }}
-        notify_when: 'failure'
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.ACTION_MONITORING_SLACK }}     
+    # Too much noise at the moment
+    #- name: Report Status
+    #  if: always()
+    #  uses: ravsamhq/notify-slack-action@v2
+    #  with:
+    #    status: ${{ job.status }}
+    #    notify_when: 'failure'
+    #  env:
+    #    SLACK_WEBHOOK_URL: ${{ secrets.ACTION_MONITORING_SLACK }}     
         
 
 
