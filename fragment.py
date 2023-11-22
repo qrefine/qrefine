@@ -1,7 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
-import time
 import copy
 import itertools
 import libtbx.load_env
@@ -62,6 +61,7 @@ class fragments(object):
       save_clusters              = False,
       select_within_radius       = 10.0,
       bond_with_altloc_flag      = True):
+    # Internals / Externals
     self.bond_with_altloc_flag = bond_with_altloc_flag
     self.clustering = clustering
     self.select_within_radius = select_within_radius
@@ -78,6 +78,10 @@ class fragments(object):
     self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
     self.save_clusters = save_clusters
+    self.expansion = None
+    self.expansion_file = None
+    self.pdb_hierarchy_super = None
+    #
     raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
     self.charge_service = charges_class(
         raw_records           = raw_records,
@@ -87,10 +91,14 @@ class fragments(object):
         os.mkdir(self.working_folder)
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
-    self.get_altloc_molecular_indices()
-    if(1):
-      self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
+    self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
                            if atom.pdb_label_columns()[4]!=" "]
+    self._expand()
+
+    self.qm_run = qm_run
+    self.set_up_cluster_qm()
+
+  def _expand(self):
     self.expansion = expand(
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
@@ -98,11 +106,8 @@ class fragments(object):
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
     ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
-    self.expansion.write_super_cell_selected_in_sphere(file_name=self.expansion_file)
-    self.qm_run = qm_run
-    #t0 = time.time()
-    self.set_up_cluster_qm()
-    #print "time taken for interaction graph",(time.time() - t0)
+    self.expansion.write_super_cell_selected_in_sphere(
+      file_name=self.expansion_file)
 
   def update_xyz(self,sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
@@ -128,21 +133,7 @@ class fragments(object):
       self.get_fragments()
       self.get_fragment_hierarchies_and_charges()
 
-  def get_altloc_molecular_indices(self):
-    self.altloc_molecular_indices=[]
-    index = 0
-    for chain in self.pdb_hierarchy.chains():
-      for residue_group in chain.residue_groups():
-        index +=1
-        if(residue_group.have_conformers()):
-          self.altloc_molecular_indices.append(index)
-
-  def set_up_cluster_qm(self, sites_cart=None):
-    if(sites_cart is not None):
-      ## update the selection of expansion_sphere, and its
-      ## geometry_restraints_manager and pdb_hierarchy
-      self.pdb_hierarchy_super = self.expansion.update(
-        sites_cart=sites_cart).ph_super_sphere
+  def set_up_cluster_qm(self):
     ###get clusters and their buffer regions using yoink and graph clustering.
     try:
       pre_clusters = self.clusters
@@ -154,7 +145,6 @@ class fragments(object):
       self.get_fragment_hierarchies_and_charges()
 
   def get_clusters(self):
-    #print(self.clustering)
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
     if(not self.clustering):
       return(range(1,n_residues+1,1) )
@@ -164,25 +154,14 @@ class fragments(object):
     self.interaction_list += self.backbone_connections
     ## isolate altloc molecules
     new_interaction_list = []
-    if(0):
-      for item in self.interaction_list:
-        contain_altlocs = set(self.altloc_molecular_indices)&set(item)
-        if(len(contain_altlocs)==0):
-          new_interaction_list.append(item)
-      self.interaction_list = new_interaction_list
     from . import clustering
-    # t0 = time.time()
     self.clustering = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size = n_residues,
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster)
     clusters = self.clustering.get_clusters()
-    # self.clusters=sorted(clusters, key=len, reverse=True)
     self.clusters=sorted(clusters,
      key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
-    # self.clusters = sorted(clusters,
-    #   lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0)
-    # print "time taken for clustering", (time.time() - t0)
 
   def get_fragments(self):
 
@@ -192,6 +171,7 @@ class fragments(object):
         if(index+1 in selected_atom_indices_in_sub_ph):
           selected_atom_indices_in_entire_ph.append(int(number))
       return selected_atom_indices_in_entire_ph
+
     self.pdb_hierarchy_super.atoms_reset_serial()
     phs = [self.pdb_hierarchy_super]
     altloc_size = self.pdb_hierarchy_super.altloc_indices().size()
