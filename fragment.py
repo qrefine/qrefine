@@ -54,12 +54,12 @@ class fragments(object):
       qm_engine_name             = None,
       crystal_symmetry           = None,
       clustering                 = True,
-      qm_run                     = True,
       cif_objects                = None,
       debug                      = False,
       charge_cutoff              = 8.0,
       save_clusters              = False,
       select_within_radius       = 10.0,
+      clusters_only              = False,
       bond_with_altloc_flag      = True):
     # Internals / Externals
     self.bond_with_altloc_flag = bond_with_altloc_flag
@@ -81,6 +81,8 @@ class fragments(object):
     self.expansion = None
     self.expansion_file = None
     self.pdb_hierarchy_super = None
+    self.clusters = None
+    self.clusters_only = clusters_only
     #
     raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
     self.charge_service = charges_class(
@@ -95,7 +97,6 @@ class fragments(object):
                            if atom.pdb_label_columns()[4]!=" "]
     self._expand()
 
-    self.qm_run = qm_run
     self.set_up_cluster_qm()
 
   def _expand(self):
@@ -109,38 +110,15 @@ class fragments(object):
     self.expansion.write_super_cell_selected_in_sphere(
       file_name=self.expansion_file)
 
-  def update_xyz(self,sites_cart):
+  def update_xyz(self, sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    pre_atoms=[atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
-    self.expansion = self.expansion.update_xyz(
-                                 sites_cart=sites_cart)
+    self.expansion = self.expansion.update_xyz(sites_cart=sites_cart)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
-
-# DEL    new_atoms=[ atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
-# DEL    #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size):
-# DEL    if(pre_atoms!=new_atoms):
-# DEL      if(self.debug):
-# DEL        print("the content of the super sphere has been changed,reset up fragments")
-# DEL      #Note: the atom size of self.expansion.ph_super_sphere gets changeed,
-# DEL      #while the atom size in super_sphere_geometry_restraints_manager
-# DEL      #does not get changed. Re-generate the object of expand
-# DEL      if(1):
-# DEL        self.expansion = expand(
-# DEL          pdb_hierarchy        = self.pdb_hierarchy,
-# DEL          crystal_symmetry     = self.crystal_symmetry,
-# DEL          select_within_radius = self.select_within_radius)
-# DEL        self.pdb_hierarchy_super = self.expansion.ph_super_sphere
-# DEL      self.get_fragments()
-# DEL      self.get_fragment_hierarchies_and_charges()
 
   def set_up_cluster_qm(self):
     ###get clusters and their buffer regions using yoink and graph clustering.
-    try:
-      pre_clusters = self.clusters
-    except:
-      pre_clusters = None
     self.get_clusters()
-    if(self.qm_run is True and pre_clusters!=self.clusters):
+    if not self.clusters_only:
       self.get_fragments()
       self.get_fragment_hierarchies_and_charges()
 
@@ -161,7 +139,7 @@ class fragments(object):
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster)
     clusters = self.clustering.get_clusters()
     self.clusters=sorted(clusters,
-     key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
+      key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
 
   def get_fragments(self):
 

@@ -45,20 +45,12 @@ class expand(object):
     #
     self.update()
 
-  def update(self, sites_cart=None):# DEL , redo_super_cell=False):
+  def update(self, sites_cart=None):
     if(sites_cart is not None):
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-      # DEL if(not redo_super_cell):
       self.ph_super_sphere = self.SCM.update(sites_cart=sites_cart)
-    # DEL if(redo_super_cell):
-    # DEL   self.SCM = cctbx_super_cell.manager(
-    # DEL     pdb_hierarchy        = self.pdb_hierarchy,
-    # DEL     crystal_symmetry     = self.crystal_symmetry,
-    # DEL     select_within_radius = self.select_within_radius)
-    # DEL   self.ph_super_sphere = self.SCM.super_sphere_hierarchy.deep_copy()
-    # DEL   self.cs_box = self.SCM.cs_super_sphere
-    if(self.create_restraints_manager):
-      if(self.super_sphere_geometry_restraints_manager is None): # DEL  or redo_super_cell):
+    if(self.create_restraints_manager and
+      self.super_sphere_geometry_restraints_manager is None):
         self.update_super_sphere_geometry_restraints_manager()
     return self
 

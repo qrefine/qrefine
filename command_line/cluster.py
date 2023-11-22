@@ -26,7 +26,7 @@ def run(pdb_file, log,  maxnum_residues_in_cluster=4):
     pdb_hierarchy=ph,
     crystal_symmetry=cs,
     maxnum_residues_in_cluster=int(maxnum_residues_in_cluster),
-    qm_run=False)# not run qm_calculation, just the clustering result
+    clusters_only = True)
   print("Residue indices for each cluster:\n", fq.clusters, file=log)
   print('# clusters  : ',len(fq.clusters), file=log)
 
