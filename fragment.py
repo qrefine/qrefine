@@ -116,22 +116,22 @@ class fragments(object):
                                  sites_cart=sites_cart)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
 
-    new_atoms=[ atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
-    #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size):
-    if(pre_atoms!=new_atoms):
-      if(self.debug):
-        print("the content of the super sphere has been changed,reset up fragments")
-      #Note: the atom size of self.expansion.ph_super_sphere gets changeed,
-      #while the atom size in super_sphere_geometry_restraints_manager
-      #does not get changed. Re-generate the object of expand
-      if(1):
-        self.expansion = expand(
-          pdb_hierarchy        = self.pdb_hierarchy,
-          crystal_symmetry     = self.crystal_symmetry,
-          select_within_radius = self.select_within_radius)
-        self.pdb_hierarchy_super = self.expansion.ph_super_sphere
-      self.get_fragments()
-      self.get_fragment_hierarchies_and_charges()
+# DEL    new_atoms=[ atom.pdb_label_columns() for atom in self.pdb_hierarchy_super.atoms()]
+# DEL    #if(self.expansion.ph_super_sphere.atoms_size()!=pre_size):
+# DEL    if(pre_atoms!=new_atoms):
+# DEL      if(self.debug):
+# DEL        print("the content of the super sphere has been changed,reset up fragments")
+# DEL      #Note: the atom size of self.expansion.ph_super_sphere gets changeed,
+# DEL      #while the atom size in super_sphere_geometry_restraints_manager
+# DEL      #does not get changed. Re-generate the object of expand
+# DEL      if(1):
+# DEL        self.expansion = expand(
+# DEL          pdb_hierarchy        = self.pdb_hierarchy,
+# DEL          crystal_symmetry     = self.crystal_symmetry,
+# DEL          select_within_radius = self.select_within_radius)
+# DEL        self.pdb_hierarchy_super = self.expansion.ph_super_sphere
+# DEL      self.get_fragments()
+# DEL      self.get_fragment_hierarchies_and_charges()
 
   def set_up_cluster_qm(self):
     ###get clusters and their buffer regions using yoink and graph clustering.

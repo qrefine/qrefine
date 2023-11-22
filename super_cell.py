@@ -45,20 +45,20 @@ class expand(object):
     #
     self.update()
 
-  def update(self, sites_cart=None, redo_super_cell=False):
+  def update(self, sites_cart=None):# DEL , redo_super_cell=False):
     if(sites_cart is not None):
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-      if(not redo_super_cell):
-        self.ph_super_sphere = self.SCM.update(sites_cart=sites_cart)
-    if(redo_super_cell):
-      self.SCM = cctbx_super_cell.manager(
-        pdb_hierarchy        = self.pdb_hierarchy,
-        crystal_symmetry     = self.crystal_symmetry,
-        select_within_radius = self.select_within_radius)
-      self.ph_super_sphere = self.SCM.super_sphere_hierarchy.deep_copy()
-      self.cs_box = self.SCM.cs_super_sphere
+      # DEL if(not redo_super_cell):
+      self.ph_super_sphere = self.SCM.update(sites_cart=sites_cart)
+    # DEL if(redo_super_cell):
+    # DEL   self.SCM = cctbx_super_cell.manager(
+    # DEL     pdb_hierarchy        = self.pdb_hierarchy,
+    # DEL     crystal_symmetry     = self.crystal_symmetry,
+    # DEL     select_within_radius = self.select_within_radius)
+    # DEL   self.ph_super_sphere = self.SCM.super_sphere_hierarchy.deep_copy()
+    # DEL   self.cs_box = self.SCM.cs_super_sphere
     if(self.create_restraints_manager):
-      if(self.super_sphere_geometry_restraints_manager is None or redo_super_cell):
+      if(self.super_sphere_geometry_restraints_manager is None): # DEL  or redo_super_cell):
         self.update_super_sphere_geometry_restraints_manager()
     return self
 
