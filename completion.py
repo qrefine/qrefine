@@ -93,7 +93,6 @@ def iterate_over_threes(hierarchy,
     else:
       for i in range(len(three)):
         rg = get_residue_group(three[i])
-        assert 0
         conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
                                                 rg,
                                                 )
@@ -142,7 +141,6 @@ def iterate_using_original(hierarchy,
                            use_capping_hydrogens=False,
                            append_to_end_of_model=False,
                            ):
-  assert 0
   slots=[]
   start=18
   assert len(original_hierarchy.models())==1
@@ -592,9 +590,8 @@ def complete_pdb_hierarchy(hierarchy,
     sites_cart = hierarchy.atoms().extract_xyz()
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
   #
-  # moved to mmtbx.ligands
+  # maybe more to cctbx
   #
-  assert original_hierarchy is None
   add_terminal_hydrogens_qr( ppf.all_chain_proxies.pdb_hierarchy,
                              ppf.geometry_restraints_manager(),
                              use_capping_hydrogens=use_capping_hydrogens,
@@ -681,6 +678,7 @@ def run(pdb_filename=None,
                                                    # code and Molprobity
     pdb_filename=pdb_filename,   # used just for naming of debug output
     pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why
+    original_pdb_filename=original_pdb_filename,
     verbose=False,
     use_reduce=use_reduce
   )

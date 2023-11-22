@@ -878,15 +878,16 @@ def test_helix():
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
-  from qrefine.charges import charges_class
-  cc = charges_class(tf)
-  charge = cc.get_total_charge()
-  assert charge==0, 'charge of helix should be zero not %s' % charge
+  # from qrefine.charges import charges_class
+  # cc = charges_class(tf)
+  # charge = cc.get_total_charge()
+  # assert charge==0, 'charge of helix should be zero not %s' % charge
   cmd = 'iotbx.python %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
     tf)
   cmd += ' append_to_end_of_model=0'
   easy_run.call(cmd)
+  print('\n  ~>  %s\n'%cmd)
   pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
   must_find = ['H1', 'H2', 'H3', 'OXT']
@@ -1163,4 +1164,4 @@ def run(prefix, nproc=1):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

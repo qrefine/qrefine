@@ -83,6 +83,7 @@ class charges_class:
                electrons=True, # hidden
                verbose=False,
                ):
+    assert 0
     self.verbose=verbose
     self.pdb_filename=pdb_filename
     self.raw_records=raw_records
