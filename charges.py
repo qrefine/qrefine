@@ -73,6 +73,8 @@ class chemical_component_class(dict):
 
 class charges_class:
   def __init__(self,
+               pdb_hierarchy=None,
+               crystal_symmetry=None,
                pdb_filename=None,
                raw_records=None,
                pdb_inp=None,
@@ -85,22 +87,26 @@ class charges_class:
     self.pdb_filename=pdb_filename
     self.raw_records=raw_records
     assert not (ligand_cif_file_names and cif_objects)
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
-                                            raw_records=raw_records,
-                                            pdb_inp=pdb_inp,
-                                            cif_objects=cif_objects,
-                                           )
+
+    ppf = hierarchy_utils.get_processed_pdb(
+      pdb_filename = pdb_filename,
+      raw_records  = raw_records,
+      pdb_inp      = pdb_inp,
+      pdb_hierarchy = pdb_hierarchy,
+      crystal_symmetry = crystal_symmetry,
+      cif_objects  = cif_objects)
+
     self.inter_residue_bonds = get_inter_residue_bonds(ppf)
+    cs = crystal_symmetry
+    if cs is None:
+      cs = ppf.all_chain_proxies.pdb_inp.crystal_symmetry_from_cryst1()
     self.update_pdb_hierarchy(
-      ppf.all_chain_proxies.pdb_hierarchy,
-      ppf.all_chain_proxies.pdb_inp.crystal_symmetry_from_cryst1(),
-    )
-    self.pdb_inp = ppf.all_chain_proxies.pdb_inp
+      pdb_hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
+      crystal_symmetry=cs)
+
     assert self.crystal_symmetry, 'There is no CRYST1 record in the input file'
 
-    self.hetero_charges = get_hetero_charges(self.pdb_inp,
-                                             self.pdb_hierarchy,
-    )
+    self.hetero_charges = None
     if not self.hetero_charges:
       # some defaults
       self.hetero_charges = default_ion_charges

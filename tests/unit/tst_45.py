@@ -8,7 +8,6 @@ import libtbx.load_env
 from scitbx.array_family import flex
 import mmtbx.model
 from qrefine import qr, refine
-from qrefine.fragment import fragment_extracts
 from qrefine import cluster_restraints
 from qrefine.tests.unit import run_tests
 from qrefine.utils import hierarchy_utils

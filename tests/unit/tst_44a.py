@@ -8,7 +8,6 @@ from scitbx.array_family import flex
 import mmtbx.model
 from qrefine import qr, refine
 
-from qrefine.fragment import fragment_extracts
 from qrefine import  cluster_restraints
 from qrefine.utils import hierarchy_utils
 from libtbx.utils import null_out
@@ -56,8 +55,8 @@ def run(prefix, verbose=False):
   """
   path = qr_unit_tests+"/data_files/"
   files = ["m2_complete_box_large.pdb",
-           "p212121.pdb", 
-           "p1_box_small.pdb", 
+           "p212121.pdb",
+           "p1_box_small.pdb",
            "p1_box_large.pdb"
            ]
   for f in files:
@@ -72,7 +71,7 @@ def run(prefix, verbose=False):
     rm2, sites_cart = get_restraints_manager(expansion=True, file_name=fn)
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
-    if(verbose): 
+    if(verbose):
       atoms = ph.atoms()
       ds = flex.sqrt((g1 - g2).dot())
       for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):
@@ -85,7 +84,7 @@ def run(prefix, verbose=False):
       r = abs(abs(a)-abs(b))/(abs(a)+abs(b))*2.*100
       rs.append(r)
     if(verbose): print(f, "min/max/mean:", rs.min_max_mean().as_tuple())
-    
+
     d = max(granalyse.get_grad_wdelta(ref=g1, g=g2))
     if(verbose): print(d, "get_grad_wdelta")
     assert d < 10. # XXX Is this reasonable?

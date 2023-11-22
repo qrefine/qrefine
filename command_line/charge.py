@@ -85,7 +85,7 @@ def run(args, log):
     print('version: ',__version__, file=log)
   del sys.argv[1:]
   cc = charges.charges_class(
-    params.model_file_name,
+    pdb_filename = params.model_file_name,
     ligand_cif_file_names=params.ligand_cif_file_name,
     electrons=params.electrons,
     verbose=params.verbose,

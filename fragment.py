@@ -60,7 +60,7 @@ class fragments(object):
       select_within_radius       = 10.0,
       clusters_only              = False,
       bond_with_altloc_flag      = True):
-    # Internals / Externals
+    #
     self.bond_with_altloc_flag = bond_with_altloc_flag
     self.select_within_radius = select_within_radius
     self.charge_embedding = charge_embedding
@@ -81,11 +81,8 @@ class fragments(object):
     self.pdb_hierarchy_super = None
     self.clusters = None
     self.clusters_only = clusters_only
+    self.charge_service = None
     #
-    raw_records = pdb_hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
-    self.charge_service = charges_class(
-        raw_records           = raw_records,
-        ligand_cif_file_names = cif_objects)
     if(os.path.exists(self.working_folder) is not True):
       if(make_working_folder):
         os.mkdir(self.working_folder)
@@ -94,7 +91,6 @@ class fragments(object):
     self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
                            if atom.pdb_label_columns()[4]!=" "]
     self._expand()
-
     self.set_up_cluster_qm()
 
   def _expand(self):
@@ -103,7 +99,6 @@ class fragments(object):
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = self.select_within_radius)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
-    ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
     self.expansion.write_super_cell_selected_in_sphere(
       file_name=self.expansion_file)
@@ -114,7 +109,6 @@ class fragments(object):
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
 
   def set_up_cluster_qm(self):
-    ###get clusters and their buffer regions using yoink and graph clustering.
     self.get_clusters()
     if not self.clusters_only:
       self.get_fragments()
@@ -149,7 +143,6 @@ class fragments(object):
       ## generate pdb_hierarchy for each altloc case
       phs = []
       asc = self.pdb_hierarchy_super.atom_selection_cache()
-      if(self.debug):self.pdb_hierarchy_super.write_pdb_file(file_name="super.pdb")
       ## the first one altloc is " ", A B.. altlocs start from 1
       altlocs = self.pdb_hierarchy_super.altloc_indices().keys()
       altlocs.sort()
@@ -158,7 +151,6 @@ class fragments(object):
         sel = asc.selection("altloc '%s' or altloc '' or altloc ' '"%altloc)
         ph_altloc = self.pdb_hierarchy_super.select(sel)
         phs.append(ph_altloc)
-        if(self.debug):ph_altloc.write_pdb_file(file_name="super-"+str(altloc)+".pdb")
     cluster_atoms_in_phs = []
     fragment_super_atoms_in_phs = []
     clusters = self.clusters##from graph clustring, molecular indices
@@ -185,11 +177,8 @@ class fragments(object):
                                                      atoms_in_one_fragment, ph)
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
         molecules_in_fragments.append(molecules_in_one_fragment)
-        if(0):
-          print(i, "atoms in cluster: ", atoms_in_one_cluster)
-        if True:
-          atoms = self.pdb_hierarchy_super.atoms()
-          check_selection_integrity(atoms, atoms_in_one_cluster)
+        atoms = self.pdb_hierarchy_super.atoms()
+        check_selection_integrity(atoms, atoms_in_one_cluster)
       # print "cluster->fragments done"
       if(self.two_buffers):## define a second buffer layer
         # print "adding second layer"
@@ -347,10 +336,6 @@ class fragments(object):
         self.fragment_super_atoms[i])
       fragment_super_hierarchy = self.pdb_hierarchy_super.select(
         fragment_super_selection)
-      if(self.debug):
-        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"-origin-cs.pdb")
-        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+".pdb",
-          crystal_symmetry=self.expansion.cs_box)
       charge_hierarchy = completion.run(pdb_hierarchy=fragment_super_hierarchy,
                       crystal_symmetry=self.expansion.cs_box,
                       model_completion=False,
@@ -358,35 +343,47 @@ class fragments(object):
       self.fragment_capped_initial.append(charge_hierarchy)
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.expansion.cs_box)
-      if(1):charge_hierarchy.write_pdb_file(file_name=str(i)+"_capping_tmp.pdb",
-          crystal_symmetry=self.expansion.cs_box)
 
-      self.charge_service.update_pdb_hierarchy(
-        charge_hierarchy,
-        self.expansion.cs_box,
-      )
-      #TODO: do not why self.charge_service could not right charge
-      #charge = self.charge_service.get_total_charge()
-      charge = charges_class(pdb_filename=str(i)+"_capping_tmp.pdb").get_total_charge()
-      #the capping pdb file causes problem for tests, remove it
-      os.remove(str(i)+"_capping_tmp.pdb")
+      self.charge_service = charges_class(
+        pdb_hierarchy=charge_hierarchy,
+        crystal_symmetry=self.expansion.cs_box).get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
-      self.fragment_charges.append(charge)
+      self.fragment_charges.append(self.charge_service)
       cluster_selection = pdb_hierarchy_select(
         self.pdb_hierarchy.atoms_size(), self.cluster_atoms[i])
       self.cluster_selections.append(cluster_selection)
       s = fragment_selection==cluster_selection
       buffer_selection = fragment_selection.deep_copy().set_selected(s, False)
       self.buffer_selections.append(buffer_selection)
-      if(self.debug):
-        fragment_super_hierarchy.write_pdb_file(file_name=str(i)+"_frag.pdb",
-          crystal_symmetry=self.expansion.cs_box)
-        cluster_pdb_hierarchy = self.pdb_hierarchy.select(cluster_selection)
-        cluster_pdb_hierarchy.write_pdb_file(file_name=str(i)+"_cluster.pdb",
-          crystal_symmetry=self.expansion.cs_box)
       check_hierarchy(fragment_super_hierarchy)
+
+  def get_fragment_extracts(self):
+    return group_args(
+      cluster_selections        = self.cluster_selections,
+      fragment_charges          = self.fragment_charges,
+      fragment_selections       = self.fragment_selections,
+      fragment_super_selections = self.fragment_super_selections,
+      fragment_capped_initial   = self.fragment_capped_initial,
+      working_folder            = self.working_folder,
+      fragment_super_atoms      = self.fragment_super_atoms,
+      cluster_atoms             = self.cluster_atoms,
+      qm_engine_name            = self.qm_engine_name,
+      charge_embedding          = self.charge_embedding,
+      crystal_symmetry          = self.crystal_symmetry,
+      pdb_hierarchy             = self.pdb_hierarchy,
+      pdb_hierarchy_super       = self.pdb_hierarchy_super,
+      expansion_cs              = self.expansion.cs_box,
+      buffer_selections         = self.buffer_selections,
+      fragment_scales           = self.fragment_scales,
+      debug                     = self.debug,
+      charge_service            = self.charge_service,
+      charge_cutoff             = self.charge_cutoff,
+      expansion_file            = self.expansion_file,
+      save_clusters             = self.save_clusters,
+      super_sphere_geometry_restraints_manager = \
+        self.expansion.super_sphere_geometry_restraints_manager)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
@@ -488,32 +485,6 @@ def write_mm_charge_file(fragment_extracts, index):
       raise Sorry("There is no point charge file")
     file_name = os.path.abspath(file_name)
   return file_name
-
-def fragment_extracts(fragments):
-  return group_args(
-    cluster_selections   = fragments.cluster_selections,
-    fragment_charges     = fragments.fragment_charges,
-    fragment_selections  = fragments.fragment_selections,
-    fragment_super_selections=fragments.fragment_super_selections,
-    fragment_capped_initial=fragments.fragment_capped_initial,
-    super_sphere_geometry_restraints_manager= \
-          fragments.expansion.super_sphere_geometry_restraints_manager,
-    working_folder       = fragments.working_folder,
-    fragment_super_atoms = fragments.fragment_super_atoms,
-    cluster_atoms        = fragments.cluster_atoms,
-    qm_engine_name       = fragments.qm_engine_name,
-    charge_embedding     = fragments.charge_embedding,
-    crystal_symmetry     = fragments.crystal_symmetry,
-    pdb_hierarchy        = fragments.pdb_hierarchy,
-    pdb_hierarchy_super  = fragments.pdb_hierarchy_super,
-    expansion_cs         = fragments.expansion.cs_box,
-    buffer_selections    = fragments.buffer_selections,
-    fragment_scales      = fragments.fragment_scales,
-    debug                = fragments.debug,
-    charge_service       = fragments.charge_service,
-    charge_cutoff        = fragments.charge_cutoff,
-    expansion_file       = fragments.expansion_file,
-    save_clusters        = fragments.save_clusters)
 
 def write_cluster_and_fragments_pdbs(fragments,directory):
   # write current fragment and cluster PDBs into ./<directory>

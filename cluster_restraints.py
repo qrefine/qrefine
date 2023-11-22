@@ -8,7 +8,7 @@ from libtbx.utils import Sorry
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
-from .fragment import fragment_extracts, write_cluster_and_fragments_pdbs
+from .fragment import write_cluster_and_fragments_pdbs
 from .restraints import from_qm
 from libtbx import group_args
 
@@ -45,7 +45,7 @@ class from_cluster(object):
     self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
       file_name=self.restraints_manager.file_name,
       crystal_symmetry=self.fragment_manager.expansion.cs_box)
-    fragment_extracts_obj = fragment_extracts(self.fragment_manager)
+    fragment_extracts_obj = self.fragment_manager.get_fragment_extracts()
     # super_sphere_geometry_restraints_manager will cause qusb submits
     # a single job instead of batch jobs
     if(isinstance(self.restraints_manager, from_qm)):

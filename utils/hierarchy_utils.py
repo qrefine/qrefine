@@ -57,6 +57,8 @@ def get_pdb_interpretation_params():
   return params
 
 def get_processed_pdb(pdb_filename=None,
+                      pdb_hierarchy=None,
+                      crystal_symmetry=None,
                       raw_records=None,
                       pdb_inp=None,
                       params=None,
@@ -73,6 +75,8 @@ def get_processed_pdb(pdb_filename=None,
     mon_lib_srv           = mon_lib_srv,
     ener_lib              = ener_lib,
     params                = params,
+    pdb_hierarchy=pdb_hierarchy,
+    crystal_symmetry=crystal_symmetry,
     file_name             = pdb_filename,
     pdb_inp               = pdb_inp,
     raw_records           = raw_records,

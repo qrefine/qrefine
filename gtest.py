@@ -27,7 +27,7 @@ local_phil = """
 def run_g_test(params, model, weights, start_fmodel, log):
   import numpy as np
   import time
-  from .fragment import fragment_extracts, write_cluster_and_fragments_pdbs
+  from .fragment import write_cluster_and_fragments_pdbs
   from .refine import create_fragment_manager, create_restraints_manager,create_calculator
 
   # determine what kind of buffer to calculate
@@ -80,7 +80,7 @@ def run_g_test(params, model, weights, start_fmodel, log):
       print('two_buffers on, pc on', file=log)
       params.cluster.charge_embedding=True
       params.cluster.two_buffers=True
-    
+
     for max_cluster in cluster_scan:
       idl.append([ig,max_cluster])
       print('g_mode: %s' % (" - ".join(map(str,idl[idx]))), file=log)
@@ -102,7 +102,8 @@ def run_g_test(params, model, weights, start_fmodel, log):
         # save fragment data. below works
         # better way is to make a single PDB file with chain IDs
         label="-".join(map(str,idl[idx]))
-        write_cluster_and_fragments_pdbs(fragments=fragment_extracts(frags),directory=label)
+        write_cluster_and_fragments_pdbs(
+          fragments=frags.get_fragment_extracts(),directory=label)
 
       calculator_manager = create_calculator(
         weights            = weights,
