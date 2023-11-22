@@ -89,7 +89,6 @@ def iterate_over_threes(hierarchy,
           append_to_end_of_model=append_to_end_of_model,
           )
         if rc:
-          print('rc1',rc)
           additional_hydrogens.append(rc)
     else:
       for i in range(len(three)):
@@ -131,7 +130,6 @@ def iterate_over_threes(hierarchy,
         use_capping_hydrogens=use_capping_hydrogens,
         append_to_end_of_model=append_to_end_of_model,
       )
-      print(rc)
       if rc: additional_hydrogens.append(rc)
       #hierarchy.reset_i_seq_if_necessary()
     else:
@@ -144,6 +142,7 @@ def iterate_using_original(hierarchy,
                            use_capping_hydrogens=False,
                            append_to_end_of_model=False,
                            ):
+  assert 0
   slots=[]
   start=18
   assert len(original_hierarchy.models())==1
@@ -282,7 +281,6 @@ def add_terminal_hydrogens_qr(
     occupancy=1.,
     verbose=False,
     ):
-  assert 0
   # add N terminal hydrogens because Reduce only does it to resseq=1
   # needs to be alt.loc. aware for non-quantum-refine
   if original_hierarchy:
@@ -317,6 +315,7 @@ def add_terminal_hydrogens_qr(
     if rc: additional_hydrogens += [rc]
 
   if append_to_end_of_model and additional_hydrogens:
+    from mmtbx.ligands.ready_set_utils import _add_atoms_from_chains_to_end_of_hierarchy
     tmp = []
     for group in additional_hydrogens:
       for chain in group:
@@ -595,17 +594,14 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # moved to mmtbx.ligands
   #
-  from mmtbx.ligands.ready_set_utils import add_terminal_hydrogens
   assert original_hierarchy is None
-  add_terminal_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
-                         ppf.geometry_restraints_manager(),
-                         use_capping_hydrogens=use_capping_hydrogens,
-                         append_to_end_of_model=append_to_end_of_model,
-                         # original_hierarchy=original_hierarchy,
-                         terminate_all_N_terminals=True,
-                         terminate_all_C_terminals=True,
-                         verbose=verbose,
-                        ) # in place
+  add_terminal_hydrogens_qr( ppf.all_chain_proxies.pdb_hierarchy,
+                             ppf.geometry_restraints_manager(),
+                             use_capping_hydrogens=use_capping_hydrogens,
+                             append_to_end_of_model=append_to_end_of_model,
+                             original_hierarchy=original_hierarchy,
+                             verbose=verbose,
+                            ) # in place
   if debug:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
@@ -731,7 +727,6 @@ if __name__=="__main__":
     kwds['crystal_symmetry'] = ppf.all_chain_proxies.pdb_inp.crystal_symmetry()
     display_hierarchy_atoms(kwds['pdb_hierarchy'])
     rc = run(None, **kwds)
-    #print '='*80
     display_hierarchy_atoms(rc)
     assert 0, 'FINISHED TESTING'
   #print 'run',args,kwds

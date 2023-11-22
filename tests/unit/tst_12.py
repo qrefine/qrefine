@@ -1072,7 +1072,8 @@ def test_original_pdb():
   pdb_inp = pdb.input('test_original_pdb.pdb')
   assert len(pdb_inp.atoms())==49
   pdb_inp = pdb.input('test_original_pdb_capping.pdb')
-  assert len(pdb_inp.atoms())==50
+  goal=50
+  assert len(pdb_inp.atoms())==goal, '#atoms %s != %s' % (len(pdb_inp.atoms()), goal)
 
 def test_10_capping():
   f=open('test_10_capping.pdb', 'w')
