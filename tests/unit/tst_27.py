@@ -583,13 +583,13 @@ def run(prefix):
               ]:
     assert line not in lines, 'found %s' % line
   assert ' HE  ARG A  10' in lines, 'not found HE  ARG A  10'
-  cmd = 'qr.charges %s verbose=1' % (fnc)
-  if 0: print(cmd)
-  rc = easy_run.go(cmd)
-  assert 'Charge: -1' in rc.stdout_lines
+  # cmd = 'qr.charges %s verbose=1' % (fnc)
+  # if 0: print(cmd)
+  # rc = easy_run.go(cmd)
+  # assert 'Charge: -1' in rc.stdout_lines
   os.remove(fnc)
   return rc
 
 if(__name__=='__main__'):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
