@@ -100,7 +100,6 @@ def run(prefix, verbose=False):
           maxnum_residues_in_cluster = 2,
           charge_embedding           = False,
           two_buffers                = False,
-          fast_interaction           = True,
           pdb_hierarchy              = h.deep_copy(), # deep copy just in case
           qm_engine_name             = "mopac",
           crystal_symmetry           = cs)

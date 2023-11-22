@@ -60,13 +60,11 @@ class fragments(object):
       debug                      = False,
       charge_cutoff              = 8.0,
       save_clusters              = False,
-      fast_interaction           = False,
       select_within_radius       = 10.0,
       bond_with_altloc_flag      = True):
     self.bond_with_altloc_flag = bond_with_altloc_flag
     self.clustering = clustering
     self.select_within_radius = select_within_radius
-    self.fast_interaction = fast_interaction
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
     self.crystal_symmetry = crystal_symmetry
@@ -101,11 +99,6 @@ class fragments(object):
     ## write expansion.pdb as the reference for capping
     self.expansion_file = "expansion.pdb"
     self.expansion.write_super_cell_selected_in_sphere(file_name=self.expansion_file)
-    if(not self.fast_interaction):
-      from qrefine.plugin.yoink.pyoink import PYoink
-      from qrefine.utils.yoink_utils import write_yoink_infiles
-      self.yoink_dat_path = os.path.join(qrefine,"plugin","yoink","dat")
-      self.pyoink = PYoink(os.path.join(qrefine,"plugin","yoink","Yoink-0.0.1.jar"))
     self.qm_run = qm_run
     #t0 = time.time()
     self.set_up_cluster_qm()
@@ -165,19 +158,7 @@ class fragments(object):
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
     if(not self.clustering):
       return(range(1,n_residues+1,1) )
-    if(self.fast_interaction):
-      self.interaction_list = pair_interaction.run(copy.deepcopy(self.pdb_hierarchy))  ##deepcopy
-    else: # to be deprecated.
-      self.cluster_file_name = self.working_folder + "/cluster.xml"
-      self.qmmm_file_name = self.working_folder + "/qmmm.xml"
-      ##  write yoink input file to get interactions
-      if(not self.fast_interaction):
-        from qrefine.utils.yoink_utils import write_yoink_infiles
-      write_yoink_infiles(self.cluster_file_name, self.qmmm_file_name,
-                          self.pdb_hierarchy, self.yoink_dat_path)
-      self.pyoink.input_file = self.cluster_file_name
-      self.pyoink.update()
-      self.interaction_list, weight = self.pyoink.get_interactions_list()
+    self.interaction_list = pair_interaction.run(copy.deepcopy(self.pdb_hierarchy))  ##deepcopy
 
     self.interacting_pairs = len(self.interaction_list)
     self.interaction_list += self.backbone_connections
@@ -238,27 +219,13 @@ class fragments(object):
       cluster_atoms_in_ph = []
       fragment_super_atoms_in_ph = []
       molecules_in_fragments = []
-      ## write yoink input file to get fragment
-      if(not self.fast_interaction):
-        pyoink = self.pyoink
-        from qrefine.utils.yoink_utils import write_yoink_infiles
-        write_yoink_infiles(self.cluster_file_name,
-                          self.qmmm_file_name,
-                          ph,
-                          self.yoink_dat_path)
       for i in range(len(clusters)):
         # print 'processing cluster', i
-        if(self.fast_interaction):
-          atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
-            pair_interaction.run(copy.deepcopy(ph), clusters[i])  ##deepcopy
-          # print("clusters[i]",clusters[i])
-          # print("molecules_in_one_fragment:", molecules_in_one_fragment)
-          # print("atoms_in_one_fragment",atoms_in_one_fragment)
-        else:
-          pyoink.input_file = self.qmmm_file_name
-          pyoink.update(clusters[i])
-          atoms_in_one_cluster = pyoink.qm_core_fixed_indices
-          atoms_in_one_fragment, molecules_in_one_fragment = pyoink.get_qm_indices()
+        atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
+          pair_interaction.run(copy.deepcopy(ph), clusters[i])  ##deepcopy
+        # print("clusters[i]",clusters[i])
+        # print("molecules_in_one_fragment:", molecules_in_one_fragment)
+        # print("atoms_in_one_fragment",atoms_in_one_fragment)
 
         atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
                                                     atoms_in_one_cluster, ph)
@@ -278,12 +245,7 @@ class fragments(object):
         # print "adding second layer"
         fragment_super_atoms_in_ph = []
         for molecules in molecules_in_fragments:
-          if(self.fast_interaction):
-            junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(copy.deepcopy(ph),molecules)
-          else:
-            pyoink.input_file = self.qmmm_file_name
-            pyoink.update(list(molecules))
-            atoms_in_one_fragment, junk = pyoink.get_qm_indices()
+          junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(copy.deepcopy(ph),molecules)
           atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
                                                      atoms_in_one_fragment, ph)
           fragment_super_atoms_in_ph.append(atoms_in_one_fragment)

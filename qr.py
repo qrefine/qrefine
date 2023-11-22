@@ -26,9 +26,6 @@ scattering_table = wk1995  it1992  *n_gaussian electron neutron
   .type = choice
   .help = Choices of scattering table for structure factors calculations
 cluster{
-  fast_interaction = True
-    .type = bool
-    .help = enable/disable C++ clustering
   charge_cutoff = 8.0
     .type = float
     .help = distance for point charge cutoff

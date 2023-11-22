@@ -75,7 +75,6 @@ def run(prefix):
          clustering                 = clustering,
          pdb_hierarchy              = model.get_hierarchy().deep_copy(),
          qm_engine_name             = "mopac",
-         fast_interaction           = True,
          crystal_symmetry           = model.crystal_symmetry())
       else:
         fc = fq
