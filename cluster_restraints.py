@@ -12,20 +12,29 @@ from .fragment import write_cluster_and_fragments_pdbs
 from .restraints import from_qm
 from libtbx import group_args
 
+def check_no_altlocs(h, file_name):
+  altlocs = []
+  for m in h.models():
+    for c in m.chains():
+      for rg in c.residue_groups():
+        for ag in rg.atom_groups():
+          altlocs.append(ag.altloc)
+  altlocs = list(set(altlocs))
+  assert len(altlocs)<=2, [file_name, altlocs]
+  cntr = 0
+  for a in altlocs:
+    if(len(a)==0): cntr+=1
+  assert cntr==1, [file_name, altlocs]
+
 class from_cluster(object):
   def __init__(self, restraints_manager, fragment_manager, parallel_params):
     adopt_init_args(self, locals())
-    #
-    # super_sphere_geometry_restraints_manager will cause qusb submits
-    # a single job instead of batch jobs
-    fragment_extracts_obj = self.fragment_manager.get_fragment_extracts()
-    if(isinstance(self.restraints_manager, from_qm)):
-      fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
-    self.restraints_manager.fragment_extracts = fragment_extracts_obj
 
-  def energies_sites(self, sites_cart):
+  def energies_sites(self, sites_cart, compute_gradients=True):
     tg = self.target_and_gradients(sites_cart=sites_cart)
-    return group_args(target = tg[0], gradients = tg[1])
+    return group_args(
+      target    = tg[0],
+      gradients = tg[1])
 
   def target_and_gradients(self, sites_cart):
     # update the pdb hierarchy of the center
@@ -33,6 +42,15 @@ class from_cluster(object):
     self.fragment_manager.update_xyz(sites_cart)
     sites_cart = self.fragment_manager.pdb_hierarchy_super.atoms().extract_xyz()
     #
+    self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
+      file_name=self.restraints_manager.file_name,
+      crystal_symmetry=self.fragment_manager.expansion.cs_box)
+    fragment_extracts_obj = self.fragment_manager.get_fragment_extracts()
+    # super_sphere_geometry_restraints_manager will cause qusb submits
+    # a single job instead of batch jobs
+    if(isinstance(self.restraints_manager, from_qm)):
+      fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
+    self.restraints_manager.fragment_extracts = fragment_extracts_obj
     selection_and_sites_cart=[]
 
     #
@@ -57,6 +75,7 @@ class from_cluster(object):
        #  tmp_h.write_pdb_file(
        #    file_name        = fn,
        #    crystal_symmetry = self.fragment_manager.expansion.cs_box)
+       #  check_no_altlocs(h=tmp_h, file_name=fn)
        #  self.restraints_manager.target_and_gradients(sites_cart=sites_cart,
        #    selection=selection_fragment, index=index)
        #except Exception as e:
