@@ -21,37 +21,55 @@ bio-macromolecules by employing a divide and conquer type approach. We
 have developed a new fragmentation approach for achieving a
 quantum-refinement of bio-macromolecules.
 
+## Installation
 
-### Quickstart
+### standard route (open-source, cctbx-based)
 
-Please first install Phenix, see https://www.phenix-online.org/
+ 1. Install conda. We highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3. 
+ 
+ 2. Clone this repo and enter it's directory.
+ ```
+ git clone https://github.com/qrefine/qrefine.git qrefine && cd qrefine
+ ```
+ 3. Use the provided `environmental.yaml` to generate a new conda environment called `qrefine`. After installation activate the enviroment. The activation (unless set to automatic) has to be done for every new shell.
+ ```
+ mamba env create -n qrefine -f environmental.yaml
+ mamba activate qrefine
+ ```
+ 4. We need to install missing restraints libraries and the `reduce` and `probe` programs. This is handled by a bash script.
+ ```
+ bash ./build_into_conda.sh
+ ```
+ 5. run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
-Note: Python 3.7 installer with the "modules" directory phenix-installer-<version>-intel-linux-x86_64.tar.xz starts from version 1.21rc1-4904.
+ Expert users proficient with installing cctbx via bootstrap.py can extract the needed snippets from the bash  script to install the missing parts.
+
+<!-- ### conda package
+A conda package is provided for qrefine. We currently make use of the nightly build of cctbx.
+```
+conda create -n qrefine qrefine cctbx -c qrefine -c cctbx-nightly
+```
+If conda itself is not yet installed, we highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3.  -->
+
+### Phenix user route
+
+Please make sure to use a python3 installation of Phenix: https://www.phenix-online.org/
 
 Once you have Phenix installed, go to the directory where you installed Phenix.
 
 ```
  source phenix_env.sh # source phenix_env.csh
- phenix.python -m pip install ase==3.17.0
- phenix.python -m pip install pymongo
- cd modules
- git clone https://github.com/qrefine/qrefine.git
- cd ../build
+ phenix.python -m pip install ase==3.17.0 pymongo
+ git clone https://github.com/qrefine/qrefine.git modules/qrefine
+ cd build
  libtbx.configure qrefine
  source setpaths.sh # source setpaths.csh
  ```
  Note: you may need to use sudo depending on the permissions of your Phenix installation.
 
- ###### Using the Git repository of *cctbx*.
-
-NOT UP TO DATE
-
-To remain up-to-date with the changes in the *cctbx* project that contains many
-of the functions used in Q|R, remove the **cctbx_project** directory in the
-modules directory. The above command will clone it from *GitHub*.
-
+ 
  ### Run Tests 
-
+Tests need to be run in an empty directory.
 ``` 
  mkdir tests
  cd tests
@@ -63,22 +81,18 @@ If any of the tests fail, please raise an issue here: [issue tracker](https://gi
  
  Can be found at: https://qrefine.com/qr.html
  
-
-### Help 
-
-If you run into any trouble please ask for help:
-```
- qr.refine --help
-```
-
 ### Commandline options
 
 If you want to see the available options and default values please type:
 ```
- qr.refine --defaults or qr.refine --show
+ qr.refine --show-defaults
 ``` 
 
-
+### Example
+Options are straightforward added to the command line arguments:
+```
+qr.refine tests/unit/data_files/helix.pdb engine=mopac clustering=0 gradient_only=1
+```
  
 
 ### Contact us 
