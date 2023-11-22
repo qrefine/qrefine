@@ -247,8 +247,6 @@ class clustering_update(object):
     if(rmsd_diff > self.rmsd_tolerance):
       print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
-      print(" interacting pairs number:  ", \
-        calculator.restraints_manager.fragment_manager.interacting_pairs, file=self.log)
       self.pre_sites_cart = sites_cart
 
 class restart_data(object):
@@ -427,8 +425,6 @@ def refine(fmodel,
       rmsd_tolerance = params.refine.rmsd_tolerance * 100,
       verbose=params.debug,
       )
-    print("\ninteracting pairs number:  ", \
-      calculator.restraints_manager.fragments.interacting_pairs, file=log)
   weight_cycle = weight_cycle_start
   print("Start:", file=log)
   results.show(prefix="  ")

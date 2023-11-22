@@ -53,7 +53,6 @@ class fragments(object):
       pdb_hierarchy              = None,
       qm_engine_name             = None,
       crystal_symmetry           = None,
-      clustering                 = True,
       cif_objects                = None,
       debug                      = False,
       charge_cutoff              = 8.0,
@@ -63,7 +62,6 @@ class fragments(object):
       bond_with_altloc_flag      = True):
     # Internals / Externals
     self.bond_with_altloc_flag = bond_with_altloc_flag
-    self.clustering = clustering
     self.select_within_radius = select_within_radius
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
@@ -124,20 +122,14 @@ class fragments(object):
 
   def get_clusters(self):
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
-    if(not self.clustering):
-      return(range(1,n_residues+1,1) )
     self.interaction_list = pair_interaction.run(copy.deepcopy(self.pdb_hierarchy))  ##deepcopy
-
-    self.interacting_pairs = len(self.interaction_list)
-    self.interaction_list += self.backbone_connections
+    self.interaction_list += self.backbone_connections # XXX WHY IS THIS?
     ## isolate altloc molecules
-    new_interaction_list = []
     from . import clustering
-    self.clustering = clustering.betweenness_centrality_clustering(
+    clusters = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size = n_residues,
-      maxnum_residues_in_cluster = self.maxnum_residues_in_cluster)
-    clusters = self.clustering.get_clusters()
+      maxnum_residues_in_cluster = self.maxnum_residues_in_cluster).get_clusters()
     self.clusters=sorted(clusters,
       key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
 

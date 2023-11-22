@@ -1,5 +1,6 @@
 
 def get_backbone_connections(pdb_hierarchy):
+  # XXX This does not handle insertion codes
   backbone_connections = []
   count = 0
   for chain in pdb_hierarchy.chains():
