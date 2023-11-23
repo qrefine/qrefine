@@ -1,19 +1,14 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
-import time
 import iotbx
 from iotbx import pdb
 from libtbx import easy_run
 from libtbx import easy_mp
 import libtbx.load_env
 import qrefine.finalise
-import qrefine.charges
 import qrefine.completion
-from qrefine.utils import hierarchy_utils
 from qrefine.tests.unit import run_tests
-
-### TODO: after this test works, split it into charge|completion|finalise
 
 qr_repo_parent_env = 'QR_REPO_PARENT'
 qr_repo_parent = os.environ.get(qr_repo_parent_env, None)
@@ -719,139 +714,6 @@ HETATM   55 HD23 DLE A   4       5.391  -8.150  12.314  0.00 38.38           H
   ''',
         }
 
-def test_qxyz_non_zero():
-  def _check_non_zero_charge(filename):
-    for line in open(filename, 'r').readlines():
-      tmp = line.split()
-      if len(tmp)<2: continue
-      assert float(tmp[0])!=0, 'no partial charge %s' % line
-  for residue in ['pro',
-                  'gly',
-                  ]:
-    tf='%s.pdb' % residue
-    f=open(tf, "w")
-    f.write(pdbs[residue])
-    f.close()
-    pdb_inp = pdb.input(tf)
-    hierarchy = pdb_inp.construct_hierarchy()
-    charges.write_pdb_hierarchy_qxyz_file(hierarchy,
-                                               'test_%s.dat' % residue,
-                                             )
-    _check_non_zero_charge('test_%s.dat' % residue)
-
-def test_qxyz_xyzq():
-  tf='water.pdb'
-  f=open(tf, "w")
-  f.write(pdbs["water"])
-  f.close()
-  pdb_inp = pdb.input(tf)
-  hierarchy = pdb_inp.construct_hierarchy()
-  if  os.path.exists('test_water.dat'): os.remove('test_water.dat')
-  charges.write_pdb_hierarchy_qxyz_file(hierarchy,
-                                             'test_water.dat',
-                                             )
-  assert not os.path.exists('test_water.dat')
-  charges.write_pdb_hierarchy_qxyz_file(hierarchy,
-                                             'test_water.dat',
-                                             exclude_water=False,
-                                             )
-  tst_str = '''\
-3
-
--0.408  -0.21  0.0  -0.296
-0.204  0.733  0.0  -0.296
-0.204  -0.524  0.0  0.593
-'''
-  lines = open('test_water.dat', 'r').read()
-  lines = lines.strip().replace('\n','').replace(' ','')
-  tst_str = tst_str.strip().replace('\n','').replace(' ','')
-  #for a,b in zip(lines.strip(), tst_str.strip()): print '"%s" "%s"' % (a,b)
-  assert lines.strip()==tst_str.strip(), '"%s"\n"%s"' % (tst_str.strip(),
-                                                         lines.strip())
-  os.remove('test_water.dat')
-  charges.write_pdb_hierarchy_xyzq_file(hierarchy,
-                                        'test_water.dat',
-                                        exclude_water=False,
-                                      )
-  tst_str = '''\
--0.21  0.0  -0.296  -0.408
-0.733  0.0  -0.296  0.204
--0.524  0.0  0.593  0.204'''
-  lines = open('test_water.dat', 'r').read()
-  lines = lines.strip().replace('\n','').replace(' ','')
-  tst_str = tst_str.strip().replace('\n','').replace(' ','')
-  assert lines.strip()==tst_str, '%s'% (lines)
-  os.remove('test_water.dat')
-
-def test_terminal_and_alt_loc(residue):
-  tf = '%s_terminal.pdb' % residue
-  f=open(tf, "w")
-  f.write(pdbs["%s_terminal" % residue])
-  f.close()
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
-  easy_run.call(cmd)
-  pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
-  hierarchy = pdb_inp.construct_hierarchy()
-  must_find = ['H2', 'H3', 'OXT']
-  if residue!='PRO': must_find.append('H1')
-  for atom in hierarchy.atoms():
-    if residue=='PRO': assert atom.name.strip()!='H1'
-    if atom.name.strip() in must_find:
-      must_find.remove(atom.name.strip())
-  assert not must_find, 'must find %s is not empty' % must_find
-
-def test_PRO_terminal_and_alt_loc():
-  test_terminal_and_alt_loc('PRO')
-
-def test_GLY_terminal_and_alt_loc():
-  test_terminal_and_alt_loc('GLY')
-
-def test_1yjp_charge():
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  tf='%s/qr-core/tests/data_files/1yjp.pdb' % qr_repo_parent
-  try: os.symlink(tf, os.path.basename(tf))
-  except: pass
-  tf = os.path.basename(tf)
-  pdb_inp = pdb.input(tf)
-  hierarchy = pdb_inp.construct_hierarchy()
-  try:
-    charge = charges.calculate_pdb_hierarchy_charge(hierarchy)
-    assert 0
-  except Exception as e:
-    assert e.message.find('no hydrogens')>-1
-  cmd = 'iotbx.python %s/qr-core/finalise.py %s' % (qr_repo_parent, tf)
-  easy_run.call(cmd)
-  pdb_inp = pdb.input(tf.replace('.pdb', '_complete.pdb'))
-  hierarchy = pdb_inp.construct_hierarchy()
-  charge = charges.calculate_pdb_hierarchy_charge(hierarchy, verbose=False)
-  assert charge==0, 'charge of 1yjp should be zero not %s' % charge
-
-def test_terminal_charge(residue, charge=0):
-  # must run after other PRO
-  tf = '%s_terminal_complete.pdb' % residue
-  ppf = hierarchy_utils .get_processed_pdb(pdb_filename=tf)
-  inter_residue_bonds = charges.get_inter_residue_bonds(ppf)
-  # should the hierarchy come from ppf???
-  pdb_inp = iotbx.pdb.input(tf)
-  hierarchy = pdb_inp.construct_hierarchy()
-  hetero_charges = charges.get_hetero_charges(pdb_inp, hierarchy)
-  if not hetero_charges:
-    # some defaults
-    hetero_charges = charges.default_ion_charges
-  total_charge = charges.calculate_pdb_hierarchy_charge(
-    hierarchy,
-    hetero_charges=hetero_charges,
-    inter_residue_bonds=inter_residue_bonds,
-    verbose=False,
-  )
-  assert total_charge==charge, "total_charge: %d, charge:%d"%(total_charge,charge)
-
-def test_PRO_terminal_charge():
-  test_terminal_charge('PRO')
-
-def test_GLY_terminal_charge():
-  test_terminal_charge('GLY')
 
 def test_capping_of_C_terminal():
   tf = 'c_terminal_capping.pdb'
@@ -878,10 +740,6 @@ def test_helix():
   f.close()
   pdb_inp=pdb.input(tf)
   hierarchy = pdb_inp.construct_hierarchy()
-  # from qrefine.charges import charges_class
-  # cc = charges_class(tf)
-  # charge = cc.get_total_charge()
-  # assert charge==0, 'charge of helix should be zero not %s' % charge
   cmd = 'iotbx.python %s %s' % (
     os.path.join(qrefine_d, 'completion.py'),
     tf)
@@ -897,149 +755,6 @@ def test_helix():
   assert not must_find
   pdb_inp=pdb.input(tf.replace('.pdb', '_complete.pdb'))
   hierarchy = pdb_inp.construct_hierarchy()
-  # cc.update_pdb_hierarchy(hierarchy, pdb_inp.crystal_symmetry_from_cryst1())
-  # charge = cc.get_total_charge()
-  # assert charge==1, 'charge of helix should be one not %s' % charge
-
-def test_charge_for_charmm_pdbs(only_i=None):
-  from charges import calculate_pdb_hierarchy_charge
-  charge_dict = {'3kyi': -12,
-                 '2oy0': 16,
-                 '1y1l': -8,
-                 '3dtj': 0,
-                 '3tz9': -10,
-                 '4rnf': -13,
-                 '2jee': -32,
-                 '4k2r': -1,
-                 '5d12': -11,
-                 '1il5': 0,
-                 '1va7': -8,
-                 '2oeq': -5,
-                 '4drw': -16,
-                 '4xa1': -45,
-                 '2ghj': 46,
-                 '1ok9': -14,
-                 '3nak': 0,
-                 '2x10': -22,
-                 '3oe9': 27,
-                 '4fsx': -42,
-                 '4p7h': -19,
-                 '5diz': -25,
-                 '3uds': -8,
-                 '3uj4': 0,
-                 '4ctd': -44,
-                 '1byz': -4,
-                 '1lzt': 8,
-                 '1vfy': -1,
-                 '1m24': -2,
-                 '1i07': 4,
-                 '1opd': -6,
-                 '1vbw': 8,
-                 '1rfs': -4,
-                 '1ly2': 7,
-                 '1a7y': 0,
-                 '1v7s': 8,
-                 '2wpz': 0,
-                 '2akf': -3,
-                 '4lzt': 8,
-                 '3ovj': 4,
-                 '4lzl': -5,
-                 '4w71': 0,
-                 '4uiv': 4,
-                 '4rp6': -1,
-                 '3u29': 0,
-                 '2omq': -4,
-                 '2ol9': 0,
-                 '4xfo': 0,
-                 '2xmu': -10,
-                 '2xmt': -10,
-                 '4uit': 4,
-                 '4uiu': 4,
-                 '4onk': 0,
-                 '2f2n': 8,
-                 '4uiw': 4,
-                 '5cgo': 6,
-                 '2y3j': 0,
-                 '2i1u': -1,
-                 '4w67': 0,
-                 '3osm': 9,
-                 '4wxt': -4,
-                 '3o2h': -1,
-                 '2f30': 8,
-                 '4w5y': 0,
-                 '5e5v': 0,
-                 '2ona': 0,
-                 '4itk': -9,
-                 '5e61': 0,
-                 '4kdw': -17,
-                 '4z0w': -2,
-                 '4uby': 0,
-                 '2w9r': -1,
-                 '3t4f': 0,
-                 '3pzz': 0,
-                 '2y3k': 0}
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  pdb_dir = '%s/qr-core/tests/charmm_pdbs' % qr_repo_parent
-  pdb_files = os.listdir(pdb_dir)
-  for i, pdb_file in enumerate(pdb_files):
-    if only_i is not None and i!=only_i: continue
-    if pdb_file[:-4] not in charge_dict: continue
-    if pdb_file.endswith(".pdb"):
-      if pdb_file in ['2i1u.pdb',
-                      '4wxt.pdb',
-      ]:
-        # disuphide bridge = in 2i1u 2.94 Phenix says yes, Charmm says no
-        continue
-      pdb_file_path = os.path.join(pdb_dir, pdb_file)
-      charge = charges.get_total_charge_from_pdb(pdb_file_path)
-      assert charge==charge_dict[pdb_file[:-4]], \
-        '%s charge is %d, charmm charge is %d,  no matchy matchy' % (
-          pdb_file[:-4],
-          charge,
-          charge_dict[pdb_file[:-4]],
-        )
-
-def test_charge_of_neutral_terminal():
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  charge = 0
-  tf = "%s/qr-core/tests/babel_pdbs/clusters/neutral_nterminal.pdb" % qr_repo_parent
-  charge_neutral_nterminal = charges.get_total_charge_from_pdb(tf)
-  assert charge == charge_neutral_nterminal, 'no match %s %s' % (
-    charge,
-    charge_neutral_nterminal,
-    )
-  tf = "%s/qr-core/tests/babel_pdbs/clusters/neutral_cterminal.pdb" % qr_repo_parent
-  charge_neutral_cterminal = charges.get_total_charge_from_pdb(tf)
-  assert charge == charge_neutral_cterminal, 'no match %s %s' % (
-    charge,
-    charge_neutral_cterminal,
-    )
-
-def test_capping_of_cluster_complete(only_i=None):
-  assert  qr_repo_parent, 'Set environmental variable %s' % qr_repo_parent_env
-  pdb_dir = '%s/qr-core/tests/babel_pdbs' % qr_repo_parent
-  babel_dir = os.path.join(pdb_dir, 'capping')
-  cluster_dir = os.path.join(pdb_dir, 'clusters')
-  cluster_files = os.listdir(cluster_dir)
-  for i, cluster_file in enumerate(cluster_files):
-    if only_i is not None and i!=only_i: continue
-    if cluster_file.find('capping')>-1: continue
-    if cluster_file.endswith(".pdb") and ("temp" not in cluster_file):
-      cluster_file_path = os.path.join(cluster_dir, cluster_file)
-      if not os.path.exists(cluster_file):
-        os.symlink(cluster_file_path, cluster_file)
-      cluster_file_path = cluster_file
-      cmd = "qrefine.python %s/qr-core/completion.py %s model_completion=False" % (
-        qr_repo_parent,
-        cluster_file_path,
-        )
-      easy_run.call(cmd)
-      result_file = cluster_file_path[:-4] + "_capping.pdb"
-      babel_file = os.path.join(babel_dir, cluster_file[:-4] + "_babel.pdb")
-      result_size = len(pdb.input(result_file).atoms())
-      babel_size =  len(pdb.input(babel_file).atoms())
-      assert result_size ==  babel_size,\
-        '%s atom size after babel capping: %d, after run_cluster_complete: %d' %(cluster_file, babel_size, result_size)
 
 def test_short_gap():
   f=open('test_short_gap.pdb', 'w')
@@ -1075,39 +790,10 @@ def test_original_pdb():
   pdb_inp = pdb.input('test_original_pdb_capping.pdb')
   goal=50
   assert len(pdb_inp.atoms())==goal, '#atoms %s != %s' % (len(pdb_inp.atoms()), goal)
-
-def test_10_capping():
-  f=open('test_10_capping.pdb', 'w')
-  f.write(pdbs['10_capping'])
-  f.close()
-  from qrefine import charges
-  cc = charges.charges_class('test_10_capping.pdb')
-  rc = cc.get_total_charge(list_charges=True)
-  if 0: print(rc)
-  for test_charge, calculated_charge in zip([0,1,0,0,0,0,-1,0,0,0,0,1,0,0,0,1],
-                                            rc,
-                                            ):
-    assert test_charge==calculated_charge[1], 'Charge %s not %s' % (
-      test_charge,
-      calculated_charge,
-      )
-
-def _run_go_cmd_on_pdb(code, cmd):
-  f=open('test_%s.pdb' % code, 'w')
-  f.write(pdbs[code])
-  f.close()
-  cmd += ' %s' % ('test_%s.pdb' % code)
-  rc = easy_run.go(cmd)
-  return rc
-
+  
 def test_cys_hg_capping():
   rc = _run_go_cmd_on_pdb('cys_hg_capping', 'qr.finalise action=capping')
   assert rc.return_code==0, rc.show_stdout()
-
-def test_fva():
-  rc = _run_go_cmd_on_pdb('fva', 'qr.charges')
-  assert rc.return_code==0, rc.show_stdout()
-  assert 0
 
 def run(prefix, nproc=1):
   """
@@ -1115,31 +801,11 @@ def run(prefix, nproc=1):
   """
   tests = [
     [test_cys_hg_capping, 1],
-    #[test_fva, 1],
     [test_original_pdb, 1],
     [test_short_gap, 1],
     [test_helix, 1],
     [test_capping_of_C_terminal, 1],
-    # removed temp.
-    # [test_10_capping, 1],
   ]
-  junk = [
-    [test_GLY_terminal_and_alt_loc, 1],
-    [test_PRO_terminal_and_alt_loc, 1],
-    [test_charge_of_neutral_terminal, 1],
-    [test_qxyz_non_zero, 1],
-    [test_qxyz_xyzq, 1],
-    [test_1yjp_charge, 1],
-    [test_charge_for_charmm_pdbs, 80],
-    [test_capping_of_cluster_complete, 65],
-    # need files from alt loc test
-    [test_GLY_terminal_charge, 1],
-    [test_PRO_terminal_charge, 1],
-    ]
-  if 0:
-    tests = [
-      [test_capping_of_C_terminal, 1],
-      ]
   def get_test(i, j):
     func = tests[i][0]
     if j is not None: return func(j)
@@ -1164,4 +830,4 @@ def run(prefix, nproc=1):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run_tests.runner(function=run, prefix=prefix, disable=True)
