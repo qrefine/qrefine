@@ -53,9 +53,6 @@ def get_model():
 def run(prefix):
   """
   Test raw calls for gradeients from fragment with and w/o clustering.
-
-  XXX TEST FAILS: mmtbx/ligands/ready_set_utils.py. Behaviour of fragments call
-  XXX isn't clear in case of altlocs. Did it work before?
   """
   for maxnum_residues_in_cluster in [2, 15]:
     print("Using maxnum_residues_in_cluster:", maxnum_residues_in_cluster)
