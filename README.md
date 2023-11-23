@@ -25,7 +25,7 @@ quantum-refinement of bio-macromolecules.
 
 ### standard route (open-source, cctbx-based)
 
- 1. Install conda. We highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3. 
+ 1. Install conda. **We highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3.**
  
  2. Clone this repo and enter it's directory.
  ```
@@ -50,13 +50,8 @@ quantum-refinement of bio-macromolecules.
  5. run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
  Expert users proficient with installing cctbx via bootstrap.py have to extract the needed snippets from the bash  script to install the missing parts.
-
-<!-- ### conda package
-A conda package is provided for qrefine. We currently make use of the nightly build of cctbx.
-```
-conda create -n qrefine qrefine cctbx -c qrefine -c cctbx-nightly
-```
-If conda itself is not yet installed, we highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3.  -->
+ 
+ 
 
 ### Phenix user route
 
@@ -73,6 +68,22 @@ Once you have Phenix installed, go to the directory where you installed Phenix.
  source setpaths.sh # source setpaths.csh
  ```
  Note: you may need to use sudo depending on the permissions of your Phenix installation.
+
+### conda packages (experimental)
+
+[![Anaconda](https://anaconda.org/qrefine/qrefine/badges/latest_release_date.svg)](https://anaconda.org/qrefine/qrefine)
+[![Anaconda](https://anaconda.org/qrefine/qrefine/badges/version.svg)](https://anaconda.org/qrefine/qrefine)
+[![Anaconda](https://anaconda.org/qrefine/qrefine/badges/platforms.svg)](https://anaconda.org/qrefine/qrefine)
+
+A conda package is provided for qrefine. We currently make use of the nightly build of cctbx. Use `conda >=23.10` or `mamba`
+ **The conda-forge setup https://github.com/conda-forge/miniforge#miniforge3 is recommended.**
+
+During quick development cycles the conda packages will lag behind as they are build manually.
+```
+conda create -n QR qrefine -c qrefine -c cctbx-nightly
+conda activate QR
+qr.test
+```
 
  
  ### Run Tests 
