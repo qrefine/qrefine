@@ -83,12 +83,10 @@ class charges_class:
                electrons=True, # hidden
                verbose=False,
                ):
-    assert 0
     self.verbose=verbose
     self.pdb_filename=pdb_filename
     self.raw_records=raw_records
     assert not (ligand_cif_file_names and cif_objects)
-
     ppf = hierarchy_utils.get_processed_pdb(
       pdb_filename = pdb_filename,
       raw_records  = raw_records,

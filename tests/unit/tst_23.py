@@ -4,7 +4,7 @@ from qrefine.tests.unit import run_tests
 from qrefine.charges import charges_class
 
 def get_charge(fn, assert_correct_chain_terminii=True, verbose=False):
-  cc=charges_class(fn)
+  cc=charges_class(pdb_filename=fn)
   return cc.get_total_charge(
     assert_correct_chain_terminii=assert_correct_chain_terminii,
     verbose=verbose)

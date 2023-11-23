@@ -34,14 +34,14 @@ ATOM      2  CA  ALA A   6      11.516  11.071  11.540  1.00103.38           C
 ATOM      3  C   ALA A   6      11.169  11.789  10.247  1.00105.41           C
 ATOM      4  O   ALA A   6      10.000  12.117  10.000  1.00 98.78           O
 ATOM      5  CB  ALA A   6      12.044  12.068  12.580  1.00114.34           C
-ATOM         OXT ALA A   6      12.053  12.051   9.432  1.00105.41           O
-ATOM      6  H   ALA A   6      13.260  10.127  11.670  0.00 99.80           H
-ATOM         H2  ALA A   6      12.172   9.227  11.641  0.00 99.80           H
-ATOM         H3  ALA A   6      12.632   9.909  10.424  0.00 99.80           H
-ATOM      7  HA  ALA A   6      10.602  10.628  11.934  0.00103.38           H
-ATOM      8  HB1 ALA A   6      11.855  11.673  13.578  0.00114.34           H
-ATOM      9  HB2 ALA A   6      13.115  12.203  12.431  0.00114.34           H
-ATOM     10  HB3 ALA A   6      11.528  13.020  12.453  0.00114.34           H
+ATOM      6  OXT ALA A   6      12.053  12.051   9.432  1.00105.41           O
+ATOM      7  H1  ALA A   6      13.348  10.185  11.865  0.00 99.80           H
+ATOM      8  H2  ALA A   6      12.079   9.089  11.597  0.00 99.80           H
+ATOM      9  H3  ALA A   6      12.733   9.966  10.297  0.00 99.80           H
+ATOM     10  HA  ALA A   6      10.602  10.628  11.934  0.00103.38           H
+ATOM     11  HB1 ALA A   6      12.973  12.504  12.214  0.00114.34           H
+ATOM     12  HB2 ALA A   6      12.225  11.541  13.517  0.00114.34           H
+ATOM     13  HB3 ALA A   6      11.300  12.850  12.731  0.00114.34           H
 TER
 """
 
@@ -72,4 +72,4 @@ def run(prefix):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

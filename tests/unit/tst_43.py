@@ -72,7 +72,6 @@ def run(prefix):
          altloc_method              = "subtract",
          charge_embedding           = False,
          two_buffers                = False,
-         clustering                 = clustering,
          pdb_hierarchy              = model.get_hierarchy().deep_copy(),
          qm_engine_name             = "mopac",
          crystal_symmetry           = model.crystal_symmetry())
@@ -93,4 +92,4 @@ def run(prefix):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
