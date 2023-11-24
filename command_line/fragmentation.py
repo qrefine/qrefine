@@ -7,7 +7,6 @@ import os.path
 import libtbx
 import iotbx.pdb
 from qrefine.fragment import fragments
-from qrefine.fragment import get_fragment_extracts
 from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
 from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
@@ -32,7 +31,7 @@ def run(pdb_file, log):
     debug=True,
     qm_engine_name="terachem")
   print("Residue indices for each cluster:\n", fq.clusters, file=log)
-  fq_ext = get_fragment_extracts(fq)
+  fq_ext = fq.get_fragment_extracts(fq)
   for i in range(len(fq.clusters)):
       # add capping for the cluster and buffer
       print("capping frag:", i, file=log)
