@@ -48,6 +48,7 @@ class fragments(object):
       clustering_method          = None,
       altloc_method              = None,
       maxnum_residues_in_cluster = 20,
+      bcc_threshold              = 9,
       charge_embedding           = False,
       two_buffers                = False,
       pdb_hierarchy              = None,
@@ -75,6 +76,7 @@ class fragments(object):
     self.altloc_method =  altloc_method
     self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
+    self.bcc_threshold = bcc_threshold
     self.save_clusters = save_clusters
     self.expansion = None
     self.expansion_file = None
@@ -123,7 +125,8 @@ class fragments(object):
     clusters = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size = n_residues,
-      maxnum_residues_in_cluster = self.maxnum_residues_in_cluster).get_clusters()
+      maxnum_residues_in_cluster = self.maxnum_residues_in_cluster,
+      bcc_threshold = self.bcc_threshold).get_clusters()
     self.clusters=sorted(clusters,
       key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
 
