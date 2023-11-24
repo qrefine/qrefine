@@ -1,9 +1,17 @@
 from __future__ import division
 from __future__ import absolute_import
+import sys
+import time
+from qrefine import qr
+import iotbx.pdb
 from boost_adaptbx import graph
 from boost_adaptbx.graph import clustering_algorithm
 from boost_adaptbx.graph import connected_component_algorithm as cca
 from libtbx.utils import Sorry
+from libtbx.program_template import ProgramTemplate
+from qrefine.fragment import fragments
+
+
 
 class girvan_nweman_clustering(object):
 
@@ -120,3 +128,51 @@ class betweenness_centrality_clustering(object):
     for pair in self.interaction_list:
       self.g.add_edge(vertex1 = vertices[pair[0]-1],
         vertex2 = vertices[pair[1]-1], weight = 1)
+
+class Program(ProgramTemplate):
+
+  description = """
+  qr.cluster Cluster a system into many small pieces
+
+
+  Example:
+  qr.cluster model.pdb  [<param_name>=<param_value>] ...
+  """
+
+  local_phil ="""
+  maxnum_residues_in_cluster = 25
+      .type = int
+      .help = maximum number of residues in a cluster
+  bcc_threshold = 9
+      .type = int
+      .help = threshold value for bcc
+  """
+
+
+  datatypes = ['model', 'phil', ]
+
+  master_phil_str = qr.master_phil_str + local_phil
+
+  def validate(self):
+    print('Validate inputs:', file=self.logger)
+    self.data_manager.has_models(
+      expected_n=1,
+      exact_count=True,
+      raise_sorry=True)
+
+
+  def run(self):
+    self.header("Refinement start")
+    print("max number of residues in each cluster:\n", self.params.maxnum_residues_in_cluster, file=log)
+    print("bcc threshold value:\n", self.params.bcc_threshold, file=log)
+    ph = self.data_manager.get_model().get_hierarchy()
+    cs = self.data_manager.get_model().crystal_symmetry()
+    fq = fragments(
+      pdb_hierarchy=ph,
+      crystal_symmetry=cs,
+      maxnum_residues_in_cluster=self.params.maxnum_residues_in_cluster,
+      bcc_threshold = self.params.bcc_threshold,
+      clusters_only = True)
+    print("Residue indices for each cluster:\n", fq.clusters, file=log)
+    print('# clusters  : ',len(fq.clusters), file=log)
+
