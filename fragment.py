@@ -349,7 +349,7 @@ class fragments(object):
 
       self.charge_service = charges_class(
         pdb_hierarchy=charge_hierarchy,
-        crystal_symmetry=self.expansion.cs_box) 
+        crystal_symmetry=self.expansion.cs_box).get_total_charge() 
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
