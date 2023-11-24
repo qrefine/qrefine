@@ -9,9 +9,6 @@ Overview
 
 A program to break up a protein into small manageable pieces for quantum chemistry.
 
-This command line tool uses Yoink-0.0.1 which is written using JAVA 1.8.
-
-If the command line tool does not work, please check
 
 Running the program
 -------------------
@@ -19,6 +16,7 @@ Running the program
 ``qr.cluster input.pdb``
 
 where input.pdb is the PDB model of your choice.
+
 
 It defaults to max number of residues in each cluster being set to 15.
 
