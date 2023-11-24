@@ -140,19 +140,10 @@ class Program(ProgramTemplate):
   qr.cluster model.pdb  [<param_name>=<param_value>] ...
   """
 
-  local_phil ="""
-  maxnum_residues_in_cluster = 25
-      .type = int
-      .help = maximum number of residues in a cluster
-  bcc_threshold = 9
-      .type = int
-      .help = threshold value for bcc
-  """
-
 
   datatypes = ['model', 'phil', ]
 
-  master_phil_str = qr.master_phil_str + local_phil
+  master_phil_str = qr.master_phil_str
 
   def validate(self):
     print('Validate inputs:', file=self.logger)
@@ -163,17 +154,22 @@ class Program(ProgramTemplate):
 
 
   def run(self):
-    self.header("Refinement start")
-    print("max number of residues in each cluster:\n", self.params.maxnum_residues_in_cluster, file=log)
-    print("bcc threshold value:\n", self.params.bcc_threshold, file=log)
+    self.header("Clustering start")
+    print("max number of residues in each cluster: ", self.params.cluster.maxnum_residues_in_cluster, file=log)
+    print("bcc threshold value: ", self.params.cluster.bcc_threshold, file=log)
     ph = self.data_manager.get_model().get_hierarchy()
     cs = self.data_manager.get_model().crystal_symmetry()
     fq = fragments(
       pdb_hierarchy=ph,
       crystal_symmetry=cs,
-      maxnum_residues_in_cluster=self.params.maxnum_residues_in_cluster,
-      bcc_threshold = self.params.bcc_threshold,
+      maxnum_residues_in_cluster=self.params.cluster.maxnum_residues_in_cluster,
+      bcc_threshold = self.params.cluster.bcc_threshold,
       clusters_only = True)
-    print("Residue indices for each cluster:\n", fq.clusters, file=log)
+    #print("Residue indices for each cluster:\n", fq.clusters, file=log)
     print('# clusters  : ',len(fq.clusters), file=log)
+    values = []
+    for cluster in fq.clusters:
+        values.append(str(len(cluster)))
+    res_sizes = ','.join(values)
+    print('# residues in cluster  : ', res_sizes, file=log)
 
