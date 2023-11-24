@@ -1,10 +1,6 @@
 """
 
-1. This command line tool checks to see that the correct version of java is installed.
-Java 1.8 is needed to run the density based descriptor code. This is called Yoink-0.0.1.jar and is
-installed in the plugin/yoink folder.
-
-2. This command line tool also checks to see if environment variables are pointing to installed qm engines.
+1. This command line tool also checks to see if environment variables are pointing to installed qm engines.
 
 3. A conditional import of python based engines.
 
@@ -71,49 +67,7 @@ def run():
          ]
   draw_box_around_text(msg, width=78)
 
-  cmd = 'java -version'
-  rc = easy_run.go(cmd)
-  for line in rc.stdout_lines:
-    if line.find('java version')>-1:
-      version = line.split('"')[1][:3]
-      if float(version)<1.8:
-        print('''
-  Need at least Java 1.8. Please update your system Java using a JDK bundle
-  and try again.
-        ''')
-        sys.exit()
-
-  java_env_vars = {'JAVA_HOME' : 'absolute_path_of_java_home',
-                   'JAVA_LIB_PATH' : 'absolute_path_of_java_lib',
-                   'LD_LIBRARY_PATH' : '$LD_LIBRARY_PATH:$JAVA_LIB_PATH/server',
-                   }
-  count = 0
-  for env_var in java_env_vars:
-    print('  Set? "%s" "%s"' % (env_var, os.environ.get(env_var, False)))
-    if not os.environ.get(env_var, False):
-      print('''
-      The following environment variables need setting.
-      ''')
-      for env_var, help in java_env_vars.items():
-        print('%s %s : %s' % (' '*10, env_var, help))
-      if env_var.startswith('JAVA'):
-        print('''
-      On OSX use
-        /usr/libexec/java_home -v 1.8
-      to find the install directory
-      ''')
-      elif env_var=='LD_LIBRARY_PATH':
-        print('''
-      The Phenix environment ignores the user set LD_LIBRARY_PATH unless the
-      environmental variable PHENIX_TRUST_OTHER_ENV is set.
-      ''')
-      count+=1
-      break
-  else:
-    print('\n  Java appears to be installed\n')
-  if count:
-    print('   STOPPING')
-    #sys.exit()
+ 
 
   qm_engine_env_vars = {'MOPAC_COMMAND' : 'Mopac executable',
                         'TERACHEM_COMMAND' : 'TeraChem directory',
