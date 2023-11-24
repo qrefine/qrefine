@@ -11,8 +11,6 @@ from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
 from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
 
-qrefine_path = libtbx.env.find_in_repositories("qrefine")
-qr_yoink_path =os.path.join(qrefine_path, "plugin","yoink","yoink")
 
 log = sys.stdout
 
