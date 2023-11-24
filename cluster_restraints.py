@@ -57,7 +57,7 @@ class from_cluster(object):
     # This call is for debugging purposes. It used to be fast but at some point
     # became very slow. BEWARE: enabling this call makes a simple optimization
     # of a tiny molecule uisng CCTBX restraints about 110 times slower.
-    # This function calls completion and cmpletion calls ReadySet and many other
+    # This function calls completion and completion calls ReadySet and many other
     # specialized functions -- perhaps something became slower around there.
     #
     #write_cluster_and_fragments_pdbs(fragments=fragment_extracts_obj,directory='frag_pdbs')
