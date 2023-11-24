@@ -42,6 +42,9 @@ cluster{
   maxnum_residues_in_cluster = 15
     .type = int
     .help = maximum number of residues in a cluster
+  bcc_threshold = 9
+    .type = int
+    .help = threshold value for bcc clustering   
   select_within_radius = 10
     .type = int
     .help = supersphere expansion radius

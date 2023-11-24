@@ -73,18 +73,19 @@ class girvan_nweman_clustering(object):
     return final_clusters
 
 class betweenness_centrality_clustering(object):
-  def __init__(self, interaction_list,maxnum_residues_in_cluster=20,size=None):
+  def __init__(self, interaction_list,maxnum_residues_in_cluster=20,bcc_threshold=9,size=None):
     self.interaction_list = interaction_list
     self.g = graph.adjacency_list(
       graph_type="undirected",
       vertex_type="vector",
       edge_type="set")
     self.maxnum_residues_in_cluster=maxnum_residues_in_cluster
+    self.bcc_threshold=bcc_threshold
     self.size = size
 
   def get_clusters(self):
     self.build_graph()
-    threshold = 9
+    threshold = self.bcc_threshold
     clustering = True
     while (clustering and threshold >=4):
       edge_centrality_map = clustering_algorithm.\
