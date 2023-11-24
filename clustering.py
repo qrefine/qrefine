@@ -97,6 +97,7 @@ class betweenness_centrality_clustering(object):
         clustering = False
       else:
         threshold -= 1
+    print "max(components_size): ",max(components_size)    
     final_components = []
     for component in components:
       component[:] = [x + 1 for x in component]
