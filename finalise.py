@@ -39,7 +39,7 @@ def remove_alternative_locations(hierarchy):
   return hierarchy
 
 def run_fetch_pdb(code):
-  cmd = 'phenix.fetch_pdb %s' % code
+  cmd = 'iotbx.fetch_pdb %s' % code
   print('Fetching files')
   print(cmd)
   easy_run.call(cmd)
