@@ -173,7 +173,7 @@ def get_cctbx_gradients(ph, cs):
     sites_cart=ph.atoms().extract_xyz(), compute_gradients=True).gradients
   return group_args(model = model, gradients = gradients)
 
-def from_cctbx_altlocs(ph, cs, method="subtract", option=False):
+def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
   # both_options: Applied to "subtract" only and for testing only.
   assert method in ["subtract", "average"]
   g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
