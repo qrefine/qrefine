@@ -171,5 +171,5 @@ class Program(ProgramTemplate):
     for cluster in fq.clusters:
         values.append(str(len(cluster)))
     res_sizes = ','.join(values)
-    print(f"# residues in cluster: [ {res_sizes} ]", file=log)
+    print(f"# residues in clusters: [ {res_sizes} ]", file=log)
 
