@@ -33,7 +33,7 @@ To obtain the PDB file and data file please visit: https://www.rcsb.org/
 Alternatively, you can fetch them using a command line tool:
 
   
- ```phenix.fetch_pdb 1uso --mtz ```
+ ```iotbx.fetch_pdb 1uso --mtz ```
  
  
 ## Pre-process the model 
