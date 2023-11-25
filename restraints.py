@@ -158,6 +158,8 @@ def get_cctbx_gradients(ph, cs):
     params.pdb_interpretation.use_neutron_distances = True
     params.pdb_interpretation.restraints_library.cdl = False
     params.pdb_interpretation.sort_atoms = False
+    params.pdb_interpretation.flip_symmetric_amino_acids = False
+    params.pdb_interpretation.correct_hydrogens=False
     model = mmtbx.model.manager(
       model_input = ph.as_pdb_input(),
       crystal_symmetry          = crystal_symmetry,
@@ -171,36 +173,48 @@ def get_cctbx_gradients(ph, cs):
     sites_cart=ph.atoms().extract_xyz(), compute_gradients=True).gradients
   return group_args(model = model, gradients = gradients)
 
-def from_cctbx_altlocs(ph, cs, method="subtract"):
+def from_cctbx_altlocs(ph, cs, method="subtract", option=False):
+  # both_options: Applied to "subtract" only and for testing only.
   assert method in ["subtract", "average"]
   g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
   conf_ind = ph.get_conformer_indices()
   n_altlocs = flex.max(conf_ind)
   sel_W = conf_ind == 0
+  sel_W_empty = sel_W.count(True) == 0
   g_blanks = flex.vec3_double(sel_W.count(True))
   for ci in range(1, n_altlocs+1):
     sel_ci = conf_ind == ci
     sel_ci_blank = (conf_ind == ci) | sel_W
     ph_ci_blank = ph.select(sel_ci_blank)
+    # DEBUG ph_ci_blank.write_pdb_file("ph_ci_blank_%d.pdb"%ci)
     g_ci_blank_ = get_cctbx_gradients(ph=ph_ci_blank, cs=cs).gradients
     g_ci = g_ci_blank_.select(ph_ci_blank.get_conformer_indices() == 1)
     g_result = g_result.set_selected(sel_ci, g_ci)
     g_blanks += g_ci_blank_.select( ph_ci_blank.get_conformer_indices()==0 )
   if(method=="subtract"):
+    """
+    Not suitable for QM as this needs to calculate gradients using the whole model
+    """
     # Option 1
-#    g_blank = get_cctbx_gradients(ph=ph.select(sel_W), cs=cs).gradients
-#    g_result_1 = g_result.set_selected(sel_W, g_blanks-((n_altlocs-1)*g_blank))
+    if(option==1):
+      if(not sel_W_empty):
+        g_blank = get_cctbx_gradients(ph=ph.select(sel_W), cs=cs).gradients
+        result = g_result.set_selected(sel_W, g_blanks-((n_altlocs-1)*g_blank))
+      else:
+        result = get_cctbx_gradients(ph=ph, cs=cs).gradients
     # Option 2
-    g_blank = get_cctbx_gradients(ph=ph, cs=cs).gradients.select(sel_W)
-    g_result_2 = g_result.set_selected(sel_W, g_blank)
+    if(option==2):
+      g_blank = get_cctbx_gradients(ph=ph, cs=cs).gradients.select(sel_W)
+      result = g_result.set_selected(sel_W, g_blank)
     #
     # Options 1 and 2 are identical. Disabled for performance and because it
     # expectedly crashes when altloc is ' '.
-#    assert approx_equal(g_result_1, g_result_2)
+    # assert approx_equal(g_result_1, g_result_2)
   elif(method=="average"):
-    g_result_2 = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+    result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+    # DEBUG ph.select(sel_W).write_pdb_file("sel_W.pdb")
   else: assert 0
-  return g_result_2
+  return result
 
 class from_altlocs(object):
   def __init__(self, restraints_source, pdb_hierarchy, crystal_symmetry,
@@ -218,12 +232,8 @@ class from_altlocs(object):
       index      = selection_and_sites_cart[2])
 
   def target_and_gradients(self, sites_cart, selection=None, index=None):
-
-    # XXX This is very durty, just to get things runing for now.
-
     gradient = from_cctbx_altlocs(
       ph=self.pdb_hierarchy, cs=self.crystal_symmetry, method=self.method)
-    # Make sure gradient_only is set correctly!!!
     energy=0 # undefined!
     return energy, gradient
 
