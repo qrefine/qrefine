@@ -24,5 +24,4 @@ dependencies:
   - xtb
   - xtb-python
   - pyscf
-  - torch
   - torchani=2.2
