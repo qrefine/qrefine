@@ -5,14 +5,13 @@ import time
 import os.path
 import libtbx
 import iotbx.pdb
-from libtbx.program_template import ProgramTemplate
+
 from qrefine import qr
-
-
 from qrefine.fragment import fragments
 from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
 from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
+from libtbx.program_template import ProgramTemplate
 
 
 class Program(ProgramTemplate):
@@ -43,6 +42,7 @@ class Program(ProgramTemplate):
     ph = self.data_manager.get_model().get_hierarchy()
     cs = self.data_manager.get_model().crystal_symmetry()
 
+    # Build clusters from model
     fq = fragments(
       pdb_hierarchy=ph,
       crystal_symmetry=cs,
@@ -50,6 +50,9 @@ class Program(ProgramTemplate):
       debug=True,
       qm_engine_name="terachem")
     print("Residue indices for each cluster:\n", fq.clusters, file=log)
+
+
+    # Now build fragments from clusters.
     fq_ext = fq.get_fragment_extracts()
     for i in range(len(fq.clusters)):
         # add capping for the cluster and buffer
