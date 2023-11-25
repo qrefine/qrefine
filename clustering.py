@@ -166,10 +166,10 @@ class Program(ProgramTemplate):
       bcc_threshold = self.params.cluster.bcc_threshold,
       clusters_only = True)
     #print("Residue indices for each cluster:\n", fq.clusters, file=log)
-    print('# clusters  : ',len(fq.clusters), file=log)
+    print('# clusters: ',len(fq.clusters), file=log)
     values = []
     for cluster in fq.clusters:
         values.append(str(len(cluster)))
     res_sizes = ','.join(values)
-    print('# residues in cluster  : ', res_sizes, file=log)
+    print(f"# residues in cluster: [ {res_sizes} ]", file=log)
 
