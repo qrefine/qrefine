@@ -14,6 +14,9 @@ from qrefine.fragment import write_mm_charge_file
 from libtbx.program_template import ProgramTemplate
 
 
+log = sys.stdout
+
+
 class Program(ProgramTemplate):
 
   description = """
