@@ -2,14 +2,14 @@
 
 1. This command line tool also checks to see if environment variables are pointing to installed qm engines.
 
-3. A conditional import of python based engines.
+2. A conditional import of python based engines.
 
-A list of installed engines are printed to the screen for your convenience.
+A list of installed calculators are printed to the screen for your convenience.
 
 
 """
 
-# LIBTBX_SET_DISPATCHER_NAME qr.build_interfaces
+# LIBTBX_SET_DISPATCHER_NAME qr.c
 from __future__ import print_function
 import os, sys
 
