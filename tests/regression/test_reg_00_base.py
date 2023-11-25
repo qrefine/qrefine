@@ -9,6 +9,9 @@ from abc import ABCMeta, abstractmethod
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 
+qr_reg_data = os.path.join(qrefine_path, "tests/regression/datasets/cluster")
+
+
 qsub_command = 'qsub  -N reg_test_cluster -m ae -q fat  -l nodes=1:ppn=32'
 
 class test_base:
@@ -33,15 +36,11 @@ class test_base:
 
   #TODO compare with  /home/xuyanting/test_prime/elbow.py
   def run(self):
-    test_results =parallel_map(
-      func=self.func,
-      iterable=self.pdbs,
-#      method='pbs',
-      method='multiprocessing',
-      preserve_exception_message=True,
-#      processes=4,
-      processes=len(self.pdbs),
-      qsub_command=qsub_command,
-      use_manager=True)
+    print("running test")
+    test_results = []
+    for filename in os.listdir(qr_reg_data):
+      test_results.append(os.system(f"qr.cluster {qr_reg_data}/{filename}"))
+      test_results.append(os.system(f"qr.fragment {qr_reg_data}/{filename}"))
     for test_result in test_results:
       self.check_assertions(test_results)
+
