@@ -9,19 +9,21 @@ dependencies:
   - pytorch-cuda
   - cudatoolkit
   - cuda-python
-  - torchani=2.2
   - numba
   - numpy
   - python=3.10
   - "blas=*=mkl"
   - networkx
   - pymongo
-  - ase==3.17.0
   - cxx-compiler
   - c-compiler
   - subversion
   - make
+  - ase==3.17.0
+  # Calculators
   - mopac
   - xtb
   - xtb-python
   - pyscf
+  - torch
+  - torchani=2.2
