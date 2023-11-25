@@ -14,7 +14,6 @@ dependencies:
   - python=3.10
   - "blas=*=mkl"
   - networkx
-  - pymongo
   - cxx-compiler
   - c-compiler
   - subversion
