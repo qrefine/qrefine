@@ -2,16 +2,19 @@
 
 1. This command line tool also checks to see if environment variables are pointing to installed qm engines.
 
-2. A conditional import of python based engines.
+3. A conditional import of python based engines.
 
-A list of installed calculators are printed to the screen for your convenience.
+A list of installed engines are printed to the screen for your convenience.
 
 
 """
 
-# LIBTBX_SET_DISPATCHER_NAME qr.c
+# LIBTBX_SET_DISPATCHER_NAME qr.calculators
 from __future__ import print_function
 import os, sys
+import shutil
+import warnings
+warnings.filterwarnings('ignore')
 
 from libtbx import easy_run
 
@@ -67,42 +70,58 @@ def run():
          ]
   draw_box_around_text(msg, width=78)
 
- 
 
-  qm_engine_env_vars = {'MOPAC_COMMAND' : 'Mopac executable',
+  qm_engin_path = {
+                'XTBHOME':'XTB directory'}
+
+
+  command = shutil.which('xtb')
+  if command is None:
+    raise RuntimeError('$XTBHOME not set')
+  else:
+    print(" - XTB was found on your path")
+
+
+  command = shutil.which('mopac')
+  if command is None:
+    raise RuntimeError('mopac is not installed and found on your path')
+  else:
+    print(" - MOPAC was found on your path")
+
+
+  qm_engine_env_vars = {
                         'TERACHEM_COMMAND' : 'TeraChem directory',
                         'Orca_COMMAND': 'Orca directory',
-                        'XTBHOME':'XTB directory',
                         'g16root':'Gaussian 16 directory',
                         'TURBODIR ':'Turbomole directory',
                         }
   count = []
-  for env_var, value in os.environ.items():
-    print(' ~> %s : %s' % (env_var, value))
-  for env_var in qm_engine_env_vars:
-    if os.environ.get(env_var, False):
-      print('\n  Environmental variable %s set for "%s" to "%s"\n' % (
-        env_var,
-        qm_engine_env_vars[env_var],
-        os.environ[env_var],
-        ))
-      if not os.path.exists(os.environ[env_var]):
-        print('''
-        Environmental variable "%s" : "%s" does not point to anything!
-
-        STOPPING
-        ''' % (env_var, os.environ[env_var]))
-        sys.exit()
-      count.append(env_var)
-    else:
-      print('  Environmental variable %s for "%s" not found\n' % (
-        env_var,
-        qm_engine_env_vars[env_var],
-        ))
+  #for env_var, value in os.environ.items():
+  #  print(' ~> %s : %s' % (env_var, value))
+  #for env_var in qm_engine_env_vars:
+ #   if os.environ.get(env_var, False):
+ #     print('\n  Environmental variable %s set for "%s" to "%s"\n' % (
+ #       env_var,
+ #       qm_engine_env_vars[env_var],
+ #       os.environ[env_var],
+ #       ))
+ #     if not os.path.exists(os.environ[env_var]):
+ #       print('''
+#        Environmental variable "%s" : "%s" does not point to anything!
+#
+  #      STOPPING
+  #      ''' % (env_var, os.environ[env_var]))
+  #      sys.exit()
+  #    count.append(env_var)
+  #  else:
+  #    print('  Environmental variable %s for "%s" not found\n' % (
+  #      env_var,
+  #      qm_engine_env_vars[env_var],
+  #       ))
 
   qm_engines_python =    { 'PyScf':' A collection of electronic structure programs powered by Python',
-                           'ANI':'ANI-1 neural net potential with python interface (ASE)',
-                           'TorchANI':'Accurate Neural Network Potential on PyTorch'
+                            'TorchANI':'Accurate Neural Network Potential on PyTorch',
+                           'ANI':'ANI-1 neural net potential with python interface (ASE)'
 
   }
 
@@ -112,29 +131,20 @@ def run():
     if name == 'PyScf':
       try:
         import pyscf
-        print("  PyScf successfully imported")
+        print(" - PyScf successfully imported")
         qm_engines_python_installed[name] = description
       except:
-        print("  PyScf could not be imported")
+        print(" - PyScf could not be imported")
 
     if name == 'TorchANI':
       try:
         import torch
         import torchani
-        print("  TorchANI successfully imported")
+        print(" - TorchANI successfully imported")
         qm_engines_python_installed[name] = description
       except:
         print("  TorchANI could not be imported")
 
-    if name == 'ANI':
-      try:
-        import ani
-        from ani.ase_interface import aniensloader
-        from ani.ase_interface import ANIENS
-        print("  ANI successfully imported")
-        qm_engines_python_installed[name] = description
-      except:
-        print("  ANI could not be imported")
 
   if count:
     print('''
@@ -148,7 +158,7 @@ def run():
     print('''
     No QM engines found!
 
-    Install and set an environmental variable from the list.
+    Install and setup the following QM engines if required.
     ''')
     for env_var, help in qm_engine_env_vars.items():
       print('%s %s : %s' % (' '*10, env_var, help))
