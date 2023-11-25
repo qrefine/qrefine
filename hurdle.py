@@ -5,7 +5,7 @@ import os
 import iotbx
 from libtbx.utils import Sorry
 from libtbx import Auto
-from phenix.program_template import ProgramTemplate
+from libtbx.program_template import ProgramTemplate
 
 # =============================================================================
 class Program(ProgramTemplate):
