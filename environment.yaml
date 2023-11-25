@@ -23,5 +23,5 @@ dependencies:
   - mopac
   - xtb
   - xtb-python
-  - pyscf
+  #- pyscf
   - torchani=2.2
