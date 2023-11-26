@@ -25,4 +25,4 @@ It defaults to max number of residues in each cluster being set to 15.
 List of all available keywords
 ------------------------------
 
-{{phil:qrefine.command_line.restraint}}
+{{phil:qrefine.command_line.cluster}}
