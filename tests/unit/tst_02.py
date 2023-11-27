@@ -24,15 +24,18 @@ def run(prefix):
     print(file_name)
     pi = iotbx.pdb.input(file_name = file_name)
 
-    #pi.write_pdb_file("whole.pdb")
-
     ph = pi.construct_hierarchy()
     cs = pi.crystal_symmetry()
     # Gradients from CCTBX (directly)
     g1 = restraints.get_cctbx_gradients(ph = ph, cs = cs).gradients
     # Gradients from CCTBX (via decomposing hierarchy into concormers A, B, blanc)
-    g2 = restraints.from_cctbx_altlocs(ph = ph, cs = cs, option=1, method=method)#, method="average")
+    g2 = restraints.from_cctbx_altlocs(ph = ph, cs = cs, option=1, method=method)
     g3 = restraints.from_cctbx_altlocs(ph = ph, cs = cs, option=2, method=method)
+
+    _, gX = restraints.from_altlocs2(ph = ph, cs = cs, method=method
+      ).target_and_gradients(sites_cart = ph.atoms().extract_xyz())
+    assert approx_equal(g1, gX)
+
     # Make sure they match!
     assert approx_equal(g1, g2)
     if method == "subtract": assert approx_equal(g2, g3)
@@ -46,5 +49,4 @@ def run(prefix):
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  #run_tests.runner(function=run, prefix=prefix, disable=False)
-  run(prefix)
+  run_tests.runner(function=run, prefix=prefix, disable=False)

@@ -22,6 +22,8 @@ from qrefine.super_cell import expand
 import qrefine.completion as model_completion
 from libtbx.utils import null_out
 from libtbx.test_utils import approx_equal
+from collections import OrderedDict
+from libtbx import adopt_init_args
 
 class restraints(object):
   """
@@ -151,7 +153,7 @@ class from_expansion(object):
 
 #-------------------------------------------------------------------------------
 
-def get_cctbx_gradients(ph, cs):
+def get_cctbx_gradients(ph, cs, rm_only=False):
   def process_model_file(ph, crystal_symmetry, cif_objects=None):
     import iotbx.pdb
     params = mmtbx.model.manager.get_default_pdb_interpretation_params()
@@ -169,12 +171,62 @@ def get_cctbx_gradients(ph, cs):
       pdb_interpretation_params = params,)
     return model
   model = process_model_file(ph=ph, crystal_symmetry=cs)
-  gradients = model.get_restraints_manager().energies_sites(
-    sites_cart=ph.atoms().extract_xyz(), compute_gradients=True).gradients
-  return group_args(model = model, gradients = gradients)
+  rm = model.get_restraints_manager()
+  if(not rm_only):
+    gradients = rm.energies_sites(
+      sites_cart=ph.atoms().extract_xyz(), compute_gradients=True).gradients
+    return group_args(model = model, gradients = gradients)
+  else:
+    def get_g(sites_cart):
+      return rm.energies_sites(
+        sites_cart=sites_cart, compute_gradients=True).gradients
+    return get_g
+
+class from_altlocs2(object):
+  def __init__(self, ph, cs, method):
+    adopt_init_args(self, locals())
+    self.d = OrderedDict()
+    self.conf_ind  = ph.get_conformer_indices()
+    self.n_altlocs = flex.max(self.conf_ind)
+    for ci in set(self.conf_ind): # ci=0 is for blanc
+      sel_ci = self.conf_ind == ci
+      sel = sel_ci if ci == 0 else sel_ci | (self.conf_ind == 0)
+      ph_conformer = ph.select(sel)
+      ci_ph_conformer = ph_conformer.get_conformer_indices()
+      self.d[ci] = group_args(
+        c_selection  = sel,
+        c_zero       = ci_ph_conformer == 0,
+        c_one        = ci_ph_conformer == 1,
+        sel_ci       = sel_ci,
+        ph_conformer = ph_conformer,
+        rm           = get_cctbx_gradients(ph=ph_conformer, cs=cs, rm_only=True))
+    self.sel_W_empty = \
+      True if not 0 in self.d.keys() else self.d[0].c_selection.count(True) == 0
+
+  def target_and_gradients(self, sites_cart):
+    g_result  = flex.vec3_double(self.conf_ind.size(), [0,0,0])
+    if not self.sel_W_empty:
+      g_blanks  = flex.vec3_double(self.d[0].c_selection.count(True))
+    for ci, v in zip(self.d.keys(), self.d.values()):
+      if ci==0: continue
+      g_ci_blank_ = v.rm(sites_cart = sites_cart.select(v.c_selection))
+      g_ci = g_ci_blank_.select(v.c_one)
+      g_result = g_result.set_selected(v.sel_ci, g_ci)
+      if not self.sel_W_empty: g_blanks += g_ci_blank_.select(v.c_zero)
+    if self.method=="subtract":
+      if not self.sel_W_empty:
+        W = self.d[0]
+        g_blank = W.rm(sites_cart = sites_cart.select(W.c_selection))
+        result = g_result.set_selected(
+          W.c_selection, g_blanks-((self.n_altlocs-1)*g_blank))
+      else: result = g_result
+    elif self.method=="average":
+      result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+    else: assert 0
+    energy=0 # undefined!
+    return energy, result
 
 def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
-  # both_options: Applied to "subtract" only and for testing only.
   assert method in ["subtract", "average"]
   g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
   conf_ind = ph.get_conformer_indices()
@@ -184,13 +236,12 @@ def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
   g_blanks = flex.vec3_double(sel_W.count(True))
   for ci in range(1, n_altlocs+1):
     sel_ci = conf_ind == ci
-    sel_ci_blank = (conf_ind == ci) | sel_W
-    ph_ci_blank = ph.select(sel_ci_blank)
-    # DEBUG ph_ci_blank.write_pdb_file("ph_ci_blank_%d.pdb"%ci)
-    g_ci_blank_ = get_cctbx_gradients(ph=ph_ci_blank, cs=cs).gradients
-    g_ci = g_ci_blank_.select(ph_ci_blank.get_conformer_indices() == 1)
+    ph_conformer = ph.select((conf_ind == ci) | sel_W)
+    ci_ph_conformer = ph_conformer.get_conformer_indices()
+    g_ci_blank_ = get_cctbx_gradients(ph=ph_conformer, cs=cs).gradients
+    g_ci = g_ci_blank_.select(ci_ph_conformer == 1)
     g_result = g_result.set_selected(sel_ci, g_ci)
-    g_blanks += g_ci_blank_.select( ph_ci_blank.get_conformer_indices()==0 )
+    g_blanks += g_ci_blank_.select(ci_ph_conformer == 0)
   if(method=="subtract"):
     """
     Not suitable for QM as this needs to calculate gradients using the whole model
@@ -201,7 +252,9 @@ def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
         g_blank = get_cctbx_gradients(ph=ph.select(sel_W), cs=cs).gradients
         result = g_result.set_selected(sel_W, g_blanks-((n_altlocs-1)*g_blank))
       else:
-        result = get_cctbx_gradients(ph=ph, cs=cs).gradients
+        # Both are exwctly equivalent
+        #result = get_cctbx_gradients(ph=ph, cs=cs).gradients
+        result = g_result
     # Option 2
     if(option==2):
       g_blank = get_cctbx_gradients(ph=ph, cs=cs).gradients.select(sel_W)
