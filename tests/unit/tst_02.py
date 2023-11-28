@@ -27,8 +27,16 @@ def run(prefix):
     file_name = os.path.join(qr_unit_tests,"data_files",file_name)
     print(file_name)
     pi = iotbx.pdb.input(file_name = file_name)
-    model = mmtbx.model.manager(model_input = pi)
+    
+    model = restraints.model_from_hierarchy(
+      pdb_hierarchy    = pi.construct_hierarchy(), 
+      crystal_symmetry = pi.crystal_symmetry())
+      
+    rm = restraints.from_cctbx(
+      restraints_manager = model.get_restraints_manager())
+    _, g0 = rm.target_and_gradients(sites_cart = model.get_sites_cart())
 
+    # This uses primitive ad-hoc code to get gradients
     ph = model.get_hierarchy()
     cs = model.crystal_symmetry()
     # Gradients from CCTBX (directly)
@@ -37,19 +45,22 @@ def run(prefix):
     g2 = restraints.from_cctbx_altlocs(ph = ph, cs = cs, option=1, method=method)
     g3 = restraints.from_cctbx_altlocs(ph = ph, cs = cs, option=2, method=method)
 
+    # This does the same but using the standard code (expansion, as qr.refine).
     from qrefine import qr
     params = qr.get_default_params()
     params.restraints="cctbx"
-    #print("params.clustering:", params.quantum.engine_name)
+    params.cluster.clustering=False
 
     _, gX = restraints.from_altlocs2(model = model, method=method,
       params = params).target_and_gradients(sites_cart = ph.atoms().extract_xyz())
+     
+    #
     assert approx_equal(g1, gX)
-
-    # Make sure they match!
+    assert approx_equal(g0, g1)
     assert approx_equal(g1, g2)
-    if method == "subtract": assert approx_equal(g2, g3)
-
+    assert approx_equal(g2, g3)
+  
+    #STOP()
 
     # Individual differences
     #g1 = g1.as_double()

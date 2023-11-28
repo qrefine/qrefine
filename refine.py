@@ -110,19 +110,20 @@ def create_fragment_manager(
 
 def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(params = params, model = model)
+  
+  return restraints_source.restraints_manager
+  
+  if(model.altlocs_present()):
+    return restraints.from_altlocs2(
+      model  = model,
+      params = params,
+      method = params.cluster.altloc_method)
   if(params.expansion):
-    if(model.altlocs_present()):
-      return restraints.from_altlocs(
-        restraints_source = restraints_source,
-        pdb_hierarchy     = model.get_hierarchy(),
-        crystal_symmetry  = model.crystal_symmetry(),
-        method            = params.cluster.altloc_method)
-    else:
-      return restraints.from_expansion(
-        params            = params,
-        restraints_source = restraints_source,
-        pdb_hierarchy     = model.get_hierarchy(),
-        crystal_symmetry  = model.crystal_symmetry())
+    return restraints.from_expansion(
+      params            = params,
+      restraints_source = restraints_source,
+      pdb_hierarchy     = model.get_hierarchy(),
+      crystal_symmetry  = model.crystal_symmetry())
   else:
     if(params.cluster.clustering):
       fragment_manager = create_fragment_manager(params = params, model = model)
@@ -133,7 +134,6 @@ def create_restraints_manager(params, model):
     else:
       # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
-
 
 def create_calculator(weights, params, restraints_manager, fmodel=None,
                       model=None):

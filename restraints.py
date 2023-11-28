@@ -24,9 +24,9 @@ from libtbx.utils import null_out
 from libtbx.test_utils import approx_equal
 from collections import OrderedDict
 from libtbx import adopt_init_args
+import time
 
-def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects):
-  cif_objects = None
+def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None):
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
@@ -34,7 +34,7 @@ def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects):
   params.pdb_interpretation.flip_symmetric_amino_acids = False
   params.pdb_interpretation.correct_hydrogens=False
   model = mmtbx.model.manager(
-    model_input       = pdb_hierarchy,
+    model_input       = pdb_hierarchy.as_pdb_input(),
     crystal_symmetry  = crystal_symmetry,
     restraint_objects = cif_objects,
     log               = null_out())
@@ -65,7 +65,7 @@ class restraints(object):
     # This is called in expansion
     if(not self.source_of_restraints_qm()):
       model = model_from_hierarchy(
-        pdb_hierarchy    = pdb_hierarchy.as_pdb_input(),
+        pdb_hierarchy    = pdb_hierarchy,
         crystal_symmetry = crystal_symmetry,
         cif_objects      = self.cif_objects)
       self.restraints_manager = from_cctbx(
@@ -169,7 +169,7 @@ class from_expansion(object):
 
 def get_cctbx_gradients(ph, cs, rm_only=False):
   model = model_from_hierarchy(
-    pdb_hierarchy    = ph.as_pdb_input(),
+    pdb_hierarchy    = ph,
     crystal_symmetry = cs,
     cif_objects      = None)
   rm = model.get_restraints_manager()
@@ -186,6 +186,7 @@ def get_cctbx_gradients(ph, cs, rm_only=False):
 
 class from_altlocs2(object):
   def __init__(self, model, method, params=None):
+    t0 = time.time()
     adopt_init_args(self, locals())
     self.cs = self.model.crystal_symmetry()
     ph = self.model.get_hierarchy()
@@ -207,6 +208,7 @@ class from_altlocs2(object):
         target_and_gradients = rm)
     self.sel_W_empty = \
       True if not 0 in self.d.keys() else self.d[0].c_selection.count(True) == 0
+    print("INIT:", time.time()-t0)
 
   def _setup_restraints_managers(self, model):
     restraints_source = restraints(
@@ -218,6 +220,7 @@ class from_altlocs2(object):
         crystal_symmetry  = model.crystal_symmetry()).target_and_gradients
 
   def target_and_gradients(self, sites_cart):
+    self.model.set_sites_cart(sites_cart=sites_cart)
     g_result  = flex.vec3_double(self.conf_ind.size(), [0,0,0])
     if not self.sel_W_empty:
       g_blanks  = flex.vec3_double(self.d[0].c_selection.count(True))
@@ -240,6 +243,7 @@ class from_altlocs2(object):
       result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
     else: assert 0
     energy=0 # undefined!
+    print("HERE")
     return energy, result
 
 def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
@@ -303,7 +307,7 @@ class from_altlocs(object):
   def target_and_gradients(self, sites_cart, selection=None, index=None):
     gradient = from_cctbx_altlocs(
       ph=self.pdb_hierarchy, cs=self.crystal_symmetry, method=self.method)
-    energy=0 # undefined!
+    energy=None # undefined!
     return energy, gradient
 
 #-------------------------------------------------------------------------------
