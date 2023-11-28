@@ -243,7 +243,6 @@ class from_altlocs2(object):
       result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
     else: assert 0
     energy=0 # undefined!
-    print("HERE")
     return energy, result
 
 def from_cctbx_altlocs(ph, cs, method="subtract", option=2):

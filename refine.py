@@ -110,9 +110,6 @@ def create_fragment_manager(
 
 def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(params = params, model = model)
-  
-  return restraints_source.restraints_manager
-  
   if(model.altlocs_present()):
     return restraints.from_altlocs2(
       model  = model,
