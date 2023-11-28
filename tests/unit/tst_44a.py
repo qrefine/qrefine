@@ -8,7 +8,7 @@ from scitbx.array_family import flex
 import mmtbx.model
 from qrefine import qr, refine
 
-from qrefine import  cluster_restraints
+from qrefine import  cluster_restraints, restraints
 from qrefine.utils import hierarchy_utils
 from libtbx.utils import null_out
 from qrefine.tests.unit import run_tests
@@ -20,14 +20,9 @@ qr_unit_tests = os.path.join(qrefine, "tests","unit")
 def get_model(file_name):
   file_name = os.path.join(qr_unit_tests,"data_files",file_name)
   pdb_inp = iotbx.pdb.input(file_name)
-  model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
-  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
-  params.pdb_interpretation.use_neutron_distances = True
-  params.pdb_interpretation.restraints_library.cdl = False
-  params.pdb_interpretation.sort_atoms = False
-  model.process(make_restraints=True, grm_normalization=False,
-    pdb_interpretation_params = params)
-  return model
+  return restraints.model_from_hierarchy(
+    pdb_hierarchy    = pdb_inp.construct_hierarchy(),
+    crystal_symmetry = pdb_inp.crystal_symmetry())
 
 def get_restraints_manager(expansion, file_name):
   model = get_model(file_name=file_name)
@@ -49,7 +44,7 @@ def get_restraints_manager(expansion, file_name):
          model.get_sites_cart()
   return result
 
-def run(prefix, verbose=False):
+def run(prefix, verbose=True):
   """
   Exercise expansion=False / expansion=True
   """
@@ -71,7 +66,7 @@ def run(prefix, verbose=False):
     rm2, sites_cart = get_restraints_manager(expansion=True, file_name=fn)
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
-    if(verbose):
+    if 0:
       atoms = ph.atoms()
       ds = flex.sqrt((g1 - g2).dot())
       for d, g, gg, dist, a in zip((g1-g2), g1, g2, ds, atoms):

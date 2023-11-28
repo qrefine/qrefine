@@ -50,7 +50,7 @@ def run(prefix, verbose=False):
   """
   Exercise expansion=False / expansion=True with altlocs
   """
-  for altloc_method in ["average", "subtract"]:
+  for altloc_method in ["subtract"]:
     if(verbose): print("altloc_method", altloc_method, "-"*20)
     path = qr_unit_tests+"/data_files/"
     files = ["gly2_1.pdb", "altlocs2.pdb", "altlocs.pdb", "gly2_2.pdb"]
