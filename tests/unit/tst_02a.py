@@ -11,14 +11,20 @@ from scitbx.array_family import flex
 from qrefine import qr
 from qrefine import restraints
 import mmtbx.model
+from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
 def run(prefix):
   """
-  ????????
+  Exercise equivalency of from_altlocs and from_cctbx via minimization and
+  qr.refine
+  All three output PDBs are expected to be identical up to PDB file precision.
   """
+  #
+  # Run minimization
+  #
   for option in ["from_altlocs", "from_cctbx"]:
     file_name = os.path.join(qr_unit_tests,"data_files","h_altconf_2_complete_modified.pdb")
     pdb_inp = iotbx.pdb.input(file_name)
@@ -27,7 +33,6 @@ def run(prefix):
       pdb_hierarchy    = pdb_inp.construct_hierarchy(),
       crystal_symmetry = pdb_inp.crystal_symmetry())
 
-    print("NAM input:", model.size())
     params = qr.get_default_params()
     params.restraints="cctbx"
     params.quantum.method='PM7'
@@ -49,6 +54,32 @@ def run(prefix):
     model.get_hierarchy().write_pdb_file(
       "%s_%s.pdb"%(prefix,option),
       crystal_symmetry = pdb_inp.crystal_symmetry())
+  #
+  # Run qrefine
+  #
+  cmd = " ".join([
+    "qr.refine",
+    file_name,
+    "clustering=false",
+    "minimizer=lbfgs",
+    "number_of_micro_cycles=1",
+    "restraints=cctbx",
+    "gradient_only=true",
+    "max_iterations_refine=25",
+    "output_file_name_prefix=%s"%prefix,
+    "output_folder_name=%s"%prefix,
+    " > %s.zlog"%prefix])
+  easy_run.call(cmd)
+  #
+  # Check all three files are the same
+  #
+  s1 = iotbx.pdb.input("tst_02a_from_altlocs.pdb").atoms().extract_xyz()
+  s2 = iotbx.pdb.input("tst_02a_from_cctbx.pdb").atoms().extract_xyz()
+  s3 = iotbx.pdb.input("tst_02a/tst_02a_refined.pdb").atoms().extract_xyz()
+  d1 = flex.mean(flex.sqrt((s1 - s2).dot()))
+  d2 = flex.mean(flex.sqrt((s1 - s3).dot()))
+  assert d1 < 1.e-4, d1 # This is what we expect!
+  assert d2 < 1.e-4, d2 # This is what we expect!
 
 def cctbx_opt(model, restraints_manager, max_shift=0.2, max_iterations=25):
   from scitbx import minimizers

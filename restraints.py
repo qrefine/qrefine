@@ -186,7 +186,6 @@ def get_cctbx_gradients(ph, cs, rm_only=False):
 
 class from_altlocs2(object):
   def __init__(self, model, method, params=None):
-    t0 = time.time()
     adopt_init_args(self, locals())
     self.cs = self.model.crystal_symmetry()
     ph = self.model.get_hierarchy()
@@ -208,7 +207,6 @@ class from_altlocs2(object):
         target_and_gradients = rm)
     self.sel_W_empty = \
       True if not 0 in self.d.keys() else self.d[0].c_selection.count(True) == 0
-    print("INIT:", time.time()-t0)
 
   def _setup_restraints_managers(self, model):
     restraints_source = restraints(
