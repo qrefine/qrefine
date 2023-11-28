@@ -238,9 +238,18 @@ class from_altlocs2(object):
           W.c_selection, g_blanks-((self.n_altlocs-1)*g_blank))
       else: result = g_result
     elif self.method=="average":
-      result = g_result.set_selected(sel_W, g_blanks*(1/n_altlocs))
+      if not self.sel_W_empty:
+        result = g_result.set_selected(
+          self.d[0].c_selection, g_blanks*(1/self.n_altlocs))
+      else:
+        result = g_result
     else: assert 0
     energy=0 # undefined!
+    
+    # XXX tmp debugging info
+    N = flex.mean( flex.sqrt((result).dot()) )
+    print("<|gradient|>", self.method, N)
+    
     return energy, result
 
 def from_cctbx_altlocs(ph, cs, method="subtract", option=2):

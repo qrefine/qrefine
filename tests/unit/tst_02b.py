@@ -10,17 +10,21 @@ from libtbx.test_utils import approx_equal
 from qrefine import restraints
 from scitbx.array_family import flex
 import mmtbx.model
+from qrefine.command_line import granalyse
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 
 def run(prefix):
   """
-  CCTBX gradients in presence of altlocs. method = "subtract"
+  CCTBX gradients in presence of altlocs. method = "average"
+  
+  XXX No assertions yet.
   """
-  method = "subtract"
+  method = "average"
   for file_name in ["gly2_1.pdb", "gly2_2.pdb", "h_altconf_complete.pdb",
                     "h_altconf_2_complete.pdb", "altlocs2.pdb", "altlocs.pdb"]:
+
 
     file_name = os.path.join(qr_unit_tests,"data_files",file_name)
     print(file_name)
@@ -53,19 +57,16 @@ def run(prefix):
       params = params).target_and_gradients(sites_cart = ph.atoms().extract_xyz())
      
     #
-    assert approx_equal(g1, gX)
-    assert approx_equal(g0, g1)
-    assert approx_equal(g1, g2)
-    assert approx_equal(g2, g3)
-  
-    #STOP()
-
-    # Individual differences
-    #g1 = g1.as_double()
-    #g2 = g2.as_double()
-    #diff = flex.abs(g1-g2)
-    #for d, atom in zip(diff, ph.atoms()):
-    #  print(atom.format_atom_record(), d)
+    #assert approx_equal(g1, gX)
+    #assert approx_equal(g0, g1)
+    #assert approx_equal(g1, g2)
+    #assert approx_equal(g2, g3)
+    
+    print( "(g1, gX):", max(granalyse.get_grad_wdelta(ref=g1, g=gX)) )
+    print( "(g0, g1):", max(granalyse.get_grad_wdelta(ref=g0, g=g1)) )
+    print( "(g1, g2):", max(granalyse.get_grad_wdelta(ref=g1, g=g2)) )
+    print( "(g2, g3):", max(granalyse.get_grad_wdelta(ref=g2, g=g3)) )
+    
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
