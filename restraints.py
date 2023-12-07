@@ -62,30 +62,45 @@ class restraints(object):
     return self.params.restraints == "qm"
 
   def update(self, pdb_hierarchy, crystal_symmetry):
-    # This is called in expansion
-    if(not self.source_of_restraints_qm()):
-      model = model_from_hierarchy(
-        pdb_hierarchy    = pdb_hierarchy,
-        crystal_symmetry = crystal_symmetry,
-        cif_objects      = self.cif_objects)
-      self.restraints_manager = from_cctbx(
-        restraints_manager = model.get_restraints_manager())
-    else:
-      assert self.source_of_restraints_qm()
-      self.restraints_manager = from_qm(
-        cif_objects      = self.cif_objects,
-        method           = self.params.quantum.method,
-        basis            = self.params.quantum.basis,
-        pdb_hierarchy    = pdb_hierarchy,
-        charge           = self.params.quantum.charge,
-        qm_engine_name   = self.params.quantum.engine_name,
-        qm_addon         = self.params.quantum.qm_addon,
-        qm_addon_method  = self.params.quantum.qm_addon_method,
-        memory           = self.params.quantum.memory,
-        nproc            = self.params.quantum.nproc,
-        url              = self.params.quantum.server_url,
-        crystal_symmetry = crystal_symmetry,
-        clustering       = self.params.cluster.clustering)
+    #
+    if self.restraints_manager is not None:
+      if(not self.source_of_restraints_qm()):
+        size = self.restraints_manager.geometry_restraints_manager.geometry.\
+          sites_cart_used_for_pair_proxies().size()
+      else:
+        size = self.restraints_manager.system_size
+        assert self.restraints_manager.pdb_hierarchy.atoms().size() == size
+    #
+    # IMPORTANT! This assumes expansion remains constant in terms of atom
+    #            content (not atoms added/removed during minimization).
+    #            Therefore, we do not need to re-created restraints.
+    #
+    if(self.restraints_manager is None or
+       pdb_hierarchy.atoms().size()!=size):
+      # This is called in expansion
+      if(not self.source_of_restraints_qm()):
+        model = model_from_hierarchy(
+          pdb_hierarchy    = pdb_hierarchy,
+          crystal_symmetry = crystal_symmetry,
+          cif_objects      = self.cif_objects)
+        self.restraints_manager = from_cctbx(
+          restraints_manager = model.get_restraints_manager())
+      else:
+        assert self.source_of_restraints_qm()
+        self.restraints_manager = from_qm(
+          cif_objects      = self.cif_objects,
+          method           = self.params.quantum.method,
+          basis            = self.params.quantum.basis,
+          pdb_hierarchy    = pdb_hierarchy,
+          charge           = self.params.quantum.charge,
+          qm_engine_name   = self.params.quantum.engine_name,
+          qm_addon         = self.params.quantum.qm_addon,
+          qm_addon_method  = self.params.quantum.qm_addon_method,
+          memory           = self.params.quantum.memory,
+          nproc            = self.params.quantum.nproc,
+          url              = self.params.quantum.server_url,
+          crystal_symmetry = crystal_symmetry,
+          clustering       = self.params.cluster.clustering)
     return self.restraints_manager
 
 class from_expansion(object):
@@ -245,11 +260,11 @@ class from_altlocs2(object):
         result = g_result
     else: assert 0
     energy=0 # undefined!
-    
+
     # XXX tmp debugging info
     N = flex.mean( flex.sqrt((result).dot()) )
     print("<|gradient|>", self.method, N)
-    
+
     return energy, result
 
 def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
