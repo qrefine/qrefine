@@ -185,6 +185,8 @@ class sites_opt(object):
     self.number_of_target_and_gradients_calls = 0
 
   def target_and_gradients(self):
+    self.number_of_target_and_gradients_calls+=1
+    t0=time.time()
     sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
     self.f, self.g = self.restraints_manager.target_and_gradients(
       sites_cart = sites_plus_x)
@@ -200,7 +202,7 @@ class sites_opt(object):
 
     self.max_shift_between_resets = self.shift_eval_func(flex.sqrt((
       self.sites_cart - sites_plus_x).dot()))
-
+    self.total_time += (time.time()-t0)
     return self.f, self.g
 
   def compute_functional_and_gradients(self):
@@ -240,6 +242,8 @@ class sites(calculator):
     self.x_target_functor = None
     self.not_hd_selection = None # XXX UGLY
     self.initialize(fmodel = self.fmodel)
+    self.total_time = 0
+    self.number_of_target_and_gradients_calls = 0
 
   def initialize(self, fmodel=None):
     self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
@@ -275,6 +279,8 @@ class sites(calculator):
       update_f_calc  = True)
 
   def target_and_gradients(self, x):
+    self.number_of_target_and_gradients_calls+=1
+    t0=time.time()
     self.update(x = x)
     rt, rg = self.restraints_manager.target_and_gradients(sites_cart = self.x)
     tgx = self.x_target_functor(compute_gradients=True)
@@ -291,6 +297,7 @@ class sites(calculator):
       easy_pickle.dump(self.dump_gradients+"_rg", rg.as_double())
       easy_pickle.dump(self.dump_gradients+"_g", g.as_double())
       STOP()
+    self.total_time += (time.time()-t0)
     return t, g.as_double()
 
 class adp(calculator):

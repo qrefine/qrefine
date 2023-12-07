@@ -592,6 +592,9 @@ def refine(fmodel,
       conv_test    = conv_test,
       results      = results)
   print("At end of further refinement:", file=log)
+  print("calculator(refine), total_time (target_and_gradients)", calculator.total_time)
+  print("calculator(refine), number_of_target_and_gradients_calls (target_and_gradients)",
+    calculator.number_of_target_and_gradients_calls)
   results.show(prefix="  ")
 
 def opt(model, params, results, calculator):
@@ -648,3 +651,6 @@ def opt(model, params, results, calculator):
     output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
   # final = model.geometry_statistics().show_short()
   # print("final: %s"%final, file=log_switch)
+  print("calculator(opt), total_time (target_and_gradients)", calculator.total_time)
+  print("calculator(opt), number_of_target_and_gradients_calls (target_and_gradients)",
+    calculator.number_of_target_and_gradients_calls)
