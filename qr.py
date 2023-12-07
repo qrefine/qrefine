@@ -44,7 +44,7 @@ cluster{
     .help = maximum number of residues in a cluster
   bcc_threshold = 9
     .type = int
-    .help = threshold value for bcc clustering   
+    .help = threshold value for bcc clustering
   select_within_radius = 10
     .type = int
     .help = supersphere expansion radius
@@ -279,6 +279,10 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       exact_count=True,
       raise_sorry=False)
     self.has_data = self.has_ma or self.has_map
+    #
+    if self.params.refine.minimizer == "lbfgsb":
+      if self.params.refine.gradient_only:
+        raise Sorry("gradient_only must be False for lbfgsb.")
 
   def run(self):
     self.header("Refinement start")

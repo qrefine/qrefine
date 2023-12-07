@@ -181,6 +181,8 @@ class sites_opt(object):
     assert self.shift_eval in ["max", "mean"]
     if(self.shift_eval == "mean"): self.shift_eval_func = flex.mean
     else:                          self.shift_eval_func = flex.max
+    self.total_time = 0
+    self.number_of_target_and_gradients_calls = 0
 
   def target_and_gradients(self):
     sites_plus_x = self.sites_cart+flex.vec3_double(self.x)

@@ -116,7 +116,6 @@ class from_expansion(object):
     self.crystal_symmetry_ss = None
     self.expansion = None
     self._expand()
-    self.sites_cart_previous = self.pdb_hierarchy.atoms().extract_xyz()
 
   def __call__(self, selection_and_sites_cart):
     # XXX Not sure what this is and why!?
@@ -140,18 +139,9 @@ class from_expansion(object):
 
   def _update(self, sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-
-    xyz = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
-    xyz = xyz.set_selected(self.selection, sites_cart)
-    self.pdb_hierarchy_super_completed.atoms().set_xyz(xyz)
-
     self._expand()
-    self.sites_cart_previous = sites_cart
 
   def _expand(self):
-    #self.selection = flex.bool(self.pdb_hierarchy.atoms().size(), True)
-    #self.pdb_hierarchy_super_completed = self.pdb_hierarchy#.deep_copy()
-    #return
     if(self.expansion is None):
       self.expansion = expand(
         pdb_hierarchy        = self.pdb_hierarchy,
@@ -159,19 +149,18 @@ class from_expansion(object):
         select_within_radius = self.params.cluster.select_within_radius)
     else:
       self.expansion.update(sites_cart = self.pdb_hierarchy.atoms().extract_xyz())
-    pdb_hierarchy_super = self.expansion.ph_super_sphere
-    pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
-      crystal_symmetry = self.expansion.cs_box)
-    self.crystal_symmetry_ss = self.expansion.cs_box
-    # Use same route for CCTBX and QM !
+#    pdb_hierarchy_super = self.expansion.ph_super_sphere
+#    pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
+#      crystal_symmetry = self.expansion.cs_box)
+#    self.crystal_symmetry_ss = self.expansion.cs_box
     if(self.restraints_source.source_of_restraints_qm()):
       self.pdb_hierarchy_super_completed = model_completion.run(
-        pdb_hierarchy         = pdb_hierarchy_super,
+        pdb_hierarchy         = self.expansion.ph_super_sphere,
         crystal_symmetry      = self.expansion.cs_box,
         model_completion      = False,
         original_pdb_filename = None)
     else:
-      self.pdb_hierarchy_super_completed = pdb_hierarchy_super
+      self.pdb_hierarchy_super_completed = self.expansion.ph_super_sphere
     selection = flex.bool(
       self.pdb_hierarchy_super_completed.atoms().size(), False)
     self.selection = selection.set_selected(
@@ -339,6 +328,8 @@ class from_cctbx(object):
     self.geometry_restraints_manager = restraints_manager
     self.file_name = file_name
     self.fragment_extracts = fragment_extracts
+    self.total_time = 0
+    self.number_of_target_and_gradients_calls = 0
 
   def __call__(self, selection_and_sites_cart):
     return self.target_and_gradients(
@@ -357,6 +348,7 @@ class from_cctbx(object):
       gradients = tg[1])
 
   def target_and_gradients(self, sites_cart, selection=None, index=None):
+
     if(selection is not None): ### clustering
       super_selection = self.fragment_extracts.fragment_super_selections[index]
       grm = self.fragment_extracts.super_sphere_geometry_restraints_manager
@@ -386,7 +378,6 @@ class from_qm(object):
       file_name                  = "./ase/tmp_ase.pdb",
       crystal_symmetry           = None,
       clustering                 = False,
-#      charge_service             = None,
       cif_objects                = None,
       # change to quantum phil scope !!!!
       method                     = 'rhf',
@@ -413,7 +404,7 @@ class from_qm(object):
       os.mkdir(self.working_folder)
     if(charge is None and clustering is False):
       charge_service = charges_class(
-        pdb_hierarchy = pdb_hierarchy,
+        pdb_hierarchy = self.pdb_hierarchy.deep_copy(), # XXX Something bad happens otherwise!
         crystal_symmetry = crystal_symmetry,
         cif_objects = cif_objects)
       self.charge = charge_service.get_total_charge()
