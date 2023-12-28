@@ -188,8 +188,12 @@ class sites(calculator):
     self.data_weight = 1.
     self.restraints_weight_scale = 1.
     self.restraints_weight = 1.
+    self.r_works = flex.double()
+    self.n_converged = 0
 
   def initialize(self, fmodel=None):
+    self.r_works = flex.double()
+    self.n_converged = 0
     self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
     assert fmodel is not None
     self.fmodel = fmodel
@@ -236,6 +240,22 @@ class sites(calculator):
       xray_structure = self.fmodel.xray_structure,
       update_f_calc  = True)
 
+    r_work = self.fmodel.r_work()
+    self.r_works.append(r_work)
+
+    d=None
+    if self.r_works.size()>20:
+      a = self.r_works[-3:]
+      d = max(list(set([abs(i-j) for i in a for j in a if i != j])))
+      d = True if d<0.0003 else False
+      if d: self.n_converged += 1
+      else:
+        if self.n_converged>0: self.n_converged -= 1
+
+  def converged(self):
+    if self.n_converged >= 3: return True
+    else:                   return False
+
   def target_and_gradients(self, x):
     self.number_of_target_and_gradients_calls+=1
     t0=time.time()
@@ -257,55 +277,6 @@ class sites(calculator):
       STOP()
     self.total_time += (time.time()-t0)
     return t, g.as_double()
-
-class adp(calculator):
-  def __init__(self,
-               fmodel=None,
-               restraints_manager=None,
-               restraints_weight=None,
-               data_weight=None,
-               restraints_weight_scale=None):
-    adopt_init_args(self, locals())
-    self.x = None
-    self.x_target_functor = None
-    self.initialize(fmodel = self.fmodel)
-
-  def initialize(self, fmodel=None):
-    assert fmodel is not None
-    self.fmodel = fmodel
-    self.fmodel.xray_structure.scatterers().flags_set_grads(state=False)
-    assert self.fmodel.xray_structure.scatterers().size() == \
-      self.fmodel.xray_structure.use_u_iso().count(True)
-    sel = flex.bool(
-      self.fmodel.xray_structure.scatterers().size(), True).iselection()
-    self.fmodel.xray_structure.scatterers().flags_set_grad_u_iso(iselection=sel)
-    self.x = fmodel.xray_structure.extract_u_iso_or_u_equiv()
-    self.x_target_functor = self.fmodel.target_functor()
-
-  def calculate_weight(self):
-    raise RuntimeError("Not implemented.")
-    self.data_weight = compute_weight(
-      fmodel = self.fmodel,
-      rm     = self.restraints_manager)
-
-  def reset_fmodel(self, fmodel=None):
-    if(fmodel is not None):
-      self.initialize(fmodel=fmodel)
-      self.fmodel = fmodel
-
-  def update(self, x):
-    self.x = x
-    self.fmodel.xray_structure.set_u_iso(values = self.x)
-    self.fmodel.update_xray_structure(
-      xray_structure = self.fmodel.xray_structure,
-      update_f_calc  = True)
-
-  def target_and_gradients(self, x):
-    self.update(x = x)
-    tgx = self.x_target_functor(compute_gradients=True)
-    f = tgx.target_work()
-    g = tgx.gradients_wrt_atomic_parameters(u_iso=True)
-    return f, g
 
 class sites_real_space(object):
   def __init__(self,

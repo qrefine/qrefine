@@ -73,19 +73,20 @@ class minimizer(object):
     return b_mean
 
   def callback_after_step(self, minimizer=None):
-    if(self.geometry_rmsd_manager is not None or self.mode=="refine"):
+    if(self.geometry_rmsd_manager is not None and self.mode=="weight"):
+      assert self.max_bond_rmsd is not None
       b_mean = self._get_bond_rmsd()
-      if(self.mode=="refine" and
-         b_mean>self.max_bond_rmsd and
+      if(b_mean>self.max_bond_rmsd and
          self.number_of_function_and_gradients_evaluations-3>20):
         return True
+    if(self.calculator.converged()): return True
 
   def compute_functional_and_gradients(self):
     self.number_of_function_and_gradients_evaluations += 1
     #print("  step: %3d bond rmsd: %8.6f"%(
     #  self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd()),
-    #  "%6.4f"%self.calculator.fmodel.r_work()
-    #  )
+    #  "%6.4f"%self.calculator.fmodel.r_work(),
+    #  self.mode)
     return self.calculator.target_and_gradients(x = self.x)
 
   def prcg_min(self,params):
@@ -245,8 +246,12 @@ class minimizer_ase(object):
 
 def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
   minimized = None
-  if  (mode == "weight"): max_iterations = params.refine.max_iterations_weight
-  elif(mode == "refine"): max_iterations = params.refine.max_iterations_refine
+  if  (mode == "weight"):
+    max_iterations = params.refine.max_iterations_weight
+    max_bond_rmsd  = params.refine.max_bond_rmsd
+  elif(mode == "refine"):
+    max_iterations = params.refine.max_iterations_refine
+    max_bond_rmsd  = None
   if(params.refine.use_ase_lbfgs):
     minimized = minimizer_ase(
       calculator            = calculator,
@@ -272,9 +277,9 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
         gradient_only         = params.refine.gradient_only,
         line_search           = params.refine.line_search,
         max_iterations        = max_iterations,
-        max_bond_rmsd         = params.refine.max_bond_rmsd,
+        max_bond_rmsd         = max_bond_rmsd,
         results               = results,
-        mode                  = params.refine.mode,
+        mode                  = mode,
         geometry_rmsd_manager = geometry_rmsd_manager,
         preopt_params         = preopt)
   return minimized
@@ -356,13 +361,13 @@ def refine(fmodel,
           results               = results,
           geometry_rmsd_manager = geometry_rmsd_manager,
           mode                  = "weight")
-        #print("HERE-1"*2, fmodel.r_work(), calculator.fmodel.r_work())
+        #print("HERE-1"*2, "%7.5f %7.5f"%(fmodel.r_work(),calculator.fmodel.r_work()))
         if(minimized is not None):
           calculator.reset_fmodel(fmodel = fmodel)
           calculator.update_fmodel()
           n_fev += minimized.number_of_function_and_gradients_evaluations
           break
-      #print("HERE-2"*2, fmodel.r_work(), calculator.fmodel.r_work())
+      #print("HERE-2"*2, "%7.5f %7.5f"%(fmodel.r_work(),calculator.fmodel.r_work()))
       if(minimized is None): continue
       # Sanity check:
       assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
@@ -389,36 +394,40 @@ def refine(fmodel,
       #
       # Ready to stop?
       if(up>0 and down>0):
+        print("Flip happened. Stopping weight search.", file=log)
         break
       if(b_rmsds.size()>3):
         v = list(set(b_rmsds[-3:]))
         if(b_rmsds[-3:].size() > len(v)):
+          print("Bond rmsd stalled. Stopping weight search.", file=log)
           break
-    # Ok, done. Now choose best result.
-    if(r_frees.size()==0):
-      raise Sorry(
-        "Weight search yields no result. Change search criteria and re-try.")
-    # Choose best result
-    s = flex.sort_permutation(r_frees)
-    index = s[0]
-    calculator.setw(restraints_weight_scale = restraints_weight_scale[index])
-    print("Best Rfree from above: %6.4f"%r_frees[index])
-    print("Best restraints scale:", round(restraints_weight_scale[index],3))
-    xrs = fmodel.xray_structure
-    xrs.set_sites_cart(sites_cart[index])
-    fmodel.update_xray_structure(
-      xray_structure = xrs,
-      update_f_calc  = True,
-      update_f_mask  = True)
+    # Ok, done with weights.
+    if(r_frees.size()==0): # Fallback
+      print("Weight search yields no result. Using last result.", file=log)
+      print("Taking result with Rwork, Rfree: %6.4f %6.4f"%(
+        fmodel.r_work(), fmodel.r_free()), file=log)
+    else: # Choose best result
+      s = flex.sort_permutation(r_frees)
+      index = s[0]
+      calculator.setw(restraints_weight_scale = restraints_weight_scale[index])
+      print("Best Rfree from above: %6.4f"%r_frees[index], file=log)
+      print("Best restraints scale:", round(restraints_weight_scale[index],3), file=log)
+      xrs = fmodel.xray_structure
+      xrs.set_sites_cart(sites_cart[index])
+      fmodel.update_xray_structure(
+        xray_structure = xrs,
+        update_f_calc  = True,
+        update_f_mask  = True)
     fmodel.update_all_scales(remove_outliers=False)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
-      fmodel.r_work(), fmodel.r_free()))
+      fmodel.r_work(), fmodel.r_free()), file=log)
   #
   # Done with weights. Now let's refine!
   #
   print("Refinement:", file=log)
   calculator.reset_fmodel(fmodel = fmodel)
   calculator.update_fmodel()
+  assert not calculator.converged()
   for refine_cycle in range(params.refine.number_of_refine_cycles):
     calculator.reset_fmodel(fmodel=fmodel)
     if(clustering):
@@ -448,6 +457,9 @@ def refine(fmodel,
       output_folder_name = params.output_folder_name,
       output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
     results.show(prefix="  ")
+    if(calculator.converged()):
+      print("Refinement converged. Stopping now.", file=log)
+      break
   #print("At end of further refinement:", file=log)
   #print("calculator(refine), total_time (target_and_gradients)", calculator.total_time)
   #print("calculator(refine), number_of_target_and_gradients_calls (target_and_gradients)",
@@ -455,7 +467,7 @@ def refine(fmodel,
   results.show(prefix="  ")
   assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
   print("Best Rwork, Rfree (after refinement): %6.4f %6.4f"%(
-      fmodel.r_work(), fmodel.r_free()))
+      fmodel.r_work(), fmodel.r_free()), file=log)
 
 def opt(model, params, results, calculator):
   assert model == calculator.model
