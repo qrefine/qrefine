@@ -22,6 +22,35 @@ from mmtbx.validation.clashscore import clashscore
 from libtbx.utils import null_out
 from cctbx import maptbx
 
+def compute_weight(fmodel, restraints_manager, shake_sites=False):
+  if(shake_sites):
+    random.seed(1)
+    flex.set_random_seed(1)
+  fmodel_dc = fmodel.deep_copy()
+  xrs = fmodel_dc.xray_structure.deep_copy_scatterers()
+  if(shake_sites):
+    xrs.shake_sites_in_place(mean_distance=0.2)
+  fmodel_dc.update_xray_structure(xray_structure=xrs, update_f_calc=True)
+  x_target_functor = fmodel_dc.target_functor()
+  tgx = x_target_functor(compute_gradients=True)
+  gx = flex.vec3_double(tgx.\
+    gradients_wrt_atomic_parameters(site=True).packed())
+  tc, gc = restraints_manager.target_and_gradients(sites_cart=xrs.sites_cart())
+  x = gc.norm()
+  y = gx.norm()
+  # filter out large contributions
+  gx_d = flex.sqrt(gx.dot())
+  sel = gx_d>flex.mean(gx_d)*6
+  y = gx.select(~sel).norm()
+  #
+  gc_d = flex.sqrt(gc.dot())
+  sel = gc_d>flex.mean(gc_d)*6
+  x = gc.select(~sel).norm()
+  #
+  if(y != 0.0): data_weight = x/y
+  else:         data_weight = 1.0 # ad hoc default fallback
+  return data_weight
+
 def get_bonds_rmsd(restraints_manager, xrs):
   hd_sel = xrs.hd_selection()
   energies_sites = \
@@ -29,94 +58,6 @@ def get_bonds_rmsd(restraints_manager, xrs):
       sites_cart        = xrs.sites_cart().select(~hd_sel),
       compute_gradients = False)
   return energies_sites.bond_deviations()[2]
-
-class weights(object):
-  def __init__(self,
-               shake_sites             = True,
-               restraints_weight       = None,
-               data_weight             = None,
-               restraints_weight_scale = 1.0):
-    adopt_init_args(self, locals())
-    if(self.data_weight is not None):
-      self.weight_was_provided = True
-    else:
-      self.weight_was_provided = False
-    self.restraints_weight_scales = flex.double([self.restraints_weight_scale])
-    self.r_frees = []
-    self.r_works = []
-
-  def scale_restraints_weight(self):
-    if(self.weight_was_provided): return
-    self.restraints_weight_scale *= 4.0
-
-  def adjust_restraints_weight_scale(
-        self,
-        fmodel,
-        geometry_rmsd_manager,
-        max_bond_rmsd,
-        scale):
-    adjusted = None
-    if(self.weight_was_provided): return adjusted
-    rw = fmodel.r_work()
-    rf = fmodel.r_free()
-    cctbx_rm_bonds_rmsd = get_bonds_rmsd(
-      restraints_manager = geometry_rmsd_manager.geometry,
-      xrs                = fmodel.xray_structure)
-    ####
-    adjusted = False
-    if(cctbx_rm_bonds_rmsd>max_bond_rmsd):
-      self.restraints_weight_scale *= scale
-      adjusted = True
-    if(not adjusted and rf<rw):
-      self.restraints_weight_scale /= scale
-      adjusted = True
-    if(not adjusted and cctbx_rm_bonds_rmsd<max_bond_rmsd and rf>rw and
-       abs(rf-rw)*100.<5.):
-      self.restraints_weight_scale /= scale
-      adjusted = True
-    if(not adjusted and cctbx_rm_bonds_rmsd<max_bond_rmsd and rf>rw and
-       abs(rf-rw)*100.>5.):
-      self.restraints_weight_scale *= scale
-      adjusted = True
-    ####
-    self.r_frees.append(round(rf,4))
-    self.r_works.append(round(rw,4))
-    return adjusted
-
-  def add_restraints_weight_scale_to_restraints_weight_scales(self):
-    if(self.weight_was_provided): return
-    self.restraints_weight_scales.append(self.restraints_weight_scale)
-
-  def compute_weight(self, fmodel, rm, verbose=False):
-    if(self.weight_was_provided): return
-    random.seed(1)
-    flex.set_random_seed(1)
-    #
-    fmodel_dc = fmodel.deep_copy()
-    xrs = fmodel_dc.xray_structure.deep_copy_scatterers()
-    if(self.shake_sites):
-      xrs.shake_sites_in_place(mean_distance=0.2)
-    fmodel_dc.update_xray_structure(xray_structure=xrs, update_f_calc=True)
-    x_target_functor = fmodel_dc.target_functor()
-    tgx = x_target_functor(compute_gradients=True)
-    gx = flex.vec3_double(tgx.\
-            gradients_wrt_atomic_parameters(site=True).packed())
-    tc, gc = rm.target_and_gradients(sites_cart=xrs.sites_cart())
-    x = gc.norm()
-    y = gx.norm()
-    if verbose: print('>>> gradient norms c,x %0.2f %0.2f' % (x, y))
-    # filter out large contributions
-    gx_d = flex.sqrt(gx.dot())
-    sel = gx_d>flex.mean(gx_d)*6
-    y = gx.select(~sel).norm()
-    #
-    gc_d = flex.sqrt(gc.dot())
-    sel = gc_d>flex.mean(gc_d)*6
-    x = gc.select(~sel).norm()
-    ################
-    if(y != 0.0): self.data_weight = x/y
-    else:         self.data_weight = 1.0 # ad hoc default fallback
-    if verbose: print('>>> data_weight %0.2f' % self.data_weight)
 
 class calculator(object):
   def __init__(self,
@@ -139,8 +80,9 @@ class calculator(object):
       self.fmodel.update_xray_structure(
         xray_structure = self.fmodel.xray_structure,
         update_f_calc  = True,
-        update_f_mask  = True)
-      self.fmodel.update_all_scales(remove_outliers=False)
+        #update_f_mask  = True
+        )
+      #self.fmodel.update_all_scales(remove_outliers=False)
     else:
       self.xray_structure.tidy_us()
       self.xray_structure.apply_symmetry_sites()
@@ -235,7 +177,6 @@ class sites(calculator):
   def __init__(self,
                fmodel=None,
                restraints_manager=None,
-               weights=None,
                dump_gradients=None):
     adopt_init_args(self, locals())
     self.x = None
@@ -244,6 +185,9 @@ class sites(calculator):
     self.initialize(fmodel = self.fmodel)
     self.total_time = 0
     self.number_of_target_and_gradients_calls = 0
+    self.data_weight = 1.
+    self.restraints_weight_scale = 1.
+    self.restraints_weight = 1.
 
   def initialize(self, fmodel=None):
     self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
@@ -268,8 +212,22 @@ class sites(calculator):
       self.fmodel = fmodel
       self.update_fmodel()
 
-  def update_restraints_weight_scale(self, restraints_weight_scale):
-    self.weights.restraints_weight_scale = restraints_weight_scale
+  def setw(self,
+           data_weight = None,
+           restraints_weight_scale = None,
+           restraints_weight = None):
+    if(data_weight is not None):
+      self.data_weight = data_weight
+    if(restraints_weight_scale is not None):
+      self.restraints_weight_scale = restraints_weight_scale
+    if(restraints_weight is not None):
+      self.restraints_weight = restraints_weight
+
+  def scale_restraints_weight_down(self, scale=2):
+    self.setw(restraints_weight_scale = self.restraints_weight_scale/scale)
+
+  def scale_restraints_weight_up(self, scale=2):
+    self.setw(restraints_weight_scale = self.restraints_weight_scale*scale)
 
   def update(self, x):
     self.x = flex.vec3_double(x)
@@ -287,10 +245,10 @@ class sites(calculator):
     dt = tgx.target_work()
     dg = flex.vec3_double(tgx.\
       gradients_wrt_atomic_parameters(site=True).packed())
-    t = dt*self.weights.data_weight + \
-      self.weights.restraints_weight*rt*self.weights.restraints_weight_scale
-    g = dg*self.weights.data_weight + \
-      self.weights.restraints_weight*rg*self.weights.restraints_weight_scale
+    t = dt*self.data_weight + \
+      self.restraints_weight*rt*self.restraints_weight_scale
+    g = dg*self.data_weight + \
+      self.restraints_weight*rg*self.restraints_weight_scale
     if(self.dump_gradients is not None):
       from libtbx import easy_pickle
       easy_pickle.dump(self.dump_gradients+"_dg", dg.as_double())

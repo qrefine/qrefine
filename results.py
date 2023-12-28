@@ -64,58 +64,6 @@ class manager(object):
     if(n_fev is not None):
       self.n_fev += n_fev
 
-  def choose_best(self, use_r_work):
-    # Do not inlude initial model in decision-making.
-    rfs  = self.r_frees[1:]
-    rws  = self.r_works[1:]
-    bs   = self.bs    [1:]
-    gaps = rfs - rws
-    xrss = self.xrss  [1:]
-    rewescas = self.restraints_weight_scales[1:]
-    # Select all that satisfy bonds and Rfree-Rwork gap criteria
-    s  = bs < self.max_bond_rmsd
-    rfs  = rfs .select(s)
-    rws  = rws .select(s)
-    bs   = bs  .select(s)
-    gaps = gaps.select(s)
-    rewescas = rewescas.select(s)
-    xrss = selxrs(xrss=xrss, s=s)
-    # Rfree-Rwork gap
-    filtered_by_gap=False
-    s  = gaps>0
-    s &= flex.abs(gaps)*100.<self.max_r_work_r_free_gap
-    if(s.count(True)>0):
-      rfs      = rfs .select(s)
-      rws      = rws .select(s)
-      bs       = bs  .select(s)
-      gaps     = gaps.select(s)
-      rewescas = rewescas.select(s)
-      xrss     = selxrs(xrss=xrss, s=s)
-      filtered_by_gap=True
-    if(rfs.size()==0):
-      return None, None, None, None
-    else:
-      # Choose the one that has lowest Rfree
-      if(use_r_work): rs = rws.deep_copy()
-      else:           rs = rfs.deep_copy()
-      min_r = flex.min(rs)
-      min_gap = flex.min(gaps)
-      index_best = None
-      if(filtered_by_gap):
-        for i in range(rs.size()):
-          if(abs(rs[i]-min_r)<1.e-5):
-            index_best = i
-            break
-      else:
-        for i in range(gaps.size()):
-          if(abs(gaps[i]-min_gap)<1.e-5):
-            index_best = i
-            break
-      # This is the result
-      self.pdb_hierarchy.adopt_xray_structure(xrss[index_best])
-      return xrss[index_best], rws[index_best], rfs[index_best],\
-        rewescas[index_best]
-
   def choose_last(self):
     xrs_best = self.xrss[len(self.xrss)-1].deep_copy_scatterers()
     self.pdb_hierarchy.adopt_xray_structure(xrs_best)
@@ -156,18 +104,7 @@ class manager(object):
                output_file_name_prefix,
                output_folder_name,
                use_r_work):
-    xrs_best = None
-    if(self.mode == "refine"):
-      xrs_best, r_work, r_free, dummy = self.choose_best(use_r_work=use_r_work)
-      if(xrs_best is not None):
-        print("Best r_work: %6.4f r_free: %6.4f"%(r_work, r_free), file=log)
-      else:
-        print(" r_factor (best): None", file=log)
-        print(" take the last structure", file=log)
-        self.show(prefix="")
-        xrs_best = self.xrss[0]
-    if(self.mode == "opt"):
-      self.choose_last()
+    self.choose_last()
     if(output_file_name_prefix is not None):
       file_name = "%s_refined.pdb"%output_file_name_prefix
     else:
@@ -176,4 +113,3 @@ class manager(object):
       output_file_name   = file_name,
       output_folder_name = output_folder_name)
     print("See %s in %s folder."%(file_name, output_folder_name), file=log)
-    return xrs_best

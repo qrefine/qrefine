@@ -15,82 +15,9 @@ import numpy
 from libtbx.test_utils import approx_equal
 from scitbx import minimizers
 import sys, math
+from libtbx.utils import Sorry
 
 log = sys.stdout
-
-class convergence(object):
-  def __init__(self, params, fmodel=None, xray_structure=None):
-    self.r_start=None
-    if(fmodel is not None):
-      self.r_start = fmodel.r_work()
-      self.sites_cart_start = fmodel.xray_structure.sites_cart()
-    else:
-      self.sites_cart_start = xray_structure.sites_cart()
-    self.r_tolerance=params.refine.r_tolerance
-    self.max_bond_rmsd=params.refine.max_bond_rmsd
-    self.rmsd_tolerance=params.refine.rmsd_tolerance
-    self.use_convergence_test = params.refine.use_convergence_test
-    self.number_of_convergence_occurances=0
-    #
-    self.rws = flex.double()
-    self.rfs = flex.double()
-    self.gaps = flex.double()
-    self.restraints_weight_scales = flex.double()
-
-  def is_converged(self, fmodel, bond_rmsd=None, restraints_weight_scale=None):
-    #
-    if not self.use_convergence_test: return False
-    #
-    rw = fmodel.r_work()
-    rf = fmodel.r_free()
-    gap = rf-rw
-    self.rws                     .append(rw)
-    self.rfs                     .append(rf)
-    self.gaps                    .append(gap)
-    if(restraints_weight_scale is not None):
-      self.restraints_weight_scales.append(restraints_weight_scale)
-    #
-    if(restraints_weight_scale is not None):
-      rwc = self.restraints_weight_scales
-      i_last = self.rws.size()-1
-      if(i_last>3):
-        rwc_3 = rwc[i_last]
-        rwc_2 = rwc[i_last-1]
-        rwc_1 = rwc[i_last-2]
-        rws123 = [rwc_1, rwc_2, rwc_3]
-        for rwc_i in rws123:
-          if(rws123.count(rwc_i)>1):
-            return True
-    #
-    sites_cart = fmodel.xray_structure.sites_cart()
-    r_diff=abs(self.r_start-rw)
-    rmsd_diff=self.sites_cart_start.rms_difference(sites_cart)
-    self.sites_cart_start = sites_cart
-    self.r_start=rw
-    if(r_diff<self.r_tolerance and rmsd_diff<self.rmsd_tolerance and
-       (bond_rmsd is not None and bond_rmsd<self.max_bond_rmsd)):
-      self.number_of_convergence_occurances+=2
-    if(self.number_of_convergence_occurances==2 or rw<0.005):
-      return True and self.use_convergence_test
-    else: return False and self.use_convergence_test
-
-  def is_geometry_converged(self, sites_cart):
-    if not self.use_convergence_test: return False
-    rmsd_diff=self.sites_cart_start.rms_difference(sites_cart)
-    if(rmsd_diff<self.rmsd_tolerance):
-      return True
-
-  def geometry_exploded(self, fmodel, geometry_rmsd_manager):
-    result = False
-    cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
-      restraints_manager = geometry_rmsd_manager.geometry,
-      xrs                = fmodel.xray_structure)
-    if(cctbx_rm_bonds_rmsd>self.max_bond_rmsd*2.0):
-      result = True
-    return result
-
-  def is_weight_scale_converged(self, restraints_weight_scale):
-    return restraints_weight_scale in self.restraints_weight_scales
 
 class minimizer(object):
   def __init__(self,
@@ -155,8 +82,10 @@ class minimizer(object):
 
   def compute_functional_and_gradients(self):
     self.number_of_function_and_gradients_evaluations += 1
-    print("  step: %3d bond rmsd: %8.6f"%(
-      self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd()))
+    #print("  step: %3d bond rmsd: %8.6f"%(
+    #  self.number_of_function_and_gradients_evaluations, self._get_bond_rmsd()),
+    #  "%6.4f"%self.calculator.fmodel.r_work()
+    #  )
     return self.calculator.target_and_gradients(x = self.x)
 
   def prcg_min(self,params):
@@ -248,31 +177,6 @@ class clustering_update(object):
       print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
       self.pre_sites_cart = sites_cart
-
-class restart_data(object):
-  def __init__(self, geometry_rmsd_manager, fmodel=None, xray_structure=None):
-    assert [xray_structure, fmodel].count(None) == 1
-    rst_data = {}
-    fmodel._origin = None # Need for pickling! MTZ object cannot be pickled.
-    if(fmodel is not None): rst_data["fmodel"] = fmodel
-    else:                   rst_data["xrs"] = xray_structure
-    rst_data["geometry_rmsd_manager"] = geometry_rmsd_manager
-    self.rst_data = rst_data
-
-  def write_rst_file(self, rst_file, weight_cycle = None, refine_cycle = None,
-                     micro_cycle = None, fmodel = None, weights = None,
-                     conv_test = None, results = None, xray_structure = None):
-    self.rst_data["weight_cycle"] = weight_cycle
-    self.rst_data["refine_cycle"] = refine_cycle
-    self.rst_data["micro_cycle"] = micro_cycle
-    fmodel._origin = None # Need for pickling! MTZ object cannot be pickled.
-    self.rst_data["rst_fmodel"] = fmodel
-    self.rst_data["rst_xray_structure"] = xray_structure
-    self.rst_data["weights"] = weights
-    self.rst_data["conv_test"] = conv_test
-    self.rst_data["results"] = results
-    with open(rst_file, 'wb') as handle:
-      pickle.dump(self.rst_data,file=handle)
 
 class minimizer_ase(object):
   def __init__(self, calculator, params, max_iterations, geometry_rmsd_manager):
@@ -384,8 +288,15 @@ def run_collect(n_fev, results, fmodel, geometry_rmsd_manager, calculator):
     r_free                  = fmodel.r_free(),
     b                       = cctbx_rm_bonds_rmsd,
     xrs                     = fmodel.xray_structure,
-    restraints_weight_scale = calculator.weights.restraints_weight_scale,
+    restraints_weight_scale = calculator.restraints_weight_scale,
     n_fev                   = n_fev)
+
+def get_rrb(fmodel, geometry_rmsd_manager):
+  b_rmsd = calculator_module.get_bonds_rmsd(
+    restraints_manager = geometry_rmsd_manager.geometry,
+    xrs                = fmodel.xray_structure)
+  return group_args(
+    b_rmsd=b_rmsd, r_work=fmodel.r_work(), r_free=fmodel.r_free())
 
 def refine(fmodel,
            params,
@@ -393,163 +304,125 @@ def refine(fmodel,
            calculator,
            geometry_rmsd_manager):
   if(not params.refine.refine_sites): return
-  rst_file = params.rst_file
-  rst_data = restart_data(fmodel=fmodel,
-    geometry_rmsd_manager=geometry_rmsd_manager)
-  if(os.path.isfile(rst_file)):
-    with open(rst_file, 'rb') as handle:
-      rst_file_data = pickle.load(handle)
-      weight_cycle_start = rst_file_data["weight_cycle"]
-      refine_cycle_start = rst_file_data["refine_cycle"]
-      print(file=log)
-      print("*"*50, file=log)
-      print("restarts from weight_cycle: %d, refine_cycle: %s"%(
-        weight_cycle_start, refine_cycle_start), file=log)
-      print("*"*50, file=log)
-      print(file=log)
-  else:
-    weight_cycle_start = 1
-    refine_cycle_start = None
-  if(weight_cycle_start==1):
-    conv_test = convergence(fmodel = fmodel, params = params)
-  else:
-    conv_test = rst_file_data["conv_test"]
-  try:
-    clustering = calculator.restraints_manager.clustering
-  except :
-    clustering = False
+  # Ugly!
+  try:    clustering = calculator.restraints_manager.clustering
+  except: clustering = False
   if(clustering):
     cluster_qm_update = clustering_update(
       pre_sites_cart = calculator.fmodel.xray_structure.sites_cart(),
       log            = log,
       rmsd_tolerance = params.refine.rmsd_tolerance * 100,
-      verbose=params.debug,
-      )
-  weight_cycle = weight_cycle_start
+      verbose        = params.debug)
   print("Start:", file=log)
   results.show(prefix="  ")
-  if(refine_cycle_start is not None):
-    print("Found optimal weight. Proceed to further refinement with this weight.", file=log)
-    fmodel = calculator.fmodel.deep_copy()
-  elif(not params.refine.skip_weight_search):
+
+  if(not params.refine.skip_weight_search):
     print("Optimal weight search:", file=log)
     fmodel_copy = calculator.fmodel.deep_copy()
-    for weight_cycle in range(weight_cycle_start,
-                               params.refine.number_of_weight_search_cycles+1):
-      if((weight_cycle!=1 and weight_cycle==weight_cycle_start)):
-        fmodel = calculator.fmodel.deep_copy()
-        if params.debug: print('>>> Using calculator fmodel')
-      else:
-        fmodel = fmodel_copy.deep_copy()
-        if params.debug: print('>>> Using fmodel_copy fmodel')
+    data_weight = calculator_module.compute_weight(
+      fmodel             = fmodel_copy,
+      restraints_manager = calculator.restraints_manager)
+    calculator.setw(
+      data_weight             = data_weight,
+      restraints_weight_scale = 1.,
+      restraints_weight       = 1.)
+    # Weight control stuff
+    rrb_start = get_rrb(
+      fmodel                = fmodel_copy,
+      geometry_rmsd_manager = geometry_rmsd_manager)
+    r_free_best = rrb_start.r_free
+    up   = 0
+    down = 0
+    r_frees    = flex.double()
+    b_rmsds    = flex.double()
+    sites_cart = []
+    restraints_weight_scale = flex.double()
+    print("Data weight (initial):", data_weight, file=log)
+    #
+    # Loop over weight search cycles
+    for weight_cycle in range(1, params.refine.number_of_weight_search_cycles+1):
+      fmodel = fmodel_copy.deep_copy() # Always use initial unchanged fmodel
       calculator.reset_fmodel(fmodel = fmodel)
+      calculator.update_fmodel()
+
       if(clustering):
         cluster_qm_update.re_clustering(calculator)
-      # Calculate weight
-      calculator.calculate_weight(verbose=params.debug)
-      # Collect state
-      rst_data.write_rst_file(
-        rst_file     = rst_file,
-        refine_cycle = None,
-        weight_cycle = weight_cycle,
-        fmodel       = fmodel,
-        weights      = calculator.weights,
-        conv_test    = conv_test,
-        results      = results)
-      # Run minimization
+      # Run minimization with given weight
       n_fev = 0
-      for mc in range(params.refine.number_of_macro_cycles):
+      for mc in range(1): # Just do once. Why one needs to do it more than once!
         minimized = run_minimize(
           calculator            = calculator,
           params                = params,
           results               = results,
           geometry_rmsd_manager = geometry_rmsd_manager,
           mode                  = "weight")
+        #print("HERE-1"*2, fmodel.r_work(), calculator.fmodel.r_work())
         if(minimized is not None):
           calculator.reset_fmodel(fmodel = fmodel)
           calculator.update_fmodel()
           n_fev += minimized.number_of_function_and_gradients_evaluations
           break
+      #print("HERE-2"*2, fmodel.r_work(), calculator.fmodel.r_work())
       if(minimized is None): continue
-      # collect
-      run_collect(
-        n_fev                 = n_fev,
-        results               = results,
+      # Sanity check:
+      assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
+      # Choose what to do with weights
+      rws = calculator.restraints_weight_scale
+      rrb = get_rrb(
         fmodel                = fmodel,
-        calculator            = calculator,
         geometry_rmsd_manager = geometry_rmsd_manager)
-      # Dump model at this step
-      results.write_pdb_file(
-        output_folder_name = params.output_folder_name,
-        output_file_name   = str(weight_cycle)+"_weight_cycle.pdb")
-      # show this step
-      results.show(prefix="  ")
-      # Converged?
-      is_converged = conv_test.is_converged(
-        bond_rmsd = results.bs[len(results.bs)-1],
-        fmodel                  = fmodel,
-        restraints_weight_scale = calculator.weights.restraints_weight_scale)
-      if(is_converged):
-        print("Converged (model).", file=log)
+      b_rmsds.append(round(rrb.b_rmsd,3))
+      if(rrb.b_rmsd < params.refine.max_bond_rmsd):
+        down += 1
+        restraints_weight_scale.append(rws)
+        calculator.scale_restraints_weight_down(scale=1.5)
+        r_frees   .append(fmodel.r_free())
+        sites_cart.append(fmodel.xray_structure.sites_cart())
+      else:
+        up += 1
+        calculator.scale_restraints_weight_up(scale=1.5)
+      # Show
+      fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws(prev): %6.3f rws: %6.3f n_fev: %d"
+      print(fmt%("", weight_cycle, rrb.r_work, rrb.r_free,
+        rrb.r_free-rrb.r_work, rrb.b_rmsd,
+        rws, calculator.restraints_weight_scale, n_fev), file=log)
+      #
+      # Ready to stop?
+      if(up>0 and down>0):
         break
-      calculator.weights.adjust_restraints_weight_scale(
-        fmodel                = fmodel,
-        geometry_rmsd_manager = geometry_rmsd_manager,
-        max_bond_rmsd         = params.refine.max_bond_rmsd,
-        scale                 = params.refine.adjust_restraints_weight_scale_value)
-      # Converged?
-      is_converged = conv_test.is_weight_scale_converged(
-        restraints_weight_scale = calculator.weights.restraints_weight_scale)
-      if(is_converged):
-        print("Converged (weight scale).", file=log)
-        break
-      calculator.weights.\
-          add_restraints_weight_scale_to_restraints_weight_scales()
-    print("At end of weight search:", file=log)
-    results.show(prefix="  ")
-    #
-    # Done with weight search. Now get best result and refine it further.
-    #
-    xrs_best, dummy, dummy, wsc_best = results.choose_best(
-      use_r_work = params.refine.choose_best_use_r_work)
+      if(b_rmsds.size()>3):
+        v = list(set(b_rmsds[-3:]))
+        if(b_rmsds[-3:].size() > len(v)):
+          break
+    # Ok, done. Now choose best result.
+    if(r_frees.size()==0):
+      raise Sorry(
+        "Weight search yields no result. Change search criteria and re-try.")
+    # Choose best result
+    s = flex.sort_permutation(r_frees)
+    index = s[0]
+    calculator.setw(restraints_weight_scale = restraints_weight_scale[index])
+    print("Best Rfree from above: %6.4f"%r_frees[index])
+    print("Best restraints scale:", round(restraints_weight_scale[index],3))
+    xrs = fmodel.xray_structure
+    xrs.set_sites_cart(sites_cart[index])
     fmodel.update_xray_structure(
-      xray_structure = xrs_best,
+      xray_structure = xrs,
       update_f_calc  = True,
       update_f_mask  = True)
     fmodel.update_all_scales(remove_outliers=False)
-    calculator.update_restraints_weight_scale(restraints_weight_scale=wsc_best)
-    ####
-    results.reset_custom()
-    run_collect(
-      n_fev                 = 0,
-      results               = results,
-      fmodel                = fmodel,
-      calculator            = calculator,
-      geometry_rmsd_manager = geometry_rmsd_manager)
-    ####
-    # show best
-    print("At start of further refinement:", file=log)
-    results.show(prefix="  ")
-    print("Start further refinement:", file=log)
-    refine_cycle_start = 1
-  if(refine_cycle_start is None): refine_cycle_start=1
+    print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
+      fmodel.r_work(), fmodel.r_free()))
   #
-  if(params.refine.skip_weight_search):
-    calculator.calculate_weight(verbose=params.debug)
+  # Done with weights. Now let's refine!
   #
-  for refine_cycle in range(refine_cycle_start,
-                      params.refine.number_of_refine_cycles+refine_cycle_start):
+  print("Refinement:", file=log)
+  calculator.reset_fmodel(fmodel = fmodel)
+  calculator.update_fmodel()
+  for refine_cycle in range(params.refine.number_of_refine_cycles):
     calculator.reset_fmodel(fmodel=fmodel)
     if(clustering):
       cluster_qm_update.re_clustering(calculator)
-    rst_data.write_rst_file(
-      rst_file     = rst_file,
-      refine_cycle = refine_cycle,
-      weight_cycle = weight_cycle,
-      fmodel       = fmodel,
-      weights      = calculator.weights,
-      conv_test    = conv_test,
-      results      = results)
     #
     n_fev = 0
     for mc in range(params.refine.number_of_macro_cycles):
@@ -575,27 +448,14 @@ def refine(fmodel,
       output_folder_name = params.output_folder_name,
       output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
     results.show(prefix="  ")
-    if(conv_test.is_converged(fmodel=fmodel)):
-      print("Converged (model).", file=log)
-      break
-    calculator.weights.adjust_restraints_weight_scale(
-      fmodel                = fmodel,
-      geometry_rmsd_manager = geometry_rmsd_manager,
-      max_bond_rmsd         = params.refine.max_bond_rmsd,
-      scale                 = 1.2)
-  rst_data.write_rst_file(
-      rst_file     = rst_file,
-      refine_cycle = refine_cycle+1,
-      weight_cycle = weight_cycle,
-      fmodel       = fmodel,
-      weights      = calculator.weights,
-      conv_test    = conv_test,
-      results      = results)
-  print("At end of further refinement:", file=log)
-  print("calculator(refine), total_time (target_and_gradients)", calculator.total_time)
-  print("calculator(refine), number_of_target_and_gradients_calls (target_and_gradients)",
-    calculator.number_of_target_and_gradients_calls)
+  #print("At end of further refinement:", file=log)
+  #print("calculator(refine), total_time (target_and_gradients)", calculator.total_time)
+  #print("calculator(refine), number_of_target_and_gradients_calls (target_and_gradients)",
+  #  calculator.number_of_target_and_gradients_calls)
   results.show(prefix="  ")
+  assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
+  print("Best Rwork, Rfree (after refinement): %6.4f %6.4f"%(
+      fmodel.r_work(), fmodel.r_free()))
 
 def opt(model, params, results, calculator):
   assert model == calculator.model

@@ -132,20 +132,13 @@ def create_restraints_manager(params, model):
       # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
 
-def create_calculator(weights, params, restraints_manager, fmodel=None,
+def create_calculator(params, restraints_manager, fmodel=None,
                       model=None):
-  if(weights is None):
-    weights = calculator.weights(
-      shake_sites             = params.refine.shake_sites ,
-      restraints_weight       = 1.0,
-      data_weight             = params.refine.data_weight,
-      restraints_weight_scale = params.refine.restraints_weight_scale)
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
       return calculator.sites(
         fmodel             = fmodel,
         restraints_manager = restraints_manager,
-        weights            = weights,
         dump_gradients     = params.dump_gradients)
     else:
       return calculator.sites_opt(
@@ -212,13 +205,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       rst_data = pickle.load(handle)
     fmodel = rst_data["fmodel"]
     results_manager = rst_data["results"]
-    weights = rst_data["weights"]
     geometry_rmsd_manager = rst_data["geometry_rmsd_manager"]
     start_fmodel = rst_data["rst_fmodel"]
     start_ph = model.get_hierarchy().deep_copy().adopt_xray_structure(
       start_fmodel.xray_structure)
   else:
-    weights = None
     if (model.size() > params.max_atoms):
       print("Too many atoms. Can take forever or crash."*50, file=log)
     geometry_rmsd_manager = model.get_restraints_manager()
@@ -286,7 +277,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     return
   else:
     calculator_manager = create_calculator(
-      weights=weights,
       fmodel=start_fmodel,
       model=model,
       params=params,
