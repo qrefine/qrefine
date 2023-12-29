@@ -82,7 +82,7 @@ class calculator(object):
         update_f_calc  = True,
         #update_f_mask  = True
         )
-      #self.fmodel.update_all_scales(remove_outliers=False)
+      #self.fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
     else:
       self.xray_structure.tidy_us()
       self.xray_structure.apply_symmetry_sites()

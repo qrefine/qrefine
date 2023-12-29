@@ -73,19 +73,6 @@ def show_cc(map_data, xray_structure, log=None):
     print("  CC_mask  : %6.4f" %result.cc_mask, file=log)
   return result.cc_mask
 
-def create_fmodel(cmdline, log):
-  fmodel = mmtbx.f_model.manager(
-    f_obs          = cmdline.f_obs,
-    r_free_flags   = cmdline.r_free_flags,
-    xray_structure = cmdline.xray_structure,
-    target_name    = cmdline.params.refine.refinement_target_name)
-  if(cmdline.params.refine.update_all_scales):
-    fmodel.update_all_scales(remove_outliers=False)
-    fmodel.show(show_header=False, show_approx=False)
-  print("Initial r_work=%6.4f r_free=%6.4f" % (fmodel.r_work(), fmodel.r_free()), file=log)
-  log.flush()
-  return fmodel
-
 def create_fragment_manager(
       model,
       params,

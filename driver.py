@@ -418,7 +418,7 @@ def refine(fmodel,
         xray_structure = xrs,
         update_f_calc  = True,
         update_f_mask  = True)
-    fmodel.update_all_scales(remove_outliers=False)
+    fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
   #

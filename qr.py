@@ -158,9 +158,6 @@ refine {
   gradient_only = False
     .type = bool
     .help = use the gradient only line search according to JA Snyman 2005.
-  update_all_scales = True
-    .type = bool
-    .help = Update bulk-solvent and overall scales
   refine_sites = True
     .type = bool
     .help = only refine the cartesian coordinates of the molecular system.
@@ -293,7 +290,7 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       self.header("Extracting fmodel")
       self.fmodel = self.data_manager.get_fmodel(
         scattering_table = self.params.scattering_table)
-      self.fmodel.update_all_scales(log=self.logger)
+      self.fmodel.update_all_scales(log=self.logger, refine_hd_scattering=False)
       self.fmodel.show(log=self.logger, show_header=False)
       self.header("Starting r-factors:")
       print("r_work=%6.4f r_free=%6.4f"%(
