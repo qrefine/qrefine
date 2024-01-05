@@ -247,11 +247,13 @@ class sites(calculator):
     self.r_works.append(r_work)
     if self.r_works.size()>20:
       a = self.r_works[-3:]
-      d = max(list(set([abs(i-j) for i in a for j in a if i != j])))
-      d = True if d<0.0003 else False
-      if d: self.n_converged += 1
-      else:
-        if self.n_converged>0: self.n_converged -= 1
+      aa = list(set([abs(i-j) for i in a for j in a if i != j]))
+      if len(aa)>0:
+        d = max(aa)
+        d = True if d<0.0003 else False
+        if d: self.n_converged += 1
+        else:
+          if self.n_converged>0: self.n_converged -= 1
 
   def converged(self):
     if self.n_converged >= 3: return True

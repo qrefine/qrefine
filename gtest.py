@@ -106,7 +106,6 @@ def run_g_test(params, model, weights, start_fmodel, log):
           fragments=frags.get_fragment_extracts(),directory=label)
 
       calculator_manager = create_calculator(
-        weights            = weights,
         fmodel             = start_fmodel,
         model              = model,
         params             = params,

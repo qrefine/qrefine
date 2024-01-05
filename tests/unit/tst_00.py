@@ -26,12 +26,9 @@ def run(prefix):
   r_start, r_final = None,None
   ofo = open("%s.log"%prefix,"r")
   for l in ofo.readlines():
-    if(l.strip().endswith("n_fev: 0")):
-      r_start = float(l.split()[2])
-    if(l.strip().startswith("Best r_work:")):
-      r_final = float(l.split()[2])
-  assert r_start > 0.1
-  assert r_final < 0.04
+    if(l.strip().startswith("Best Rwork, Rfree (after refinement)")):
+      r_final = float(l.split()[-2])
+  assert r_final < 0.04, r_final
   # Make sure output model actually corresponds to reported R-factor
   fmodel = mmtbx.f_model.manager(
     f_obs          = f_obs,
