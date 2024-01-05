@@ -28,7 +28,6 @@ class minimizer(object):
         max_bond_rmsd,
         gradient_only,
         line_search,
-        results,
         mode,
         geometry_rmsd_manager=None,
         preopt_params = None):
@@ -65,11 +64,8 @@ class minimizer(object):
   def _get_bond_rmsd(self):
     b_mean = None
     if(self.geometry_rmsd_manager is not None):
-      energies_sites = \
-        self.geometry_rmsd_manager.geometry.energies_sites(
-          sites_cart        = flex.vec3_double(self.x),
-          compute_gradients = False)
-      b_mean = energies_sites.bond_deviations()[2]
+      b_mean = self.geometry_rmsd_manager.bond_rmsd(
+        sites_cart = flex.vec3_double(self.x))
     return b_mean
 
   def callback_after_step(self, minimizer=None):
@@ -244,7 +240,7 @@ class minimizer_ase(object):
       v = self.step()
       if(not v): return
 
-def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
+def run_minimize(calculator, params, geometry_rmsd_manager, mode):
   minimized = None
   if  (mode == "weight"):
     max_iterations = params.refine.max_iterations_weight
@@ -278,7 +274,6 @@ def run_minimize(calculator, params, results, geometry_rmsd_manager, mode):
         line_search           = params.refine.line_search,
         max_iterations        = max_iterations,
         max_bond_rmsd         = max_bond_rmsd,
-        results               = results,
         mode                  = mode,
         geometry_rmsd_manager = geometry_rmsd_manager,
         preopt_params         = preopt)
@@ -296,16 +291,9 @@ def run_collect(n_fev, results, fmodel, geometry_rmsd_manager, calculator):
     restraints_weight_scale = calculator.restraints_weight_scale,
     n_fev                   = n_fev)
 
-def get_rrb(fmodel, geometry_rmsd_manager):
-  b_rmsd = calculator_module.get_bonds_rmsd(
-    restraints_manager = geometry_rmsd_manager.geometry,
-    xrs                = fmodel.xray_structure)
-  return group_args(
-    b_rmsd=b_rmsd, r_work=fmodel.r_work(), r_free=fmodel.r_free())
-
 def refine(fmodel,
            params,
-           results,
+           monitor,
            calculator,
            geometry_rmsd_manager):
   if(not params.refine.refine_sites): return
@@ -319,7 +307,7 @@ def refine(fmodel,
       rmsd_tolerance = params.refine.rmsd_tolerance * 100,
       verbose        = params.debug)
   print("Start:", file=log)
-  results.show(prefix="  ")
+  monitor.show(prefix="  ")
 
   if(not params.refine.skip_weight_search):
     print("Optimal weight search:", file=log)
@@ -332,10 +320,7 @@ def refine(fmodel,
       restraints_weight_scale = 1.,
       restraints_weight       = 1.)
     # Weight control stuff
-    rrb_start = get_rrb(
-      fmodel                = fmodel_copy,
-      geometry_rmsd_manager = geometry_rmsd_manager)
-    r_free_best = rrb_start.r_free
+    r_free_best = fmodel_copy.r_free()
     up   = 0
     down = 0
     r_frees    = flex.double()
@@ -345,11 +330,10 @@ def refine(fmodel,
     print("Data weight (initial):", data_weight, file=log)
     #
     # Loop over weight search cycles
-    for weight_cycle in range(1, params.refine.number_of_weight_search_cycles+1):
+    for weight_cycle in range(params.refine.number_of_weight_search_cycles):
       fmodel = fmodel_copy.deep_copy() # Always use initial unchanged fmodel
       calculator.reset_fmodel(fmodel = fmodel)
       calculator.update_fmodel()
-
       if(clustering):
         cluster_qm_update.re_clustering(calculator)
       # Run minimization with given weight
@@ -358,39 +342,33 @@ def refine(fmodel,
         minimized = run_minimize(
           calculator            = calculator,
           params                = params,
-          results               = results,
           geometry_rmsd_manager = geometry_rmsd_manager,
           mode                  = "weight")
-        #print("HERE-1"*2, "%7.5f %7.5f"%(fmodel.r_work(),calculator.fmodel.r_work()))
         if(minimized is not None):
           calculator.reset_fmodel(fmodel = fmodel)
           calculator.update_fmodel()
           n_fev += minimized.number_of_function_and_gradients_evaluations
           break
-      #print("HERE-2"*2, "%7.5f %7.5f"%(fmodel.r_work(),calculator.fmodel.r_work()))
       if(minimized is None): continue
+      monitor.update(fmodel = fmodel)
       # Sanity check:
       assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
       # Choose what to do with weights
       rws = calculator.restraints_weight_scale
-      rrb = get_rrb(
-        fmodel                = fmodel,
-        geometry_rmsd_manager = geometry_rmsd_manager)
-      b_rmsds.append(round(rrb.b_rmsd,3))
-      if(rrb.b_rmsd < params.refine.max_bond_rmsd):
+      b_rmsds.append(round(monitor.b_rmsd,3))
+      if(monitor.b_rmsd < params.refine.max_bond_rmsd):
         down += 1
         restraints_weight_scale.append(rws)
         calculator.scale_restraints_weight_down(scale=1.5)
-        r_frees   .append(fmodel.r_free())
-        sites_cart.append(fmodel.xray_structure.sites_cart())
+        r_frees   .append(monitor.r_free)
+        sites_cart.append(monitor.sites_cart)
       else:
         up += 1
         calculator.scale_restraints_weight_up(scale=1.5)
       # Show
-      fmt="%s %3d Rw: %6.4f Rf: %6.4f Rf-Rw: %6.4f rmsd(b): %7.4f rws(prev): %6.3f rws: %6.3f n_fev: %d"
-      print(fmt%("", weight_cycle, rrb.r_work, rrb.r_free,
-        rrb.r_free-rrb.r_work, rrb.b_rmsd,
-        rws, calculator.restraints_weight_scale, n_fev), file=log)
+      msg = "rws(prev): %6.3f rws: %6.3f n_fev: %d"%(
+        rws, calculator.restraints_weight_scale, n_fev)
+      monitor.show(prefix="%d:"%weight_cycle, suffix = msg)
       #
       # Ready to stop?
       if(up>0 and down>0):
@@ -421,6 +399,9 @@ def refine(fmodel,
     fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
+    monitor.update(fmodel = fmodel)
+    print("At refinement start", file = log)
+    monitor.show()
   #
   # Done with weights. Now let's refine!
   #
@@ -438,7 +419,6 @@ def refine(fmodel,
       minimized = run_minimize(
         calculator            = calculator,
         params                = params,
-        results               = results,
         geometry_rmsd_manager = geometry_rmsd_manager,
         mode                  = "refine")
       if(minimized is not None):
@@ -447,16 +427,11 @@ def refine(fmodel,
         n_fev += minimized.number_of_function_and_gradients_evaluations
         break
     if(minimized is None): continue
-    run_collect(
-      n_fev                 = n_fev,
-      results               = results,
-      fmodel                = fmodel,
-      calculator            = calculator,
-      geometry_rmsd_manager = geometry_rmsd_manager)
-    results.write_pdb_file(
+    monitor.update(fmodel = fmodel)
+    monitor.show(prefix="%d:"%refine_cycle, suffix="n_fev: %d"%n_fev)
+    monitor.write_pdb_file(
       output_folder_name = params.output_folder_name,
       output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
-    results.show(prefix="  ")
     if(calculator.converged()):
       print("Refinement converged. Stopping now.", file=log)
       break
@@ -464,29 +439,24 @@ def refine(fmodel,
   #print("calculator(refine), total_time (target_and_gradients)", calculator.total_time)
   #print("calculator(refine), number_of_target_and_gradients_calls (target_and_gradients)",
   #  calculator.number_of_target_and_gradients_calls)
-  results.show(prefix="  ")
+  print("At refinement end:", file = log)
+  monitor.show()
   assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
   print("Best Rwork, Rfree (after refinement): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
 
-def opt(model, params, results, calculator):
+def opt(model, params, monitor, calculator):
   assert model == calculator.model
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=log
-  # start = model.geometry_statistics().show_short()
-  # print("start: %s"%start, file=log_switch)
+  monitor.show(prefix="start:")
   if(params.cluster.clustering):
     cluster_qm_update = clustering_update(
       model.get_sites_cart(), log,
       params.cluster.re_calculate_rmsd_tolerance)
     print("\ninteracting pairs number:  ",\
       len(calculator.restraints_manager.fragment_manager.interaction_list), file=log)
-  F = flex.double()
-  for micro_cycle in range(0, params.refine.number_of_micro_cycles):
-
-    stats1 = model.geometry_statistics(use_hydrogens=True)
-    print("     ",stats1.show_short())
-
+  for micro_cycle in range(params.refine.number_of_micro_cycles):
     assert model == calculator.model
     if(params.cluster.clustering):
       cluster_qm_update.re_clustering(calculator)
@@ -500,29 +470,19 @@ def opt(model, params, results, calculator):
       minimized = minimizers.lbfgsb(
         calculator     = calculator,
         max_iterations = params.refine.max_iterations_refine)
-    F.append(calculator.f)
-    if(calculator.shift_eval == "max"): prefix = "max_shift"
-    else:                               prefix = "mean_shift"
-    prefix="cycle: %3d %s: %.6f all_shift: %.4f "%(micro_cycle, prefix,
-      calculator.max_shift_between_resets, calculator.mean_shift_from_start())
-    minimized.show(log = log_switch, prefix=prefix)
+    minimized.show(log = log_switch, prefix="")
     calculator.apply_x()
 
-    stats2 = model.geometry_statistics(use_hydrogens=True)
-    print("     ",stats2.show_short())
+    monitor.update(model = model)
+    monitor.show(prefix="cycle %d: "%micro_cycle)
+    monitor.write_pdb_file(
+      output_folder_name = params.output_folder_name,
+      output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
 
     if(calculator.converged()):
       print("Convergence reached. Stopping now.", file=log)
       break
-  results.update(
-    b     = model.get_bonds_rmsd(),
-    xrs   = model.get_xray_structure(),
-    n_fev = minimized.nfev)
-  results.write_pdb_file(
-    output_folder_name = params.output_folder_name,
-    output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
-  # final = model.geometry_statistics().show_short()
-  # print("final: %s"%final, file=log_switch)
+
   print("calculator(opt), total_time (target_and_gradients)", calculator.total_time)
   print("calculator(opt), number_of_target_and_gradients_calls (target_and_gradients)",
     calculator.number_of_target_and_gradients_calls)

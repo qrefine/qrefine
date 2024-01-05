@@ -51,13 +51,18 @@ def compute_weight(fmodel, restraints_manager, shake_sites=False):
   else:         data_weight = 1.0 # ad hoc default fallback
   return data_weight
 
-def get_bonds_rmsd(restraints_manager, xrs):
-  hd_sel = xrs.hd_selection()
-  energies_sites = \
-    restraints_manager.select(~hd_sel).energies_sites(
-      sites_cart        = xrs.sites_cart().select(~hd_sel),
+class cctbx_geometry(object):
+  def __init__(self, model):
+    restraints_manager = model.get_restraints_manager()
+    self.hd_sel = model.get_xray_structure().hd_selection()
+    self.restraints_manager = restraints_manager.select(~self.hd_sel)
+
+  def bond_rmsd(self, sites_cart):
+    assert self.hd_sel.size() == sites_cart.size()
+    energies_sites = self.restraints_manager.geometry.energies_sites(
+      sites_cart        = sites_cart.select(~self.hd_sel),
       compute_gradients = False)
-  return energies_sites.bond_deviations()[2]
+    return energies_sites.bond_deviations()[2]
 
 class calculator(object):
   def __init__(self,
@@ -182,7 +187,7 @@ class sites(calculator):
     self.x = None
     self.x_target_functor = None
     self.not_hd_selection = None # XXX UGLY
-    self.initialize(fmodel = self.fmodel)
+    self._initialize(fmodel = self.fmodel)
     self.total_time = 0
     self.number_of_target_and_gradients_calls = 0
     self.data_weight = 1.
@@ -191,7 +196,7 @@ class sites(calculator):
     self.r_works = flex.double()
     self.n_converged = 0
 
-  def initialize(self, fmodel=None):
+  def _initialize(self, fmodel):
     self.r_works = flex.double()
     self.n_converged = 0
     self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
@@ -210,11 +215,9 @@ class sites(calculator):
       rm      = self.restraints_manager,
       verbose = verbose)
 
-  def reset_fmodel(self, fmodel=None):
-    if(fmodel is not None):
-      self.initialize(fmodel=fmodel)
-      self.fmodel = fmodel
-      self.update_fmodel()
+  def reset_fmodel(self, fmodel):
+    self._initialize(fmodel=fmodel)
+    self.update_fmodel()
 
   def setw(self,
            data_weight = None,
@@ -239,11 +242,9 @@ class sites(calculator):
     self.fmodel.update_xray_structure(
       xray_structure = self.fmodel.xray_structure,
       update_f_calc  = True)
-
+    # This is to monitor convergence
     r_work = self.fmodel.r_work()
     self.r_works.append(r_work)
-
-    d=None
     if self.r_works.size()>20:
       a = self.r_works[-3:]
       d = max(list(set([abs(i-j) for i in a for j in a if i != j])))

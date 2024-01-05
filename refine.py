@@ -180,55 +180,35 @@ def set_qm_defaults(params, log):
 
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
-  # validate(model, fmodel, params, rst_file, prefix, log)
   set_qm_defaults(params,log)
   if(params.cluster.clustering):
     params.refine.gradient_only = True
     print(" params.gradient_only", params.refine.gradient_only, file=log)
-  # RESTART
-  if(os.path.isfile(str(rst_file))):
-    print("restart info is loaded from %s" % params.rst_file, file=log)
-    with open(params.rst_file, 'rb') as handle:
-      rst_data = pickle.load(handle)
-    fmodel = rst_data["fmodel"]
-    results_manager = rst_data["results"]
-    geometry_rmsd_manager = rst_data["geometry_rmsd_manager"]
-    start_fmodel = rst_data["rst_fmodel"]
-    start_ph = model.get_hierarchy().deep_copy().adopt_xray_structure(
-      start_fmodel.xray_structure)
-  else:
-    if (model.size() > params.max_atoms):
-      print("Too many atoms. Can take forever or crash."*50, file=log)
-    geometry_rmsd_manager = model.get_restraints_manager()
-    #
-    if(params.refine.dry_run): return
-    #
-    r_work, r_free = None, None
-    if(fmodel is not None):
-      r_work, r_free = fmodel.r_work(), fmodel.r_free()
-    results_manager = results.manager(
-      r_work                  = r_work,
-      r_free                  = r_free,
-      model                   = model,
-      max_bond_rmsd           = params.refine.max_bond_rmsd,
-      max_r_work_r_free_gap   = params.refine.max_r_work_r_free_gap,
-      mode                    = params.refine.mode,
-      restraints_weight_scale = params.refine.restraints_weight_scale)
-    if(params.rst_file is None):
-      if(params.output_file_name_prefix is None):
-        params.output_file_name_prefix = prefix
-      if(os.path.exists(params.output_folder_name) is False):
-        os.mkdir(params.output_folder_name)
-      params.output_file_name_prefix = os.path.basename(params.output_file_name_prefix)
-      params.rst_file = os.path.abspath(params.output_folder_name + "/" + \
-        params.output_file_name_prefix + ".rst.pickle")
-    if os.path.isfile(params.rst_file):
-      os.remove(params.rst_file)
-    print("\n***********************************************************", file=log)
-    print("restart info will be stored in %s" % params.rst_file, file=log)
-    print("***********************************************************\n", file=log)
-    start_fmodel = fmodel
-    start_ph = None # is it used anywhere? I don't see where it is used!
+  if (model.size() > params.max_atoms):
+    print("Too many atoms. Can take forever or crash."*50, file=log)
+
+  geometry_rmsd_manager = calculator.cctbx_geometry(model=model)
+
+  #
+  if(params.refine.dry_run): return
+  #
+  monitor = results.manager(
+    model                 = model,
+    geometry_rmsd_manager = geometry_rmsd_manager,
+    log                   = log)
+  monitor.update(fmodel = fmodel, model = model)
+  if(params.rst_file is None):
+    if(params.output_file_name_prefix is None):
+      params.output_file_name_prefix = prefix
+    if(os.path.exists(params.output_folder_name) is False):
+      os.mkdir(params.output_folder_name)
+    params.output_file_name_prefix = os.path.basename(params.output_file_name_prefix)
+    params.rst_file = os.path.abspath(params.output_folder_name + "/" + \
+      params.output_file_name_prefix + ".rst.pickle")
+  if os.path.isfile(params.rst_file):
+    os.remove(params.rst_file)
+  start_fmodel = fmodel
+  start_ph = None # is it used anywhere? I don't see where it is used!
 
   restraints_manager = create_restraints_manager(params, model)
 
@@ -274,15 +254,14 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         fmodel                = fmodel,
         geometry_rmsd_manager = geometry_rmsd_manager,
         calculator            = calculator_manager,
-        results               = results_manager)
+        monitor               = monitor)
     else:
       driver.opt(
         params     = params,
         model      = model,
         calculator = calculator_manager,
-        results    = results_manager)
-    xrs_best = results_manager.finalize(
+        monitor    = monitor)
+    monitor.finalize(
       input_file_name_prefix  = prefix,
       output_file_name_prefix = params.output_file_name_prefix,
-      output_folder_name      = params.output_folder_name,
-      use_r_work              = params.refine.choose_best_use_r_work)
+      output_folder_name      = params.output_folder_name)

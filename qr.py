@@ -132,9 +132,6 @@ refine {
   data_weight=None
     .type = float
     .help = Allows to specify data/restraints weight (by-pass weight search)
-  choose_best_use_r_work = False
-    .type = bool
-    .help = Use Rwork to make a decision about best weight (otherwise use Rfree)
   skip_weight_search = False
     .type = bool
     .help = Calculate weight based on gradient norms (skip weight optimization)
