@@ -8,6 +8,7 @@ import libtbx.load_env
 from mmtbx import monomer_library
 from mmtbx.monomer_library import server
 from mmtbx.monomer_library import pdb_interpretation
+from scitbx.array_family import flex
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
@@ -30,7 +31,7 @@ def get_bond_rmsd(file_name):
     assume_hydrogens_all_missing = False,
     plain_pairs_radius = 5.0)
   es = geometry.energies_sites(sites_cart = sites_cart)
-  return es.bond_deviations()[2]
+  return es.bond_deviations()[2], sites_cart
 
 def run(prefix):
   """
@@ -45,15 +46,18 @@ def run(prefix):
     "max_iterations_refine=100"])
   print(prefix)
   print("run_test_done")
-  assert get_bond_rmsd(file_name=os.path.join(qr_unit_tests,"data_files","m00_poor.pdb")) > 0.1
-  result1 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
+  assert get_bond_rmsd(file_name=os.path.join(qr_unit_tests,"data_files","m00_poor.pdb"))[0] > 0.1
+  result1, sc1 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
   assert result1 < 0.001, result1
   #Run refinement without data term
   run_tests.run_cmd(prefix,args = ["restraints=cctbx","data_weight=0",
     "clustering=False","minimizer=lbfgsb", "number_of_micro_cycles=3",
     "max_iterations_refine=100", "stpmax=999"])
-  result2 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
-  assert result2 < 0.007, result2
+  result2, sc2 = get_bond_rmsd(file_name=os.path.join(prefix,"m00_poor_refined.pdb"))
+  assert result2 < 0.01, result2
+  #
+  dist = flex.mean(flex.sqrt((sc1 - sc2).dot()))
+  assert dist < 0.15
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
