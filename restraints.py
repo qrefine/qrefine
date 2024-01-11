@@ -25,6 +25,7 @@ from libtbx.test_utils import approx_equal
 from collections import OrderedDict
 from libtbx import adopt_init_args
 import time
+from libtbx import easy_pickle
 
 def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None):
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
@@ -149,10 +150,13 @@ class from_expansion(object):
         select_within_radius = self.params.cluster.select_within_radius)
     else:
       self.expansion.update(sites_cart = self.pdb_hierarchy.atoms().extract_xyz())
-#    pdb_hierarchy_super = self.expansion.ph_super_sphere
-#    pdb_hierarchy_super.write_pdb_file(file_name="supersphere.pdb",
-#      crystal_symmetry = self.expansion.cs_box)
-#    self.crystal_symmetry_ss = self.expansion.cs_box
+    # DEBUG START
+    self.expansion.ph_super_sphere.write_pdb_file(
+      file_name        = "supersphere_restraints_py_line153.pdb",
+      crystal_symmetry = self.expansion.cs_box)
+    easy_pickle.dump("supersphere_restraints_py_line153.pkl",
+      [self.expansion.ph_super_sphere,self.expansion.cs_box])
+    # DEBUG END
     if(self.restraints_source.source_of_restraints_qm()):
       self.pdb_hierarchy_super_completed = model_completion.run(
         pdb_hierarchy         = self.expansion.ph_super_sphere,

@@ -187,6 +187,9 @@ class sites(calculator):
     self.x = None
     self.x_target_functor = None
     self.not_hd_selection = None # XXX UGLY
+
+    self.sites_cart_start = None
+
     self._initialize(fmodel = self.fmodel)
     self.total_time = 0
     self.number_of_target_and_gradients_calls = 0
@@ -197,6 +200,7 @@ class sites(calculator):
     self.n_converged = 0
 
   def _initialize(self, fmodel):
+    self.sites_cart_start = fmodel.xray_structure.sites_cart().deep_copy()
     self.r_works = flex.double()
     self.n_converged = 0
     self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
@@ -245,15 +249,24 @@ class sites(calculator):
     # This is to monitor convergence
     r_work = self.fmodel.r_work()
     self.r_works.append(r_work)
-    if self.r_works.size()>20:
-      a = self.r_works[-3:]
-      aa = list(set([abs(i-j) for i in a for j in a if i != j]))
-      if len(aa)>0:
-        d = max(aa)
-        d = True if d<0.0003 else False
-        if d: self.n_converged += 1
-        else:
-          if self.n_converged>0: self.n_converged -= 1
+
+    diff = flex.sqrt((self.x - self.sites_cart_start).dot())
+    shift_me = flex.mean(diff)
+    shift_ma = flex.max(diff)
+    print("%7.5f %7.3f %7.3f"%(r_work, shift_me, shift_ma), self.r_works.size())
+    self.sites_cart_start = self.x.deep_copy()
+
+    # Early termination
+    #
+    #if self.r_works.size()>20:
+    #  a = self.r_works[-3:]
+    #  aa = list(set([abs(i-j) for i in a for j in a if i != j]))
+    #  if len(aa)>0:
+    #    d = max(aa)
+    #    d = True if d<0.0003 else False
+    #    if d: self.n_converged += 1
+    #    else:
+    #      if self.n_converged>0: self.n_converged -= 1
 
   def converged(self):
     if self.n_converged >= 3: return True
