@@ -376,7 +376,8 @@ def refine(fmodel,
         break
       if(b_rmsds.size()>3):
         v = list(set(b_rmsds[-3:]))
-        if(b_rmsds[-3:].size() > len(v)):
+        #if(b_rmsds[-3:].size() > len(v)):
+        if(len(v)==1): # XXX See if this tighter!
           print("Bond rmsd stalled. Stopping weight search.", file=log)
           break
     # Ok, done with weights.
