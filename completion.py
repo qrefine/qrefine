@@ -69,6 +69,15 @@ def iterate_over_threes(hierarchy,
       break
     return atom.parent().parent()
   ###
+  bonds={}
+  for bond in geometry_restraints_manager.get_all_bond_proxies():
+    if not hasattr(bond, 'get_proxies_with_origin_id'): continue
+    for p in bond.get_proxies_with_origin_id():
+      tmp=bonds.setdefault(p.i_seqs[0], [])
+      tmp.append(p.i_seqs[1])
+      tmp=bonds.setdefault(p.i_seqs[1], [])
+      tmp.append(p.i_seqs[0])
+  ###
   additional_hydrogens=hierarchy_utils.smart_add_atoms()
   for three in generate_protein_fragments(
     hierarchy,
@@ -109,6 +118,7 @@ def iterate_over_threes(hierarchy,
       rg = get_residue_group(three[0])
       rc = add_n_terminal_hydrogens_to_residue_group(
         rg,
+        bonds=bonds,
         use_capping_hydrogens=use_capping_hydrogens,
         append_to_end_of_model=append_to_end_of_model,
       )
@@ -126,6 +136,7 @@ def iterate_over_threes(hierarchy,
       rg = get_residue_group(three[-1])
       rc = add_c_terminal_oxygens_to_residue_group(
         rg,
+        bonds=bonds,
         use_capping_hydrogens=use_capping_hydrogens,
         append_to_end_of_model=append_to_end_of_model,
       )
@@ -565,7 +576,7 @@ def complete_pdb_hierarchy(hierarchy,
                          ppf.geometry_restraints_manager(),
                          #use_capping_hydrogens=use_capping_hydrogens,
                          #append_to_end_of_model=append_to_end_of_model,
-                         #original_hierarchy=original_hierarchy,
+                         # original_hierarchy=original_hierarchy,
                          verbose=verbose,
                        )
   #

@@ -184,6 +184,9 @@ def run(pdb_filename,
     pdb_hierarchy             = ppf.all_chain_proxies.pdb_hierarchy,
     crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     log                       = null_out())
+  if 0:
+    ph=model.get_hierarchy()
+    ph.write_pdb_file('test.pdb')
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
   model.idealize_h_riding()
