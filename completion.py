@@ -20,6 +20,8 @@ from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_remove_cys_hg_to_atom_group
 from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
+from mmtbx.ligands.hierarchy_utils import get_bonds_as_dict
+from mmtbx.ligands.hierarchy_utils import simple_valence_check
 from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_group
 from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
 from mmtbx.ligands.ready_set_utils import generate_protein_fragments
@@ -69,14 +71,7 @@ def iterate_over_threes(hierarchy,
       break
     return atom.parent().parent()
   ###
-  bonds={}
-  for bond in geometry_restraints_manager.get_all_bond_proxies():
-    if not hasattr(bond, 'get_proxies_with_origin_id'): continue
-    for p in bond.get_proxies_with_origin_id():
-      tmp=bonds.setdefault(p.i_seqs[0], [])
-      tmp.append(p.i_seqs[1])
-      tmp=bonds.setdefault(p.i_seqs[1], [])
-      tmp.append(p.i_seqs[0])
+  bonds=get_bonds_as_dict(geometry_restraints_manager)
   ###
   additional_hydrogens=hierarchy_utils.smart_add_atoms()
   for three in generate_protein_fragments(
@@ -144,6 +139,7 @@ def iterate_over_threes(hierarchy,
       #hierarchy.reset_i_seq_if_necessary()
     else:
       pass
+  # simple_valence_check(hierarchy, geometry_restraints_manager)
   return additional_hydrogens
 
 def iterate_using_original(hierarchy,
@@ -572,16 +568,17 @@ def complete_pdb_hierarchy(hierarchy,
                                           )
     sites_cart = hierarchy.atoms().extract_xyz()
     ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
-  special_case_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
-                         ppf.geometry_restraints_manager(),
-                         #use_capping_hydrogens=use_capping_hydrogens,
-                         #append_to_end_of_model=append_to_end_of_model,
-                         # original_hierarchy=original_hierarchy,
-                         verbose=verbose,
-                       )
+  # special_case_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
+  #                        ppf.geometry_restraints_manager(),
+  #                        #use_capping_hydrogens=use_capping_hydrogens,
+  #                        #append_to_end_of_model=append_to_end_of_model,
+  #                        # original_hierarchy=original_hierarchy,
+  #                        verbose=verbose,
+  #                      )
   #
   # add terminals atoms including hydrogens and OXT - more docs here...
   #
+  for atom in ppf.all_chain_proxies.pdb_hierarchy.atoms(): print(atom.quote())
   if debug:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
