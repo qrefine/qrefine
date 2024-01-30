@@ -65,8 +65,9 @@ jobs:
          git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
          cd reference_data
          git sparse-checkout add Top8000/rama_z
-         mv Top8000/rama_z/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
+         mv Top8000/rama_z/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z/
+         
+         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z/
          ls 
          pwd 
          rm -rf rotarama_data/.svn
