@@ -90,10 +90,12 @@ jobs:
          cd reference_data
          git sparse-checkout add  Top8000/Top8000_cablam_pct_contour_grids
          mv Top8000/Top8000_cablam_pct_contour_grids/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/cablam_data
-         cd ..
-         mkdir modules
+         
+         mkdir $CONDA_PREFIX/lib/$PY/site-packages/modules
          cd $CONDA_PREFIX/lib/$PY/site-packages/modules
-         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+         git clone  https://github.com/rlabduke/probe
+
          cd probe 
          make 
          cp hybrid_36_c.c $CONDA_PREFIX/lib/$PY/site-packages/iotbx/pdb/hybrid_36_c.c
