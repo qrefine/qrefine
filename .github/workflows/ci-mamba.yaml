@@ -48,7 +48,8 @@ jobs:
          mkdir chem_data 
          cd chem_data 
          svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd 
-         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib 
+         git clone https://github.com/rlabduke/mon_lib.git
+         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib 
          svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
          svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
          rm -rf rotarama_data/.svn
