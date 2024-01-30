@@ -82,7 +82,14 @@ jobs:
          pwd 
 
          #
-         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data 
+         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data 
+         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
+         mkdir cablam_data
+         rm -rf reference_data
+         git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
+         cd reference_data
+         git sparse-checkout add  Top8000/Top8000_cablam_pct_contour_grids
+         mv Top8000/Top8000_cablam_pct_contour_grids/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/cablam_data
          cd ..
          mkdir modules
          cd $CONDA_PREFIX/lib/$PY/site-packages/modules
