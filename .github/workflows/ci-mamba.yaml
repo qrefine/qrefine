@@ -59,7 +59,7 @@ jobs:
          ls 
          pwd 
          #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
-         svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
+         #svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
          git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
          cd reference_data
          git sparse-checkout add Top8000/rama_z
