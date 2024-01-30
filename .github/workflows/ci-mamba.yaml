@@ -100,7 +100,8 @@ jobs:
          make 
          cp hybrid_36_c.c $CONDA_PREFIX/lib/$PY/site-packages/iotbx/pdb/hybrid_36_c.c
          cd ..
-         svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+         git clone https://github.com/rlabduke/reduce
          cd reduce 
          make
         
