@@ -161,7 +161,7 @@ jobs:
         
     - name: qr.test
       run: |
-        cd 
+        cd  /home/runner/work/qrefine/qrefine/
         pwd
         mkdir testing_workdir
         cd testing_workdir
@@ -171,7 +171,7 @@ jobs:
     - name: looks at testing_workdir
       if: always()
       run: ls -R
-      working-directory: ./testing_workdir
+      working-directory: /home/runner/work/qrefine/qrefine/testing_workdir
         
     - name: Archive qr test output
       if: always()
@@ -185,7 +185,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: tests-dir
-        path: ./testing_workdir
+        path: /home/runner/work/qrefine/qrefine/testing_workdir
 
     # Too much noise at the moment
     #- name: Report Status
