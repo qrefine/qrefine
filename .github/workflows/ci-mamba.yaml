@@ -142,6 +142,7 @@ jobs:
 
     - name: configure  modules  
       run: |
+        conda update cctbx -c cctbx-nightly
         mkdir -p $CONDA_PREFIX/lib/$PY/site-packages/build
         cd $CONDA_PREFIX/lib/$PY/site-packages/build
         # 
