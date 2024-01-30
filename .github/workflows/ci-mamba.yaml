@@ -159,6 +159,8 @@ jobs:
         
     - name: qr.test
       run: |
+        cd 
+        pwd
         mkdir testing_workdir
         cd testing_workdir
         source $CONDA_PREFIX/lib/$PY/site-packages/build/setpaths.sh        
