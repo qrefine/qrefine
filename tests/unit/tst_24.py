@@ -46,7 +46,7 @@ def run(prefix):
   cmd = 'qr.charges %s verbose=1' % (fnc)
   if 0: print(cmd)
   rc = easy_run.go(cmd)
-  assert 'Charge: 0' in rc.stdout_lines
+  assert 'Charge: 0' in rc.stdout_lines, rc.stdout_lines
   os.remove(fnc)
   return rc
 

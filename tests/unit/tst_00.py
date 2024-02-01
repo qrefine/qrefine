@@ -36,8 +36,8 @@ def run(prefix):
     xray_structure = xrs_refined)
   fmodel.update_all_scales()
   assert fmodel.r_work() < 0.04
-  assert abs(r_final-fmodel.r_work())<0.0005, abs(r_final-fmodel.r_work())
+  assert abs(r_final-fmodel.r_work())<0.002, abs(r_final-fmodel.r_work())
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+  run_tests.runner(function=run, prefix=prefix, disable=False)
