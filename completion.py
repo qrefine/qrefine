@@ -484,6 +484,7 @@ def complete_pdb_hierarchy(hierarchy,
   original_hierarchy = None
   params = hierarchy_utils.get_pdb_interpretation_params()
   params.restraints_library.cdl=False
+  params.automatic_linking.link_residues=True
   if use_capping_hydrogens:
     params.link_distance_cutoff=1.8 # avoid linking across a single missing AA
     if original_pdb_filename:
@@ -578,7 +579,6 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # add terminals atoms including hydrogens and OXT - more docs here...
   #
-  for atom in ppf.all_chain_proxies.pdb_hierarchy.atoms(): print(atom.quote())
   if debug:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
