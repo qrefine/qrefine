@@ -21,8 +21,7 @@ from libtbx.utils import Sorry
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_aimnet_models = os.path.join(qrefine, "plugin","ase","ani")
-MODEL_FILE=os.path.join(qr_aimnet_models, "aimnet2_qr_pbeh_cpcm_230419.jpt")
-#MODEL_FILE=os.path.join(qr_aimnet_models, "aimnet2_qr_b97m_cpcm_230419.jpt")
+MODEL_FILE=os.path.join(qr_aimnet_models, "qr_b97md4_qzvp_231002.jpt")
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL = torch.jit.load(MODEL_FILE).to(DEVICE)
 
