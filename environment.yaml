@@ -19,6 +19,7 @@ dependencies:
   - subversion
   - make
   - ase==3.17.0
+  - rdkit
   # Calculators
   - mopac
   - xtb
