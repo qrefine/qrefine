@@ -336,9 +336,6 @@ class sites_real_space(object):
         ignore_line_search_failed_step_at_upper_bound = False,
         ignore_line_search_failed_maxfev              = False)
     self.sites_cart_refined = None
-    self.cctbx_rm_bonds_rmsd = get_bonds_rmsd(
-      restraints_manager = self.geometry_rmsd_manager.geometry,
-      xrs                = self.model.get_xray_structure())
 
   def get_shift(self, other):
     s1 = self.sites_cart_start
