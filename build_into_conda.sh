@@ -20,18 +20,18 @@ echo "python modules location: $PACKAGES"
 
 
 ### restraint libs
-echo "Downloading restraints libraries"
-cd $PACKAGES
-mkdir chem_data
-cd chem_data
-svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
-svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
-rm -rf rotarama_data/.svn
-svn --quiet --non-interactive --trust-server-cert --force co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data
-cd ..
+#echo "Downloading restraints libraries"
+#cd $PACKAGES
+#mkdir chem_data
+#cd chem_data
+#svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd
+#svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
+#svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
+#svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
+#rm -rf rotarama_data/.svn
+#svn --quiet --non-interactive --trust-server-cert --force co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data
+#svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data
+#cd ..
 
 # add missing modules
 echo "Downloading qrefine"
@@ -43,7 +43,7 @@ cp -r $QREFINE/../qrefine $PACKAGES/modules/qrefine
 
 #### PROBE
 echo "Downloading probe"
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+git clone  https://github.com/rlabduke/probe 
 cd probe
 make
 cp hybrid_36_c.c $PACKAGES/iotbx/pdb/hybrid_36_c.c
@@ -51,7 +51,7 @@ cd ..
 
 ### REDUCE
 echo "Downloading reduce"
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+git clone https://github.com/rlabduke/reduce
 cd reduce
 make
 cd ..

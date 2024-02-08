@@ -39,93 +39,97 @@ jobs:
         environment-file: environment.yaml      
         cache-environment: true
         environment-name: qrefine-ci-mamba
-
-    - name:  build chem_data, probe, and reduce
+    
+    - name: run installer
       run: |
-         cd $CONDA_PREFIX/lib/$PY/site-packages
-         pwd
-         mkdir chem_data 
-         cd chem_data 
-         svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd 
-         git clone https://github.com/rlabduke/mon_lib.git
-         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib 
-         mkdir rotarama_data
-         git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
-         cd reference_data
-         git sparse-checkout add Top8000/Top8000_rotamer_pct_contour_grids
-         mv Top8000/Top8000_rotamer_pct_contour_grids/* ../rotarama_data
-         cd ../rotarama_data/
-         ls 
-         pwd 
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
-         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
-         #svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
-         rm -rf reference_data
-         git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
-         cd reference_data
-         mkdir  /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z
-         git sparse-checkout add Top8000/rama_z
-         mv Top8000/rama_z/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z/
-         
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z/
-         ls 
-         pwd 
-         rm -rf rotarama_data/.svn
-         #svn --quiet --non-interactive --trust-server-cert --force co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data 
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
-         rm -rf reference_data
-         git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
-         cd reference_data
-         git sparse-checkout add Top8000/Top8000_ramachandran_pct_contour_grids
-         mv Top8000/Top8000_ramachandran_pct_contour_grids/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rotarama_data
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rotarama_data
-         ls 
-         pwd 
+        sh build_into_conda.sh
 
-         #
-         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data 
-         cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
-         mkdir cablam_data
-         rm -rf reference_data
-         git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
-         cd reference_data
-         git sparse-checkout add  Top8000/Top8000_cablam_pct_contour_grids
-         mv Top8000/Top8000_cablam_pct_contour_grids/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/cablam_data
+    # - name:  build chem_data, probe, and reduce
+    #   run: |
+    #      cd $CONDA_PREFIX/lib/$PY/site-packages
+    #      pwd
+    #      mkdir chem_data 
+    #      cd chem_data 
+    #      svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd 
+    #      git clone https://github.com/rlabduke/mon_lib.git
+    #      #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib 
+    #      mkdir rotarama_data
+    #      git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
+    #      cd reference_data
+    #      git sparse-checkout add Top8000/Top8000_rotamer_pct_contour_grids
+    #      mv Top8000/Top8000_rotamer_pct_contour_grids/* ../rotarama_data
+    #      cd ../rotarama_data/
+    #      ls 
+    #      pwd 
+    #      cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
+    #      #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
+    #      #svn --quiet --non-interactive --trust-server-cert co  https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z
+    #      rm -rf reference_data
+    #      git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
+    #      cd reference_data
+    #      mkdir  /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z
+    #      git sparse-checkout add Top8000/rama_z
+    #      mv Top8000/rama_z/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z/
          
-         mkdir $CONDA_PREFIX/lib/$PY/site-packages/modules
-         cd $CONDA_PREFIX/lib/$PY/site-packages/modules
-         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
-         git clone  https://github.com/rlabduke/probe
+    #      cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rama_z/
+    #      ls 
+    #      pwd 
+    #      rm -rf rotarama_data/.svn
+    #      #svn --quiet --non-interactive --trust-server-cert --force co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data 
+    #      cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
+    #      rm -rf reference_data
+    #      git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
+    #      cd reference_data
+    #      git sparse-checkout add Top8000/Top8000_ramachandran_pct_contour_grids
+    #      mv Top8000/Top8000_ramachandran_pct_contour_grids/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rotarama_data
+    #      cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/rotarama_data
+    #      ls 
+    #      pwd 
 
-         cd probe 
-         make 
-         cp hybrid_36_c.c $CONDA_PREFIX/lib/$PY/site-packages/iotbx/pdb/hybrid_36_c.c
-         cd ..
-         #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
-         git clone https://github.com/rlabduke/reduce
-         cd reduce 
-         make
+    #      #
+    #      #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data 
+    #      cd /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data
+    #      mkdir cablam_data
+    #      rm -rf reference_data
+    #      git clone --filter=blob:none --sparse   https://github.com/rlabduke/reference_data
+    #      cd reference_data
+    #      git sparse-checkout add  Top8000/Top8000_cablam_pct_contour_grids
+    #      mv Top8000/Top8000_cablam_pct_contour_grids/* /home/runner/micromamba/envs/qrefine-ci-mamba/lib/python3.10/site-packages/chem_data/cablam_data
+         
+    #      mkdir $CONDA_PREFIX/lib/$PY/site-packages/modules
+    #      cd $CONDA_PREFIX/lib/$PY/site-packages/modules
+    #      #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+    #      git clone  https://github.com/rlabduke/probe
+
+    #      cd probe 
+    #      make 
+    #      cp hybrid_36_c.c $CONDA_PREFIX/lib/$PY/site-packages/iotbx/pdb/hybrid_36_c.c
+    #      cd ..
+    #      #svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+    #      git clone https://github.com/rlabduke/reduce
+    #      cd reduce 
+    #      make
         
-    - name: link qrefine code to modules dir.
-      run: |  
-       ln -s $GITHUB_WORKSPACE/../qrefine $CONDA_PREFIX/lib/$PY/site-packages/modules/qrefine
+    # - name: link qrefine code to modules dir.
+    #   run: |  
+    #    ln -s $GITHUB_WORKSPACE/../qrefine $CONDA_PREFIX/lib/$PY/site-packages/modules/qrefine
        
-    - name: delete old yoink code
-      run: rm -rf $CONDA_PREFIX/lib/$PY/site-packages/modules/qrefine/plugin/yoink
+    # - name: delete old yoink code
+    #   run: rm -rf $CONDA_PREFIX/lib/$PY/site-packages/modules/qrefine/plugin/yoink
 
-    #- name: activate enviroment
-    #  run: micromamba activate qrefine-ci-mamba
+    # #- name: activate enviroment
+    # #  run: micromamba activate qrefine-ci-mamba
 
-    - name: make build dir and set probe exe
-      run: |
-        cd $CONDA_PREFIX/lib/$PY/site-packages
-        mkdir build 
-        cd build 
-        # Use copy (cp) as scripts use os.path.isfile for detection, which fails on sys links
-        mkdir -p probe/exe/
-        cp $CONDA_PREFIX/lib/$PY/site-packages/modules/probe/probe probe/exe/ 
-        mkdir -p reduce/exe
-        cp $CONDA_PREFIX/lib/$PY/site-packages/modules/reduce/reduce_src/reduce reduce/exe/
+    # - name: make build dir and set probe exe
+    #   run: |
+    #     cd $CONDA_PREFIX/lib/$PY/site-packages
+    #     mkdir build 
+    #     cd build 
+    #     # Use copy (cp) as scripts use os.path.isfile for detection, which fails on sys links
+    #     mkdir -p probe/exe/
+    #     cp $CONDA_PREFIX/lib/$PY/site-packages/modules/probe/probe probe/exe/ 
+    #     mkdir -p reduce/exe
+    #     cp $CONDA_PREFIX/lib/$PY/site-packages/modules/reduce/reduce_src/reduce reduce/exe/
 
     # - name: (force) update to latest cctbx-nightly
     #   run: |
@@ -141,16 +145,16 @@ jobs:
           #libtbx.configure mmtbx
     #     conda update cctbx -c cctbx-nightly
 
-    - name: configure  modules  
-      run: |
-        conda update cctbx -c cctbx-nightly
-        mkdir -p $CONDA_PREFIX/lib/$PY/site-packages/build
-        cd $CONDA_PREFIX/lib/$PY/site-packages/build
-        # 
-        libtbx.configure probe qrefine reduce
-        mmtbx.rebuild_rotarama_cache
-        mmtbx.rebuild_cablam_cache
-        pwd
+    # - name: configure  modules  
+    #   run: |
+    #     conda update cctbx -c cctbx-nightly
+    #     mkdir -p $CONDA_PREFIX/lib/$PY/site-packages/build
+    #     cd $CONDA_PREFIX/lib/$PY/site-packages/build
+    #     # 
+    #     libtbx.configure probe qrefine reduce
+    #     mmtbx.rebuild_rotarama_cache
+    #     mmtbx.rebuild_cablam_cache
+    #     pwd
     
     - name: smoke test
       run: |
