@@ -26,32 +26,38 @@ quantum-refinement of bio-macromolecules.
 ### standard route (open-source, cctbx-based)
 
  1. Install conda. **We highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3.**
- 
+
  2. Clone this repo and enter it's directory.
  ```
  git clone https://github.com/qrefine/qrefine.git qrefine && cd qrefine
  ```
- 3. Use the provided `environmental.yaml` to generate a new conda environment called `qrefine`. After installation activate the enviroment. The activation (unless set to automatic) has to be done for every new shell.
+ 3. Use the provided `environmental.yaml` to generate a new conda environment called `qrefine`. After installation activate the enviroment. The activation (unless set to automatic) has to be done for every new shell:
 
-    * For a basic installation:
-         ```
-         mamba create -n qrefine qrefine cctbx networkx xtb mopac -c qrefine -c cctbx-nightly
-         ```
-
-    * for a (large) installation with pytorch/cuda
+    * full installation with pytorch/cuda
          ```
          mamba env create -n qrefine -f environmental.yaml
          mamba activate qrefine
          ```
- 4. We need to install missing restraints libraries and the `reduce` and `probe` programs. This is handled by a bash script.
+
+ 4. We need to install the `reduce` and `probe` programs. This is handled by a bash script that downloads and installs the programs into the correct path in the conda installation.
  ```
  bash ./build_into_conda.sh
  ```
  5. run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
- Expert users proficient with installing cctbx via bootstrap.py have to extract the needed snippets from the bash  script to install the missing parts.
- 
- 
+ 6. (Optional) Check if the cuda AEV version of torchani was installed:
+    ```
+    mamba list | grep torchani
+    ls $(python -c 'import site; print(site.getsitepackages()[0])')/torchani/cuaev
+    ````
+    It should say `torchani=*=cuda...` and the `cuaev` directory is present. If not you can try the the pip/wheel installation:
+    ```
+    mamba remove torchani
+    pip install torchani
+    ```
+
+
+    Expert users proficient with installing cctbx via bootstrap.py have to extract the needed snippets from the bash  script to install the missing parts.
 
 ### Phenix user route
 
@@ -85,10 +91,10 @@ conda activate QR
 qr.test
 ```
 
- 
- ### Run Tests 
+
+ ### Run Tests
 Tests need to be run in an empty directory.
-``` 
+```
  mkdir tests
  cd tests
  qr.test
@@ -96,24 +102,24 @@ Tests need to be run in an empty directory.
 If any of the tests fail, please raise an issue here: [issue tracker](https://github.com/qrefine/qrefine/issues)
 
  ### Documentation
- 
+
  Can be found at: https://qrefine.com/qr.html
- 
+
 ### Commandline options
 
 If you want to see the available options and default values please type:
 ```
  qr.refine --show-defaults
-``` 
+```
 
 ### Example
 Options are straightforward added to the command line arguments:
 ```
 qr.refine tests/unit/data_files/helix.pdb engine=mopac clustering=0 gradient_only=1
 ```
- 
 
-### Contact us 
+
+### Contact us
 
 The best way to get a hold of us is by sending us an email: qrefine@googlegroups.com
 
@@ -134,7 +140,7 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 ### Citations:
 
 Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel V. Afonine,
-Q|R: Quantum-based Refinement, 
+Q|R: Quantum-based Refinement,
 (2017) Acta Cryst. D73, 45-52.
 DOI: [10.1107/S2059798316019847](http://scripts.iucr.org/cgi-bin/paper?S2059798316019847)
 
@@ -150,9 +156,9 @@ DOI: [10.1107/S2059798319015122](http://scripts.iucr.org/cgi-bin/paper?S20597983
 
 Lum Wang, Holger Kruse, Oleg V. Sobolev, Nigel W. Moriarty, Mark P. Waller, Pavel V. Afonine, and Malgorzata Biczysko,
 Real-space quantum-based refinement for cryo-EM: Q|R#3
-(2020) Acta Cryst. D76, 1184-1191. 
-DOI：[10.1107/S2059798320013194](https://doi.org/10.1107/S2059798320013194)  
-bioRxiv 2020.05.25.115386. 
+(2020) Acta Cryst. D76, 1184-1191.
+DOI：[10.1107/S2059798320013194](https://doi.org/10.1107/S2059798320013194)
+bioRxiv 2020.05.25.115386.
 DOI:[0.1101/2020.05.25.115386](https://www.biorxiv.org/content/10.1101/2020.05.25.115386v1)
 
 Yaru Wang, Holger Kruse, Nigel W. Moriarty, Mark P. Waller, Pavel V. Afonine, and Malgorzata Biczysko,
@@ -165,14 +171,14 @@ DOI:[10.1101/2022.11.24.517825](https://doi.org/10.1101/2022.11.24.517825)
 
 #### Clustering
 
-Min Zheng, Mark P. Waller, 
+Min Zheng, Mark P. Waller,
 Yoink: An interaction‐based partitioning API,
 (2018) Journal of Computational Chemistry, 39, 799–806.
 DOI: [10.1002/jcc.25146](https://doi.org/10.1002/jcc.25146)
 
-Min Zheng, Mark P. Waller, 
-Toward more efficient density-based adaptive QM/MM methods, 
-(2017)Int J. Quant. Chem  e25336 
+Min Zheng, Mark P. Waller,
+Toward more efficient density-based adaptive QM/MM methods,
+(2017)Int J. Quant. Chem  e25336
 DOI: [10.1002/qua.25336](https://doi.org/10.1002/qua.25336)
 
 Min Zheng, Mark P. Waller, Adaptive QM/MM Methods,
@@ -181,8 +187,5 @@ DOI: [10.1002/wcms.1255](https://doi.org/10.1002/wcms.1255)
 
 Mark P. Waller, Sadhana Kumbhar, Jack Yang,
 A Density‐Based Adaptive Quantum Mechanical/Molecular Mechanical Method
-(2014) ChemPhysChem  15, 3218–3225. 
+(2014) ChemPhysChem  15, 3218–3225.
 DOI: [10.1002/cphc.201402105](https://doi.org/10.1002/cphc.201402105 )
-
-
-
