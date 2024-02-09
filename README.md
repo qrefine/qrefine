@@ -35,7 +35,7 @@ quantum-refinement of bio-macromolecules.
 
     * full installation with pytorch/cuda
          ```
-         mamba env create -n qrefine -f environmental.yaml
+         mamba env create -n qrefine -f environment.yaml
          mamba activate qrefine
          ```
 
