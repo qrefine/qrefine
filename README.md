@@ -31,7 +31,7 @@ quantum-refinement of bio-macromolecules.
  ```
  git clone https://github.com/qrefine/qrefine.git qrefine && cd qrefine
  ```
- 3. Use the provided `environmental.yaml` to generate a new conda environment called `qrefine`. After installation activate the enviroment. The activation (unless set to automatic) has to be done for every new shell:
+ 3. Use the provided `environment.yaml` to generate a new conda environment called `qrefine`. After installation activate the enviroment. The activation (unless set to automatic) has to be done for every new shell:
 
     * full installation with pytorch/cuda
          ```
