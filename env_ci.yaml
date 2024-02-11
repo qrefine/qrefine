@@ -23,7 +23,7 @@ dependencies:
   - mopac
   - xtb
   - xtb-python
-  - torchani=2.2
+#  - torchani=2.2
 # cuda/pytorch/ani
 #  - pytorch=2.1
 #  - pytorch-cuda
