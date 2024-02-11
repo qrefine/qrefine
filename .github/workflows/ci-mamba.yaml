@@ -36,7 +36,8 @@ jobs:
 
     - uses: mamba-org/setup-micromamba@v1
       with:
-        environment-file: environment.yaml      
+        #environment-file: environment.yaml      
+        environment-file: env-ci.yaml      
         cache-environment: true
         environment-name: qrefine-ci-mamba
     

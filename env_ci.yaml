@@ -1,0 +1,32 @@
+name: qrefine-ci-mamba
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+# essentials
+  - cctbx-nightly::cctbx
+  - cctbx-nightly::cctbx-base
+  - chem_data::chem_data
+  - numpy
+  - python=3.10
+  - "libblas=*=*mkl"
+  - networkx
+  - rdkit
+  - pymongo
+# 3rd part tool building
+  - cxx-compiler
+  - c-compiler
+  - make
+# Calculators
+  - ase==3.17.0
+  - mopac
+  - xtb
+  - xtb-python
+  - torchani=2.2
+# cuda/pytorch/ani
+#  - pytorch=2.1
+#  - pytorch-cuda
+#  - cudatoolkit
+#  - cuda-python
+#  - numba
