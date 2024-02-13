@@ -441,36 +441,27 @@ def special_case_hydrogens(hierarchy,
                       )
   hierarchy.sort_atoms_in_place()
 
+def __HELPER1(crystal_symmetry, hierarchy, params):
+  raw_records = hierarchy_utils.get_raw_records(
+    crystal_symmetry=crystal_symmetry, pdb_hierarchy=hierarchy)
+  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+                                          params=params,
+                                        )
+  sites_cart = hierarchy.atoms().extract_xyz()
+  ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  return ppf
+
 def complete_pdb_hierarchy(hierarchy,
                            geometry_restraints_manager,
                            use_capping_hydrogens=False,
                            append_to_end_of_model=False,
                            pdb_filename=None,
-                           pdb_inp=None,
+                           crystal_symmetry=None,
                            original_pdb_filename=None,
                            verbose=False,
                            debug=False,
                            use_reduce=True
                           ):
-  """Complete PDB hierarchy with hydrogen atoms as needed
-
-  Args:
-      hierarchy (hierarchy): Starting model
-      geometry_restraints_manager (GRM): Starting restraints
-      use_capping_hydrogens (bool, optional): Capping or not
-      append_to_end_of_model (bool, optional): Added atoms go to end of atom list
-      pdb_filename (None, optional): Description
-      pdb_inp (None, optional): Description
-      original_pdb_filename (None, optional): Description
-      verbose (bool, optional): Description
-      debug (bool, optional): Description
-
-  Returns:
-      TYPE: Description
-
-  Raises:
-      Sorry: Description
-  """
   #
   # some validations
   #
@@ -490,44 +481,18 @@ def complete_pdb_hierarchy(hierarchy,
     if original_pdb_filename:
       original_pdb_inp = iotbx.pdb.input(original_pdb_filename)
       original_hierarchy = original_pdb_inp.construct_hierarchy()
-  if debug:
-    output = hierarchy_utils.write_hierarchy(pdb_filename,
-                                             pdb_inp,
-                                             hierarchy,
-                                             'temp1',
-                                           )
   #
   # assume model is heavy-atom complete
   #
   if not use_capping_hydrogens:
-    if debug:
-      ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output)
-    else:
-      raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-      ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
-                                              params=params,
-                                            )
-      sites_cart = hierarchy.atoms().extract_xyz()
-      ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    n_changed = extend_sidechains.extend_protein_model(
-      ppf.all_chain_proxies.pdb_hierarchy,
-      mon_lib_server,
-      add_hydrogens=False,
-    )
-    if debug:
-      print('number of side chains changed',n_changed)
-      output = hierarchy_utils.write_hierarchy(pdb_filename,
-                                               pdb_inp,
-                                               ppf.all_chain_proxies.pdb_hierarchy,
-                                               'temp2',
-                                             )
+    ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
   #
   # need to use Reduce/ReadySet! to add hydrogens
   #
   if not use_capping_hydrogens:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
-      pdb_inp,
+      crystal_symmetry,
       ppf.all_chain_proxies.pdb_hierarchy,
       'readyset_input',
     )
@@ -540,63 +505,16 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # remove side chain acid hydrogens - maybe not required since recent changes
   #
-  if debug:
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output,
-                                            params=params,
-                                          )
-  else:
-    raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
-                                            params=params,
-                                          )
-    sites_cart = hierarchy.atoms().extract_xyz()
-    ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
+
   remove_acid_side_chain_hydrogens(ppf.all_chain_proxies.pdb_hierarchy)
   #
   # add hydrogens in special cases
   #  eg ETA
   #  eg N - H, H2
   #
-  if debug:
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output,
-                                            params=params,
-                                          )
-  else:
-    hierarchy = ppf.all_chain_proxies.pdb_hierarchy
-    raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
-                                            params=params,
-                                          )
-    sites_cart = hierarchy.atoms().extract_xyz()
-    ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
-  # special_case_hydrogens(ppf.all_chain_proxies.pdb_hierarchy,
-  #                        ppf.geometry_restraints_manager(),
-  #                        #use_capping_hydrogens=use_capping_hydrogens,
-  #                        #append_to_end_of_model=append_to_end_of_model,
-  #                        # original_hierarchy=original_hierarchy,
-  #                        verbose=verbose,
-  #                      )
-  #
-  # add terminals atoms including hydrogens and OXT - more docs here...
-  #
-  if debug:
-    output = hierarchy_utils.write_hierarchy(
-      pdb_filename,
-      pdb_inp,
-      ppf.all_chain_proxies.pdb_hierarchy,
-      'temp3',
-    )
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output,
-                                            params=params,
-                                           )
-  else:
-    hierarchy = ppf.all_chain_proxies.pdb_hierarchy
-    raw_records = hierarchy_utils.get_raw_records(pdb_inp, hierarchy)
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
-                                            params=params,
-                                           )
-    sites_cart = hierarchy.atoms().extract_xyz()
-    ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  hierarchy = ppf.all_chain_proxies.pdb_hierarchy
+  ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
   #
   # maybe more to cctbx
   #
@@ -607,25 +525,8 @@ def complete_pdb_hierarchy(hierarchy,
                              original_hierarchy=original_hierarchy,
                              verbose=verbose,
                             ) # in place
-  if debug:
-    output = hierarchy_utils.write_hierarchy(
-      pdb_filename,
-      pdb_inp,
-      ppf.all_chain_proxies.pdb_hierarchy,
-      'temp8',
-    )
   ppf.all_chain_proxies.pdb_hierarchy.atoms().set_chemical_element_simple_if_necessary()
   ppf.all_chain_proxies.pdb_hierarchy.sort_atoms_in_place()
-  if debug:
-    output = hierarchy_utils.write_hierarchy(
-      pdb_filename,
-      pdb_inp,
-      ppf.all_chain_proxies.pdb_hierarchy,
-      'temp9',
-    )
-  #display_hierarchy_atoms(ppf.all_chain_proxies.pdb_hierarchy)
-  #ppf.all_chain_proxies.pdb_hierarchy.atoms_reset_serial()
-  #ppf.all_chain_proxies.pdb_hierarchy.atoms().reset_i_seq()
   return ppf
 
 def run(pdb_filename=None,
@@ -654,7 +555,7 @@ def run(pdb_filename=None,
     fname = 'complete' # only this uses reduce/ReadySet
   else:
     use_capping_hydrogens=True
-    fname = 'capping' 
+    fname = 'capping'
   #
   # adjust parameters
   #
@@ -662,19 +563,14 @@ def run(pdb_filename=None,
   if use_capping_hydrogens:
     params = hierarchy_utils.get_pdb_interpretation_params()
     params.link_distance_cutoff=1.8
-  if pdb_hierarchy:
-    raw_records = hierarchy_utils.get_raw_records(
-      pdb_inp=None,
-      pdb_hierarchy=pdb_hierarchy,
-      crystal_symmetry=crystal_symmetry,
-    )
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
-    sites_cart = pdb_hierarchy.atoms().extract_xyz()
-    ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
-  else:
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename,
-                                            params=params,
-                                          )
+
+  if(pdb_filename is not None):
+    pi = iotbx.pdb.input(file_name = pdb_filename)
+    pdb_hierarchy = pi.construct_hierarchy()
+    crystal_symmetry = pi.crystal_symmetry()
+
+  ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=pdb_hierarchy, params=params)
+
   #
   # guts
   #
@@ -685,7 +581,7 @@ def run(pdb_filename=None,
     append_to_end_of_model=append_to_end_of_model, # needed for clustering
                                                    # code and Molprobity
     pdb_filename=pdb_filename,   # used just for naming of debug output
-    pdb_inp=ppf.all_chain_proxies.pdb_inp, # used in get_raw_records. why
+    crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(), # used in get_raw_records. why
     original_pdb_filename=original_pdb_filename,
     verbose=False,
     use_reduce=use_reduce
@@ -693,7 +589,7 @@ def run(pdb_filename=None,
   if pdb_filename:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
-      ppf.all_chain_proxies.pdb_inp,
+      ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
       ppf.all_chain_proxies.pdb_hierarchy,
       fname,
     )
@@ -735,5 +631,4 @@ if __name__=="__main__":
     rc = run(None, **kwds)
     display_hierarchy_atoms(rc)
     assert 0, 'FINISHED TESTING'
-  #print 'run',args,kwds
   run(*tuple(args), **kwds)

@@ -62,46 +62,13 @@ def run(pdb_filename,
         model_completion=True,
         keep_alt_loc=False,
         skip_validation=False,
-        calculate_charge=False,
+        #calculate_charge=False,
         append_to_end_of_model=False,
         neutron_option=None,
         hydrogen_atom_occupancies=0.,
         use_reduce=True
         ):
-  #
-  # do all *.pdb in a directory
-  #
-  if os.path.isdir(pdb_filename):
-    loop_over_dir(pdb_filename)
-    return
-  #
-  # fetch a PDB code
-  #
-  if pdb_filename.find(".pdb")==-1:
-    if not os.path.exists('%s.pdb' % pdb_filename):
-      run_fetch_pdb(pdb_filename)
-    pdb_filename = '%s.pdb' % pdb_filename
-
-  if 1: # read file option
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename)
-  elif 0: # raw records example
-    pdb_inp = iotbx.pdb.input(pdb_filename)
-    hierarchy = pdb_inp.construct_hierarchy()
-    raw_records = []
-    for atom in hierarchy.atoms():
-      raw_records.append(atom.format_atom_record())
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
-  else: # from hierarchy
-    pdb_inp = iotbx.pdb.input(pdb_filename)
-    hierarchy = pdb_inp.construct_hierarchy()
-    ppf = hierarchy_utils.get_processed_pdb(pdb_inp=hierarchy.as_pdb_input())
-
-  if not skip_validation:
-    model = mmtbx.model.manager(
-      model_input      = None,
-      crystal_symmetry = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
-      pdb_hierarchy    = ppf.all_chain_proxies.pdb_hierarchy)
-    initial_model_statistics = model.geometry_statistics()
+  ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename)
 
   # should use cctbx
   if keep_alt_loc: pass
@@ -113,28 +80,11 @@ def run(pdb_filename,
   ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(
     ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
   ppf.all_chain_proxies.pdb_hierarchy.remove_residue_groups_with_atoms_on_special_positions_selective(ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
-  if 0:
-    output = hierarchy_utils.write_hierarchy(
-      pdb_filename, # uses to get output filename
-      ppf.all_chain_proxies.pdb_inp,
-      ppf.all_chain_proxies.pdb_hierarchy,
-      "temp0")
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=output)
-  else:
-    raw_records = hierarchy_utils.get_raw_records(
-      ppf.all_chain_proxies.pdb_inp,
-      ppf.all_chain_proxies.pdb_hierarchy,
-    )
-    ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
-  hetero_charges = charges.get_hetero_charges(
+  raw_records = hierarchy_utils.get_raw_records(
     ppf.all_chain_proxies.pdb_inp,
     ppf.all_chain_proxies.pdb_hierarchy,
-    )
-
-  if not hetero_charges:
-    # some defaults
-    hetero_charges = charges.default_ion_charges
-  inter_residue_bonds = charges.get_inter_residue_bonds(ppf)
+  )
+  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
   #
   # extends side chains and add hydrogens
   #
@@ -149,28 +99,11 @@ def run(pdb_filename,
     ppf.all_chain_proxies.pdb_hierarchy,
     ppf.geometry_restraints_manager(),
     pdb_filename=pdb_filename,
-    pdb_inp=ppf.all_chain_proxies.pdb_inp,
+    crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     use_capping_hydrogens=use_capping_hydrogens,
     append_to_end_of_model=append_to_end_of_model,
     use_reduce=use_reduce
   )
-
-  if calculate_charge:
-    new_pdb_filename = hierarchy_utils.write_hierarchy(
-      pdb_filename, # uses to get output filename
-      ppf.all_chain_proxies.pdb_inp,
-      ppf.all_chain_proxies.pdb_hierarchy,
-      fname)
-    ## need now inter_residue_bonds because of added hydrogens
-    ##  maybe update the bond table!!!
-    ppf = hierarchy_utils.get_processed_pdb(pdb_filename=new_pdb_filename)
-    inter_residue_bonds = charges.get_inter_residue_bonds(ppf, verbose=True)
-    total_charge = charges.calculate_pdb_hierarchy_charge(
-      ppf.all_chain_proxies.pdb_hierarchy,
-      hetero_charges=hetero_charges,
-      inter_residue_bonds=inter_residue_bonds,
-    )
-    print("total_charge",total_charge)
 
   # Idealize H as riding
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
@@ -184,9 +117,6 @@ def run(pdb_filename,
     pdb_hierarchy             = ppf.all_chain_proxies.pdb_hierarchy,
     crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     log                       = null_out())
-  if 0:
-    ph=model.get_hierarchy()
-    ph.write_pdb_file('test.pdb')
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
   model.idealize_h_riding()
@@ -197,11 +127,9 @@ def run(pdb_filename,
 
   ## after no error getting total charge, write the completed pdb file
   hierarchy_utils.write_hierarchy(pdb_filename, # uses to get output filename
-                                  ppf.all_chain_proxies.pdb_inp,
+                                  ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
                                   model.get_hierarchy(),
                                   fname)
-  if not skip_validation:
-    final_model_statistics = model.geometry_statistics()
 
 if __name__=="__main__":
   def _fake_phil_parse(arg):
@@ -222,7 +150,3 @@ if __name__=="__main__":
   remove.reverse()
   for r in remove: del args[r]
   run(*tuple(args), **kwds)
-
-#  args = sys.argv[1:]
-#  del sys.argv[1:]
-#  run(*tuple(args))

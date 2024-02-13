@@ -9,7 +9,7 @@ from scitbx.array_family import flex
 from .utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
-import qrefine.completion as model_completion
+#import qrefine.completion as model_completion
 from . import completion
 from .charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
@@ -349,7 +349,7 @@ class fragments(object):
 
       self.charge_service = charges_class(
         pdb_hierarchy=charge_hierarchy,
-        crystal_symmetry=self.expansion.cs_box).get_total_charge() 
+        crystal_symmetry=self.expansion.cs_box).get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)

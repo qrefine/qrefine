@@ -84,7 +84,6 @@ def run(args, log):
     args          = args,
     log           = log,
     master_params = master_params(),
-    #validated     = validated,
   )
   del sys.argv[1:]
   model_completion=True
@@ -94,7 +93,6 @@ def run(args, log):
                model_completion=model_completion,
                keep_alt_loc=params.keep_alt_loc,
                skip_validation=params.skip_validation,
-               calculate_charge=params.calculate_charge,
                append_to_end_of_model=params.append_to_end_of_model,
                neutron_option=params.options.neutron,
                hydrogen_atom_occupancies=params.options.hydrogen_atom_occupancies,

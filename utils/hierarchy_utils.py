@@ -83,14 +83,14 @@ def get_processed_pdb(pdb_filename=None,
     keep_monomer_mappings = True)
   return ppf
 
-def write_hierarchy(pdb_filename, pdb_inp, hierarchy, underscore, verbose=False):
+def write_hierarchy(pdb_filename, crystal_symmetry, hierarchy, underscore, verbose=False):
   output = "%s_%s.pdb" % (pdb_filename[:-4],
                           underscore,
                           )
   output = os.path.basename(output)
   f=open(output, "w")
   f.write(hierarchy.as_pdb_string(
-    crystal_symmetry=pdb_inp.crystal_symmetry()),
+    crystal_symmetry=crystal_symmetry),
           )
   f.close()
   if verbose: print("\n  Output written to: %s" % output)
