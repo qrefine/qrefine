@@ -1,15 +1,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
-import math
 import sys
-from string import ascii_letters
 
 import iotbx
 from mmtbx.monomer_library import server
-from scitbx import matrix
-from scitbx.math import dihedral_angle
 from libtbx.utils import Sorry
-from functools import cmp_to_key
 
 from iotbx.pdb import amino_acid_codes as aac
 
@@ -19,43 +14,12 @@ get_class = iotbx.pdb.common_residue_names_get_class
 from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_remove_cys_hg_to_atom_group
-from mmtbx.ligands.hierarchy_utils import _add_atom_to_chain
 from mmtbx.ligands.hierarchy_utils import get_bonds_as_dict
-from mmtbx.ligands.hierarchy_utils import simple_valence_check
 from mmtbx.ligands.ready_set_utils import add_n_terminal_hydrogens_to_residue_group
 from mmtbx.ligands.ready_set_utils import add_c_terminal_oxygens_to_residue_group
 from mmtbx.ligands.ready_set_utils import generate_protein_fragments
-from mmtbx.ligands.ready_set_basics import construct_xyz
 
 log = sys.stdout
-
-def d_squared(xyz1, xyz2):
-  d2 = 0
-  for i in range(3):
-    d2 += (xyz2[i]-xyz1[i])**2
-  return d2
-
-def get_bond_vector(a1,a2,unit=False):
-  vector = []
-  l = 0
-  for i in range(3):
-    vector.append(a1.xyz[i]-a2.xyz[i])
-    l+=vector[i]**2
-  if unit:
-    l=math.sqrt(l)
-    for i in range(3):
-      vector[i] /= l
-  return tuple(vector)
-
-def get_atoms_by_names(ag, l=None, all_or_nothing=True):
-  assert l
-  assert 0
-  rc = []
-  for name in l:
-    atom = ag.get_atom(name)
-    rc.append(atom)
-  if len(l)!=len(filter(None, rc)): return None
-  return rc
 
 def iterate_over_threes(hierarchy,
                         geometry_restraints_manager,
@@ -136,10 +100,8 @@ def iterate_over_threes(hierarchy,
         append_to_end_of_model=append_to_end_of_model,
       )
       if rc: additional_hydrogens.append(rc)
-      #hierarchy.reset_i_seq_if_necessary()
     else:
       pass
-  # simple_valence_check(hierarchy, geometry_restraints_manager)
   return additional_hydrogens
 
 def iterate_using_original(hierarchy,
@@ -215,73 +177,12 @@ def iterate_using_original(hierarchy,
       pass
   return additional_hydrogens
 
-def use_electrons_to_add_hdyrogens(hierarchy,
-                                   geometry_restraints_manager,
-                                   use_capping_hydrogens=False,
-                                   append_to_end_of_model=False,
-                                   ):
-  if not use_capping_hydrogens: return
-  from mmtbx.ligands import electrons
-  rc=[]
-  raw_records = hierarchy_utils.get_raw_records(
-    pdb_hierarchy=hierarchy,
-    crystal_symmetry=geometry_restraints_manager.crystal_symmetry,
-  )
-  charges = electrons.run(pdb_filename=None,
-                          raw_records=raw_records,
-                          return_formal_charges=True,
-  )
-  charged_atoms = charges.get_charged_atoms()
-  remove=[]
-  proton_element, proton_name = get_proton_info(hierarchy)
-  for atom, electrons in charged_atoms:
-    atom_group = atom.parent()
-    #if atom_group.resname=='CYS' and atom.name==' SG ':
-    #  if electrons==-1 and atom_group.get_atom('HG'):
-    #    remove.append(atom_group.get_atom('HG'))
-    if atom.element_is_hydrogen() and electrons==1:
-      #print 'REMOVING', atom.quote()
-      remove.append(atom)
-    if get_class(atom.parent().resname) in ['common_amino_acid',
-                                            ]:
-      continue
-    atom = hierarchy.atoms()[atom.i_seq]
-    # this does not even work
-    rc = _add_hydrogens_to_atom_group_using_bad(
-      atom.parent(),
-      ' %s1 ' % proton_element,
-      proton_element,
-      atom.name.strip(),
-      'C4',
-      'C3',
-      1.,
-      120.,
-      160.,
-      append_to_end_of_model=append_to_end_of_model,
-    )
-  def _atom_i_seq(a1, a2):
-    if a1.i_seq<a2.i_seq: return -1
-    return 1
-  if remove:
-    remove.sort(key=cmp_to_key(_atom_i_seq))
-    remove.reverse()
-    for atom in remove:
-      # this is a kludge
-      # print(atom,atom.i_seq)
-      name = atom.name
-      atom = hierarchy.atoms()[atom.i_seq]
-      atom_group = atom.parent()
-      atom = atom_group.get_atom(name.strip())
-      atom_group.remove_atom(atom)
-  return rc
-
 def add_terminal_hydrogens_qr(
     hierarchy,
     geometry_restraints_manager,
     add_to_chain_breaks=False,
     use_capping_hydrogens=False,  # instead of terminal H
     append_to_end_of_model=False, # useful for Q|R
-    #use_capping_only_on_chain_breaks=False,
     original_hierarchy=None,
     occupancy=1.,
     verbose=False,
@@ -310,14 +211,6 @@ def add_terminal_hydrogens_qr(
     if get_class(atom_group.resname) not in ['common_amino_acid']:
       non_protein=True
       break
-  if non_protein and 0:
-    rc = use_electrons_to_add_hdyrogens(
-      hierarchy,
-      geometry_restraints_manager,
-      use_capping_hydrogens=use_capping_hydrogens,
-      append_to_end_of_model=append_to_end_of_model,
-    )
-    if rc: additional_hydrogens += [rc]
 
   if append_to_end_of_model and additional_hydrogens:
     from mmtbx.ligands.ready_set_utils import _add_atoms_from_chains_to_end_of_hierarchy
@@ -342,104 +235,6 @@ def remove_acid_side_chain_hydrogens(hierarchy):
   hierarchy.atoms_reset_serial()
   hierarchy.atoms().reset_i_seq()
   return hierarchy
-
-def generate_atom_group_atom_names(rg, names):
-  '''
-  Generate all alt. loc. groups of names
-  '''
-  atom_groups = rg.atom_groups()
-  atom_altlocs = {}
-  for ag in atom_groups:
-    for atom in ag.atoms():
-      atom_altlocs.setdefault(atom.parent().altloc, [])
-      atom_altlocs[atom.parent().altloc].append(atom)
-  keys = atom_altlocs.keys()
-  if len(keys)>1 and '' in keys:
-    for key in keys:
-      if key=='': continue
-      for atom in atom_altlocs['']:
-        atom_altlocs[key].append(atom)
-    del atom_altlocs['']
-  for key, item in atom_altlocs.items():
-    atoms=[]
-    for name in names:
-      for atom in item:
-        if atom.name.strip()==name.strip():
-          atoms.append(atom)
-          break
-      else:
-        assert 0, 'atoms not found %s' % names
-    yield atoms[0].parent(), atoms
-
-def _h_h2_on_N(hierarchy,
-               geometry_restraints_manager,
-               verbose=False,
-               ):
-  from mmtbx.ligands.ready_set_basics import is_perdeuterated
-  atoms = hierarchy.atoms()
-  ###
-  def get_residue_group(residue):
-    for atom in residue.atoms():
-      atom = atoms[atom.i_seq]
-      break
-    return atom.parent().parent()
-  ###
-  def get_atom_from_residue_group(residue, label):
-    h = None
-    for ag in residue.atom_groups():
-      h = ag.get_atom(label)
-      if h: break
-    return h
-  ###
-  n_done = []
-  for three in generate_protein_fragments(
-    hierarchy,
-    geometry_restraints_manager,
-    backbone_only=False,
-    #use_capping_hydrogens=use_capping_hydrogens,
-    ):
-    if len(three)==1: continue
-    for i, residue in enumerate(three):
-      if not i: continue
-      residue = get_residue_group(residue)
-      proton_name=proton_element='H'
-      if is_perdeuterated(residue):
-        proton_name=proton_element='D'
-      h = get_atom_from_residue_group(residue, proton_name)
-      if h is None:
-        for ag, (n, ca, c) in generate_atom_group_atom_names(residue,
-                                                             ['N', 'CA', 'C'],
-                                                            ):
-          if ag.resname in ['PRO']: continue
-          if n in n_done: continue
-          n_done.append(n)
-          dihedral = 0
-          rh3 = construct_xyz(n, 1.0,
-                              ca, 109.5,
-                              c, dihedral,
-                            )
-          atom = iotbx.pdb.hierarchy.atom()
-          atom.name = ' %s  ' % proton_name
-          atom.element = proton_element
-          atom.xyz = rh3[0]
-          atom.occ = n.occ
-          atom.b = n.b
-          atom.segid = ' '*4
-          ag.append_atom(atom)
-          assert ag.resname!='PRO'
-
-def special_case_hydrogens(hierarchy,
-                           geometry_restraints_manager,
-                           verbose=False,
-                          ):
-  for special_case in [
-      _h_h2_on_N,
-                       ]:
-    rc = special_case(hierarchy,
-                      geometry_restraints_manager,
-                      verbose=verbose,
-                      )
-  hierarchy.sort_atoms_in_place()
 
 def __HELPER1(crystal_symmetry, hierarchy, params):
   raw_records = hierarchy_utils.get_raw_records(
@@ -471,7 +266,6 @@ def complete_pdb_hierarchy(hierarchy,
   if not hierarchy.is_hierarchy_altloc_consistent():
     hierarchy.is_hierarchy_altloc_consistent(verbose=True)
     raise Sorry('Altloc structure of model not consistent. Make each altloc the same depth or remove completely.')
-  from mmtbx.building import extend_sidechains
   original_hierarchy = None
   params = hierarchy_utils.get_pdb_interpretation_params()
   params.restraints_library.cdl=False
