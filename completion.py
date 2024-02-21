@@ -21,6 +21,58 @@ from mmtbx.ligands.ready_set_utils import generate_protein_fragments
 
 log = sys.stdout
 
+from cctbx.eltbx import distance_based_connectivity
+
+def from_simple_connectivity(
+      hierarchy,
+      geometry_restraints_manager,
+      use_capping_hydrogens=False,
+      append_to_end_of_model=False):
+  atoms = hierarchy.atoms()
+  bonds=get_bonds_as_dict(geometry_restraints_manager)
+  conn = distance_based_connectivity.build_edge_list(
+    sites_cart=atoms.extract_xyz(), elements=atoms.extract_element())
+  dconn = {}
+  for p in conn:
+    dconn.setdefault(p[0],[]).append(p[1])
+    dconn.setdefault(p[1],[]).append(p[0])
+  additional_hydrogens = hierarchy_utils.smart_add_atoms()
+  for k, v in zip(dconn.keys(), dconn.values()):
+    a  = atoms[k]
+    rg = a.parent().parent()
+    skip=False
+    for resname in rg.unique_resnames():
+      if get_class(resname)!="common_amino_acid": skip=True
+    if skip: continue
+    if(a.name == ' C  ' and len(v)!=3):
+      #print(a.name, [atoms[i].name for i in v], rg.resseq)
+      rc = add_c_terminal_oxygens_to_residue_group(
+        rg,
+        bonds=bonds,
+        use_capping_hydrogens=use_capping_hydrogens,
+        append_to_end_of_model=append_to_end_of_model,
+      )
+      if rc: additional_hydrogens.append(rc)
+    if(a.name == ' N  ' and len(v)!=3):
+      #print(a.name, [atoms[i].name for i in v], rg.resseq)
+      rc = add_n_terminal_hydrogens_to_residue_group(
+        rg,
+        bonds=bonds,
+        use_capping_hydrogens=use_capping_hydrogens,
+        append_to_end_of_model=append_to_end_of_model,
+      )
+      if rc: additional_hydrogens.append(rc)
+  for rg in hierarchy.residue_groups():
+    if use_capping_hydrogens:
+      rc = conditional_add_cys_hg_to_atom_group(
+        geometry_restraints_manager,
+        rg,
+        append_to_end_of_model=append_to_end_of_model)
+      if rc: additional_hydrogens.append(rc)
+    else:
+      conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager, rg)
+  return additional_hydrogens
+
 def iterate_over_threes(hierarchy,
                         geometry_restraints_manager,
                         use_capping_hydrogens=False,
@@ -75,6 +127,7 @@ def iterate_over_threes(hierarchy,
       ptr+=1
       assert ptr==1, 'ptr (%d) is not 1' % ptr
       rg = get_residue_group(three[0])
+      #print("add_n_terminal_hydrogens_to_residue_group",rg.resseq)
       rc = add_n_terminal_hydrogens_to_residue_group(
         rg,
         bonds=bonds,
@@ -93,82 +146,10 @@ def iterate_over_threes(hierarchy,
       ptr-=1
       assert ptr==0, 'ptr (%d) is not 0' % ptr
       rg = get_residue_group(three[-1])
+      #print("add_c_terminal_oxygens_to_residue_group",rg.resseq)
       rc = add_c_terminal_oxygens_to_residue_group(
         rg,
         bonds=bonds,
-        use_capping_hydrogens=use_capping_hydrogens,
-        append_to_end_of_model=append_to_end_of_model,
-      )
-      if rc: additional_hydrogens.append(rc)
-    else:
-      pass
-  return additional_hydrogens
-
-def iterate_using_original(hierarchy,
-                           geometry_restraints_manager,
-                           original_hierarchy,
-                           use_capping_hydrogens=False,
-                           append_to_end_of_model=False,
-                           ):
-  slots=[]
-  start=18
-  assert len(original_hierarchy.models())==1
-  assert len(hierarchy.models())==1
-  for chain in original_hierarchy.chains():
-    for org in chain.residue_groups():
-      protein = True
-      for atom_group in org.atom_groups():
-        if(get_class(atom_group.resname) not in ["common_amino_acid",
-                                                 "modified_amino_acid",
-                                               ] and
-           atom_group.resname not in aac.three_letter_l_given_three_letter_d):
-          protein=False
-          break
-      if not protein:
-        slots.append(False)
-        continue
-      org_atom1_quote = org.atoms()[0].quote()[start:]
-      for rg in hierarchy.residue_groups():
-        if rg.atoms()[0].quote()[start:]==org_atom1_quote:
-          slots.append(rg)
-          break
-      else:
-        slots.append(0)
-    slots.append(None)
-
-  ptr=0
-  additional_hydrogens=[]
-  for i in range(len(slots)):
-    start=False
-    end=False
-    if slots[i]:
-      if i==0: start=True
-      elif not slots[i-1]: start=True
-      if i==len(slots)-1: end=True
-      elif not slots[i+1]: end=True
-      # does not work for chain ends
-    else: continue
-    rg = slots[i]
-    conditional_add_cys_hg_to_atom_group(geometry_restraints_manager,
-                                         rg,
-                                         append_to_end_of_model=append_to_end_of_model)
-    if start:
-      ptr+=1
-      assert ptr==1
-      if hierarchy_utils.is_n_terminal_residue(rg):
-        rc = None
-      else:
-        rc = add_n_terminal_hydrogens_to_residue_group(
-          rg,
-          use_capping_hydrogens=use_capping_hydrogens,
-          append_to_end_of_model=append_to_end_of_model,
-        )
-      if rc: additional_hydrogens.append(rc)
-    if end:
-      ptr-=1
-      assert ptr==0
-      rc = add_c_terminal_oxygens_to_residue_group(
-        rg,
         use_capping_hydrogens=use_capping_hydrogens,
         append_to_end_of_model=append_to_end_of_model,
       )
@@ -184,16 +165,14 @@ def add_terminal_hydrogens_qr(
     use_capping_hydrogens=False,  # instead of terminal H
     append_to_end_of_model=False, # useful for Q|R
     original_hierarchy=None,
-    occupancy=1.,
     verbose=False,
     ):
   # add N terminal hydrogens because Reduce only does it to resseq=1
   # needs to be alt.loc. aware for non-quantum-refine
-  if original_hierarchy:
-    additional_hydrogens = iterate_using_original(
+  if True:
+    additional_hydrogens = from_simple_connectivity(
       hierarchy,
       geometry_restraints_manager,
-      original_hierarchy,
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
       )
@@ -204,13 +183,6 @@ def add_terminal_hydrogens_qr(
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
     )
-
-  # add hydrogens to non-protein
-  non_protein = False
-  for atom_group in hierarchy.atom_groups():
-    if get_class(atom_group.resname) not in ['common_amino_acid']:
-      non_protein=True
-      break
 
   if append_to_end_of_model and additional_hydrogens:
     from mmtbx.ligands.ready_set_utils import _add_atoms_from_chains_to_end_of_hierarchy
