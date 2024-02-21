@@ -25,6 +25,9 @@ debug = False
 scattering_table = wk1995  it1992  *n_gaussian electron neutron
   .type = choice
   .help = Choices of scattering table for structure factors calculations
+use_reduce = True
+  .type = bool
+  .help = Use Reduce/ReadySet in completion/capping
 cluster{
   charge_cutoff = 8.0
     .type = float

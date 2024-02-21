@@ -162,7 +162,8 @@ class from_expansion(object):
         pdb_hierarchy         = self.expansion.ph_super_sphere,
         crystal_symmetry      = self.expansion.cs_box,
         model_completion      = False,
-        original_pdb_filename = None)
+        original_pdb_filename = None,
+        use_reduce            = self.params.use_reduce)
     else:
       self.pdb_hierarchy_super_completed = self.expansion.ph_super_sphere
     selection = flex.bool(
