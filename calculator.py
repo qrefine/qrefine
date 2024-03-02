@@ -347,23 +347,16 @@ class sites_real_space(object):
     s2 = m2.get_sites_cart()
     return flex.mean(flex.sqrt((s1 - s2).dot()))
 
-  #def ready_to_stop(self, sc):
-  #  return (sc.rama_fav < self.rama_fav_best and
-  #          abs(sc.rama_fav-self.rama_fav_best)>1.) or \
-  #         sc.cbeta > self.cbeta_best or \
-  #         sc.rota > self.rota_best   or \
-  #         (sc.clash > self.clash_best and
-  #          abs(sc.clash-self.clash_best)>1.)
-
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean
-    #return round(b, 2) <= 0.01 or round(a, 1) <= 1.5
-    return round(b, 2) <= 0.01 and round(a, 1) <= 1.5
+    #return round(b, 3) <= self.max_bond_rmsd and round(a, 2) <= 1.5
+    return b <= self.max_bond_rmsd and a <= 1.5
 
   def macro_cycle(self, weight):
     def stalled(x):
       for it in x:
-        if x.count(it) > 3: return True
+        if x.count(it) > 3:
+          return True
       return False
     up   = 0
     down = 0
@@ -403,8 +396,12 @@ class sites_real_space(object):
       if(up>0 and down>0):
         print("<<<<< weight optimization oscillates: quitting >>>>>")
         break
+    ####
     print()
-    if(previous_good is None): return
+    if(previous_good is None):
+      print("Using last weight to continue:", weight)
+      previous_good = weight
+    ####
     for it in [1,2,3,4,5]:
       stats = self.show(model = self.model, weight = previous_good, prefix="  start:")
       model = self.run_one(weight = previous_good)
