@@ -402,7 +402,7 @@ class sites_real_space(object):
       print("Using last weight to continue:", weight)
       previous_good = weight
     ####
-    for it in [1,2,3]:
+    for it in [1,2,3, 4,5]:
       stats = self.show(model = self.model, weight = previous_good, prefix="  start:")
       model = self.run_one(weight = previous_good)
       stats = self.show(model = model, weight = previous_good, prefix="  final:")
