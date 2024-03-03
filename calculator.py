@@ -311,7 +311,7 @@ class sites_real_space(object):
                max_iterations=None):
     adopt_init_args(self, locals())
     self.gradient_only = True
-    self.max_iterations = 150
+    self.max_iterations = 100
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
     self.show(model=self.model, weight = data_weight)
@@ -402,19 +402,19 @@ class sites_real_space(object):
       print("Using last weight to continue:", weight)
       previous_good = weight
     ####
-    for it in [1,2,3,4,5]:
+    for it in [1,2,3]:
       stats = self.show(model = self.model, weight = previous_good, prefix="  start:")
       model = self.run_one(weight = previous_good)
       stats = self.show(model = model, weight = previous_good, prefix="  final:")
-      if(self.geometry_is_good(stats)):
+      if 1:# if(self.geometry_is_good(stats)):
         shift = self.get_shift2(model, self.model)
         self.model.set_sites_cart(sites_cart = model.get_sites_cart())
         if(shift<0.01):
           print("<<<<< shift fell below 0.01: quitting >>>>>")
           break
-      else:
-        print("<<<<< geometry got worse: quitting >>>>>")
-        break
+      #else:
+      #  print("<<<<< geometry got worse: quitting >>>>>")
+      #  break
 
   def show(self, model, weight, prefix=""):
     stats = model.geometry_statistics(use_hydrogens=False)
