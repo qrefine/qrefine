@@ -311,7 +311,7 @@ class sites_real_space(object):
                max_iterations=None):
     adopt_init_args(self, locals())
     self.gradient_only = True
-    self.max_iterations = 100
+    self.max_iterations = 150
     self.weight = data_weight
     self.sites_cart_start = self.model.get_xray_structure().sites_cart()
     self.show(model=self.model, weight = data_weight)
