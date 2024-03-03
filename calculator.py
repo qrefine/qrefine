@@ -364,10 +364,12 @@ class sites_real_space(object):
     previous_good = None
     bond_rmsds = []
     cntr = 0
+    sites_cart_start = self.model.get_sites_cart().deep_copy()
     while True: # Endless loop!
+      self.model.set_sites_cart(sites_cart = sites_cart_start.deep_copy())
       print("cycle:", cntr)
       cntr+=1
-      stats = self.show(model = self.model, weight = weight, prefix="  start:")
+      self.show(model = self.model, weight = weight, prefix="  start:")
       model = self.run_one(weight = weight)
       stats = self.show(model = model, weight = weight, prefix="  final:")
       b = stats.bond().mean
@@ -382,6 +384,7 @@ class sites_real_space(object):
         else:
           weight = weight + 0.3*weight
         self.model.set_sites_cart(sites_cart = model.get_sites_cart())
+        sites_cart_start = self.model.get_sites_cart().deep_copy()
       else:
         down += 1
         if(b>0.03):
