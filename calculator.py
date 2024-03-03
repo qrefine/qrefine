@@ -410,7 +410,7 @@ class sites_real_space(object):
         shift = self.get_shift2(model, self.model)
         self.model.set_sites_cart(sites_cart = model.get_sites_cart())
         if(shift<0.01):
-          print("<<<<< shift fell below 0.01: quitting >>>>>")
+          print("<<<<< shift fell below 0.01: quitting >>>>>", shift)
           break
       #else:
       #  print("<<<<< geometry got worse: quitting >>>>>")
