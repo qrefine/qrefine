@@ -3,13 +3,15 @@ SHELL ["/bin/bash", "--login", "-c"]
 
 # Base environment setup
 COPY environment.yaml .
+COPY config/aimnet2.yaml .
 RUN mamba env create --name cctbx-cuda -f environment.yaml && mamba clean --all
+RUN maman env update --name cctbx-cuda -f aimnet2.yaml && mamba clean --all
 
 # Activate conda and clean up
 RUN echo "conda activate cctbx-cuda" >> ~/.bashrc && echo "export NUMBA_CUDA_USE_NVIDIA_BINDING=1" >> ~/.bashrc
 ENV PATH=/opt/conda/envs/cctbx-cuda/bin:${PATH}
 
-# currently conda does not want to install the cuaev version. We use the wheel
+# currently conda does not always want to install the cuaev version. We use the wheel
 RUN mamba remove -p /opt/conda/envs/cctbx-cuda/ torchani && pip install torchani
 
 # Add reduce and probe programs

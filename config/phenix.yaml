@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+dependencies:
+  - networkx
+  - rdkit
+  - pymongo
+  - ase==3.17.0
+  - xtb
