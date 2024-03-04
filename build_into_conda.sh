@@ -34,16 +34,16 @@ mkdir probe
 ### REDUCE
 echo "Downloading reduce"
 git clone https://github.com/rlabduke/reduce
-cp reduce/hybrid_36_c.c $PACKAGES/iotbx/pdb/hybrid_36_c.c
+cp reduce/reduce_src/hybrid_36_c.c $PACKAGES/iotbx/pdb/hybrid_36_c.c
 
 ### set up build dir and exes
 echo "CCTBX-install packages"
 mkdir $PACKAGES/build
 cd $PACKAGES/build
 mkdir -p probe/exe/
-cp $PREFIX/bin/probe probe/exe/
+cp $CONDA_PREFIX/bin/probe probe/exe/
 mkdir -p reduce/exe
-cp $PREFIX/bin/reduce reduce/exe/
+cp $CONDA_PREFIX/bin/reduce reduce/exe/
 
 ### run configure (still in ./build)
 libtbx.configure probe qrefine reduce
