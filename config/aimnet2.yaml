@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - "libblas=*=*mkl"
+  - torchani
+  - pytorch=2.*
+  - pytorch-cuda
+  - cudatoolkit
+  - cuda-python
+  - numba
