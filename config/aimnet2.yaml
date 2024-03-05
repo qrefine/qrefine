@@ -5,7 +5,7 @@ channels:
 dependencies:
   - "libblas=*=*mkl"
   - torchani
-  - pytorch=2.*
+  - pytorch
   - pytorch-cuda
   - cudatoolkit
   - cuda-python
