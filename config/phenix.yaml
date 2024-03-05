@@ -8,9 +8,4 @@ dependencies:
   - ase==3.17.0
   - xtb
   - "libblas=*=*mkl"
-  # - torchani
-  # - pytorch
-  # - pytorch-cuda
-  # - cudatoolkit
-  # - cuda-python
-  # - numba
+ 

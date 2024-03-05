@@ -23,7 +23,22 @@ quantum-refinement of bio-macromolecules.
 
 ## Installation
 
-### standard route (open-source, cctbx-only)
+### Phenix user route
+
+Please make sure to use a python3 *developer* installation of Phenix: https://www.phenix-online.org/
+
+Once you have Phenix installed, go to the directory where you installed Phenix.
+
+```
+ source phenix_env.sh
+ git clone https://github.com/qrefine/qrefine modules/qrefine
+ sh modules/qrefine/config/phenix_install.sh [-pytorch] 
+ source setpaths.sh # repeat is needed to update paths.
+```
+
+Note: you may need to use sudo depending on the permissions of your Phenix installation.
+
+### open-source, cctbx-only installation
 
 1.  Install conda. **We highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3.**
 
@@ -63,20 +78,7 @@ bash ./build_into_conda.sh
     pip install torchani
     ```
 
-### Phenix user route
 
-Please make sure to use a python3 installation of Phenix: https://www.phenix-online.org/
-
-Once you have Phenix installed, go to the directory where you installed Phenix.
-
-```
- source phenix_env.sh
- git clone https://github.com/qrefine/qrefine modules/qrefine
- sh modules/qrefine/config/phenix_install.sh
- source setpaths.sh # repeat is needed to update paths.
-```
-
-Note: you may need to use sudo depending on the permissions of your Phenix installation.
 
 ### Install pytorch-based AIMNET2 (and torchani) components
 
@@ -91,6 +93,14 @@ Set the following in your Terminal for optimal performance. Save it to your .bas
 
 ```
   export NUMBA_CUDA_USE_NVIDIA_BINDING=1
+  qrefine.python -c "import numba.cuda; print(numba.cuda.is_available())"
+```
+
+To check if the cuda components are working run:
+
+```
+  qrefine.python -c "import numba.cuda; print(numba.cuda.is_available())"
+  qrefine.python -c "import torch; print(torch.cuda.is_available())"
 ```
 
 ### conda packages (experimental)
