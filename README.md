@@ -71,7 +71,8 @@ Once you have Phenix installed, go to the directory where you installed Phenix.
 
 ```
  source phenix_env.sh
- sh config/phenix_install.sh
+ git clone https://github.com/qrefine/qrefine modules/qrefine
+ sh modules/qrefine/config/phenix_install.sh
  source setpaths.sh # repeat is needed to update paths.
 ```
 
