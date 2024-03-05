@@ -4,21 +4,13 @@ export PHENIX=`pwd`
 
 #ToDo: parse cmd line arguments to switch on/off aimnet and set phenix dir
 # Call getopt to validate the provided input. 
-options=$(getopt --long pytorch: -- "$@")
-[ $? -eq 0 ] || { 
-    echo "Incorrect options provided"
-    exit 1
-}
-eval set -- "$options"
-while true; do
-    case "$1" in
-    --pytorch)
-        TORCH=true
-    esac
-    shift
-done
-
-
+# if [ -z $1]; then
+if [[ "$1" == *"pytorch"* ]]; then
+    echo "installing aimnet2 dependencies!"
+    TORCH=true
+fi
+# fi
+exit
 
 echo "####################################"
 echo "#### QREFINE INSTALLER FOR PHENIX ##"
