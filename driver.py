@@ -468,6 +468,7 @@ def opt(model, params, monitor, calculator):
         gradient_only  = params.refine.gradient_only,
         stpmax         = params.refine.stpmax)
     else:
+      assert not params.refine.gradient_only
       minimized = minimizers.lbfgsb(
         calculator     = calculator,
         max_iterations = params.refine.max_iterations_refine)
