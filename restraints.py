@@ -76,8 +76,7 @@ class restraints(object):
     #            content (not atoms added/removed during minimization).
     #            Therefore, we do not need to re-created restraints.
     #
-    if(self.restraints_manager is None or
-       pdb_hierarchy.atoms().size()!=size):
+    if(self.restraints_manager is None or pdb_hierarchy.atoms().size()!=size):
       # This is called in expansion
       if(not self.source_of_restraints_qm()):
         model = model_from_hierarchy(
@@ -104,19 +103,60 @@ class restraints(object):
           clustering       = self.params.cluster.clustering)
     return self.restraints_manager
 
+def h_diff_sel(h1, h2):
+  def getids(a):
+    return a.name + a.parent().resname + a.parent().parent().resid() + \
+           a.parent().parent().parent().id
+  d = {}
+  for a in h1.atoms():
+    d[getids(a)]=a.i_seq
+  #
+  sel = flex.size_t()
+  for a in h2.atoms():
+    if not getids(a) in d:
+      sel.append(a.i_seq)
+  assert sel.size() == h2.atoms().size() - h1.atoms().size()
+  result = ~flex.bool(h2.atoms().size(), sel)
+  return result
+
 class from_expansion(object):
   def __init__(self, params, restraints_source, pdb_hierarchy, crystal_symmetry):
-    self.restraints_manager = restraints_source.restraints_manager
-    self.restraints_source  = restraints_source
-    self.pdb_hierarchy      = pdb_hierarchy
-    self.crystal_symmetry   = crystal_symmetry
-    self.params             = params
-    self.pdb_hierarchy_super_completed = None
-    self.selection = None
-    self.size = self.pdb_hierarchy.atoms().size()
-    self.crystal_symmetry_ss = None
-    self.expansion = None
-    self._expand()
+    self.restraints_manager  = restraints_source.restraints_manager
+    self.restraints_source   = restraints_source
+    self.pdb_hierarchy       = pdb_hierarchy
+    self.crystal_symmetry    = crystal_symmetry
+    self.params              = params
+    self.size                = self.pdb_hierarchy.atoms().size()
+    #
+    self.pdb_hierarchy.atoms().reset_i_seq() # XXX May be unnecessary
+    #
+    self.expansion = expand(
+      pdb_hierarchy        = self.pdb_hierarchy.deep_copy(),
+      crystal_symmetry     = self.crystal_symmetry,
+      select_within_radius = self.params.cluster.select_within_radius)
+    self.pdb_hierarchy_super_completed = model_completion.run(
+      pdb_hierarchy          = self.expansion.ph_super_sphere.deep_copy(),
+      crystal_symmetry       = self.expansion.cs_box,
+      model_completion       = False,
+      original_pdb_filename  = None,
+      append_to_end_of_model = False, #XXX
+      use_reduce             = self.params.use_reduce)
+
+    self.pdb_hierarchy.atoms().reset_i_seq()
+    self.expansion.ph_super_sphere.atoms().reset_i_seq()
+    self.pdb_hierarchy_super_completed.atoms().reset_i_seq()
+
+    selection = flex.bool(
+      self.pdb_hierarchy_super_completed.atoms().size(), False)
+    self.selection = selection.set_selected(
+      flex.size_t(range(self.pdb_hierarchy.atoms().size())), True)
+    self.restraints_manager = self.restraints_source.update(
+        pdb_hierarchy    = self.pdb_hierarchy_super_completed,
+        crystal_symmetry = self.expansion.cs_box)
+
+    self.h_diff_sel = h_diff_sel(
+      h1 = self.expansion.ph_super_sphere,
+      h2 = self.pdb_hierarchy_super_completed)
 
   def __call__(self, selection_and_sites_cart):
     # XXX Not sure what this is and why!?
@@ -130,6 +170,9 @@ class from_expansion(object):
     energy, gradients = self.restraints_manager.target_and_gradients(
         sites_cart = self.pdb_hierarchy_super_completed.atoms().extract_xyz())
     gradients = gradients.select(self.selection)
+    energy=0 # XXX UNDEFINED in most cases (or may be even all cases since
+             # selection above)
+    #
     return energy, gradients
 
   def energies_sites(self, sites_cart, compute_gradients=True):
@@ -139,40 +182,14 @@ class from_expansion(object):
       gradients = tg[1])
 
   def _update(self, sites_cart):
+    # Update coordinates in main hierarchy
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-    self._expand()
-
-  def _expand(self):
-    if(self.expansion is None):
-      self.expansion = expand(
-        pdb_hierarchy        = self.pdb_hierarchy,
-        crystal_symmetry     = self.crystal_symmetry,
-        select_within_radius = self.params.cluster.select_within_radius)
-    else:
-      self.expansion.update(sites_cart = self.pdb_hierarchy.atoms().extract_xyz())
-    # DEBUG START
-    self.expansion.ph_super_sphere.write_pdb_file(
-      file_name        = "supersphere_restraints_py_line153.pdb",
-      crystal_symmetry = self.expansion.cs_box)
-    easy_pickle.dump("supersphere_restraints_py_line153.pkl",
-      [self.expansion.ph_super_sphere,self.expansion.cs_box])
-    # DEBUG END
-    if(self.restraints_source.source_of_restraints_qm()):
-      self.pdb_hierarchy_super_completed = model_completion.run(
-        pdb_hierarchy         = self.expansion.ph_super_sphere,
-        crystal_symmetry      = self.expansion.cs_box,
-        model_completion      = False,
-        original_pdb_filename = None,
-        use_reduce            = self.params.use_reduce)
-    else:
-      self.pdb_hierarchy_super_completed = self.expansion.ph_super_sphere
-    selection = flex.bool(
-      self.pdb_hierarchy_super_completed.atoms().size(), False)
-    self.selection = selection.set_selected(
-      flex.size_t(range(self.pdb_hierarchy.atoms().size())), True)
-    self.restraints_manager = self.restraints_source.update(
-      pdb_hierarchy    = self.pdb_hierarchy_super_completed,
-      crystal_symmetry = self.expansion.cs_box)
+    # Propagate the update into expanded hierarchy
+    self.expansion.update(sites_cart = self.pdb_hierarchy.atoms().extract_xyz())
+    xyz = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
+    xyz = xyz.set_selected(self.h_diff_sel,
+      self.expansion.ph_super_sphere.atoms().extract_xyz())
+    self.pdb_hierarchy_super_completed.atoms().set_xyz(xyz)
 
 #-------------------------------------------------------------------------------
 
