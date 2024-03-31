@@ -362,13 +362,13 @@ def refine(fmodel,
       # Choose what to do with weights
       rws = calculator.restraints_weight_scale
       b_rmsds.append(round(monitor.b_rmsd,3))
-
       #
       # IF BELOW IS TRUE, THE SEARCH WILL STOP, ELSE CONDITIONS WILL BE CHECKED
       # THIS REQUIRES NOT USING ANY SHORTCUTS AND DO FULL LONG REFINEMENT FOR
       # EACH TRIAL WEIGHT VALUE
       #
-      if monitor.b_rmsd <= params.refine.max_bond_rmsd:
+      if(monitor.b_rmsd <= params.refine.max_bond_rmsd and
+         monitor.a_rmsd <= 1.7):
         print("Optimal weight found. Stopping weight search.", file=log)
         break
       #

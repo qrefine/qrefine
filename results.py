@@ -19,11 +19,15 @@ class manager(object):
     self.r_work = None
     self.r_free = None
     self.b_rmsd = self._get_b_rmsd()
+    self.a_rmsd = self._get_a_rmsd()
     self.shift_start = 0
     self.shift_prev  = 0
 
   def _get_b_rmsd(self):
     return self.geometry_rmsd_manager.bond_rmsd(sites_cart = self.sites_cart)
+
+  def _get_a_rmsd(self):
+    return self.geometry_rmsd_manager.angle_rmsd(sites_cart = self.sites_cart)
 
   def update(self, fmodel=None, model=None):
     def _(x,y): return flex.mean(flex.sqrt((x - y).dot()))
@@ -37,6 +41,7 @@ class manager(object):
       assert [fmodel, model].count(None) == 1
     self.model.set_sites_cart(sites_cart = self.sites_cart)
     self.b_rmsd = self._get_b_rmsd()
+    self.a_rmsd = self._get_a_rmsd()
     self.shift_start = _(self.sites_cart_start, self.sites_cart)
     self.shift_prev  = _(self.sites_cart_prev,  self.sites_cart)
     self.sites_cart_prev = self.sites_cart.deep_copy()

@@ -56,13 +56,21 @@ class cctbx_geometry(object):
     restraints_manager = model.get_restraints_manager()
     self.hd_sel = model.get_xray_structure().hd_selection()
     self.restraints_manager = restraints_manager.select(~self.hd_sel)
+    self._energies_sites=None
 
-  def bond_rmsd(self, sites_cart):
+  def _compute(self, sites_cart):
     assert self.hd_sel.size() == sites_cart.size()
-    energies_sites = self.restraints_manager.geometry.energies_sites(
+    self._energies_sites = self.restraints_manager.geometry.energies_sites(
       sites_cart        = sites_cart.select(~self.hd_sel),
       compute_gradients = False)
-    return energies_sites.bond_deviations()[2]
+
+  def bond_rmsd(self, sites_cart):
+    self._compute(sites_cart=sites_cart) # XXX DUPLICATE CALCULATION
+    return self._energies_sites.bond_deviations()[2]
+
+  def angle_rmsd(self, sites_cart):
+    self._compute(sites_cart=sites_cart) # XXX DUPLICATE CALCULATION
+    return self._energies_sites.angle_deviations()[2]
 
 class calculator(object):
   def __init__(self,
