@@ -68,7 +68,7 @@ class minimizer(object):
       b_mean = self.geometry_rmsd_manager.bond_rmsd(
         sites_cart = flex.vec3_double(self.x))
     return b_mean
-  
+
   # Enabling this makes it faster
   # TMP disabled to see the effect on refinement with ANI
   #
@@ -362,6 +362,18 @@ def refine(fmodel,
       # Choose what to do with weights
       rws = calculator.restraints_weight_scale
       b_rmsds.append(round(monitor.b_rmsd,3))
+
+      #
+      # IF BELOW IS TRUE, THE SEARCH WILL STOP, ELSE CONDITIONS WILL BE CHECKED
+      # THIS REQUIRES NOT USING ANY SHORTCUTS AND DO FULL LONG REFINEMENT FOR
+      # EACH TRIAL WEIGHT VALUE
+      #
+      if monitor.b_rmsd <= params.refine.max_bond_rmsd:
+        print("Optimal weight found. Stopping weight search.", file=log)
+        break
+      #
+      #
+
       if(monitor.b_rmsd < params.refine.max_bond_rmsd):
         down += 1
         restraints_weight_scale.append(rws)
@@ -382,7 +394,6 @@ def refine(fmodel,
         break
       if(b_rmsds.size()>3):
         v = list(set(b_rmsds[-3:]))
-        #if(b_rmsds[-3:].size() > len(v)):
         if(len(v)==1): # XXX See if this tighter!
           print("Bond rmsd stalled. Stopping weight search.", file=log)
           break
