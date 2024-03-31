@@ -359,16 +359,15 @@ def refine(fmodel,
           break
       if(minimized is None): continue
       monitor.update(fmodel = fmodel)
+      rws = calculator.restraints_weight_scale
+      b_rmsds.append(round(monitor.b_rmsd,3))
+      a_rmsds.append(round(monitor.a_rmsd,2))
       # Show
       msg = "rws(prev): %6.3f rws: %6.3f n_fev: %d"%(
         rws, calculator.restraints_weight_scale, n_fev)
       monitor.show(prefix="%d:"%weight_cycle, suffix = msg)
       # Sanity check:
       assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
-      # Choose what to do with weights
-      rws = calculator.restraints_weight_scale
-      b_rmsds.append(round(monitor.b_rmsd,3))
-      a_rmsds.append(round(monitor.a_rmsd,2))
       #
       # DEFINE STOPPING RULE
       GOOD = monitor.b_rmsd <= params.refine.max_bond_rmsd and \
