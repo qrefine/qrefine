@@ -253,7 +253,8 @@ class sites(calculator):
     diff = flex.sqrt((self.x - self.sites_cart_start).dot())
     shift_me = flex.mean(diff)
     shift_ma = flex.max(diff)
-    print("%7.5f %7.3f %7.3f"%(r_work, shift_me, shift_ma), self.r_works.size())
+    print("r_work: %7.5f shift mean: %7.3f shift max: %7.3f"%(
+      r_work, shift_me, shift_ma), self.r_works.size())
     self.sites_cart_start = self.x.deep_copy()
 
     # Early termination
@@ -270,7 +271,7 @@ class sites(calculator):
 
   def converged(self):
     if self.n_converged >= 3: return True
-    else:                   return False
+    else:                     return False
 
   def target_and_gradients(self, x):
     self.number_of_target_and_gradients_calls+=1
@@ -350,7 +351,7 @@ class sites_real_space(object):
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean
     #return round(b, 3) <= self.max_bond_rmsd and round(a, 2) <= 1.5
-    return b <= self.max_bond_rmsd and a <= 1.5
+    return b <= self.max_bond_rmsd and a <= 1.7
 
   def macro_cycle(self, weight):
     def stalled(x):

@@ -50,7 +50,8 @@ class minimizer(object):
       log=log_switch,
       core_params=self.lbfgs_core_params,
       termination_params=scitbx.lbfgs.termination_parameters(
-        max_iterations=max_iterations),
+        max_iterations=max_iterations,
+        min_iterations = max_iterations),
       exception_handling_params=scitbx.lbfgs.exception_handling_parameters(
         ignore_line_search_failed_rounding_errors=True,
         ignore_line_search_failed_step_at_lower_bound=True,
@@ -67,15 +68,20 @@ class minimizer(object):
       b_mean = self.geometry_rmsd_manager.bond_rmsd(
         sites_cart = flex.vec3_double(self.x))
     return b_mean
-
-  def callback_after_step(self, minimizer=None):
-    if(self.geometry_rmsd_manager is not None and self.mode=="weight"):
-      assert self.max_bond_rmsd is not None
-      b_mean = self._get_bond_rmsd()
-      if(b_mean>self.max_bond_rmsd and
-         self.number_of_function_and_gradients_evaluations-3>20):
-        return True
-    if(self.calculator.converged()): return True
+  
+  # Enabling this makes it faster
+  # TMP disabled to see the effect on refinement with ANI
+  #
+  #def callback_after_step(self, minimizer=None):
+  #  if(self.geometry_rmsd_manager is not None and self.mode=="weight"):
+  #    assert self.max_bond_rmsd is not None
+  #    b_mean = self._get_bond_rmsd()
+  #    print("    self.max_bond_rmsd", self.max_bond_rmsd, b_mean,
+  #       self.number_of_function_and_gradients_evaluations)
+  #    if(b_mean>self.max_bond_rmsd and
+  #       self.number_of_function_and_gradients_evaluations-3>20):
+  #      return True
+  #  if(self.calculator.converged()): return True
 
   def compute_functional_and_gradients(self):
     self.number_of_function_and_gradients_evaluations += 1
