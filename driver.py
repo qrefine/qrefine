@@ -301,7 +301,8 @@ def refine(fmodel,
            params,
            monitor,
            calculator,
-           geometry_rmsd_manager):
+           geometry_rmsd_manager,
+           STOP_ONCE_REACHED=True):
   if(not params.refine.refine_sites): return
   # Ugly!
   try:    clustering = calculator.restraints_manager.clustering
@@ -331,6 +332,7 @@ def refine(fmodel,
     down = 0
     r_frees    = flex.double()
     b_rmsds    = flex.double()
+    a_rmsds    = flex.double()
     sites_cart = []
     restraints_weight_scale = flex.double()
     print("Data weight (initial):", data_weight, file=log)
@@ -357,37 +359,35 @@ def refine(fmodel,
           break
       if(minimized is None): continue
       monitor.update(fmodel = fmodel)
+      # Show
+      msg = "rws(prev): %6.3f rws: %6.3f n_fev: %d"%(
+        rws, calculator.restraints_weight_scale, n_fev)
+      monitor.show(prefix="%d:"%weight_cycle, suffix = msg)
       # Sanity check:
       assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
       # Choose what to do with weights
       rws = calculator.restraints_weight_scale
       b_rmsds.append(round(monitor.b_rmsd,3))
+      a_rmsds.append(round(monitor.a_rmsd,2))
       #
       # DEFINE STOPPING RULE
       GOOD = monitor.b_rmsd <= params.refine.max_bond_rmsd and \
              monitor.a_rmsd <= 1.7
       #
-      # IF BELOW IS TRUE, THE SEARCH WILL STOP, ELSE CONDITIONS WILL BE CHECKED
-      # THIS REQUIRES NOT USING ANY SHORTCUTS AND DO FULL LONG REFINEMENT FOR
-      # EACH TRIAL WEIGHT VALUE
-      #
-      if(GOOD):
-        print("Optimal weight found. Stopping weight search.", file=log)
-        break
-      #
-      #
-
       if(GOOD):
         down += 1
         restraints_weight_scale.append(rws)
         calculator.scale_restraints_weight_down(scale=1.5)
         r_frees   .append(monitor.r_free)
         sites_cart.append(monitor.sites_cart)
+        if(STOP_ONCE_REACHED):
+          print("Optimal weight found. Stopping weight search.", file=log)
+          break
       else:
         up += 1
         calculator.scale_restraints_weight_up(scale=1.5)
       # Show
-      msg = "rws(prev): %6.3f rws: %6.3f n_fev: %d"%(
+      msg = "rws(prev): %6.3f rws: %6.3f n_fev: %d (NEXT)"%(
         rws, calculator.restraints_weight_scale, n_fev)
       monitor.show(prefix="%d:"%weight_cycle, suffix = msg)
       #
@@ -396,10 +396,10 @@ def refine(fmodel,
         print("Flip happened. Stopping weight search.", file=log)
         break
 
-
       if(b_rmsds.size()>3):
-        v = list(set(b_rmsds[-3:]))
-        if(len(v)==1): # XXX See if this tighter!
+        v1 = list(set(b_rmsds[-2:]))
+        v2 = list(set(a_rmsds[-2:]))
+        if(len(v1)==1 and len(v2)==1): # XXX See if this tighter!
           print("Bond rmsd stalled. Stopping weight search.", file=log)
           break
     # Ok, done with weights.
