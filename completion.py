@@ -256,6 +256,13 @@ def complete_pdb_hierarchy(hierarchy,
   # need to use Reduce/ReadySet! to add hydrogens
   #
   if not use_capping_hydrogens:
+    from mmtbx.building import extend_sidechains
+    n_changed = extend_sidechains.extend_protein_model(
+      ppf.all_chain_proxies.pdb_hierarchy,
+      mon_lib_server,
+      add_hydrogens=False,
+    )
+
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
       crystal_symmetry,
