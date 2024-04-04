@@ -40,6 +40,9 @@ append_to_end_of_model = False
 reduce = True
   .type = bool
   .help = Use reduce to add hydrogens or fall back to Phenix.elbow
+remove_selection = None
+  .type=str
+  .help = Remove selected atoms (eg., water)
 options
 {
   neutron = *all_h all_d
@@ -96,7 +99,8 @@ def run(args, log):
                append_to_end_of_model=params.append_to_end_of_model,
                neutron_option=params.options.neutron,
                hydrogen_atom_occupancies=params.options.hydrogen_atom_occupancies,
-               use_reduce=params.reduce
+               use_reduce=params.reduce,
+               remove_selection=params.remove_selection,
                )
 
 if __name__ == '__main__':

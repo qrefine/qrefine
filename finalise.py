@@ -66,16 +66,24 @@ def run(pdb_filename,
         append_to_end_of_model=False,
         neutron_option=None,
         hydrogen_atom_occupancies=0.,
-        use_reduce=True
+        use_reduce=True,
+        remove_selection=None,
         ):
   ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename)
-
+  #
+  if(remove_selection is not None):
+    asc = ppf.all_chain_proxies.pdb_hierarchy.atom_selection_cache()
+    sel = ~asc.selection(string=remove_selection)
+    ppf.all_chain_proxies.pdb_hierarchy = \
+      ppf.all_chain_proxies.pdb_hierarchy.select(sel)
   # should use cctbx
   if keep_alt_loc: pass
   else:
     hierarchy = remove_alternative_locations(
       ppf.all_chain_proxies.pdb_hierarchy
     )
+
+
 
   ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(
     ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
