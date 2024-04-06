@@ -103,6 +103,28 @@ def create_restraints_manager(params, model):
       params = params,
       method = params.cluster.altloc_method)
   if(params.expansion):
+    #
+    # TMP development insert to investigate Rss BEGIN
+    #
+    if(params.debug_rss):
+      from collections import OrderedDict
+      from libtbx import easy_pickle
+      result = OrderedDict()
+      RSS = [10,9,8,7,6,5,4,3,2,1]:
+      for i, rss in enumerate(RSS):
+        params.cluster.select_within_radius=rss
+        FE = restraints.from_expansion(
+          params            = params,
+          restraints_source = restraints_source,
+          pdb_hierarchy     = model.get_hierarchy(),
+          crystal_symmetry  = model.crystal_symmetry())
+        _, g = FE.target_and_gradients(sites_cart = model.get_sites_cart())
+        result[RSS] = g
+      easy_pickle.dump(file_name="gradients.pkl", obj = result)
+      STOP()
+    #
+    # TMP development insert to investigate Rss END
+    #
     return restraints.from_expansion(
       params            = params,
       restraints_source = restraints_source,

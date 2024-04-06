@@ -19,6 +19,10 @@ master_phil_str = """
 max_atoms = 50000
   .type = int
   .help = maximum number of atoms
+  
+debug_rss = False
+  .type=bool
+  
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
