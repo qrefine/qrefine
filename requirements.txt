@@ -62,7 +62,7 @@ pure-eval==0.2.2
 pycairo==1.25.1
 pycparser==2.21
 Pygments==2.16.1
-pymongo==4.6.0
+pymongo==4.6.3
 pyparsing==3.1.1
 PySide2==5.15.8
 PySocks==1.7.1
