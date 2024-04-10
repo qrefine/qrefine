@@ -141,15 +141,24 @@ class from_expansion(object):
       original_pdb_filename  = None,
       append_to_end_of_model = False, #XXX
       use_reduce             = self.params.use_reduce)
-
-    self.pdb_hierarchy.atoms().reset_i_seq()
-    self.expansion.ph_super_sphere.atoms().reset_i_seq()
-    self.pdb_hierarchy_super_completed.atoms().reset_i_seq()
-
+    # Selection of master copy
     selection = flex.bool(
       self.pdb_hierarchy_super_completed.atoms().size(), False)
     self.selection = selection.set_selected(
       flex.size_t(range(self.pdb_hierarchy.atoms().size())), True)
+    # At this point here we are sure the model is complete. So make sure the
+    # call above only changes (completes) the explansion part and leaves the
+    # master copy intact!
+    sites_cart_master = self.pdb_hierarchy.atoms().extract_xyz()
+    sites_cart_all = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
+    sites_cart_all = sites_cart_all.set_selected(self.selection, sites_cart_master)
+    self.pdb_hierarchy_super_completed.atoms().set_xyz(sites_cart_all)
+    #
+    self.pdb_hierarchy.atoms().reset_i_seq()
+    self.expansion.ph_super_sphere.atoms().reset_i_seq()
+    self.pdb_hierarchy_super_completed.atoms().reset_i_seq()
+
+
     self.restraints_manager = self.restraints_source.update(
         pdb_hierarchy    = self.pdb_hierarchy_super_completed,
         crystal_symmetry = self.expansion.cs_box)
