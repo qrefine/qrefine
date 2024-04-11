@@ -379,7 +379,7 @@ def refine(fmodel,
         calculator.scale_restraints_weight_down(scale=1.5)
         r_frees   .append(monitor.r_free)
         sites_cart.append(monitor.sites_cart)
-        if(STOP_ONCE_REACHED):
+        if(params.refine.stop_one_found_first_good_weight):
           print("Optimal weight found. Stopping weight search.", file=log)
           break
       else:
