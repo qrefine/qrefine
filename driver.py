@@ -371,7 +371,7 @@ def refine(fmodel,
       #
       # DEFINE STOPPING RULE
       GOOD = monitor.b_rmsd <= params.refine.max_bond_rmsd and \
-             monitor.a_rmsd <= 1.7
+             monitor.a_rmsd <= params.refine.max_angle_rmsd
       #
       if(GOOD):
         down += 1

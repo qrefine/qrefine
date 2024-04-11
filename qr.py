@@ -19,10 +19,10 @@ master_phil_str = """
 max_atoms = 50000
   .type = int
   .help = maximum number of atoms
-  
+
 debug_rss = False
   .type=bool
-  
+
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
@@ -180,6 +180,9 @@ refine {
   max_bond_rmsd = 0.03
     .type = float
     .help = Max bond RMSD to accept optimized weight
+  max_angle_rmsd = 1.7
+    .type = float
+    .help = Max angle RMSD to accept optimized weight
   max_r_work_r_free_gap = 5.0
     .type = float
     .help = Max difference between Rfree and Rwork to accept optimized weight
