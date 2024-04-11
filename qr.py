@@ -184,7 +184,7 @@ refine {
     .type = float
     .help = Max angle RMSD to accept optimized weight
   stop_one_found_first_good_weight = True
-    .type = float
+    .type = bool
     .help = Set True for low-res (or if use regularization), and False for high-res
   max_r_work_r_free_gap = 5.0
     .type = float
