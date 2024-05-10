@@ -225,14 +225,14 @@ class from_altlocs2(object):
     self.cs = self.model.crystal_symmetry()
     ph = self.model.get_hierarchy()
     self.d = OrderedDict()
-    self.conf_ind  = ph.get_conformer_indices()
+    self.conf_ind  = ph.get_conformer_indices().conformer_indices
     self.n_altlocs = flex.max(self.conf_ind)
     for ci in set(self.conf_ind): # ci=0 is for blanc
       sel_ci = self.conf_ind == ci
       sel = sel_ci if ci == 0 else sel_ci | (self.conf_ind == 0)
       model_conformer = self.model.select(sel)
       ph_conformer = model_conformer.get_hierarchy()
-      ci_ph_conformer = ph_conformer.get_conformer_indices()
+      ci_ph_conformer = ph_conformer.get_conformer_indices().conformer_indices
       rm = self._setup_restraints_managers(model = model_conformer)
       self.d[ci] = group_args(
         c_selection          = sel,
@@ -290,7 +290,7 @@ class from_altlocs2(object):
 def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
   assert method in ["subtract", "average"]
   g_result = flex.vec3_double(ph.atoms().size(), [0,0,0])
-  conf_ind = ph.get_conformer_indices()
+  conf_ind = ph.get_conformer_indices().conformer_indices
   n_altlocs = flex.max(conf_ind)
   sel_W = conf_ind == 0
   sel_W_empty = sel_W.count(True) == 0
@@ -298,7 +298,7 @@ def from_cctbx_altlocs(ph, cs, method="subtract", option=2):
   for ci in range(1, n_altlocs+1):
     sel_ci = conf_ind == ci
     ph_conformer = ph.select((conf_ind == ci) | sel_W)
-    ci_ph_conformer = ph_conformer.get_conformer_indices()
+    ci_ph_conformer = ph_conformer.get_conformer_indices().conformer_indices
     g_ci_blank_ = get_cctbx_gradients(ph=ph_conformer, cs=cs).gradients
     g_ci = g_ci_blank_.select(ci_ph_conformer == 1)
     g_result = g_result.set_selected(sel_ci, g_ci)

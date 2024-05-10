@@ -72,7 +72,7 @@ class electron_distribution(dict):
     self.atoms = self.hierarchy.atoms()
     self.grm = grm
     self.verbose=verbose
-    if filter(None, hierarchy.get_conformer_indices()):
+    if filter(None, hierarchy.get_conformer_indices().conformer_indices):
       assert (alternative_location_id is not None or
               alternative_location_index is not None)
     for atom in hierarchy.atoms():
