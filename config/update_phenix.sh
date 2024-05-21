@@ -23,6 +23,9 @@ echo "Installing pytorch and aimnet2 depedencies .."
     conda env update -p $PHENIX/conda_base -f $QR/config/aimnet2.yaml 
 fi
 
+# grrr
+cp ./modules/cctbx_project/iotbx/pdb/hybrid_36_f.f conda_base/lib/python3.9/site-packages/iotbx/pdb/hybrid_36_f.f
+
 ### set up build dir and exes
 echo "updating phenix/cctbx"
 cd $PHENIX/build
