@@ -3,10 +3,10 @@ channels:
   - pytorch
   - nvidia
 dependencies:
-  - "libblas=*=*mkl"
   - torchani
   - pytorch
   - pytorch-cuda
   - cudatoolkit
   - cuda-python
   - numba
+  - pyg::pytorch-cluster

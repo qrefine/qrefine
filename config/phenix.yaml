@@ -1,11 +1,7 @@
 channels:
   - conda-forge
-  - pytorch
-  - nvidia
 dependencies:
   - rdkit
   - pymongo
   - ase==3.17.0
   - xtb
-  - "libblas=*=*mkl"
- 
