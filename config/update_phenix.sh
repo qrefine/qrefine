@@ -6,7 +6,7 @@ if [ -d "${PHENIX}/conda_base" ]; then
 elif  [ -f "${PHENIX}/qr.py" ]; then
  export PHENIX="${PHENIX}/../../"
 fi
-export PACKAGES=`python -c 'import site; print(site.getsitepackages()[0])'`
+export PACKAGES=`phenix.python -c 'import site; print(site.getsitepackages()[0])'`
 
 if [[ "$1" == *"aimnet2"* ]]; then
     TORCH=true
