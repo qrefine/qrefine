@@ -2,9 +2,9 @@
 
 export PHENIX=`pwd`
 if [ -d "${PHENIX}/conda_base" ]; then
- export PHENIX="$PHENIX/modules/qrefine"
+ export PHENIX="$PHENIX"
 elif  [ -f "${PHENIX}/qr.py" ]; then
- export PHENIX="${PHENIX}"
+ export PHENIX="${PHENIX}/../../"
 fi
 export PACKAGES=`python -c 'import site; print(site.getsitepackages()[0])'`
 
@@ -33,6 +33,7 @@ fi
 # grrr
 cp $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/hybrid_36_f.f
 cp $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_c.c $PACKAGES/iotbx/pdb/hybrid_36_c.c
+echo "$PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/hybrid_36_f.f"
 
 ### set up build dir and exes
 echo "updating phenix/cctbx"
