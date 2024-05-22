@@ -1,10 +1,17 @@
 #!/bin/bash
 
 export PHENIX=`pwd`
+if [ -d "${PHENIX}/conda_base" ]; then
+ export PHENIX="$PHENIX/modules/qrefine"
+elif  [ -f "${PHENIX}/qr.py" ]; then
+ export PHENIX="${PHENIX}"
+fi
+export PACKAGES=`python -c 'import site; print(site.getsitepackages()[0])'`
 
-if [[ "$1" == *"pytorch"* ]]; then
+if [[ "$1" == *"aimnet2"* ]]; then
     TORCH=true
 fi
+
 
 echo "####################################"
 echo "#### QREFINE INSTALLER FOR PHENIX ##"
@@ -24,7 +31,8 @@ echo "Installing pytorch and aimnet2 depedencies .."
 fi
 
 # grrr
-cp ./modules/cctbx_project/iotbx/pdb/hybrid_36_f.f conda_base/lib/python3.9/site-packages/iotbx/pdb/hybrid_36_f.f
+cp $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/hybrid_36_f.f
+cp $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_c.c $PACKAGES/iotbx/pdb/hybrid_36_c.c
 
 ### set up build dir and exes
 echo "updating phenix/cctbx"

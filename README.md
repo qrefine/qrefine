@@ -32,7 +32,7 @@ Once you have Phenix installed, go to the directory where you installed Phenix.
 ```
  source phenix_env.sh
  git clone https://github.com/qrefine/qrefine modules/qrefine
- sh modules/qrefine/config/phenix_install.sh [-pytorch] 
+ sh modules/qrefine/config/phenix_install.sh [-aimnet2] 
  source setpaths.sh # repeat is needed to update paths.
 ```
 
