@@ -30,10 +30,8 @@ echo "Installing pytorch and aimnet2 depedencies .."
     conda env update -p $PHENIX/conda_base -f $QR/config/aimnet2.yaml 
 fi
 
-# grrr
-cp $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/hybrid_36_f.f
-cp $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_c.c $PACKAGES/iotbx/pdb/hybrid_36_c.c
-echo "$PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/hybrid_36_f.f"
+# libtbx.configure expects iotbx in the python site-packages dir
+cp -r $PHENIX/modules/cctbx_project/iotbx $PACKAGES/.
 
 ### set up build dir and exes
 echo "updating phenix/cctbx"
