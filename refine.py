@@ -284,6 +284,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         print ("  start: r_work=%6.4f r_free=%6.4f"%(fmodel.r_work(), fmodel.r_free()))
         mmtbx.hydrogens.fit_rotatable2(model=model, fmodel=fmodel)
         print ("  final: r_work=%6.4f r_free=%6.4f"%(fmodel.r_work(), fmodel.r_free()))
+        monitor.update(fmodel = fmodel, model = model)
       #
       driver.refine(
         params                = params,
