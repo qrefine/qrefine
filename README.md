@@ -32,8 +32,11 @@ Once you have Phenix installed, go to the directory where you installed Phenix.
 ```
  source phenix_env.sh
  git clone https://github.com/qrefine/qrefine modules/qrefine
- sh modules/qrefine/config/phenix_install.sh [-aimnet2] 
- source setpaths.sh # repeat is needed to update paths.
+ # standard install
+ sh modules/qrefine/config/update_phenix.sh
+ # for AIMnet2:
+ sh modules/qrefine/config/update_phenix.sh -aimnet2
+ qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
 ```
 
 Note: you may need to use sudo depending on the permissions of your Phenix installation.
@@ -64,21 +67,6 @@ bash ./build_into_conda.sh
 
 5.  run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
-6.  (Optional) Check if the cuda AEV version of torchani was installed:
-
-    ```
-    mamba list | grep torchani
-    ls $(python -c 'import site; print(site.getsitepackages()[0])')/torchani/cuaev
-    ```
-
-    It should say `torchani=*=cuda...` and the `cuaev` directory is present. If not you can try the the pip/wheel installation:
-
-    ```
-    mamba remove torchani
-    pip install torchani
-    ```
-
-
 
 ### Install pytorch-based AIMNET2 (and torchani) components
 
@@ -102,6 +90,20 @@ To check if the cuda components are working run:
   qrefine.python -c "import numba.cuda; print(numba.cuda.is_available())"
   qrefine.python -c "import torch; print(torch.cuda.is_available())"
 ```
+
+(Optional) Check if the cuda AEV version of torchani was installed:
+
+    ```
+    mamba list | grep torchani
+    ls $(python -c 'import site; print(site.getsitepackages()[0])')/torchani/cuaev
+    ```
+
+    It should say `torchani=*=cuda...` and the `cuaev` directory is present. If not you can try the the pip/wheel installation:
+
+    ```
+    mamba remove torchani
+    pip install torchani
+    ```
 
 ### conda packages (experimental)
 

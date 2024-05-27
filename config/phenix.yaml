@@ -3,5 +3,5 @@ channels:
 dependencies:
   - rdkit
   - pymongo
-  - ase==3.17.0
+  - ase
   - xtb
