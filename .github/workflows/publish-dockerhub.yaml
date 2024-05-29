@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  container_name: cctbx-qr
+  container_name: qrefine/cctbx-qr
   
 jobs:
   push:
