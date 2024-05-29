@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: 'qrefine'
-  REPOSITORY: 'cctbx-ani-qr'
+  container_name: cctbx-qr
   
 jobs:
   push:
@@ -15,16 +14,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: set name
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "container_name=$container_name:v$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          echo "Container Name:  $container_name:v$GITHUB_RUN_NUMBER"
+          echo "Build/Run ID  :  $GITHUB_RUN_NUMBER"
+          echo "Git hash      :  $calculatedSha"
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}  
 
-      - name: Build, tag, and push docker image to Dockerhub
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -f Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG  .
-          docker push -a $REGISTRY/$REPOSITORY     
+      - name: Docker build
+        uses: docker/build-push-action@v5
+        with:
+          file: Docker/Dockerfile
+          push: true
+          tags: ${{env.container_name}}
+
+      # - name: Build, tag, and push docker image to Dockerhub
+      #   env:
+      #     IMAGE_TAG: ${{ github.sha }}
+      #   run: |
+      #     docker build -f Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG  .
+      #     docker push -a $REGISTRY/$REPOSITORY     
   
