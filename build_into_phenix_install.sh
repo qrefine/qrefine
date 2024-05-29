@@ -46,11 +46,11 @@ echo "  Running $QREFINE/config/update_phenix.sh"
 cd $PHENIX
 if [[ $TORCH == "true" ]]; then
     echo "that"
-    sh $QREFINE/config/update_phenix2.sh aimnet2
+#    sh $QREFINE/config/update_phenix.sh aimnet2
     
 else
     echo "this"
-    sh $QREFINE/config/update_phenix2.sh
+#    sh $QREFINE/config/update_phenix.sh
 fi
     
 

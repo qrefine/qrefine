@@ -1,7 +1,6 @@
 channels:
   - conda-forge
 dependencies:
-  - rdkit
   - pymongo
   - ase
   - xtb

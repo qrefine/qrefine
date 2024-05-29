@@ -27,6 +27,7 @@ else
     TORCH=false
 fi
 
+ARM64=false
 if [[ $(uname -m) == "arm64" ]]; then
     ARM64=true
     echo ""
@@ -71,7 +72,7 @@ if [[ $INSTALLER == "false" ]]; then
     cp -r $PHENIX/modules/cctbx_project/iotbx $PACKAGES/.
 fi
 
-# run configure. Skip if qrefine_configure.log exists, this means this script was called by build_into_phenix_install.sh
+# run configure. Skip if qrefine_configure.log exists already
 if [[ ! -e "$PHENIX/build/qrefine_configure.log" ]]; then
     echo "updating phenix/cctbx"
     cd $PHENIX/build
