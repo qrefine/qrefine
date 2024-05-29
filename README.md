@@ -23,27 +23,42 @@ quantum-refinement of bio-macromolecules.
 
 ## Installation
 
-### Phenix user route
+Depending on your use case, installation of qrefine follows 3 paths:
+ - cctbx user
+ - phenix installer user
+ - phenix source user
 
-Please make sure to use a python3 *developer* installation of Phenix: https://www.phenix-online.org/
+Requirements:
+ - python >= 3.9
+ - conda (miniconda)
 
-Once you have Phenix installed, go to the directory where you installed Phenix.
+We require a minimum python version of 3.9! 
+
+### Phenix route
+Note: you may need to use sudo depending on the permissions of your Phenix installation.
+
+## source user / developer
 
 ```
  source phenix_env.sh
  git clone https://github.com/qrefine/qrefine modules/qrefine
- # standard install
- sh modules/qrefine/config/update_phenix.sh
- # for AIMnet2:
- sh modules/qrefine/config/update_phenix.sh -aimnet2
+ # request to install aimnet2 is optional
+ sh modules/qrefine/config/update_phenix.sh [aimnet2]
  qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
 ```
 
-Note: you may need to use sudo depending on the permissions of your Phenix installation.
+## installer user
+
+```
+  source path_to_phenix/phenix_env.sh
+  git clone https://github.com/qrefine/qrefine 
+  cd qrefine
+  # request to install aimnet2 is optional
+  sh build_into_phenix_install.sh [aimnet2]
+```
 
 ### open-source, cctbx-only installation
 
-1.  Install conda. **We highly recommend the conda-forge setup https://github.com/conda-forge/miniforge#miniforge3.**
 
 2.  Clone this repo and enter it's directory.
 
@@ -68,20 +83,26 @@ bash ./build_into_conda.sh
 5.  run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
 
-### Install pytorch-based AIMNET2 (and torchani) components
+### AIMNET2 (and torchani) plugins
 
-Activate the conda environment and enter the qrefine directory.
-Once activate update the environment:
+For cctbx:
 
 ```
   conda env update -f config/aimnet2.yaml
+```
+
+For Phenix either use the provided script `config/update_phenix.sh` as described above or install into the phenix conda env
+
+```
+  # identify your phenix directory
+  conda env list
+  conda env update -f -p /path/to/phenix/conda_base config/aimnet2.yaml
 ```
 
 Set the following in your Terminal for optimal performance. Save it to your .bashrc (or similar).
 
 ```
   export NUMBA_CUDA_USE_NVIDIA_BINDING=1
-  qrefine.python -c "import numba.cuda; print(numba.cuda.is_available())"
 ```
 
 To check if the cuda components are working run:
@@ -95,7 +116,7 @@ To check if the cuda components are working run:
 
     ```
     mamba list | grep torchani
-    ls $(python -c 'import site; print(site.getsitepackages()[0])')/torchani/cuaev
+    ls $(qrefine.python -c 'import site; print(site.getsitepackages()[0])')/torchani/cuaev
     ```
 
     It should say `torchani=*=cuda...` and the `cuaev` directory is present. If not you can try the the pip/wheel installation:
@@ -105,7 +126,7 @@ To check if the cuda components are working run:
     pip install torchani
     ```
 
-### conda packages (experimental)
+### conda packages (work in progres)
 
 [![Anaconda](https://anaconda.org/qrefine/qrefine/badges/latest_release_date.svg)](https://anaconda.org/qrefine/qrefine)
 [![Anaconda](https://anaconda.org/qrefine/qrefine/badges/version.svg)](https://anaconda.org/qrefine/qrefine)

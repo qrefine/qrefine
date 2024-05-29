@@ -20,12 +20,12 @@ echo "python modules location: $PACKAGES"
 
 
 # add missing modules
-echo "Downloading qrefine"
 mkdir $PACKAGES/modules
 cd $PACKAGES/modules
 
 #### QREFINE
-cp -r $QREFINE/../qrefine $PACKAGES/modules/qrefine
+mkdir -p $PACKAGES/modules/qrefine
+cp -r $QREFINE/* $PACKAGES/modules/qrefine/.
 
 #### PROBE
 # dummy directory
