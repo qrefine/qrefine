@@ -2,7 +2,7 @@
 
 [![CI pipeline on Mamba](https://github.com/qrefine/qrefine/actions/workflows/ci-mamba.yaml/badge.svg)](https://github.com/qrefine/qrefine/actions/workflows/ci-mamba.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Dockerhub](https://img.shields.io/badge/dockerhub-images-important.svg?logo=Docker")](https://hub.docker.com/repository/docker/qrefine/cctbx-ani-qr/general)
+[![Dockerhub](https://img.shields.io/badge/dockerhub-images-important.svg?logo=Docker")](https://hub.docker.com/r/qrefine/cctbx-qr)
 
 Quantum Chemistry can improve bio-macromolecular structures,
 especially when only low-resolution data derived from crystallographic
