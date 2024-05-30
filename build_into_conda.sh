@@ -41,9 +41,11 @@ echo "CCTBX-install packages"
 mkdir $PACKAGES/build
 cd $PACKAGES/build
 mkdir -p probe/exe/
-cp $CONDA_PREFIX/bin/probe probe/exe/
 mkdir -p reduce/exe
-cp $CONDA_PREFIX/bin/reduce reduce/exe/
+PROBE_EXE=`which probe`
+REDUCE_EXE=`which reduce`
+ln -s $PROBE_EXE $PACKAGES/build/probe/exe
+ln -s $REDUCE_EXE $PACKAGES/build/reduce/exe
 
 ### run configure (still in ./build)
 libtbx.configure probe qrefine reduce
