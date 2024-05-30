@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - torchani
+  - pytorch
+  - pytorch-cuda
+  - cudatoolkit
+  - cuda-python
+  - numba
+  - pyg::pytorch-cluster

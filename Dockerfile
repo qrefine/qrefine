@@ -1,32 +1,31 @@
-FROM condaforge/mambaforge:23.3.1-1
+FROM condaforge/mambaforge:24.3.0-0
 SHELL ["/bin/bash", "--login", "-c"]
 
 # Base environment setup
-COPY environment.yaml .
-RUN mamba env create --name cctbx-cuda -f environment.yaml && mamba clean --all
+RUN mkdir -p /opt/qrefine
+COPY . /opt/qrefine
+WORKDIR /opt/qrefine
+
+# clean up qrefine from java
+RUN rm -rf plugin/yoink
+
+RUN conda env create --name cctbx-cuda -f environment.yaml && mamba clean --all
+RUN conda env update --name cctbx-cuda -f config/aimnet2.yaml && mamba clean --all
+
+# debug
+RUN conda install vim
 
 # Activate conda and clean up
 RUN echo "conda activate cctbx-cuda" >> ~/.bashrc && echo "export NUMBA_CUDA_USE_NVIDIA_BINDING=1" >> ~/.bashrc
 ENV PATH=/opt/conda/envs/cctbx-cuda/bin:${PATH}
 
-# currently conda does not want to install the cuaev version. We use the wheel
+# currently conda does not always want to install the cuaev version. We use the wheel
 RUN mamba remove -p /opt/conda/envs/cctbx-cuda/ torchani && pip install torchani
 
-# Add reduce and probe programs
-COPY build_into_conda.sh .
+# run installer
 RUN bash build_into_conda.sh
 
-# QREFINE
-
-# install qrefine itself
-WORKDIR /opt/conda/envs/cctbx-cuda/lib/python3.10/site-packages
-RUN git clone https://github.com/qrefine/qrefine.git qrefine
-
-# clean up qrefine from java
-RUN rm -rf qrefine/plugin/yoink
-
-# for debugging
-RUN apt-get update && apt-get install -y vim curl
-
 ENV PATH=/opt/conda/envs/cctbx-cuda/bin:/opt/conda/envs/cctbx-cuda/lib/python3.10/site-packages/build/bin:${PATH}
+ENV OMP_MAX_ACTIVE_LEVELS=1
+ENV OMP_STACKSIZE="4G"
 WORKDIR /mnt
