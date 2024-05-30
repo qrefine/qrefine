@@ -37,7 +37,7 @@ We require a minimum python version of 3.9!
 ### Phenix route
 Note: you may need to use sudo depending on the permissions of your Phenix installation.
 
-## source user / developer
+#### Phenix source
 
 ```
  source phenix_env.sh
@@ -47,7 +47,7 @@ Note: you may need to use sudo depending on the permissions of your Phenix insta
  qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
 ```
 
-## installer user
+#### Phenix installer 
 
 ```
   source path_to_phenix/phenix_env.sh
@@ -57,7 +57,7 @@ Note: you may need to use sudo depending on the permissions of your Phenix insta
   sh build_into_phenix_install.sh [aimnet2]
 ```
 
-### open-source, cctbx-only installation
+#### cctbx (open-source)
 
 
 2.  Clone this repo and enter it's directory.
@@ -83,7 +83,7 @@ bash ./build_into_conda.sh
 5.  run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
 
 
-### AIMNET2 (and torchani) plugins
+#### AIMNET2 (and torchani) plugins
 
 For cctbx:
 
@@ -125,6 +125,19 @@ To check if the cuda components are working run:
     mamba remove torchani
     pip install torchani
     ```
+
+### Apple Silicon
+
+We cannot recommend to run qrefine with *clustering* on Apple Silicon machines as the pair interaction is unreliable (unknown cause).
+When following the cctbx installation route use the following to create the env:
+   ```
+    conda env create -n qrefine -f config/arm64-osx.yaml
+   ```
+
+For Phenix installations we recommend to switch the blas implementation to apple's accelerate in 
+   ```
+    conda install -p <phenix_conda> libblas=*=*accelerate 
+   ```
 
 ### conda packages (work in progres)
 
@@ -169,7 +182,7 @@ If you want to see the available options and default values please type:
 
 ### Example
 
-Options are straightforward added to the command line arguments:
+command line options are added ike this:
 
 ```
 qr.refine tests/unit/data_files/helix.pdb engine=mopac clustering=0 gradient_only=1
