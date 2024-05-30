@@ -18,3 +18,4 @@ dependencies:
   # Calculators
   - mopac
   - xtb
+  - libblas=*=*mkl
