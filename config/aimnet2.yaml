@@ -10,3 +10,5 @@ dependencies:
   - cuda-python
   - numba
   - pyg::pytorch-cluster
+  - opt_einsum
+  - requests

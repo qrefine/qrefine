@@ -31,10 +31,10 @@ class AIMNet2Calculator(AIMNet2ASE):
         self.set_charge(charge)
         unit_convert = ase_units.kcal / ase_units.mol
         self.calculate(atoms, properties=['energy', 'forces'])
-        self.energy_free = self.results['energy'] * unit_convert
+        self.energy_free = self.results['energy'][0] * unit_convert
         self.forces = self.results['forces'].astype(np.float64) * unit_convert
 
         if 0: # we need debugging flag here to switch on and off.
-            print(("AIMNet2: ",self.method))
+            # print(("AIMNet2: ",self.method))
             print(('Energy:',self.energy_free))
             print(('Force:', self.forces))

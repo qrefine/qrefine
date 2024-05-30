@@ -182,6 +182,10 @@ def set_qm_defaults(params, log):
           params.quantum.method,
           ), file=log)
       params.quantum.basis = ''
+  if params.quantum.engine_name=='aimnet2':
+    if params.quantum.method==Auto:
+      params.quantum.method="aimnet2-qr"
+      print(f" Default Aimnet2 model: {params.quantum.method}")
   else:
     if params.quantum.method==Auto:
       params.quantum.method='HF'

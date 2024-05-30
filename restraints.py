@@ -465,9 +465,12 @@ class from_qm(object):
     elif(self.qm_engine_name == "torchani"):
       from .plugin.ase.torchani_qr import TorchAni
       calculator = TorchAni()
+    elif(self.qm_engine_name == "aimnet2-old"):
+      from .plugin.ase.aimnet2_qr_old import AIMNet2CalculatorOLD
+      calculator = AIMNet2CalculatorOLD()
     elif(self.qm_engine_name == "aimnet2"):
       from .plugin.ase.aimnet2_qr import AIMNet2Calculator
-      calculator = AIMNet2Calculator()
+      calculator = AIMNet2Calculator(self.method)
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
     elif(self.qm_engine_name == "server"):
