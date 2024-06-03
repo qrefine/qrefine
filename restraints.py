@@ -134,13 +134,18 @@ class from_expansion(object):
       pdb_hierarchy        = self.pdb_hierarchy.deep_copy(),
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = self.params.cluster.select_within_radius)
-    self.pdb_hierarchy_super_completed = model_completion.run(
-      pdb_hierarchy          = self.expansion.ph_super_sphere.deep_copy(),
-      crystal_symmetry       = self.expansion.cs_box,
-      model_completion       = False,
-      original_pdb_filename  = None,
-      append_to_end_of_model = False, #XXX
-      use_reduce             = self.params.use_reduce)
+
+    if restraints_source.source_of_restraints_qm():
+      self.pdb_hierarchy_super_completed = model_completion.run(
+        pdb_hierarchy          = self.expansion.ph_super_sphere.deep_copy(),
+        crystal_symmetry       = self.expansion.cs_box,
+        model_completion       = False,
+        original_pdb_filename  = None,
+        append_to_end_of_model = False, #XXX
+        use_reduce             = self.params.use_reduce)
+    else:
+      self.pdb_hierarchy_super_completed = self.expansion.ph_super_sphere.deep_copy()
+
     # Selection of master copy
     selection = flex.bool(
       self.pdb_hierarchy_super_completed.atoms().size(), False)
