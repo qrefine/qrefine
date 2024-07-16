@@ -26,8 +26,7 @@ quantum-refinement of bio-macromolecules.
 Depending on your use case, installation of qrefine follows 3 paths:
 
  - [cctbx-only (open-source)](cctbx.md#cctbx-installation)
- - [phenix user](phenix.md#phenix-installer-typical-user-installation)
- - [phenix developer](phenix.md#phenix-source-developer-installation)
+ - [phenix user](phenix.md#fully-automated-recommended)
 
 
 **Requirements**:

@@ -10,10 +10,8 @@ PHENIX_PREFIX=${PHENIX_PREFIX#"PHENIX_PREFIX="}
 
 if [[ -z ${PHENIX_PREFIX} ]]; then
     # source install
-    # echo "debug: hit"
     PHENIX=`libtbx.printenv | grep 'PHENIX='`
     PHENIX=${PHENIX#"PHENIX="}
-    libtbx.printenv | grep 'PHENIX'
 else
     PHENIX=$PHENIX_PREFIX
 fi
@@ -23,9 +21,6 @@ if [[ -z ${PHENIX} ]]; then
     echo "activate the phenix installation first!"
     exit
 fi
-
-# echo "DEBUG"
-# echo "${PHENIX}/conda_base"
 
 if [[ -d "${PHENIX}/conda_base" ]]; then
  CONDA=${PHENIX}"/conda_base"

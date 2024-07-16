@@ -10,10 +10,8 @@ PHENIX_PREFIX=${PHENIX_PREFIX#"PHENIX_PREFIX="}
 
 if [[ -z ${PHENIX_PREFIX} ]]; then
     # source install
-    # echo "debug: hit"
     PHENIX=`libtbx.printenv | grep 'PHENIX='`
     PHENIX=${PHENIX#"PHENIX="}
-    libtbx.printenv | grep 'PHENIX'
 else
     PHENIX=$PHENIX_PREFIX
 fi
