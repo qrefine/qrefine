@@ -6,8 +6,8 @@ Note: you may need to use sudo depending on the permissions of your Phenix insta
 The following should work for both the typical user install and a developer source build.
 The installation type is auto-detected.
 ```
+  # activate phenix, e.g. with
   source path_to_phenix/phenix_env.sh
-  git clone https://github.com/qrefine/qrefine 
   cd qrefine
   # choose one of the below:
   # default, minimal installation

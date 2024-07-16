@@ -27,9 +27,9 @@ if [[ "$1" == *"aimnet2"* ]]; then
     TORCH=true
 fi
 
-echo "##################################################"
-echo "#### QREFINE INSTALLER FOR PHENIX USER INSTALL ###"
-echo "##################################################"
+echo "######################################"
+echo "#### QREFINE INSTALLER FOR PHENIX  ###"
+echo "######################################"
 echo ""
 echo "QREFINE location: $QREFINE"
 echo "Phenix location: $PHENIX"
@@ -46,14 +46,16 @@ fi
 
 #### QREFINE
 echo "Copying qrefine module ..."
-cp -r $QREFINE/../qrefine $PHENIX/modules/
+mkdir -p $PHENIX/modules/qrefine
+cp -r $QREFINE/../qrefine/* $PHENIX/modules/qrefine/.
 
+# dont know if that should be here.
 ### run configure (still in ./build)
-cd $PHENIX/build
-echo "Running libtbx.configure for qrefine in ./build ..."
-libtbx.configure qrefine &> qrefine_configure.log
-echo "Running: source $PHENIX/build/setpaths.sh"
-source $PHENIX/build/setpaths.sh
+# cd $PHENIX/build
+# echo "Running libtbx.configure for qrefine in ./build ..."
+# libtbx.configure qrefine &> qrefine_configure.log
+# echo "Running: source $PHENIX/build/setpaths.sh"
+# source $PHENIX/build/setpaths.sh
 
 # install packages
 echo "Updating phenix conda with QR packages ..."

@@ -25,6 +25,7 @@ fi
 if [[ -d "${PHENIX}/conda_base" ]]; then
  CONDA=${PHENIX}"/conda_base"
  echo "Found developer version of phenix."
+ INSTALLER=false
 elif  [[ -d "${PHENIX}/conda-meta" ]]; then
  CONDA=${PHENIX}
  INSTALLER=true
@@ -73,8 +74,8 @@ esac
 QR=$PHENIX/modules/qrefine
 # update phenix conda_base
 echo "Updating Phenix's conda-base .."
+conda env update -p $CONDA -f $QR/config/phenix.yaml
 
-conda env update -p $CONDA -f $QR/config/phenix.yaml 
 if [ $TORCH == "true" ]; then
 echo "Installing pytorch and aimnet2 depedencies .."
     conda env update -p $CONDA  -f $QR/config/aimnet2.yaml
@@ -83,7 +84,9 @@ fi
 
 # libtbx.configure expects iotbx in the python site-packages dir
 if [[ $INSTALLER == "false" ]]; then
-    cp -r $PHENIX/modules/cctbx_project/iotbx $PACKAGES/.
+#     cp -r $PHENIX/modules/cctbx_project/iotbx $PACKAGES/.
+    cp -r $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_c.c $PACKAGES/iotbx/pdb/.
+    cp -r $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/.
 fi
 
 # run configure. Skip if qrefine_configure.log exists already
