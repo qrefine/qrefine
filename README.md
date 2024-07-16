@@ -193,8 +193,6 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 - [Mark Waller](https://github.com/mpwaller)
 - [Nigel Moriarty](https://github.com/nwmoriarty)
 - [Holger Kruse](https://github.com/hokru)
-- [Min Zheng](https://github.com/zhengmin317)
-- [Lum Wang](https://github.com/Mooooony)
 
 ### Citations:
 
