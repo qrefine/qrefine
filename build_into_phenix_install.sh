@@ -1,15 +1,26 @@
 #!/bin/bash
 QREFINE=`pwd`
-PHENIX=$PHENIX_PREFIX
 
-# if [[ "$1" == "" ]]; then
-#     echo "usage: sh ./build_into_phenix_install.sh <phenix_location>"
-#     echo ""
-#     echo "E.g. sh ./build_into_phenix_install.sh /opt/phenix-1.21.1"
-# fi
+# phenix_prefix env can be found in the installer version, while
+# the source install just has phenix..
+# check both, first installer
+
+PHENIX_PREFIX=`libtbx.printenv | grep 'PHENIX_PREFIX='`
+PHENIX_PREFIX=${PHENIX_PREFIX#"PHENIX_PREFIX="}
 
 if [[ -z ${PHENIX_PREFIX} ]]; then
-    echo "source phenix_env.sh first!"
+    # source install
+    # echo "debug: hit"
+    PHENIX=`libtbx.printenv | grep 'PHENIX='`
+    PHENIX=${PHENIX#"PHENIX="}
+    libtbx.printenv | grep 'PHENIX'
+else
+    PHENIX=$PHENIX_PREFIX
+fi
+
+# if PHENIX is still empty then no phenix was activated.
+if [[ -z ${PHENIX} ]]; then
+    echo "activate the phenix installation first!"
     exit
 fi
 
@@ -27,11 +38,17 @@ echo "Phenix location: $PHENIX"
 echo "Aimnet2 install?: $TORCH"
 echo ""
 
-mkdir $PHENIX/modules $PHENIX/build
+if [[ ! -d "${PHENIX}/modules" ]]; then
+    mkdir $PHENIX/modules
+fi
+if [[ ! -d "${PHENIX}/build" ]]; then
+    mkdir $PHENIX/build
+fi
+# mkdir $PHENIX/modules $PHENIX/build
 
 #### QREFINE
 echo "Copying qrefine module ..."
-cp -r $QREFINE/../qrefine $PHENIX/modules/qrefine
+cp -r $QREFINE/../qrefine $PHENIX/modules/
 
 ### run configure (still in ./build)
 cd $PHENIX/build
@@ -45,14 +62,12 @@ echo "Updating phenix conda with QR packages ..."
 echo "  Running $QREFINE/config/update_phenix.sh"
 cd $PHENIX
 if [[ $TORCH == "true" ]]; then
-    echo "that"
-#    sh $QREFINE/config/update_phenix.sh aimnet2
+    sh $QREFINE/config/update_phenix.sh aimnet2
     
 else
-    echo "this"
-#    sh $QREFINE/config/update_phenix.sh
+    sh $QREFINE/config/update_phenix.sh
 fi
     
 
-echo "Setup QR+Phenix again with:"
+echo "Setup QR+Phenix in the future with:"
 echo "   source $PHENIX/build/setpaths.sh"

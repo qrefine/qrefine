@@ -24,16 +24,24 @@ quantum-refinement of bio-macromolecules.
 ## Installation
 
 Depending on your use case, installation of qrefine follows 3 paths:
- - cctbx user
- - phenix installer user
- - phenix source user
 
-Requirements:
+ - [cctbx-only (open-source)](cctbx.md#cctbx-installation)
+ - [phenix user](phenix.md#phenix-installer-typical-user-installation)
+ - [phenix developer](phenix.md#phenix-source-developer-installation)
+
+
+**Requirements**:
  - python >= 3.9
- - conda (miniconda)
+ - conda binary, e.g., miniconda. (A conda environment is not needed for Phenix)
+ - For Apple Silicon architecture please see the [additional notes](#apple-silicon)!
 
-We require a minimum python version of 3.9! 
 
+**AQua notes (aimnet2)**:
+To use AQua follow the installation instructions above and request installation of `aimnet2`.
+A few extra notes, also for [performance](aimnet2.md#performance), are provided here: [AQua notes](aimnet2.md)
+
+
+<!-- 
 ### Phenix route
 Note: you may need to use sudo depending on the permissions of your Phenix installation.
 
@@ -58,9 +66,9 @@ Note: you may need to use sudo depending on the permissions of your Phenix insta
 ```
 
 #### cctbx (open-source)
+ -->
 
-
-2.  Clone this repo and enter it's directory.
+<!-- 2.  Clone this repo and enter it's directory.
 
 ```
 git clone https://github.com/qrefine/qrefine.git qrefine && cd qrefine
@@ -80,10 +88,10 @@ git clone https://github.com/qrefine/qrefine.git qrefine && cd qrefine
 bash ./build_into_conda.sh
 ```
 
-5.  run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell.
+5.  run the given `source <path>/setpaths.sh` command at the end of the script. Also this needs to sourced for every new shell. -->
 
 
-#### AIMNET2 (and torchani) plugins
+<!-- #### AIMNET2 (and torchani) plugins
 
 For cctbx:
 
@@ -126,7 +134,7 @@ To check if the cuda components are working run:
     ```
     mamba remove torchani
     pip install torchani
-    ```
+    ``` -->
 
 ### Apple Silicon
 
@@ -141,22 +149,6 @@ For Phenix installations we recommend to switch the blas implementation to apple
     conda install -p <phenix_conda> libblas=*=*accelerate 
    ```
 
-### conda packages (work in progres)
-
-[![Anaconda](https://anaconda.org/qrefine/qrefine/badges/latest_release_date.svg)](https://anaconda.org/qrefine/qrefine)
-[![Anaconda](https://anaconda.org/qrefine/qrefine/badges/version.svg)](https://anaconda.org/qrefine/qrefine)
-[![Anaconda](https://anaconda.org/qrefine/qrefine/badges/platforms.svg)](https://anaconda.org/qrefine/qrefine)
-
-A conda package is provided for qrefine. We currently make use of the nightly build of cctbx. Use `conda >=23.10` or `mamba`
-**The conda-forge setup https://github.com/conda-forge/miniforge#miniforge3 is recommended.**
-
-During quick development cycles the conda packages will lag behind as they are build manually.
-
-```
-conda create -n QR qrefine -c qrefine -c cctbx-nightly
-conda activate QR
-qr.test
-```
 
 ### Run Tests
 
@@ -172,7 +164,8 @@ If any of the tests fail, please raise an issue here: [issue tracker](https://gi
 
 ### Documentation
 
-Can be found at: https://qrefine.com/qr.html
+Unfortunately the HTML documentation has not been updated yet.
+It can be found at: https://qrefine.com/qr.html
 
 ### Commandline options
 

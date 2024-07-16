@@ -1,25 +1,44 @@
 #!/bin/bash
 
+
+# phenix_prefix env can be found in the installer version, while
+# the source install just has phenix..
+# check both, first installer
+
+PHENIX_PREFIX=`libtbx.printenv | grep 'PHENIX_PREFIX='`
+PHENIX_PREFIX=${PHENIX_PREFIX#"PHENIX_PREFIX="}
+
 if [[ -z ${PHENIX_PREFIX} ]]; then
-    echo "source phenix_env.sh first!"
+    # source install
+    # echo "debug: hit"
+    PHENIX=`libtbx.printenv | grep 'PHENIX='`
+    PHENIX=${PHENIX#"PHENIX="}
+    libtbx.printenv | grep 'PHENIX'
+else
+    PHENIX=$PHENIX_PREFIX
+fi
+
+# if PHENIX is still empty then no phenix was activated.
+if [[ -z ${PHENIX} ]]; then
+    echo "activate the phenix installation first!"
     exit
 fi
 
-PHENIX=${PHENIX_PREFIX}
+# echo "DEBUG"
+# echo "${PHENIX}/conda_base"
 
-# execute from phenix base dir
-if [[ -d "${PHENIX_PREFIX}/conda_base" ]]; then
- CONDA=${PHENIX_PREFIX}"/conda_base"
+if [[ -d "${PHENIX}/conda_base" ]]; then
+ CONDA=${PHENIX}"/conda_base"
  echo "Found developer version of phenix."
-elif  [[ -d "${PHENIX_PREFIX}/conda-meta" ]]; then
- CONDA=${PHENIX_PREFIX}
+elif  [[ -d "${PHENIX}/conda-meta" ]]; then
+ CONDA=${PHENIX}
  INSTALLER=true
  echo "Found installer version of phenix."
 else
     echo "something wrong"
     echo "conda: $CONDA"
 fi
-export PACKAGES=`phenix.python -c 'import site; print(site.getsitepackages()[0])'`
+export PACKAGES=`libtbx.python -c 'import site; print(site.getsitepackages()[0])'`
 
 if [[ "$1" == *"aimnet2"* ]]; then
     TORCH=true
@@ -39,9 +58,9 @@ if [[ $(uname -m) == "arm64" ]]; then
 fi
 
 echo ""
-echo "####################################"
-echo "#### QREFINE INSTALLER FOR PHENIX ##"
-echo "####################################"
+# echo "####################################"
+# echo "#### QREFINE UPDATER FOR PHENIX   ##"
+# echo "####################################"
 echo ""
 echo "Phenix location :  $PHENIX"
 echo "Phenix conda    :  $CONDA"
