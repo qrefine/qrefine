@@ -475,7 +475,7 @@ class from_qm(object):
       calculator = AIMNet2CalculatorOLD()
     elif(self.qm_engine_name == "aimnet2"):
       from .plugin.ase.aimnet2_qr import AIMNet2Calculator
-      calculator = AIMNet2Calculator(self.method)
+      calculator = AIMNet2Calculator('aimnet2-qr')
     elif(self.qm_engine_name == "xtb"):
       calculator = GFNxTB()
     elif(self.qm_engine_name == "server"):
