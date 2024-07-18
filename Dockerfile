@@ -20,7 +20,7 @@ RUN echo "conda activate cctbx-cuda" >> ~/.bashrc && echo "export NUMBA_CUDA_USE
 ENV PATH=/opt/conda/envs/cctbx-cuda/bin:${PATH}
 
 # currently conda does not always want to install the cuaev version. We use the wheel
-RUN mamba remove -p /opt/conda/envs/cctbx-cuda/ torchani && pip install torchani
+# RUN mamba remove -p /opt/conda/envs/cctbx-cuda/ torchani && pip install torchani
 
 # run installer
 RUN bash build_into_conda.sh

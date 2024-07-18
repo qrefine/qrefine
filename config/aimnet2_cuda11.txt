@@ -1,0 +1,9 @@
+pytorch=*=*cuda11*
+pytorch-cuda==11.8
+cuda-python==11.8
+numba
+pytorch-cluster
+opt_einsum
+requests
+libblas=*=*mkl
+cudatoolkit=11.8

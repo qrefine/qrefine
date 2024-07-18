@@ -14,7 +14,7 @@ dependencies:
   - networkx
   - rdkit
   - pymongo
-  - ase
+  - ase=3.22.1
   # Calculators
   - mopac
   - xtb

@@ -20,5 +20,5 @@ dependencies:
   - mopac
   - xtb
   - numba
-  - torchani
+  # - torchani
   - pytorch=2.*

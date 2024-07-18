@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - pytorch::pytorch=*=*cuda12*
+  - pytorch::pytorch-cuda==12.1
+  - cuda-python==12.1
+  - numba
+  - pyg::pytorch-cluster
+  - opt_einsum
+  - requests
+  - libblas=*=*mkl
+  - cuda-nvcc-impl==12.*
+  - cuda-nvrtc==12.*

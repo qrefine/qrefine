@@ -3,7 +3,6 @@ channels:
   - pytorch
   - nvidia
 dependencies:
-  - torchani
   - pytorch
   - pytorch-cuda
   - cudatoolkit

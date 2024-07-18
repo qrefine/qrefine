@@ -2,9 +2,9 @@
 AIMNet2 plugin for Q|R.
 Based on the AIMNet2 ASE calculator by the authors of the AIMNet2 model.
 """
+import warnings
+warnings.filterwarnings('ignore', module='aimnet2calc')
 
-from __future__ import print_function
-from __future__ import absolute_import
 import numpy as np
 import ase.units as ase_units
 from aimnet2calc import AIMNet2ASE

@@ -36,10 +36,20 @@ else
 fi
 export PACKAGES=`libtbx.python -c 'import site; print(site.getsitepackages()[0])'`
 
-if [[ "$1" == *"aimnet2"* ]]; then
+SKIP=0
+if [[ "$1" == "-y" ]] || [[ "$2" == "-y" ]] || [[ "$3" == "-y" ]] ; then
+SKIP=1
+fi
+
+if [[ "$1" == *"aimnet2"* ]] || [[ "$2" == *"aimnet2"* ]] || [[ "$3" == *"aimnet2"* ]] ; then
     TORCH=true
 else
     TORCH=false
+fi
+
+CUDA11=false
+if [[ "$1" == "cuda11" ]] || [[ "$2" == "cuda11" ]] || [[ "$3" == "cuda11" ]] ; then
+CUDA11=true
 fi
 
 ARM64=false
@@ -64,34 +74,43 @@ echo "Pytorch/Aimnet2 :  $TORCH"
 echo "osx-arm64       :  $ARM64"
 echo ""
 echo ""
-read -p "Check above locations/settings. Continue (y/n)?" choice
-case "$choice" in 
-  y|Y ) echo "yes";;
-  n|N ) echo "no"; exit;;
-  * ) echo "invalid"; exit;;
-esac
 
-QR=$PHENIX/modules/qrefine
-# update phenix conda_base
-echo "Updating Phenix's conda-base .."
-conda env update -p $CONDA -f $QR/config/phenix.yaml
-
-if [ $TORCH == "true" ]; then
-echo "Installing pytorch and aimnet2 depedencies .."
-    conda env update -p $CONDA  -f $QR/config/aimnet2.yaml
-    phenix.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
+if [[ $SKIP == 0 ]]; then
+    read -p "Check above locations/settings. Continue (y/n)?" choice
+    case "$choice" in 
+      y|Y ) echo "yes";;
+      n|N ) echo "no"; exit;;
+      * ) echo "invalid"; exit;;
+    esac
 fi
 
-# libtbx.configure expects iotbx in the python site-packages dir
-if [[ $INSTALLER == "false" ]]; then
-#     cp -r $PHENIX/modules/cctbx_project/iotbx $PACKAGES/.
-    cp -r $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_c.c $PACKAGES/iotbx/pdb/.
-    cp -r $PHENIX/modules/cctbx_project/iotbx/pdb/hybrid_36_f.f $PACKAGES/iotbx/pdb/.
-fi
-
-# run configure. Skip if qrefine_configure.log exists already
 if [[ ! -e "$PHENIX/build/qrefine_configure.log" ]]; then
     echo "updating phenix/cctbx"
     cd $PHENIX/build
     libtbx.configure qrefine > qrefine_configure.log
+fi
+
+
+QR=$PHENIX/modules/qrefine
+
+# update phenix conda_base
+echo "Updating Phenix's conda-base .."
+# env update sometimes installs cctbx-base by itself!? changing to install 
+# conda env update -p $CONDA --file $QR/config/phenix.yaml > --json > $PHENIX/build/conda_update.json
+# conda install -p $CONDA -y --file $QR/config/phenix_req.txt -c conda-forge > $PHENIX/build/conda_qr.out
+qrefine.python -m pip install -r $QR/config/phenix.txt > $PHENIX/build/qrefine_req.out
+
+if [ $TORCH == "true" ]; then
+echo "Installing pytorch and aimnet2 depedencies .."
+
+    if [ $CUDA11 == "true" ]; then
+        # conda install -y -p $CONDA --file $QR/config/aimnet2_cuda11.txt -c nvidia  -c pytorch  -c pyg -c conda-forge > $PHENIX/build/conda_aimnet2.out
+        conda env update -p $CONDA --file $QR/config/cuda11.yaml
+    else
+        # conda install -y -p $CONDA --file $QR/config/aimnet2_cuda12.txt -c conda-forge -c pytorch -c nvidia -c pyg > $PHENIX/build/conda_aimnet2.out
+        # conda install -y -p $CONDA --file $QR/config/aimnet2.txt
+        conda env update -p $CONDA --file $QR/config/cuda12.yaml
+    fi
+    
+    phenix.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
 fi

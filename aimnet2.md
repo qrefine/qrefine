@@ -1,4 +1,4 @@
-### AIMNET2-based AQua (and torchani) plugins
+### AIMNET2-based AQua plugins
 
 in general please follow the general installation notes. To update your qrefine installation use:
 
@@ -28,6 +28,15 @@ To check if the cuda components are working run:
 ```
   qrefine.python -c "import numba.cuda; print(numba.cuda.is_available())"
   qrefine.python -c "import torch; print(torch.cuda.is_available())"
+```
+
+
+### torchani
+
+torchani is not installed by default. Try to install it via conda
+
+```
+conda install -p <phenix_conda> torchani -c conda-forge
 ```
 
 (Optional) Check if the cuda AEV version of torchani was installed:

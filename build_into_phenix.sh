@@ -23,9 +23,15 @@ if [[ -z ${PHENIX} ]]; then
 fi
 
 TORCH=false
-if [[ "$1" == *"aimnet2"* ]]; then
+if [[ "$1" == *"aimnet2"* ]] || [[ "$2" == *"aimnet2"* ]] ; then
     TORCH=true
 fi
+
+CUDA11=false
+if [[ "$1" == "cuda11" ]] || [[ "$2" == "cuda11" ]] ; then
+    CUDA11=true
+fi
+
 
 echo "######################################"
 echo "#### QREFINE INSTALLER FOR PHENIX  ###"
@@ -62,12 +68,17 @@ echo "Updating phenix conda with QR packages ..."
 echo "  Running $QREFINE/config/update_phenix.sh"
 cd $PHENIX
 if [[ $TORCH == "true" ]]; then
-    sh $QREFINE/config/update_phenix.sh aimnet2
-    
+    if [[ $CUDA11 == "true" ]]; then
+        sh $QREFINE/config/update_phenix.sh aimnet2 cuda11
+    else
+        sh $QREFINE/config/update_phenix.sh aimnet2
+    fi
 else
     sh $QREFINE/config/update_phenix.sh
 fi
-    
 
 echo "Setup QR+Phenix in the future with:"
 echo "   source $PHENIX/build/setpaths.sh"
+echo "we suggest to save this line to your .bashrc or similar"
+echo "For convience we also sys-linked setpaths.sh to the current directory"
+ln -s $PHENIX/build/setpaths.sh .
