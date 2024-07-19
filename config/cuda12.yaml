@@ -7,7 +7,6 @@ dependencies:
   - pytorch::pytorch-cuda==12.1
   - cuda-python==12.1
   - numba
-  - pyg::pytorch-cluster
   - opt_einsum
   - requests
   - libblas=*=*mkl

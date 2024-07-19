@@ -2,9 +2,9 @@ pytorch=*=*cuda12*
 pytorch-cuda==12.1
 cuda-python
 numba
-pytorch-cluster
 opt_einsum
 requests
 libblas=*=*mkl
+cuda-nvcc
 cuda-nvcc-impl
 cuda-nvrtc==12.*

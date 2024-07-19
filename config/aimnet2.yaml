@@ -4,10 +4,10 @@ channels:
   - nvidia
 dependencies:
   - pytorch
-  - pytorch-cuda
-  - cudatoolkit
-  - cuda-python
+  # - pytorch-cuda
+  # - cudatoolkit
+  # - cuda-python
   - numba
-  - pyg::pytorch-cluster
+  # - pyg::pytorch-cluster
   - opt_einsum
   - requests
