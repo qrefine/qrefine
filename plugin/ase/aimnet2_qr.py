@@ -82,10 +82,14 @@ def calc_nbmat(coord, cutoff: float, max_nb: int = 128):
         threadsperblock = 32
         blockspergrid = (N + (threadsperblock - 1)) // threadsperblock
         _nbmat_kernel_cuda[blockspergrid, threadsperblock](n_coord, n_nbmat, n_nnb, cutoff**2, max_nb)
+        max_nb = nnb.max().item()
+        nbmat = nbmat[:, :max_nb]
         return nbmat.to(torch.long), nnb.to(torch.long)
     else:
         coord = coord.cpu().numpy()
         nbmat, nnb = _nbmat_kernel_cpu(coord, cutoff, max_nb)
+        max_nb = nnb.max()
+        nbmat = nbmat[:, :max_nb]
         return torch.as_tensor(nbmat, dtype=torch.long, device=device), torch.as_tensor(nnb, dtype=torch.long, device=device)
 
 
