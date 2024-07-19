@@ -199,7 +199,6 @@ def set_qm_defaults(params, log):
         from aimnet2calc import AIMNet2ASE
       except ModuleNotFoundError as e:
         print(str(e), file=log)
-      finally:
         raise Sorry("AIMNet2 does not seem to be installed or available.")
   else:
     if params.quantum.method==Auto:
