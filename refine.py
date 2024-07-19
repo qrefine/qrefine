@@ -166,7 +166,6 @@ def create_calculator(params, restraints_manager, fmodel=None,
       restraints_manager = restraints_manager,
       weights            = weights)
 
-# def validate(model, fmodel, params, rst_file, prefix, log):
 def set_qm_defaults(params, log):
   outl = ''
   if params.quantum.engine_name=='mopac':
@@ -183,9 +182,25 @@ def set_qm_defaults(params, log):
           ), file=log)
       params.quantum.basis = ''
   if params.quantum.engine_name=='aimnet2':
+    print(file=log)
+    print("Setting aimnet2 specific defaults:", file=log)
     if params.quantum.method==Auto:
       params.quantum.method="aimnet2-qr"
-      print(f" Default Aimnet2 model: {params.quantum.method}")
+      print(f"  Default Aimnet2 model: {params.quantum.method}", file=log)
+      params.cluster.clustering=False
+      params.refine.minimizer="lbfgsb"
+      params.refine.gradient_only=False
+      params.restraints="qm"
+      print("  Setting cluster.clustering  :",  params.cluster.clustering  , file=log)
+      print("  Setting refine.minimizer    :",  params.refine.minimizer    , file=log)
+      print("  Setting refine.gradient_only:",  params.refine.gradient_only, file=log)
+      print("  Setting restraints          :",  params.restraints          , file=log)
+      try:
+        from aimnet2calc import AIMNet2ASE
+      except ModuleNotFoundError as e:
+        print(str(e), file=log)
+      finally:
+        raise Sorry("AIMNet2 does not seem to be installed or available.")
   else:
     if params.quantum.method==Auto:
       params.quantum.method='HF'
