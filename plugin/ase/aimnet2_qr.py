@@ -165,6 +165,11 @@ class BaseAIMNet2Calculator:
         else:
             self.device = torch.device('cpu')
 
+        _x = torch.zeros(1, device=self.device)
+        print('Running AIMNet2/PyTorch on device:', str(_x.device).upper())
+        _numba_device = 'CUDA' if _x.is_cuda else 'CPU'
+        print('Running Numba on device:', _numba_device)
+
         if isinstance(model, str):
             p = get_model_path(model)
             self.model = torch.jit.load(p, map_location=self.device)
