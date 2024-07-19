@@ -112,5 +112,5 @@ echo "Installing pytorch and aimnet2 depedencies .."
         conda env update -p $CONDA --file $QR/config/cuda12.yaml
     fi
     
-    phenix.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
+    # phenix.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git 
 fi

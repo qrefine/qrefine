@@ -6,14 +6,12 @@ For cctbx
 
 ```
   conda env update -f config/aimnet2.yaml
-  qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git
 ```
 
 For Phenix either use the provided script `config/update_phenix.sh` as described above or install into the phenix conda env like  this:
 
 ```
   conda env update -f -p /path/to/phenix/conda_base config/aimnet2.yaml
-  qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git
 ```
 
 #### Performance
