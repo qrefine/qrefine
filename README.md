@@ -85,7 +85,10 @@ command line options are added like this:
 
 ```
 qr.refine tests/unit/data_files/helix.pdb engine=mopac clustering=0 gradient_only=1
-qr.refine your_pdb.pdb your_map.map mode=refine engine=aimnet2 / for AQuaRef
+```
+for AQuaRef run
+```
+qr.refine your_pdb.pdb your_map.map mode=refine engine=aimnet2 
 ```
 
 ### Contact us
