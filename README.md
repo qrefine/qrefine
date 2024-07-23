@@ -35,9 +35,9 @@ Depending on your use case, installation of qrefine follows 3 paths:
  - For Apple Silicon architecture please see the [additional notes](#apple-silicon)!
 
 
-**AQua notes (aimnet2)**:
-To use AQua follow the installation instructions above and request installation of `aimnet2`.
-A few extra notes, also for [performance](aimnet2.md#performance), are provided here: [AQua notes](aimnet2.md)
+**AQuaRef notes (aimnet2)**:
+To use AQuaRef follow the installation instructions above and request installation of `aimnet2`.
+A few extra notes, also for [performance](aimnet2.md#performance), are provided here: [AQuaRef notes](aimnet2.md)
 
 
 ### Apple Silicon
@@ -81,10 +81,11 @@ If you want to see the available options and default values please type:
 
 ### Example
 
-command line options are added ike this:
+command line options are added like this:
 
 ```
 qr.refine tests/unit/data_files/helix.pdb engine=mopac clustering=0 gradient_only=1
+qr.refine your_pdb.pdb your_map.map mode=refine engine=aimnet2 / for AQuaRef
 ```
 
 ### Contact us
