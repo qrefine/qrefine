@@ -10,7 +10,7 @@ WORKDIR /opt/qrefine
 RUN rm -rf plugin/yoink
 
 RUN conda env create --name cctbx-cuda -f environment.yaml && mamba clean --all
-RUN conda env update --name cctbx-cuda -f config/aimnet2.yaml && mamba clean --all
+RUN conda env update --name cctbx-cuda -f config/cuda12.yaml && mamba clean --all
 
 # debug
 RUN conda install vim
@@ -19,8 +19,7 @@ RUN conda install vim
 RUN echo "conda activate cctbx-cuda" >> ~/.bashrc && echo "export NUMBA_CUDA_USE_NVIDIA_BINDING=1" >> ~/.bashrc
 ENV PATH=/opt/conda/envs/cctbx-cuda/bin:${PATH}
 
-# currently conda does not always want to install the cuaev version. We use the wheel
-# RUN mamba remove -p /opt/conda/envs/cctbx-cuda/ torchani && pip install torchani
+RUN qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.git
 
 # run installer
 RUN bash build_into_conda.sh
