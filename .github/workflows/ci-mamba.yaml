@@ -38,7 +38,7 @@ jobs:
       - uses: mamba-org/setup-micromamba@v1.8.0
         with:
           environment-file: environment.yaml
-          cache-environment: true
+          cache-environment: false
           environment-name: qrefine-ci-mamba
           post-cleanup: all
 
