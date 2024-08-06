@@ -3,8 +3,8 @@ channels:
   - conda-forge
 dependencies:
   # cctbx essentials
-  - cctbx=2024.7
-  - cctbx-base=2024.7
+  - cctbx=2024.6
+  - cctbx-base=2024.6
   - chem_data::chem_data
   - phenix-project::probe
   - phenix-project::reduce
