@@ -22,8 +22,6 @@ def get_model(file_name):
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
   params.pdb_interpretation.sort_atoms = False
-  # XXX Setting to 0 breaks tests 04 and 44. Need to investigate!
-  params.pdb_interpretation.const_shrink_donor_acceptor=0.6
   model.process(make_restraints=True, grm_normalization=False,
     pdb_interpretation_params = params)
   return model
@@ -40,6 +38,11 @@ def get_restraints_manager(expansion, clustering, file_name):
 def run(prefix, verbose=False):
   """
   Exercise expansion=False / expansion=True
+  
+  XXX
+  XXX test passes if const_shrink_donor_acceptor=0.6 in central location.
+  XXX (same for tst_04)
+  XXX
   """
   for clustering in [False,True]:
     if(verbose): print("clustering=", clustering, "-"*40)

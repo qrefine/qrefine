@@ -36,7 +36,7 @@ def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=
   params.pdb_interpretation.correct_hydrogens=False
   if log is None: log = null_out()
   model = mmtbx.model.manager(
-    model_input       = None, #pdb_hierarchy.as_pdb_input(),
+    model_input       = None,
     pdb_hierarchy     = pdb_hierarchy,
     crystal_symmetry  = crystal_symmetry,
     restraint_objects = cif_objects,
