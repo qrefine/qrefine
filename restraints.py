@@ -27,18 +27,20 @@ from libtbx import adopt_init_args
 import time
 from libtbx import easy_pickle
 
-def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None):
+def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=None):
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
   params.pdb_interpretation.sort_atoms = False
   params.pdb_interpretation.flip_symmetric_amino_acids = False
   params.pdb_interpretation.correct_hydrogens=False
+  if log is None: log = null_out()
   model = mmtbx.model.manager(
-    model_input       = pdb_hierarchy.as_pdb_input(),
+    model_input       = None, #pdb_hierarchy.as_pdb_input(),
+    pdb_hierarchy     = pdb_hierarchy,
     crystal_symmetry  = crystal_symmetry,
     restraint_objects = cif_objects,
-    log               = null_out())
+    log               = log)
   model.process(make_restraints=True, grm_normalization=False,
     pdb_interpretation_params = params,)
   return model
