@@ -67,6 +67,7 @@ def run(pdb_filename,
         neutron_option=None,
         hydrogen_atom_occupancies=0.,
         use_reduce=True,
+        shift_to_origin=True,
         remove_selection=None,
         ):
   ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename)
@@ -84,9 +85,9 @@ def run(pdb_filename,
     )
 
 
-
-  ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(
-    ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
+  if shift_to_origin:
+    ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(
+      ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
   ppf.all_chain_proxies.pdb_hierarchy.remove_residue_groups_with_atoms_on_special_positions_selective(ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
   raw_records = hierarchy_utils.get_raw_records(
     ppf.all_chain_proxies.pdb_inp,

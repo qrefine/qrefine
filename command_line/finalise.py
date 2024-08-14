@@ -43,6 +43,9 @@ reduce = True
 remove_selection = None
   .type=str
   .help = Remove selected atoms (eg., water)
+shift_to_origin = True
+  .type = bool
+  .help = Shift input model to origin
 options
 {
   neutron = *all_h all_d
@@ -100,6 +103,7 @@ def run(args, log):
                neutron_option=params.options.neutron,
                hydrogen_atom_occupancies=params.options.hydrogen_atom_occupancies,
                use_reduce=params.reduce,
+               shift_to_origin = params.shift_to_origin,
                remove_selection=params.remove_selection,
                )
 
