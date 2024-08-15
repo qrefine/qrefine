@@ -48,7 +48,7 @@ shift_to_origin = True
   .help = Shift input model to origin
 options
 {
-  neutron = *all_h all_d
+  neutron = *all_h all_d hd_and_h hd_and_d all_hd
     .type = choice
   hydrogen_atom_occupancies = 0.
     .type = float
