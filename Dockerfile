@@ -31,4 +31,6 @@ RUN qrefine.python -m pip install git+https://github.com/zubatyuk/aimnet2calc.gi
 
 ENV OMP_MAX_ACTIVE_LEVELS=1
 ENV OMP_STACKSIZE="4G"
+ENV PYTHONUNBUFFERED=true
+ENV GFORTRAN_UNBUFFERED_ALL=1
 WORKDIR /mnt
