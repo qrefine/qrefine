@@ -293,6 +293,9 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
 
   def run(self):
     self.header("Refinement start")
+    
+    self.data_manager.update_all_defaults(
+      data_type = self.params.scattering_table)
 
     # fmodel stuff
     self.fmodel=None
