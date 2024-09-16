@@ -15,14 +15,15 @@ from qrefine import refine
 
 
 master_phil_str = """
-
+auto_cust = True
+  .type = bool
+  .help = Allow to overwrite parameters inside the program: some user-defined \
+          parameters will be ignored.
 max_atoms = 50000
   .type = int
   .help = maximum number of atoms
-
 debug_rss = False
   .type=bool
-
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
@@ -291,12 +292,59 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       if self.params.refine.gradient_only:
         raise Sorry("gradient_only must be False for lbfgsb.")
 
+  def auto_cust(self):
+    #
+    # XXX Temporary work-around. Future: use the same machinery as phenix.refine
+    # 
+    if(not self.params.auto_cust): return
+    #    
+    # AIMNet2 specific settings (as used in tests for the paper).
+    #
+    if(self.params.refine.mode=="refine" and 
+       self.params.quantum.engine_name=="aimnet2"):
+      msg="""
+The following settings have been auto-set to match refine.mode=refine 
+and quantum.engine_name=aimnet2:
+"""
+      self.params.restraints="qm"
+      self.params.cluster.clustering=False
+      self.params.refine.minimizer="lbfgsb"
+      self.params.refine.number_of_weight_search_cycles=10
+      self.params.refine.number_of_refine_cycles=5
+      self.params.expansion=True
+      self.params.use_reduce=False
+      self.params.cluster.select_within_radius=7
+      self.params.refine.max_iterations_weight=100
+      if(self.fmodel.f_obs().d_min()<1.2):
+        self.params.refine.max_bond_rmsd=0.025
+        self.params.refine.max_angle_rmsd=2.5
+      else:
+        self.params.refine.max_bond_rmsd=0.01
+        self.params.refine.max_angle_rmsd=1.7
+      self.params.refine.stop_one_found_first_good_weight=False
+      self.params.refine.gradient_only=False
+      print(msg, file=self.logger)
+      print("  restraints                              ", self.params.restraints, file=self.logger)
+      print("  cluster.clustering                      ", self.params.cluster.clustering, file=self.logger)
+      print("  refine.minimizer                        ", self.params.refine.minimizer, file=self.logger)
+      print("  refine.number_of_weight_search_cycles   ", self.params.refine.number_of_weight_search_cycles, file=self.logger)
+      print("  refine.number_of_refine_cycles          ", self.params.refine.number_of_refine_cycles, file=self.logger)
+      print("  expansion                               ", self.params.expansion, file=self.logger)
+      print("  use_reduce                              ", self.params.use_reduce, file=self.logger)
+      print("  cluster.select_within_radius            ", self.params.cluster.select_within_radius, file=self.logger)
+      print("  refine.max_iterations_weight            ", self.params.refine.max_iterations_weight, file=self.logger)
+      print("  refine.max_bond_rmsd                    ", self.params.refine.max_bond_rmsd, file=self.logger)
+      print("  refine.max_angle_rmsd                   ", self.params.refine.max_angle_rmsd, file=self.logger)
+      print("  refine.stop_one_found_first_good_weight ", self.params.refine.stop_one_found_first_good_weight, file=self.logger)
+      print("  refine.gradient_only                    ", self.params.refine.gradient_only, file=self.logger)
+    print("\n***", file=self.logger)
+    print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
+    print("***\n", file=self.logger)
+
   def run(self):
     self.header("Refinement start")
-    
     self.data_manager.update_all_defaults(
       data_type = self.params.scattering_table)
-
     # fmodel stuff
     self.fmodel=None
     if(self.has_ma):
@@ -312,6 +360,10 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       print(self.params.refine.refinement_target_name, file=self.logger)
       self.fmodel.set_target_name(
         target_name=self.params.refine.refinement_target_name)
+    # Auto-cust (set) parameters
+    #
+    self.auto_cust()
+    #
     # real map
     map_data = None
     if(self.has_map):

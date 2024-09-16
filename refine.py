@@ -187,14 +187,6 @@ def set_qm_defaults(params, log):
     if params.quantum.method==Auto:
       params.quantum.method="aimnet2-qr"
       print(f"  Default Aimnet2 model: {params.quantum.method}", file=log)
-      params.cluster.clustering=False
-      params.refine.minimizer="lbfgsb"
-      params.refine.gradient_only=False
-      params.restraints="qm"
-      print("  Setting cluster.clustering  :",  params.cluster.clustering  , file=log)
-      print("  Setting refine.minimizer    :",  params.refine.minimizer    , file=log)
-      print("  Setting refine.gradient_only:",  params.refine.gradient_only, file=log)
-      print("  Setting restraints          :",  params.restraints          , file=log)
       try:
         from aimnet2calc import AIMNet2ASE
       except ModuleNotFoundError as e:
