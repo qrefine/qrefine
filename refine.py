@@ -97,12 +97,30 @@ def create_fragment_manager(
 
 def create_restraints_manager(params, model):
   restraints_source = restraints.restraints(params = params, model = model)
-  if(model.altlocs_present()):
+  #
+  # Exchengeable H/D as the only altlocs in the model. Special case.
+  # Works only with expansion.
+  #
+  if model.altlocs_present_only_hd():
+    assert params.expansion
+    return restraints.from_expansion(
+      params            = params,
+      restraints_source = restraints_source,
+      pdb_hierarchy     = model.get_hierarchy(),
+      crystal_symmetry  = model.crystal_symmetry())
+  #
+  # General case of altlocs. Developmenal code. NOT IN PRODUCTION.
+  #
+  elif(model.altlocs_present()):
     return restraints.from_altlocs2(
       model  = model,
       params = params,
       method = params.cluster.altloc_method)
+  #
+  # No altlocs of any kind with expansion.
+  #
   if(params.expansion):
+    assert not params.cluster.clustering
     #
     # TMP development insert to investigate Rss BEGIN
     #
@@ -134,6 +152,9 @@ def create_restraints_manager(params, model):
       restraints_source = restraints_source,
       pdb_hierarchy     = model.get_hierarchy(),
       crystal_symmetry  = model.crystal_symmetry())
+  #
+  # No altlocs of any kind, no expansion
+  #
   else:
     if(params.cluster.clustering):
       fragment_manager = create_fragment_manager(params = params, model = model)
