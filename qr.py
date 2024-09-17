@@ -295,15 +295,15 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
   def auto_cust(self):
     #
     # XXX Temporary work-around. Future: use the same machinery as phenix.refine
-    # 
+    #
     if(not self.params.auto_cust): return
-    #    
+    #
     # AIMNet2 specific settings (as used in tests for the paper).
     #
-    if(self.params.refine.mode=="refine" and 
+    if(self.params.refine.mode=="refine" and
        self.params.quantum.engine_name=="aimnet2"):
       msg="""
-The following settings have been auto-set to match refine.mode=refine 
+The following settings have been auto-set to match refine.mode=refine
 and quantum.engine_name=aimnet2:
 """
       self.params.restraints="qm"
@@ -315,12 +315,16 @@ and quantum.engine_name=aimnet2:
       self.params.use_reduce=False
       self.params.cluster.select_within_radius=7
       self.params.refine.max_iterations_weight=100
-      if(self.fmodel.f_obs().d_min()<1.2):
-        self.params.refine.max_bond_rmsd=0.025
-        self.params.refine.max_angle_rmsd=2.5
-      else:
-        self.params.refine.max_bond_rmsd=0.01
-        self.params.refine.max_angle_rmsd=1.7
+      if self.fmodel is not None:
+        if(self.fmodel.f_obs().d_min()<1.2):
+          self.params.refine.max_bond_rmsd=0.025
+          self.params.refine.max_angle_rmsd=2.5
+        else:
+          self.params.refine.max_bond_rmsd=0.01
+          self.params.refine.max_angle_rmsd=1.7
+      elif self.map_data is not None:
+        self.params.refine.max_bond_rmsd=0.0001
+      else: assert 0
       self.params.refine.stop_one_found_first_good_weight=False
       self.params.refine.gradient_only=False
       print(msg, file=self.logger)
@@ -340,6 +344,8 @@ and quantum.engine_name=aimnet2:
     print("\n***", file=self.logger)
     print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
     print("***\n", file=self.logger)
+    if(self.model.altlocs_present()):
+      raise Sorry("Alternative conformations are not supported with AIMNet2.")
 
   def run(self):
     self.header("Refinement start")
@@ -360,19 +366,15 @@ and quantum.engine_name=aimnet2:
       print(self.params.refine.refinement_target_name, file=self.logger)
       self.fmodel.set_target_name(
         target_name=self.params.refine.refinement_target_name)
-    # Auto-cust (set) parameters
-    #
-    self.auto_cust()
-    #
     # real map
-    map_data = None
+    self.map_data = None
     if(self.has_map):
-      map_data = self.data_manager.get_real_map().map_data()
-      map_data = map_data - flex.mean(map_data)
-      sd = map_data.sample_standard_deviation()
+      self.map_data = self.data_manager.get_real_map().map_data()
+      self.map_data = self.map_data - flex.mean(self.map_data)
+      sd = self.map_data.sample_standard_deviation()
       if sd is not None and sd != 0:
-        map_data = map_data/sd
-      if(map_data is not None):
+        self.map_data = self.map_data/sd
+      if(self.map_data is not None):
         self.params.refine.mode="refine"
     #
     if(not self.has_data):
@@ -395,11 +397,15 @@ and quantum.engine_name=aimnet2:
       scattering_table  = self.params.scattering_table,
       d_min             = 1.0,
       log               = self.logger)
+    # Auto-cust (set) parameters
+    #
+    self.auto_cust()
+    #
     # run qrefine
     refine.run(
       model    = self.model,
       fmodel   = self.fmodel,
-      map_data = map_data,
+      map_data = self.map_data,
       params   = self.params,
       rst_file = self.params.rst_file,
       prefix   = model_file_name[:-4],
