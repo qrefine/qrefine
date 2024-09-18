@@ -341,11 +341,12 @@ and quantum.engine_name=aimnet2:
       print("  refine.max_angle_rmsd                   ", self.params.refine.max_angle_rmsd, file=self.logger)
       print("  refine.stop_one_found_first_good_weight ", self.params.refine.stop_one_found_first_good_weight, file=self.logger)
       print("  refine.gradient_only                    ", self.params.refine.gradient_only, file=self.logger)
-    print("\n***", file=self.logger)
-    print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
-    print("***\n", file=self.logger)
-    if(self.model.altlocs_present()):
-      raise Sorry("Alternative conformations are not supported with AIMNet2.")
+      #
+      print("\n***", file=self.logger)
+      print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
+      print("***\n", file=self.logger)
+      if(self.model.altlocs_present()):
+        raise Sorry("Alternative conformations are not supported with AIMNet2.")
 
   def run(self):
     self.header("Refinement start")

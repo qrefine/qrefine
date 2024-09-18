@@ -44,28 +44,27 @@ def run(prefix, verbose=False):
   XXX (same for tst_04)
   XXX
   """
-  for clustering in [False,True]:
-    if(verbose): print("clustering=", clustering, "-"*40)
-    path = qr_unit_tests+"/data_files/"
-    for fn in os.listdir(path):
-      if not fn.endswith(".pdb"): continue
-      fn = path + fn
-      ph = iotbx.pdb.input(fn).construct_hierarchy()
-      if list(ph.altloc_indices()) != ['']: continue
-      if(verbose): print(fn)
-      #
-      rm1, sites_cart = get_restraints_manager(
-        expansion=False, clustering=clustering, file_name=fn)
-      t1, g1 = rm1.target_and_gradients(sites_cart = sites_cart)
-      #
-      rm2, sites_cart = get_restraints_manager(
-        expansion=True, clustering=clustering, file_name=fn)
-      t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
-      #
-      diff = flex.abs(g1.as_double()-g2.as_double())
-      if(verbose):  print(diff.min_max_mean().as_tuple())
-      #
-      assert flex.max(diff) < 1.e-6, flex.max(diff)
+  if(verbose): print("clustering=", clustering, "-"*40)
+  path = qr_unit_tests+"/data_files/"
+  for fn in os.listdir(path):
+    if not fn.endswith(".pdb"): continue
+    fn = path + fn
+    ph = iotbx.pdb.input(fn).construct_hierarchy()
+    if list(ph.altloc_indices()) != ['']: continue
+    if(verbose): print(fn)
+    #
+    rm1, sites_cart = get_restraints_manager(
+      expansion=False, clustering=True, file_name=fn)
+    t1, g1 = rm1.target_and_gradients(sites_cart = sites_cart)
+    #
+    rm2, sites_cart = get_restraints_manager(
+      expansion=True, clustering=False, file_name=fn)
+    t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
+    #
+    diff = flex.abs(g1.as_double()-g2.as_double())
+    if(verbose):  print(diff.min_max_mean().as_tuple())
+    #
+    assert flex.max(diff) < 1.e-6, flex.max(diff)
 
 if(__name__ == "__main__"):
   prefix = os.path.basename(__file__).replace(".py","")

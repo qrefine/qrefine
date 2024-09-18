@@ -44,7 +44,6 @@ def run(prefix):
   XXX (same for tst_44)
   XXX
   """
-  clustering = True
   done = False
   path = qr_unit_tests+"/data_files/"
   for fn in os.listdir(path):
@@ -56,11 +55,11 @@ def run(prefix):
     print(fn)
     #
     rm1, sites_cart = get_restraints_manager(
-      expansion=False, clustering=clustering, file_name=fn)
+      expansion=False, clustering=True, file_name=fn)
     t1, g1 = rm1.target_and_gradients(sites_cart = sites_cart)
     #
     rm2, sites_cart = get_restraints_manager(
-      expansion=True, clustering=clustering, file_name=fn)
+      expansion=True, clustering=False, file_name=fn)
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
     diff = flex.abs(g1.as_double()-g2.as_double())
