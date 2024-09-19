@@ -130,7 +130,9 @@ def run(pdb_filename,
     pdb_interpretation_params = params)
   model.idealize_h_riding()
   hierarchy=model.get_hierarchy()
-  if neutron_option=='all_d':
+  if neutron_option=='all_h':
+    pass
+  elif neutron_option=='all_d':
     from mmtbx.ligands.ready_set_utils import perdeuterate_model_ligands
     perdeuterate_model_ligands(hierarchy)
   else:
