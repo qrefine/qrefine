@@ -72,34 +72,6 @@ class cctbx_geometry(object):
     self._compute(sites_cart=sites_cart) # XXX DUPLICATE CALCULATION
     return self._energies_sites.angle_deviations()[2]
 
-class calculator(object):
-  def __init__(self,
-               fmodel=None,
-               xray_structure=None,
-               restraints_weight_scale = 1.0):
-    assert [fmodel, xray_structure].count(None)==1
-    self.fmodel=None
-    self.xray_structure=None
-    if(fmodel is not None):
-      self.fmodel = fmodel
-    if(xray_structure is not None):
-      self.xray_structure = xray_structure
-    self.restraints_weight_scale = restraints_weight_scale
-
-  def update_fmodel(self):
-    if(self.fmodel is not None):
-      self.fmodel.xray_structure.tidy_us()
-      self.fmodel.xray_structure.apply_symmetry_sites()
-      self.fmodel.update_xray_structure(
-        xray_structure = self.fmodel.xray_structure,
-        update_f_calc  = True,
-        #update_f_mask  = True
-        )
-      #self.fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
-    else:
-      self.xray_structure.tidy_us()
-      self.xray_structure.apply_symmetry_sites()
-
 class sites_opt(object):
   """
   General calculator for model geometry optimization. For native CCTBX
@@ -186,18 +158,16 @@ class sites_opt(object):
     f, g = self.target_and_gradients()
     return self.x, f, g
 
-class sites(calculator):
+class sites(object):
   def __init__(self,
-               fmodel=None,
+               fmodel,
                restraints_manager=None,
                dump_gradients=None):
     adopt_init_args(self, locals())
     self.x = None
     self.x_target_functor = None
     self.not_hd_selection = None # XXX UGLY
-
     self.sites_cart_start = None
-
     self._initialize(fmodel = self.fmodel)
     self.total_time = 0
     self.number_of_target_and_gradients_calls = 0
@@ -226,6 +196,15 @@ class sites(calculator):
       fmodel  = self.fmodel,
       rm      = self.restraints_manager,
       verbose = verbose)
+
+  def update_fmodel(self):
+    self.fmodel.xray_structure.tidy_us()
+    self.fmodel.xray_structure.apply_symmetry_sites()
+    self.fmodel.update_xray_structure(
+      xray_structure = self.fmodel.xray_structure,
+      update_f_calc  = True,
+      #update_f_mask  = True
+      )
 
   def reset_fmodel(self, fmodel):
     self._initialize(fmodel=fmodel)

@@ -168,6 +168,7 @@ def create_calculator(params, restraints_manager, fmodel=None,
                       model=None):
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
+      assert model is not None
       return calculator.sites(
         fmodel             = fmodel,
         restraints_manager = restraints_manager,
