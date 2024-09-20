@@ -122,19 +122,18 @@ def h_diff_sel(h1, h2):
   return result
 
 class from_expansion(object):
-  def __init__(self, params, restraints_source, pdb_hierarchy, crystal_symmetry):
+  def __init__(self, params, restraints_source, model):
+    self.model               = model
     self.restraints_manager  = restraints_source.restraints_manager
     self.restraints_source   = restraints_source
-    self.pdb_hierarchy       = pdb_hierarchy
-    self.crystal_symmetry    = crystal_symmetry
     self.params              = params
-    self.size                = self.pdb_hierarchy.atoms().size()
+    self.size                = self.model.get_hierarchy().atoms().size()
     #
-    self.pdb_hierarchy.atoms().reset_i_seq() # XXX May be unnecessary
+    self.model.get_hierarchy().atoms().reset_i_seq() # XXX May be unnecessary
     #
     self.expansion = expand(
-      pdb_hierarchy        = self.pdb_hierarchy.deep_copy(),
-      crystal_symmetry     = self.crystal_symmetry,
+      pdb_hierarchy        = self.model.get_hierarchy().deep_copy(),
+      crystal_symmetry     = self.model.crystal_symmetry(),
       select_within_radius = self.params.cluster.select_within_radius)
 
     if restraints_source.source_of_restraints_qm():
@@ -152,19 +151,22 @@ class from_expansion(object):
     selection = flex.bool(
       self.pdb_hierarchy_super_completed.atoms().size(), False)
     self.selection = selection.set_selected(
-      flex.size_t(range(self.pdb_hierarchy.atoms().size())), True)
+      flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
     # At this point here we are sure the model is complete. So make sure the
     # call above only changes (completes) the explansion part and leaves the
     # master copy intact!
-    sites_cart_master = self.pdb_hierarchy.atoms().extract_xyz()
+    sites_cart_master = self.model.get_hierarchy().atoms().extract_xyz()
     sites_cart_all = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
     sites_cart_all = sites_cart_all.set_selected(self.selection, sites_cart_master)
     self.pdb_hierarchy_super_completed.atoms().set_xyz(sites_cart_all)
     #
-    self.pdb_hierarchy.atoms().reset_i_seq()
+    self.model.get_hierarchy().atoms().reset_i_seq()
     self.expansion.ph_super_sphere.atoms().reset_i_seq()
     self.pdb_hierarchy_super_completed.atoms().reset_i_seq()
 
+    self.pdb_hierarchy_super_completed.write_pdb_file(
+      file_name = "supersphere.pdb",
+      crystal_symmetry = self.expansion.cs_box)
 
     self.restraints_manager = self.restraints_source.update(
         pdb_hierarchy    = self.pdb_hierarchy_super_completed,
@@ -199,9 +201,10 @@ class from_expansion(object):
 
   def _update(self, sites_cart):
     # Update coordinates in main hierarchy
-    self.pdb_hierarchy.atoms().set_xyz(sites_cart)
+    self.model.get_hierarchy().atoms().set_xyz(sites_cart)
     # Propagate the update into expanded hierarchy
-    self.expansion.update(sites_cart = self.pdb_hierarchy.atoms().extract_xyz())
+    self.expansion.update(
+      sites_cart = self.model.get_hierarchy().atoms().extract_xyz())
     xyz = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
     xyz = xyz.set_selected(self.h_diff_sel,
       self.expansion.ph_super_sphere.atoms().extract_xyz())
@@ -256,8 +259,7 @@ class from_altlocs2(object):
     return from_expansion(
         params            = self.params,
         restraints_source = restraints_source,
-        pdb_hierarchy     = model.get_hierarchy(),
-        crystal_symmetry  = model.crystal_symmetry()).target_and_gradients
+        model             = model).target_and_gradients
 
   def target_and_gradients(self, sites_cart):
     self.model.set_sites_cart(sites_cart=sites_cart)

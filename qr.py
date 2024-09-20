@@ -291,6 +291,12 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     if self.params.refine.minimizer == "lbfgsb":
       if self.params.refine.gradient_only:
         raise Sorry("gradient_only must be False for lbfgsb.")
+    #
+    if self.params.expansion or self.params.cluster.clustering:
+      self.params.refine.minimizer="lbfgs"
+      self.params.refine.gradient_only=True
+      print("\n  expansion/clustering require minimizer=lbfgs and gradient_only=True \n",
+        file=self.logger)
 
   def auto_cust(self):
     #
@@ -308,14 +314,15 @@ and quantum.engine_name=aimnet2:
 """
       self.params.restraints="qm"
       self.params.cluster.clustering=False
-      self.params.refine.minimizer="lbfgsb"
       self.params.refine.number_of_weight_search_cycles=10
       self.params.refine.number_of_refine_cycles=5
-      self.params.expansion=True
       self.params.use_reduce=False
       self.params.cluster.select_within_radius=7
       self.params.refine.max_iterations_weight=100
       if self.fmodel is not None:
+        self.params.expansion=True
+        self.params.refine.minimizer="lbfgs"
+        self.params.refine.gradient_only=True
         if(self.fmodel.f_obs().d_min()<1.2):
           self.params.refine.max_bond_rmsd=0.025
           self.params.refine.max_angle_rmsd=2.5
@@ -324,9 +331,11 @@ and quantum.engine_name=aimnet2:
           self.params.refine.max_angle_rmsd=1.7
       elif self.map_data is not None:
         self.params.refine.max_bond_rmsd=0.0001
+        self.params.expansion=False
+        self.params.refine.minimizer="lbfgsb"
+        self.params.refine.gradient_only=False
       else: assert 0
       self.params.refine.stop_one_found_first_good_weight=False
-      self.params.refine.gradient_only=False
       print(msg, file=self.logger)
       print("  restraints                              ", self.params.restraints, file=self.logger)
       print("  cluster.clustering                      ", self.params.cluster.clustering, file=self.logger)

@@ -106,8 +106,7 @@ def create_restraints_manager(params, model):
     return restraints.from_expansion(
       params            = params,
       restraints_source = restraints_source,
-      pdb_hierarchy     = model.get_hierarchy(),
-      crystal_symmetry  = model.crystal_symmetry())
+      model             = model)
   #
   # General case of altlocs. Developmenal code. NOT IN PRODUCTION.
   #
@@ -150,8 +149,7 @@ def create_restraints_manager(params, model):
     return restraints.from_expansion(
       params            = params,
       restraints_source = restraints_source,
-      pdb_hierarchy     = model.get_hierarchy(),
-      crystal_symmetry  = model.crystal_symmetry())
+      model             = model)
   #
   # No altlocs of any kind, no expansion
   #
