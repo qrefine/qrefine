@@ -142,7 +142,7 @@ class hd_mapper(object):
       else:                     g_all[i] = g_all[j]
     return g_all
 
-def create_restraints_manager(params, model, hdm):
+def create_restraints_manager(params, model, hdm=None):
   restraints_source = restraints.restraints(params = params, model = model)
   #
   # Exchengeable H/D as the only altlocs in the model. Special case.
