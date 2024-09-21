@@ -51,6 +51,7 @@ import mmtbx.model.statistics
 from libtbx import Auto
 from ase.io import read as ase_io_read
 from cctbx import maptbx
+from scitbx.array_family import flex
 
 def show_cc(map_data, xray_structure, log=None):
   import mmtbx.maps.mtriage
@@ -95,18 +96,63 @@ def create_fragment_manager(
     select_within_radius       = params.cluster.select_within_radius,
     bond_with_altloc_flag      = params.cluster.bond_with_altloc)
 
-def create_restraints_manager(params, model):
+class hd_mapper(object):
+  """
+  Utility function that allows to use a model with exhangeable H/D sites as
+  single protonated model by re-mapping 'short' gradients into the full-size
+  gradients.
+  """
+
+  def __init__(self, model):
+    self.sel = model.selection(string = "not element D")
+    self.ehd = model.get_hierarchy().exchangeable_hd_selections()
+    self.elements = [e.strip().upper() for e in
+      model.get_hierarchy().atoms().extract_element()]
+    self.size = model.size()
+    #
+    #self.h_selection = model.selection(string = "element H")
+    #self.d_selection = model.selection(string = "element D")
+    #
+    self.keep = flex.bool(self.size, True)
+    for pair in self.ehd:
+      i,j = pair[0][0], pair[1][0]
+      for it in [i,j]:
+        if self.elements[it]=="D": self.keep[it] = False
+    self.n_keep = self.keep.count(True)
+    self._model = model.select(self.keep)
+
+  def get_single_model(self):
+    return self._model
+
+  def shrink(self, array):
+    return array.select(self.keep)
+
+  def map_it(self, g_short):
+    assert self.n_keep == g_short.size()
+    g_all = flex.vec3_double(self.size, [0,0,0])
+
+    #g_all = g_all.set_selected(self.h_selection, 1)
+    #g_all = g_all.set_selected(self.d_selection, 2)
+    #print(list(g_all))
+
+    g_all = g_all.set_selected(self.sel, g_short)
+    for pair in self.ehd:
+      i,j = pair[0][0], pair[1][0]
+      if self.elements[i]=="H": g_all[j] = g_all[i]
+      else:                     g_all[i] = g_all[j]
+    return g_all
+
+def create_restraints_manager(params, model, hdm):
   restraints_source = restraints.restraints(params = params, model = model)
   #
   # Exchengeable H/D as the only altlocs in the model. Special case.
   # Works only with expansion.
   #
   if model.altlocs_present_only_hd():
-    assert params.expansion
     return restraints.from_expansion(
       params            = params,
       restraints_source = restraints_source,
-      model             = model)
+      model             = hdm.get_single_model())
   #
   # General case of altlocs. Developmenal code. NOT IN PRODUCTION.
   #
@@ -164,13 +210,13 @@ def create_restraints_manager(params, model):
       # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
 
-def create_calculator(params, restraints_manager, fmodel=None,
-                      model=None):
+def create_calculator(params, restraints_manager, model, fmodel=None, hdm=None):
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
       assert model is not None
       return calculator.sites(
         fmodel             = fmodel,
+        hdm                = hdm,
         restraints_manager = restraints_manager,
         dump_gradients     = params.dump_gradients)
     else:
@@ -266,7 +312,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   start_fmodel = fmodel
   start_ph = None # is it used anywhere? I don't see where it is used!
 
-  restraints_manager = create_restraints_manager(params, model)
+  hdm = None
+  if model.altlocs_present_only_hd():
+    hdm = hd_mapper(model = model)
+  restraints_manager = create_restraints_manager(
+    params=params, model=model, hdm=hdm)
 
   if(map_data is not None and params.refine.mode == "refine"):
     model.geometry_statistics(use_hydrogens=False).show()
@@ -300,10 +350,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     return
   else:
     calculator_manager = create_calculator(
-      fmodel=start_fmodel,
-      model=model,
-      params=params,
-      restraints_manager=restraints_manager)
+      fmodel             = start_fmodel,
+      model              = model,
+      params             = params,
+      restraints_manager = restraints_manager,
+      hdm                = hdm)
     if(params.refine.mode == "refine"):
       #
       # Optimize H

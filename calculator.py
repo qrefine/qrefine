@@ -22,7 +22,7 @@ from mmtbx.validation.clashscore import clashscore
 from libtbx.utils import null_out
 from cctbx import maptbx
 
-def compute_weight(fmodel, restraints_manager, shake_sites=False):
+def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None):
   if(shake_sites):
     random.seed(1)
     flex.set_random_seed(1)
@@ -35,7 +35,13 @@ def compute_weight(fmodel, restraints_manager, shake_sites=False):
   tgx = x_target_functor(compute_gradients=True)
   gx = flex.vec3_double(tgx.\
     gradients_wrt_atomic_parameters(site=True).packed())
-  tc, gc = restraints_manager.target_and_gradients(sites_cart=xrs.sites_cart())
+
+  sites_cart = xrs.sites_cart()
+  if hdm is not None:
+    sites_cart = hdm.shrink(array=sites_cart)
+
+  tc, gc = restraints_manager.target_and_gradients(sites_cart=sites_cart)
+
   x = gc.norm()
   y = gx.norm()
   # filter out large contributions
@@ -161,9 +167,11 @@ class sites_opt(object):
 class sites(object):
   def __init__(self,
                fmodel,
+               hdm=None,
                restraints_manager=None,
                dump_gradients=None):
     adopt_init_args(self, locals())
+    self.hdm = hdm
     self.x = None
     self.x_target_functor = None
     self.not_hd_selection = None # XXX UGLY
@@ -190,12 +198,6 @@ class sites(object):
       site       = True)
     self.x = self.fmodel.xray_structure.sites_cart().as_double()
     self.x_target_functor = self.fmodel.target_functor()
-
-  def calculate_weight(self, verbose=False):
-    self.weights.compute_weight(
-      fmodel  = self.fmodel,
-      rm      = self.restraints_manager,
-      verbose = verbose)
 
   def update_fmodel(self):
     self.fmodel.xray_structure.tidy_us()
@@ -264,7 +266,16 @@ class sites(object):
     self.number_of_target_and_gradients_calls+=1
     t0=time.time()
     self.update(x = x)
-    rt, rg = self.restraints_manager.target_and_gradients(sites_cart = self.x)
+
+    XG = self.x
+    if self.hdm is not None:
+      XG = self.hdm.shrink(array=XG)
+
+    rt, rg = self.restraints_manager.target_and_gradients(sites_cart = XG)
+
+    if self.hdm is not None:
+      rg = self.hdm.map_it(g_short = rg)
+
     tgx = self.x_target_functor(compute_gradients=True)
     dt = tgx.target_work()
     dg = flex.vec3_double(tgx.\
