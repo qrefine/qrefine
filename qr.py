@@ -326,9 +326,15 @@ and quantum.engine_name=aimnet2:
         self.params.expansion=True
         self.params.refine.minimizer="lbfgs"
         self.params.refine.gradient_only=True
-        if(self.fmodel.f_obs().d_min()<1.2):
+
+        d_min = self.fmodel.f_obs().d_min()
+
+        if(d_min<1.2):
           self.params.refine.max_bond_rmsd=0.025
           self.params.refine.max_angle_rmsd=2.5
+        elif(d_min>=1.2 and d_min<3):
+          self.params.refine.max_bond_rmsd=0.02
+          self.params.refine.max_angle_rmsd=2.0
         else:
           self.params.refine.max_bond_rmsd=0.01
           self.params.refine.max_angle_rmsd=1.7
