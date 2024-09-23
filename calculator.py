@@ -21,6 +21,7 @@ from mmtbx.validation.rotalyze import rotalyze
 from mmtbx.validation.clashscore import clashscore
 from libtbx.utils import null_out
 from cctbx import maptbx
+from libtbx.test_utils import approx_equal
 
 def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None):
   if(shake_sites):
@@ -274,12 +275,16 @@ class sites(object):
     rt, rg = self.restraints_manager.target_and_gradients(sites_cart = XG)
 
     if self.hdm is not None:
-      rg = self.hdm.map_it(g_short = rg)
+      rg = self.hdm.expand(g_short = rg)
 
     tgx = self.x_target_functor(compute_gradients=True)
     dt = tgx.target_work()
     dg = flex.vec3_double(tgx.\
       gradients_wrt_atomic_parameters(site=True).packed())
+
+    if self.hdm is not None:
+      dg = self.hdm.average(array = dg)
+
     t = dt*self.data_weight + \
       self.restraints_weight*rt*self.restraints_weight_scale
     g = dg*self.data_weight + \

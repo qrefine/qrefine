@@ -288,6 +288,9 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       raise_sorry=False)
     self.has_data = self.has_ma or self.has_map
     #
+    assert [self.params.expansion,
+            self.params.cluster.clustering].count(True) != 2
+    #
     if self.params.refine.minimizer == "lbfgsb":
       if self.params.refine.gradient_only:
         raise Sorry("gradient_only must be False for lbfgsb.")

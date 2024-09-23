@@ -104,15 +104,11 @@ class hd_mapper(object):
   """
 
   def __init__(self, model):
-    self.sel = model.selection(string = "not element D")
+    self.model = model
     self.ehd = model.get_hierarchy().exchangeable_hd_selections()
     self.elements = [e.strip().upper() for e in
       model.get_hierarchy().atoms().extract_element()]
     self.size = model.size()
-    #
-    #self.h_selection = model.selection(string = "element H")
-    #self.d_selection = model.selection(string = "element D")
-    #
     self.keep = flex.bool(self.size, True)
     for pair in self.ehd:
       i,j = pair[0][0], pair[1][0]
@@ -120,7 +116,6 @@ class hd_mapper(object):
         if self.elements[it]=="D": self.keep[it] = False
     self.n_keep = self.keep.count(True)
     self._model = model.select(self.keep)
-    self.sel = self.keep # XXX
 
   def get_single_model(self):
     return self._model
@@ -128,19 +123,36 @@ class hd_mapper(object):
   def shrink(self, array):
     return array.select(self.keep)
 
-  def map_it(self, g_short):
-    assert self.n_keep == g_short.size()
-    g_all = flex.vec3_double(self.size, [0,0,0])
-
-    #g_all = g_all.set_selected(self.h_selection, 1)
-    #g_all = g_all.set_selected(self.d_selection, 2)
-    #print(list(g_all))
-
-    g_all = g_all.set_selected(self.sel, g_short)
+  def check(self, array):
+    assert array.size() == self.size
     for pair in self.ehd:
       i,j = pair[0][0], pair[1][0]
-      if self.elements[i]=="H": g_all[j] = g_all[i]
-      else:                     g_all[i] = g_all[j]
+      assert array[i] == array[j]
+
+  def average(self, array):
+    for pair in self.ehd:
+      i,j = pair[0][0], pair[1][0]
+      ai = array[i]
+      ai = flex.vec3_double([array[i],])
+      aj = flex.vec3_double([array[j],])
+      aa = (ai+aj)*0.5
+      array[i] = aa[0]
+      array[j] = aa[0]
+    return array
+
+  def expand(self, g_short):
+    assert self.n_keep == g_short.size()
+    g_all = flex.vec3_double(self.size, [0,0,0])
+    g_all = g_all.set_selected(self.keep, g_short)
+    for pair in self.ehd:
+      i,j = pair[0][0], pair[1][0]
+      if   g_all[i] == (0,0,0): g_all[i] = g_all[j]
+      elif g_all[j] == (0,0,0): g_all[j] = g_all[i]
+      else: assert 0, [g_all[j] , g_all[i]]
+      #if self.elements[i]=="H": g_all[j] = g_all[i]
+      #else:                     g_all[i] = g_all[j]
+    for g in g_all:
+      assert g != (0,0,0)
     return g_all
 
 def create_restraints_manager(params, model, hdm=None):
