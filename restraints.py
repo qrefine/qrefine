@@ -51,7 +51,7 @@ class restraints(object):
   """
   def __init__(self, params, model):
     self.params = params
-    self.model = model
+    self.model = model.deep_copy()
     self.cif_objects      = model.get_restraint_objects()
     self.pdb_hierarchy    = model.get_hierarchy()
     self.crystal_symmetry = model.crystal_symmetry()
