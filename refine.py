@@ -328,6 +328,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   if model.altlocs_present_only_hd():
     print("Using hd_mapper")
     hdm = hd_mapper(model = model)
+    altlocs_present = False
 
   exclude_selection = None
   if params.refine.exclude is not None:
