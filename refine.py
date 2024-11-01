@@ -161,6 +161,7 @@ def create_restraints_manager(params, model, altlocs_present):
   # General case of altlocs. Developmenal code. NOT IN PRODUCTION.
   #
   if(altlocs_present):
+    print("altlocs_present", altlocs_present)
     assert not model.altlocs_present_only_hd()
     return restraints.from_altlocs2(
       model  = model,
@@ -195,6 +196,7 @@ def create_restraints_manager(params, model, altlocs_present):
     #
     # TMP development insert to investigate Rss END
     #
+    print("Restraints are from restraints.from_expansion")
     return restraints.from_expansion(
       params            = params,
       restraints_source = restraints_source)
@@ -324,6 +326,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
 
   hdm = None
   if model.altlocs_present_only_hd():
+    print("Using hd_mapper")
     hdm = hd_mapper(model = model)
 
   exclude_selection = None
@@ -337,6 +340,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       raise Sorry("exclude_selection is incompatible with clustering=True")
 
   if hdm is not None:
+    print("Using hd_mapper again!")
     model_for_restraints = hdm.get_single_model()
   elif exclude_selection is not None:
     model_for_restraints = model.select(~exclude_selection)
