@@ -221,6 +221,9 @@ refine {
   shift_evaluation = max *mean
     .type = choice(multi=False)
     .help = Use mean or max coordinate shift to decide on convergence
+  exclude = None
+    .type = str
+    .help = Atom selection string to select atoms to be exluded from refinement
 }
 
 parallel {

@@ -32,13 +32,13 @@ def get_restraints_manager(expansion, clustering, file_name):
   params.restraints="cctbx"
   params.expansion = expansion
   params.cluster.clustering=clustering
-  return refine.create_restraints_manager(params=params, model=model), \
-         model.get_sites_cart()
+  return refine.create_restraints_manager(params=params, model=model,
+         altlocs_present=False), model.get_sites_cart()
 
 def run(prefix, verbose=False):
   """
   Exercise expansion=False / expansion=True
-  
+
   XXX
   XXX test passes if const_shrink_donor_acceptor=0.6 in central location.
   XXX (same for tst_04)

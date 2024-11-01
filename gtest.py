@@ -88,7 +88,8 @@ def run_g_test(params, model, weights, start_fmodel, log):
       print("~max cluster size ",max_cluster, file=log)
       params.cluster.maxnum_residues_in_cluster=max_cluster
       fragment_manager = create_fragment_manager(params = params, model = model)
-      restraints_manager = create_restraints_manager(params, model)
+      restraints_manager = create_restraints_manager(params, model,
+        altlocs_present=False)
       rm = restraints_manager
       if(fragment_manager is not None):
         print(f"time taken for fragments {time.time() - t0:.2f}")

@@ -23,7 +23,8 @@ from libtbx.utils import null_out
 from cctbx import maptbx
 from libtbx.test_utils import approx_equal
 
-def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None):
+def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None,
+                   exclude_selection=None):
   if(shake_sites):
     random.seed(1)
     flex.set_random_seed(1)
@@ -40,6 +41,8 @@ def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None):
   sites_cart = xrs.sites_cart()
   if hdm is not None:
     sites_cart = hdm.shrink(array=sites_cart)
+  if exclude_selection is not None:
+    sites_cart = sites_cart.select(~exclude_selection)
 
   tc, gc = restraints_manager.target_and_gradients(sites_cart=sites_cart)
 
@@ -169,10 +172,10 @@ class sites(object):
   def __init__(self,
                fmodel,
                hdm=None,
+               exclude_selection=None,
                restraints_manager=None,
                dump_gradients=None):
     adopt_init_args(self, locals())
-    self.hdm = hdm
     self.x = None
     self.x_target_functor = None
     self.not_hd_selection = None # XXX UGLY
@@ -185,6 +188,9 @@ class sites(object):
     self.restraints_weight = 1.
     self.r_works = flex.double()
     self.n_converged = 0
+    self.keep_selection = None
+    if self.exclude_selection is not None:
+      self.keep_selection = ~self.exclude_selection
 
   def _initialize(self, fmodel):
     self.sites_cart_start = fmodel.xray_structure.sites_cart().deep_copy()
@@ -272,6 +278,9 @@ class sites(object):
     if self.hdm is not None:
       XG = self.hdm.shrink(array=XG)
 
+    if self.keep_selection is not None:
+      XG = XG.select(self.keep_selection)
+
     rt, rg = self.restraints_manager.target_and_gradients(sites_cart = XG)
 
     if self.hdm is not None:
@@ -281,6 +290,11 @@ class sites(object):
     dt = tgx.target_work()
     dg = flex.vec3_double(tgx.\
       gradients_wrt_atomic_parameters(site=True).packed())
+
+    if self.keep_selection is not None:
+      dg = dg.set_selected(self.exclude_selection, [0,0,0])
+      tmp = flex.vec3_double(dg.size(), [0,0,0])
+      rg = tmp.set_selected(self.keep_selection, rg)
 
     if self.hdm is not None:
       dg = self.hdm.average(array = dg)

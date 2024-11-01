@@ -122,8 +122,8 @@ def h_diff_sel(h1, h2):
   return result
 
 class from_expansion(object):
-  def __init__(self, params, restraints_source, model):
-    self.model               = model
+  def __init__(self, params, restraints_source):
+    self.model               = restraints_source.model
     self.restraints_manager  = restraints_source.restraints_manager
     self.restraints_source   = restraints_source
     self.params              = params
@@ -258,8 +258,7 @@ class from_altlocs2(object):
       params = self.params, model = model)
     return from_expansion(
         params            = self.params,
-        restraints_source = restraints_source,
-        model             = model).target_and_gradients
+        restraints_source = restraints_source).target_and_gradients
 
   def target_and_gradients(self, sites_cart):
     self.model.set_sites_cart(sites_cart=sites_cart)

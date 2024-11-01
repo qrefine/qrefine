@@ -155,26 +155,18 @@ class hd_mapper(object):
       assert g != (0,0,0)
     return g_all
 
-def create_restraints_manager(params, model, hdm=None):
+def create_restraints_manager(params, model, altlocs_present):
   restraints_source = restraints.restraints(params = params, model = model)
-  #
-  # Exchengeable H/D as the only altlocs in the model. Special case.
-  # Works only with expansion.
-  #
-  if model.altlocs_present_only_hd():
-    return restraints.from_expansion(
-      params            = params,
-      restraints_source = restraints_source,
-      model             = hdm.get_single_model())
   #
   # General case of altlocs. Developmenal code. NOT IN PRODUCTION.
   #
-  elif(model.altlocs_present()):
+  if(altlocs_present):
+    assert not model.altlocs_present_only_hd()
     return restraints.from_altlocs2(
       model  = model,
       params = params,
       method = params.cluster.altloc_method)
-  #
+
   # No altlocs of any kind with expansion.
   #
   if(params.expansion):
@@ -193,9 +185,7 @@ def create_restraints_manager(params, model, hdm=None):
         params.cluster.select_within_radius=rss
         FE = restraints.from_expansion(
           params            = params,
-          restraints_source = restraints_source,
-          pdb_hierarchy     = model.get_hierarchy(),
-          crystal_symmetry  = model.crystal_symmetry())
+          restraints_source = restraints_source)
         _, g = FE.target_and_gradients(sites_cart = model.get_sites_cart())
         result[rss] = g
         print("Trying rss", rss, time.time()-t0)
@@ -207,8 +197,7 @@ def create_restraints_manager(params, model, hdm=None):
     #
     return restraints.from_expansion(
       params            = params,
-      restraints_source = restraints_source,
-      model             = model)
+      restraints_source = restraints_source)
   #
   # No altlocs of any kind, no expansion
   #
@@ -223,16 +212,21 @@ def create_restraints_manager(params, model, hdm=None):
       # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
 
-def create_calculator(params, restraints_manager, model, fmodel=None, hdm=None):
+def create_calculator(params, restraints_manager, model, fmodel=None, hdm=None,
+                      exclude_selection=None):
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
       assert model is not None
       return calculator.sites(
         fmodel             = fmodel,
         hdm                = hdm,
+        exclude_selection  = exclude_selection,
         restraints_manager = restraints_manager,
         dump_gradients     = params.dump_gradients)
     else:
+      # XXX
+      # XXX exclude_selection and hdm are not used XXX
+      # XXX
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
         model              = model,
@@ -325,11 +319,34 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   start_fmodel = fmodel
   start_ph = None # is it used anywhere? I don't see where it is used!
 
+  # XXX This needs to be consolidated !
+  altlocs_present = model.altlocs_present()
+
   hdm = None
   if model.altlocs_present_only_hd():
     hdm = hd_mapper(model = model)
+
+  exclude_selection = None
+  if params.refine.exclude is not None:
+    exclude_selection = model.selection(string = params.refine.exclude)
+
+  if [exclude_selection, hdm].count(None)==0:
+    raise Sorry("exclude_selection is incompatible with presence of H/D.")
+  if params.cluster.clustering:
+    if exclude_selection is not None:
+      raise Sorry("exclude_selection is incompatible with clustering=True")
+
+  if hdm is not None:
+    model_for_restraints = hdm.get_single_model()
+  elif exclude_selection is not None:
+    model_for_restraints = model.select(~exclude_selection)
+  else:
+    model_for_restraints = model
+
   restraints_manager = create_restraints_manager(
-    params=params, model=model, hdm=hdm)
+    params=params, model=model_for_restraints, altlocs_present=altlocs_present)
+
+  # XXX This needs to be consolidated !
 
   if(map_data is not None and params.refine.mode == "refine"):
     model.geometry_statistics(use_hydrogens=False).show()
@@ -367,7 +384,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       model              = model,
       params             = params,
       restraints_manager = restraints_manager,
-      hdm                = hdm)
+      hdm                = hdm,
+      exclude_selection  = exclude_selection)
     if(params.refine.mode == "refine"):
       #
       # Optimize H

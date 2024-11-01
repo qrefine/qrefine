@@ -42,8 +42,8 @@ def get_restraints_manager(expansion, file_name, altloc_method):
   #params.cluster.maxnum_residues_in_cluster=6
   params.cluster.maxnum_residues_in_cluster=999
 
-  result = refine.create_restraints_manager(params=params, model=model), \
-         model.get_sites_cart()
+  result = refine.create_restraints_manager(params=params, model=model,
+    altlocs_present=True), model.get_sites_cart()
   return result
 
 def run(prefix, verbose=False):

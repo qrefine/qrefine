@@ -322,6 +322,7 @@ def refine(fmodel,
     data_weight = calculator_module.compute_weight(
       fmodel             = fmodel_copy,
       hdm                = calculator.hdm,
+      exclude_selection  = calculator.exclude_selection,
       restraints_manager = calculator.restraints_manager)
     calculator.setw(
       data_weight             = data_weight,
