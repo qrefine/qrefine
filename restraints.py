@@ -117,7 +117,8 @@ def h_diff_sel(h1, h2):
   for a in h2.atoms():
     if not getids(a) in d:
       sel.append(a.i_seq)
-  assert sel.size() == h2.atoms().size() - h1.atoms().size()
+  s1,s2 = h2.atoms().size() , h1.atoms().size()
+  assert sel.size() == s1-s2, [sel.size(), s1-s2]
   result = ~flex.bool(h2.atoms().size(), sel)
   return result
 
@@ -136,37 +137,61 @@ class from_expansion(object):
       crystal_symmetry     = self.model.crystal_symmetry(),
       select_within_radius = self.params.cluster.select_within_radius)
 
+    # DEBUGGING
+    #self.expansion.ph_super_sphere.write_pdb_file(
+    #  file_name = "ss.pdb",
+    #  crystal_symmetry = self.expansion.cs_box)
+
     if restraints_source.source_of_restraints_qm():
+      master_selection = flex.bool(
+        self.expansion.ph_super_sphere.atoms().size(), False)
+      master_selection = master_selection.set_selected(
+        flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
       self.pdb_hierarchy_super_completed = model_completion.run(
         pdb_hierarchy          = self.expansion.ph_super_sphere.deep_copy(),
         crystal_symmetry       = self.expansion.cs_box,
         model_completion       = False,
         original_pdb_filename  = None,
         append_to_end_of_model = False, #XXX
+        selection              = ~master_selection, # DO NOT TOUCH THE MASTER!
         use_reduce             = self.params.use_reduce)
+      # ASSERT MASTER IS UNTOUCHED
+      hm = self.expansion.ph_super_sphere.select(master_selection)
+      master_selection = flex.bool(
+        self.pdb_hierarchy_super_completed.atoms().size(), False)
+      master_selection = master_selection.set_selected(
+        flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
+      hc = self.pdb_hierarchy_super_completed.select(master_selection)
+      assert hc.is_similar_hierarchy(hm)
     else:
       self.pdb_hierarchy_super_completed = self.expansion.ph_super_sphere.deep_copy()
+
+    # DEBUGGING
+    #self.pdb_hierarchy_super_completed.write_pdb_file(
+    #  file_name = "ss_completed0.pdb",
+    #  crystal_symmetry = self.expansion.cs_box)
 
     # Selection of master copy
     selection = flex.bool(
       self.pdb_hierarchy_super_completed.atoms().size(), False)
     self.selection = selection.set_selected(
       flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
-    # At this point here we are sure the model is complete. So make sure the
-    # call above only changes (completes) the explansion part and leaves the
-    # master copy intact!
-    sites_cart_master = self.model.get_hierarchy().atoms().extract_xyz()
-    sites_cart_all = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
-    sites_cart_all = sites_cart_all.set_selected(self.selection, sites_cart_master)
-    self.pdb_hierarchy_super_completed.atoms().set_xyz(sites_cart_all)
+#    # At this point here we are sure the model is complete. So make sure the
+#    # call above only changes (completes) the explansion part and leaves the
+#    # master copy intact!
+#    sites_cart_master = self.model.get_hierarchy().atoms().extract_xyz()
+#    sites_cart_all = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
+#    sites_cart_all = sites_cart_all.set_selected(self.selection, sites_cart_master)
+#    self.pdb_hierarchy_super_completed.atoms().set_xyz(sites_cart_all)
     #
     self.model.get_hierarchy().atoms().reset_i_seq()
     self.expansion.ph_super_sphere.atoms().reset_i_seq()
     self.pdb_hierarchy_super_completed.atoms().reset_i_seq()
 
-    self.pdb_hierarchy_super_completed.write_pdb_file(
-      file_name = "supersphere.pdb",
-      crystal_symmetry = self.expansion.cs_box)
+    # DEBUGGING
+    #self.pdb_hierarchy_super_completed.write_pdb_file(
+    #  file_name = "ss_completed1.pdb",
+    #  crystal_symmetry = self.expansion.cs_box)
 
     self.restraints_manager = self.restraints_source.update(
         pdb_hierarchy    = self.pdb_hierarchy_super_completed,

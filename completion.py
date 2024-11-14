@@ -27,7 +27,8 @@ def from_simple_connectivity(
       hierarchy,
       geometry_restraints_manager,
       use_capping_hydrogens=False,
-      append_to_end_of_model=False):
+      append_to_end_of_model=False,
+      selection=None):
   atoms = hierarchy.atoms()
   bonds=get_bonds_as_dict(geometry_restraints_manager)
   conn = distance_based_connectivity.build_edge_list(
@@ -39,6 +40,7 @@ def from_simple_connectivity(
   additional_hydrogens = hierarchy_utils.smart_add_atoms()
   for k, v in zip(dconn.keys(), dconn.values()):
     a  = atoms[k]
+    if selection is not None and not selection[a.i_seq]: continue # XXX
     rg = a.parent().parent()
     skip=False
     for resname in rg.unique_resnames():
@@ -62,8 +64,17 @@ def from_simple_connectivity(
         append_to_end_of_model=append_to_end_of_model,
       )
       if rc: additional_hydrogens.append(rc)
+
   for rg in hierarchy.residue_groups():
     if use_capping_hydrogens:
+
+      skip=True
+      for a in rg.atoms():
+        if selection is not None and not selection[a.i_seq]:
+          skip=True
+          break
+      if skip: continue
+
       rc = conditional_add_cys_hg_to_atom_group(
         geometry_restraints_manager,
         rg,
@@ -166,6 +177,7 @@ def add_terminal_hydrogens_qr(
     append_to_end_of_model=False, # useful for Q|R
     original_hierarchy=None,
     verbose=False,
+    selection=None,
     ):
   # add N terminal hydrogens because Reduce only does it to resseq=1
   # needs to be alt.loc. aware for non-quantum-refine
@@ -175,6 +187,7 @@ def add_terminal_hydrogens_qr(
       geometry_restraints_manager,
       use_capping_hydrogens=use_capping_hydrogens,
       append_to_end_of_model=append_to_end_of_model,
+      selection=selection,
       )
   else:
     additional_hydrogens=iterate_over_threes(
@@ -192,7 +205,7 @@ def add_terminal_hydrogens_qr(
         tmp.append(chain)
     _add_atoms_from_chains_to_end_of_hierarchy(hierarchy, tmp)
 
-def remove_acid_side_chain_hydrogens(hierarchy):
+def remove_acid_side_chain_hydrogens(hierarchy, selection=None):
   from mmtbx.ligands.ready_set_basics import get_proton_info
   proton_element, proton_name = get_proton_info(hierarchy)
   removes = {"GLU" : "%sE2" % proton_element,
@@ -202,6 +215,10 @@ def remove_acid_side_chain_hydrogens(hierarchy):
     r = removes.get(ag.resname, None)
     if r is None: continue
     atom = ag.get_atom(r)
+    skip=False
+    if selection is not None and not selection[atom.i_seq]: skip=True
+    if skip:
+      continue
     if atom:
       ag.remove_atom(atom)
   hierarchy.atoms_reset_serial()
@@ -227,7 +244,8 @@ def complete_pdb_hierarchy(hierarchy,
                            original_pdb_filename=None,
                            verbose=False,
                            debug=False,
-                           use_reduce=True
+                           use_reduce=True,
+                           selection=None,# ONLY APPLIES FOR CAPPING
                           ):
   #
   # some validations
@@ -280,7 +298,10 @@ def complete_pdb_hierarchy(hierarchy,
   #
   ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
 
-  remove_acid_side_chain_hydrogens(ppf.all_chain_proxies.pdb_hierarchy)
+  if not use_capping_hydrogens:
+    remove_acid_side_chain_hydrogens(
+      hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
+      selection=selection)
   #
   # add hydrogens in special cases
   #  eg ETA
@@ -297,6 +318,7 @@ def complete_pdb_hierarchy(hierarchy,
                              append_to_end_of_model=append_to_end_of_model,
                              original_hierarchy=original_hierarchy,
                              verbose=verbose,
+                             selection=selection,
                             ) # in place
   ppf.all_chain_proxies.pdb_hierarchy.atoms().set_chemical_element_simple_if_necessary()
   ppf.all_chain_proxies.pdb_hierarchy.sort_atoms_in_place()
@@ -308,7 +330,8 @@ def run(pdb_filename=None,
         model_completion=True,
         original_pdb_filename=None,
         append_to_end_of_model=True,
-        use_reduce=True
+        use_reduce=True,
+        selection=None, # ONLY APPLIES FOR CAPPING
         ):
   #
   # function as be used in two main modes
@@ -357,7 +380,8 @@ def run(pdb_filename=None,
     crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(), # used in get_raw_records. why
     original_pdb_filename=original_pdb_filename,
     verbose=False,
-    use_reduce=use_reduce
+    use_reduce=use_reduce,
+    selection=selection, # ONLY APPLIES FOR CAPPING
   )
   if pdb_filename:
     output = hierarchy_utils.write_hierarchy(
