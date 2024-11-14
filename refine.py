@@ -116,6 +116,7 @@ class hd_mapper(object):
         if self.elements[it]=="D": self.keep[it] = False
     self.n_keep = self.keep.count(True)
     self._model = model.select(self.keep)
+    self._model.de_deuterate()
 
   def get_single_model(self):
     return self._model
