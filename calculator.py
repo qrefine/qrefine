@@ -272,6 +272,10 @@ class sites(object):
   def target_and_gradients(self, x):
     self.number_of_target_and_gradients_calls+=1
     t0=time.time()
+
+    if self.hdm is not None:
+      x = self.hdm.average(array = flex.vec3_double(x)).as_double()
+
     self.update(x = x)
 
     XG = self.x
