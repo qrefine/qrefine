@@ -15,14 +15,6 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")
 qr_unit_tests_data = os.path.join(qr_unit_tests,"data_files")
 
-def assert_folder_is_empty(prefix):
-  if(len(os.listdir("."))>0):
-    print('-'*80)
-    print("Folder is not empty: test prefix:", prefix)
-    print("Remove before proceeding:", os.listdir("."))
-    print('-'*80)
-    raise Sorry("Folder is not empty: test prefix:", prefix)
-
 def setup_helix_example(pdb_name = "m00_good.pdb",
                         mtz_name = "m00_good.mtz"):
   # Read good model and compute data from it.
@@ -65,41 +57,9 @@ def run_cmd(prefix,args,pdb_name = "m00_poor.pdb",
     raise SystemExit(f"A command within a test failed!")
   return rc.return_code
 
-def clean_up(prefix, mtz_name = None):
-  test_folder_name = prefix
-  if(os.path.exists(test_folder_name)):
-    shutil.rmtree(test_folder_name)
-  if(mtz_name is not None): os.remove(mtz_name)
-  try: os.remove("%s.log"%prefix)
-  except: pass
-  try: os.remove("m00_good.mtz")
-  except: pass
-  files_to_remove1 = [
-    'c_terminal_capping.pdb', 'c_terminal_capping_capping.pdb', 'cluster.xml',
-    'helix.pdb', 'helix_complete.pdb', 'helix_readyset_input.pdb', 'qmmm.xml',
-    'test_10_capping.pdb', 'test_cys_hg_capping.pdb',
-    'test_point_charges.pdb', 'q.xyz', "expansion.pdb",
-    'test_cys_hg_capping_capping.pdb', 'test_original_pdb.pdb',
-    'test_original_pdb_capping.pdb', 'test_short_gap.pdb',
-    'test_short_gap_capping.pdb', 'entire_qm.pdb', 'cluster_qm.pdb',
-    '%s.pdb'%prefix, '%s.log'%prefix, '%s_complete.pdb'%prefix,
-    '%s_readyset_input.pdb'%prefix]
-  files_to_remove2 = [
-    'tst_14.pdb', 'tst_14_p1.pdb', 'tst_14_super_cell.pdb', 'super_cell.pdb',
-    'tst_14_super_sphere.pdb','test_zn_his_charge.pdb']
-  files_to_remove3 = ['cluster_false.pkl', 'cluster_true.pkl','1-20.npy']
-  files_to_remove4 = ['A.pdb', 'B.pdb', 'W.pdb']
-  for f in files_to_remove1+files_to_remove2+files_to_remove3+files_to_remove4:
-    try: os.remove(f)
-    except: pass
-  for folder in ['ase', 'ase_error', 'pdb', '1-20','frag_pdbs']:
-    try:
-      shutil.rmtree(folder)
-    except: pass
-
 def runner(function, prefix, disable=False):
+  prefix = "qrefine_"+prefix
   import sys
-  assert_folder_is_empty(prefix=prefix)
   rc = 0
   try:
     if(disable):
@@ -108,16 +68,10 @@ def runner(function, prefix, disable=False):
       t0 = time.time()
       function(prefix = prefix)
       print(prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0))
-      # Turning this off to get some output from CI pipeline
-      if os.environ.get('CLEANUP_TESTS') is not None:
-          print("not cleaning up tests")
-      else:  
-        clean_up(prefix)
   except Exception as e:
       print(prefix, "FAILED", str(e))
       print(traceback.format_exc())
       rc=1
-  # clean_up(prefix)
   assert not rc, "%s rc: %s" % (prefix, rc)
   return rc
 
@@ -178,7 +132,7 @@ def run(nproc=1,
   in_separate_directory=True # not(nproc==1)
   for i, file_name in enumerate(tests):
     tests[i]=tuple([file_name, in_separate_directory])
-  #    
+  #
   for args, res, err_str in easy_mp.multi_core_run( _run_test,
                                                     tests,
                                                     nproc,
