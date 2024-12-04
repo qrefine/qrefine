@@ -485,21 +485,24 @@ def opt(model, params, monitor, calculator):
     if(params.cluster.clustering):
       cluster_qm_update.re_clustering(calculator)
     if(params.refine.minimizer == "lbfgs"):
+      core_params = scitbx.lbfgs.core_parameters(
+        stpmin = 1.e-9,
+        stpmax = params.refine.stpmax)
       minimized = minimizers.lbfgs(
         calculator     = calculator,
+        mode           = "lbfgs",
+        core_params    = core_params,
         max_iterations = params.refine.max_iterations_refine,
-        gradient_only  = params.refine.gradient_only,
-        stpmax         = params.refine.stpmax)
+        gradient_only  = params.refine.gradient_only)
     else:
       assert not params.refine.gradient_only
-      minimized = minimizers.lbfgsb(
+      minimized = minimizers.lbfgs(
+        mode           = "lbfgsb",
         calculator     = calculator,
         max_iterations = params.refine.max_iterations_refine)
-    minimized.show(log = log_switch, prefix="")
     calculator.apply_x()
-
     monitor.update(model = model)
-    monitor.show(prefix="cycle %d: "%micro_cycle)
+    monitor.show(prefix="cycle %d: f=%.9g | "%(micro_cycle, calculator.f))
     monitor.write_pdb_file(
       output_folder_name = params.output_folder_name,
       output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")

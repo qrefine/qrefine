@@ -145,6 +145,15 @@ class sites_opt(object):
   def compute_functional_and_gradients(self):
     return self.target_and_gradients()
 
+  def update(self, x):
+    self.x = x
+
+    self.target_and_gradients()
+
+  def target(self): return self.f
+
+  def gradients(self): return self.g
+
   def apply_x(self):
     self.f_start = self.f
     self.model.set_sites_cart(

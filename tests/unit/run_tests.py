@@ -66,12 +66,15 @@ def runner(function, prefix, disable=False):
       print(prefix + ": Skipped (not recommended, do something about it!)")
     else:
       t0 = time.time()
+      os.mkdir(prefix)
+      os.chdir(prefix)
       function(prefix = prefix)
       print(prefix + ":  OK  " + "Time: %6.2f (s)" % (time.time() - t0))
   except Exception as e:
       print(prefix, "FAILED", str(e))
       print(traceback.format_exc())
       rc=1
+  os.chdir('..')
   assert not rc, "%s rc: %s" % (prefix, rc)
   return rc
 
