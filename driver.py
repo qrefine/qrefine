@@ -55,7 +55,7 @@ class minimizer(object):
       exception_handling_params=scitbx.lbfgs.exception_handling_parameters(
         ignore_line_search_failed_rounding_errors=True,
         ignore_line_search_failed_step_at_lower_bound=True,
-        ignore_line_search_failed_step_at_upper_bound=False,#True,
+        ignore_line_search_failed_step_at_upper_bound=True,
         ignore_line_search_failed_maxfev=True,
         ignore_line_search_failed_xtol=True,
         ignore_search_direction_not_descent=True
@@ -73,15 +73,16 @@ class minimizer(object):
   # TMP disabled to see the effect on refinement with ANI
   #
   #def callback_after_step(self, minimizer=None):
-  #  if(self.geometry_rmsd_manager is not None and self.mode=="weight"):
-  #    assert self.max_bond_rmsd is not None
-  #    b_mean = self._get_bond_rmsd()
-  #    print("    self.max_bond_rmsd", self.max_bond_rmsd, b_mean,
-  #       self.number_of_function_and_gradients_evaluations)
-  #    if(b_mean>self.max_bond_rmsd and
-  #       self.number_of_function_and_gradients_evaluations-3>20):
-  #      return True
-  #  if(self.calculator.converged()): return True
+  #  print("CALLING BACK")
+    #if(self.geometry_rmsd_manager is not None and self.mode=="weight"):
+    #  assert self.max_bond_rmsd is not None
+    #  b_mean = self._get_bond_rmsd()
+    #  print("    self.max_bond_rmsd", self.max_bond_rmsd, b_mean,
+    #     self.number_of_function_and_gradients_evaluations)
+    #  if(b_mean>self.max_bond_rmsd and
+    #     self.number_of_function_and_gradients_evaluations-3>20):
+    #    return True
+    #if(self.calculator.converged()): return True
 
   def compute_functional_and_gradients(self):
     self.number_of_function_and_gradients_evaluations += 1
@@ -469,19 +470,19 @@ def refine(fmodel,
   print("Best Rwork, Rfree (after refinement): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
 
-def opt(model, params, monitor, calculator):
-  assert model == calculator.model
+def opt(params, monitor, calculator):
+  assert monitor.model == calculator.model
   log_switch = None
   if (params.refine.opt_log or params.debug): log_switch=log
   monitor.show(prefix="start:")
   if(params.cluster.clustering):
     cluster_qm_update = clustering_update(
-      model.get_sites_cart(), log,
+      calculator.model.get_sites_cart(), log,
       params.cluster.re_calculate_rmsd_tolerance)
     print("\ninteracting pairs number:  ",\
       len(calculator.restraints_manager.fragment_manager.interaction_list), file=log)
   for micro_cycle in range(params.refine.number_of_micro_cycles):
-    assert model == calculator.model
+    assert monitor.model == calculator.model
     if(params.cluster.clustering):
       cluster_qm_update.re_clustering(calculator)
     if(params.refine.minimizer == "lbfgs"):
@@ -501,8 +502,9 @@ def opt(model, params, monitor, calculator):
         calculator     = calculator,
         max_iterations = params.refine.max_iterations_refine)
     calculator.apply_x()
-    monitor.update(model = model)
-    monitor.show(prefix="cycle %d: f=%.9g | "%(micro_cycle, calculator.f))
+    monitor.update(model = calculator.model)
+    monitor.show(prefix="cycle %d: f=%.9g nfev: %3d | "%(
+      micro_cycle, calculator.f, calculator.number_of_target_and_gradients_calls))
     monitor.write_pdb_file(
       output_folder_name = params.output_folder_name,
       output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")

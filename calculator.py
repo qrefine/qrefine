@@ -96,13 +96,15 @@ class sites_opt(object):
 
   def __init__(self, model, max_shift, restraints_manager, shift_eval,
                dump_gradients=False, convergence_threshold=1.e-3,
-               convergence_reached_times=3):
+               convergence_reached_times=3, use_callback_after_step=False,
+               ):
+    self.use_callback_after_step = use_callback_after_step
     self.model = model
     self.restraints_manager = restraints_manager
     self.dump_gradients = dump_gradients
     self.convergence_threshold = convergence_threshold
     self.convergence_reached_times = convergence_reached_times
-    self.meat_convergence_criteria = 0
+    self.meet_convergence_criteria = 0
     self.x = flex.double(self.model.size()*3, 0)
     self.n = self.x.size()
     self.f = None
@@ -120,13 +122,28 @@ class sites_opt(object):
     else:                          self.shift_eval_func = flex.max
     self.total_time = 0
     self.number_of_target_and_gradients_calls = 0
+    self.sites_plus_x = self.set_sites_plus_x()
+    self._converged = False
+
+  def set_sites_plus_x(self):
+    self.sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
+    return self.sites_plus_x
+
+  def callback_after_step(self, minimizer=None):
+    if not self.use_callback_after_step: return None
+    shift_from_start = flex.mean(flex.sqrt(
+      (self.sites_plus_x - self.sites_cart_start).dot()))
+    if shift_from_start >= self.convergence_threshold:
+      self._converged = True
+      return True
+    else: return False
 
   def target_and_gradients(self):
     self.number_of_target_and_gradients_calls+=1
     t0=time.time()
-    sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
+    self.set_sites_plus_x()
     self.f, self.g = self.restraints_manager.target_and_gradients(
-      sites_cart = sites_plus_x)
+      sites_cart = self.sites_plus_x)
     self.g = self.g.as_double()
     # For tests
     if(self.dump_gradients):
@@ -136,9 +153,8 @@ class sites_opt(object):
     #
     if(self.f_start is None):
       self.f_start = self.f
-
     self.max_shift_between_resets = self.shift_eval_func(flex.sqrt((
-      self.sites_cart - sites_plus_x).dot()))
+      self.sites_cart - self.sites_plus_x).dot()))
     self.total_time += (time.time()-t0)
     return self.f, self.g
 
@@ -147,7 +163,6 @@ class sites_opt(object):
 
   def update(self, x):
     self.x = x
-
     self.target_and_gradients()
 
   def target(self): return self.f
@@ -161,17 +176,12 @@ class sites_opt(object):
     self.x = flex.double(self.model.size()*3, 0)
     self.sites_cart = self.model.get_sites_cart()
     if(self.max_shift_between_resets < self.convergence_threshold):
-      self.meat_convergence_criteria += 1
+      self.meet_convergence_criteria += 1
+      if(self.meet_convergence_criteria >= self.convergence_reached_times):
+        self._converged = True
 
   def converged(self):
-    if(self.meat_convergence_criteria >= self.convergence_reached_times):
-      return True
-    return False
-
-  def mean_shift_from_start(self):
-    # Assumes apply_x has been called before so that self.sites_cart are updated
-    return flex.mean(flex.sqrt((
-      self.sites_cart - self.sites_cart_start).dot()))
+    return self._converged
 
   def __call__(self):
     f, g = self.target_and_gradients()

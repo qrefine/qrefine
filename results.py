@@ -11,7 +11,7 @@ class manager(object):
   def __init__(self, model, geometry_rmsd_manager, log):
     self.log = log
     self.geometry_rmsd_manager = geometry_rmsd_manager
-    self.model = model.deep_copy()
+    self.model = model#.deep_copy()
     self.sites_cart_start = self.model.get_sites_cart().deep_copy()
     self.sites_cart_prev  = self.sites_cart_start.deep_copy()
     self.sites_cart       = self.sites_cart_start.deep_copy()
@@ -46,8 +46,11 @@ class manager(object):
     self.shift_prev  = _(self.sites_cart_prev,  self.sites_cart)
     self.sites_cart_prev = self.sites_cart.deep_copy()
 
+  def get_stats(self):
+    return self.model.geometry_statistics(use_hydrogens=False)
+
   def g_info(self):
-    stats = self.model.geometry_statistics(use_hydrogens=False)
+    stats = self.get_stats()
     s = stats.show_short()
     s = s.split()
     s = " ".join(s)
