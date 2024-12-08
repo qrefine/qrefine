@@ -73,9 +73,10 @@ def run(prefix):
   #
   # Check all three files are the same
   #
-  s1 = iotbx.pdb.input("tst_02a_from_altlocs.pdb").atoms().extract_xyz()
-  s2 = iotbx.pdb.input("tst_02a_from_cctbx.pdb").atoms().extract_xyz()
-  s3 = iotbx.pdb.input("tst_02a/tst_02a_refined.pdb").atoms().extract_xyz()
+  cwd = os.getcwd()
+  s1 = iotbx.pdb.input("%s/qrefine_tst_02a_from_altlocs.pdb"%cwd).atoms().extract_xyz()
+  s2 = iotbx.pdb.input("%s/qrefine_tst_02a_from_cctbx.pdb"%cwd).atoms().extract_xyz()
+  s3 = iotbx.pdb.input("%s/qrefine_tst_02a/qrefine_tst_02a_refined.pdb"%cwd).atoms().extract_xyz()
   d1 = flex.mean(flex.sqrt((s1 - s2).dot()))
   d2 = flex.mean(flex.sqrt((s1 - s3).dot()))
   assert d1 < 1.e-4, d1 # This is what we expect!
@@ -87,11 +88,15 @@ def cctbx_opt(model, restraints_manager, max_shift=0.2, max_iterations=25):
   s1 = model.get_sites_cart().deep_copy()
   C = calculator.sites_opt(model=model, max_shift=max_shift,
     restraints_manager=restraints_manager, shift_eval="mean")
+  import scitbx.lbfgs
+  core_params = scitbx.lbfgs.core_parameters(
+    stpmin = 1.e-9,
+    stpmax = max_shift)
   minimized = minimizers.lbfgs(
     calculator     = C,
+    mode           = "lbfgs",
     gradient_only  = True,
-    max_iterations = max_iterations,
-    stpmax         = max_shift)
+    max_iterations = max_iterations)
   C.apply_x()
   print("Moved by:", flex.mean(flex.sqrt((s1 - C.model.get_sites_cart()).dot())))
   return C.model.get_sites_cart()
