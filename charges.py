@@ -84,6 +84,7 @@ class charges_class:
                verbose=False,
                ):
     self.verbose=verbose
+    self.cif_objects = cif_objects
     self.pdb_filename=pdb_filename
     self.raw_records=raw_records
     assert not (ligand_cif_file_names and cif_objects)
@@ -94,7 +95,6 @@ class charges_class:
       pdb_hierarchy = pdb_hierarchy,
       crystal_symmetry = crystal_symmetry,
       cif_objects  = cif_objects)
-
     self.inter_residue_bonds = get_inter_residue_bonds(ppf)
     cs = crystal_symmetry
     if cs is None:
@@ -160,6 +160,7 @@ class charges_class:
         )
       charge = electrons.run(pdb_filename=self.pdb_filename,
                              raw_records=self.raw_records,
+                             cif_objects=self.cif_objects,
                              return_formal_charges=list_charges,
                              verbose=verbose,
       )

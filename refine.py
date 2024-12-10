@@ -402,9 +402,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       # PRE-OPTIMIZATION (CODITIONAL)
       #
       stats = monitor.get_stats()
-      if(stats.rama_z_score().whole.value<-2.5 or
+      if(stats.rama_z_score().whole.value is not None and (
+         stats.rama_z_score().whole.value<-2.5 or
          stats.clash().score>10 or
-         fmodel.f_obs().d_min()>3):
+         fmodel.f_obs().d_min()>3)):
         print("Initial geometry regularization:")
         print("  r_work: %6.4f r_free: %6.4f"%(
           fmodel.r_work(), fmodel.r_free()))
