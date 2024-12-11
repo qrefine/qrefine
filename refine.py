@@ -436,7 +436,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     else:
       driver.opt(
         params     = params,
-        model      = model,
         calculator = calculator_manager,
         monitor    = monitor)
     monitor.finalize(
