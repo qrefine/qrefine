@@ -90,15 +90,18 @@ if [[ ! -e "$PHENIX/build/qrefine_configure.log" ]]; then
     libtbx.configure qrefine > qrefine_configure.log
 fi
 
-
+source $PHENIX/build/setpaths.sh
 QR=$PHENIX/modules/qrefine
 
 # update phenix conda_base
 echo "Updating Phenix's conda-base .."
 # env update sometimes installs cctbx-base by itself!? changing to install 
-# conda env update -p $CONDA --file $QR/config/phenix.yaml > --json > $PHENIX/build/conda_update.json
+conda env update -p $CONDA --file $QR/config/phenix.yaml --json > $PHENIX/build/conda_update.json
+if [[ $(INSTALLER) == "false" ]]; then
+  conda remove -p $CONDA -y --force cctbx-base
+fi
 # conda install -p $CONDA -y --file $QR/config/phenix_req.txt -c conda-forge > $PHENIX/build/conda_qr.out
-qrefine.python -m pip install -r $QR/config/phenix.txt > $PHENIX/build/qrefine_req.out
+#qrefine.python -m pip install -r $QR/config/phenix.txt > $PHENIX/build/qrefine_req.out
 
 if [ $TORCH == "true" ]; then
 echo "Installing pytorch and aimnet2 depedencies .."

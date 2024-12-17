@@ -1,3 +1,2 @@
 ase==3.22.*
 pymongo==4.8.0
-xtb

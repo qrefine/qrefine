@@ -80,5 +80,5 @@ fi
 echo "Setup QR+Phenix in the future with:"
 echo "   source $PHENIX/build/setpaths.sh"
 echo "we suggest to save this line to your .bashrc or similar"
-echo "For convience we also sys-linked setpaths.sh to the current directory"
-ln -s $PHENIX/build/setpaths.sh .
+echo "For convience we also wrote the command source_qrefine.sh"
+echo 'source $PHENIX/build/setpaths.sh' > source_qrefine.sh
