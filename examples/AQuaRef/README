@@ -26,7 +26,7 @@ Since AQuaRef requires an atom-complete model, missing hydrogens were added with
 TIME TO RUN
 -----------
 
-About 5 minutes.
+Less than 5 minutes (depending on hardware used).
 
 ---------------------------------
 COMMAND TO RUN AQUAREF REFINEMENT
@@ -34,9 +34,13 @@ COMMAND TO RUN AQUAREF REFINEMENT
 
   qr.aquaref 3j63_chainA_box_complete.pdb 3j63_chainA_box_masked.ccp4
   
+Refined model is real_space_refined.pdb
+  
 --------------------------------
 MODEL GEOMETRY BEFORE REFINEMENT
 --------------------------------
+
+Compute model geometry statistics:
 
   phenix.model_statistics 3j63_chainA_box.pdb
   
@@ -74,6 +78,9 @@ therefore, the values are not related in a simple manner.
   helix: -4.69 (0.38), residues: 34
   sheet:  None (None), residues: 0
   loop : -1.80 (0.74), residues: 55
+  
+Note: very poor clashscore, Ramachandran plot statistics (counts and Rama-Z), 
+and poor side chain rotamers.
   
 -------------------------------
 MODEL GEOMETRY AFTER REFINEMENT
@@ -115,6 +122,9 @@ therefore, the values are not related in a simple manner.
   helix: -2.48 (0.55), residues: 49
   sheet:  None (None), residues: 0
   loop :  0.36 (0.90), residues: 40
+  
+Note: perfect clashscore, Ramachandran plot statistics (counts and Rama-Z), 
+and very good side chain rotamers.
   
 -------------------------
 MODEL-TO-DATA FIT QUALITY
