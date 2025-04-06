@@ -1,0 +1,132 @@
+-----------
+DESCRIPTION
+-----------
+
+This is to illustrate a simple AQuaRef refinement using cryo-EM data.
+
+-----------
+SOURCE DATA
+-----------
+
+Input atomic model and data (map) for 3j63 were obtained using
+
+  phenix.fetch_pdb 3j63 action=model+data
+
+For example purposes, to cut down on runtime, only one chain (A) was selected 
+from the original model, and map and model were boxed as following:
+
+  phenix.map_box 3j63_chainA.pdb emd_5830.map keep_origin=False \
+    keep_input_unit_cell_and_grid=False mask_atoms=false
+  
+Since AQuaRef requires an atom-complete model, missing hydrogens were added with
+
+  qr.finalise reduce=false 3j63_chainA_box.pdb
+
+-----------
+TIME TO RUN
+-----------
+
+About 5 minutes.
+
+---------------------------------
+COMMAND TO RUN AQUAREF REFINEMENT
+---------------------------------
+
+  qr.aquaref 3j63_chainA_box_complete.pdb 3j63_chainA_box_masked.ccp4
+  
+--------------------------------
+MODEL GEOMETRY BEFORE REFINEMENT
+--------------------------------
+
+  phenix.model_statistics 3j63_chainA_box.pdb
+  
+Geometry Restraints Library: GeoStd + Monomer Library + CDL v1.2
+Deviations from Ideal Values - rmsd, rmsZ for bonds and angles.
+  Bond      :  0.004   0.033    713  Z= 0.295
+  Angle     :  1.224   8.260    959  Z= 0.848
+  Chirality :  0.071   0.176    112
+  Planarity :  0.004   0.038    124
+  Dihedral  : 17.730  83.377    274
+  Min Nonbonded Distance : 2.290
+
+Molprobity Statistics.
+  All-atom Clashscore : 45.96
+  Ramachandran Plot:
+    Outliers :  4.49 %
+    Allowed  : 10.11 %
+    Favored  : 85.39 %
+  Rotamer:
+    Outliers :  5.48 %
+    Allowed  : 20.55 %
+    Favored  : 73.97 %
+  Cbeta Deviations :  0.00 %
+  Peptide Plane:
+    Cis-proline     : 0.00 %
+    Cis-general     : 0.00 %
+    Twisted Proline : 0.00 %
+    Twisted General : 0.00 %
+
+Rama-Z (Ramachandran plot Z-score):
+Interpretation: bad |Rama-Z| > 3; suspicious 2 < |Rama-Z| < 3; good |Rama-Z| < 2.
+Scores for whole/helix/sheet/loop are scaled independently;
+therefore, the values are not related in a simple manner.
+  whole: -4.46 (0.70), residues: 89
+  helix: -4.69 (0.38), residues: 34
+  sheet:  None (None), residues: 0
+  loop : -1.80 (0.74), residues: 55
+  
+-------------------------------
+MODEL GEOMETRY AFTER REFINEMENT
+-------------------------------
+
+phenix.model_statistics real_space_refined.pdb
+
+Geometry Restraints Library: GeoStd + Monomer Library + CDL v1.2
+Deviations from Ideal Values - rmsd, rmsZ for bonds and angles.
+  Bond      :  0.009   0.027    713  Z= 0.646
+  Angle     :  1.436   8.669    959  Z= 0.904
+  Chirality :  0.109   0.346    112
+  Planarity :  0.015   0.100    124
+  Dihedral  : 15.320  89.492    274
+  Min Nonbonded Distance : 2.632
+
+Molprobity Statistics.
+  All-atom Clashscore : 0.00
+  Ramachandran Plot:
+    Outliers :  0.00 %
+    Allowed  :  0.00 %
+    Favored  : 100.00 %
+  Rotamer:
+    Outliers :  0.00 %
+    Allowed  :  9.59 %
+    Favored  : 90.41 %
+  Cbeta Deviations :  0.00 %
+  Peptide Plane:
+    Cis-proline     : 0.00 %
+    Cis-general     : 0.00 %
+    Twisted Proline : 0.00 %
+    Twisted General : 0.00 %
+
+Rama-Z (Ramachandran plot Z-score):
+Interpretation: bad |Rama-Z| > 3; suspicious 2 < |Rama-Z| < 3; good |Rama-Z| < 2.
+Scores for whole/helix/sheet/loop are scaled independently;
+therefore, the values are not related in a simple manner.
+  whole: -2.14 (0.76), residues: 89
+  helix: -2.48 (0.55), residues: 49
+  sheet:  None (None), residues: 0
+  loop :  0.36 (0.90), residues: 40
+  
+-------------------------
+MODEL-TO-DATA FIT QUALITY
+-------------------------
+
+CCmask 
+  before refinement: 0.5418
+  after refinement:  0.5133
+  
+A slight decrease in CCmask after refinement, accompanied by significantly 
+improved model geometry, indicates that the original model was overfitting the 
+data.
+
+  
+
