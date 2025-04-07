@@ -342,7 +342,7 @@ and quantum.engine_name=aimnet2:
           self.params.refine.max_bond_rmsd=0.01
           self.params.refine.max_angle_rmsd=1.7
       elif self.map_data is not None:
-        self.params.refine.max_bond_rmsd=0.0001
+        self.params.refine.max_bond_rmsd=0.009
         self.params.expansion=False
         self.params.refine.minimizer="lbfgsb"
         self.params.refine.gradient_only=False
