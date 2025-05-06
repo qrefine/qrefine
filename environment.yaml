@@ -10,7 +10,7 @@ dependencies:
   - phenix-project::reduce
   # essentials
   - numpy=1.26
-  - python=3.11
+  - python=3.10
   - networkx
   - rdkit
   - pymongo
