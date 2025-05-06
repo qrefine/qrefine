@@ -3,14 +3,14 @@ channels:
   - conda-forge
 dependencies:
   # cctbx essentials
-  - cctbx-nightly::cctbx
-  - cctbx-nightly::cctbx-base
+  - cctbx=2024.12
+  - cctbx-base=2024.12
   - chem_data::chem_data
   - phenix-project::probe
   - phenix-project::reduce
   # essentials
   - numpy=1.26
-  - python=3.10
+  - python=3.11
   - networkx
   - rdkit
   - pymongo
