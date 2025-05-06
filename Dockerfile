@@ -1,4 +1,4 @@
-FROM condaforge/mambaforge:latest
+FROM condaforge/miniforge:latest
 SHELL ["/bin/bash", "--login", "-c"]
 
 # Base environment setup
