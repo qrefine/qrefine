@@ -406,7 +406,7 @@ class sites_real_space(object):
     bond_rmsds = []
     cntr = 0
     sites_cart_start = self.model.get_sites_cart().deep_copy()
-    while True: # Endless loop!
+    while True and self.skip_weight_search: # Endless loop!
       self.model.set_sites_cart(sites_cart = sites_cart_start.deep_copy())
       print("cycle:", cntr)
       cntr+=1
@@ -504,9 +504,12 @@ class sites_real_space(object):
     else:         return 1.0 # ad hoc default fallback
 
   def run(self):
-    weight = self.get_weight()
-    print("Initial weight estimate from ratio of grad norms:", weight)
-    self.macro_cycle(weight = weight)
+    if self.weight is None:
+      self.weight = self.get_weight()
+      print("Initial weight estimate from ratio of grad norms:", weight)
+    else:
+      print(f"Initial weight by user input: {self.weight}")
+    self.macro_cycle(weight = self.weight)
     return self.model
 
   def run_one(self, weight):

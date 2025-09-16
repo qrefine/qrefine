@@ -509,6 +509,9 @@ class from_qm(object):
       calculator = GFNxTB()
     elif(self.qm_engine_name == "server"):
       calculator = RestAPICalculator(url=self.url)
+    elif(self.qm_engine_name == "fairchem"):
+      from .plugin.ase.fairchem import FAIRChemCalculator2
+      calculator = FAIRChemCalculator2()
     else:
       raise Sorry("qm_calculator needs to be specified.")
     #

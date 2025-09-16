@@ -24,14 +24,18 @@ class RestAPICalculator(Calculator):
     def __init__(self, url=None):
         super().__init__()
         self.url = url
+        self.charge = 0
+        self.spin = 1
+        self.nproc = 1
 
-    def calculate(self, atoms=None, properties=["energy"], system_changes=all_changes):
-        # do_forces = "forces" in properties
+    def calculate(self, atoms=None, properties=["energy", "forces"], system_changes=all_changes):
         atoms_json = {
             "species": atoms.get_atomic_numbers().tolist(),
             "coordinates": atoms.get_positions().tolist(),
+            "spin": self.spin,
+            "charge": self.charge,
+            "ncpu": self.nproc
         }
-        # print(atoms_json)
         try:
             response = requests.post(url=f"{self.url}/calc", json=atoms_json)
             if response.status_code != int(200):
@@ -39,12 +43,18 @@ class RestAPICalculator(Calculator):
         except requests.exceptions.HTTPError as error:
             print(error)
         self.results["energy"] = np.array(response.json()["energy"])
-        # if do_forces:
-        self.results["forces"] = np.array(response.json()["forces"])
+        if "forces" in properties:
+            self.results["forces"] = np.array(response.json()["forces"])
 
     def run_qr(self, atoms,coordinates=None,charge=None,pointcharges=None,define_str=None):
+        """ Expects energy and forces in kcal/mol and kcal/mol/A """
         self.atoms = atoms
-        unit_convert = ase.units.kcal / ase.units.mol
+        self.charge = int(charge)
+        # unit_convert = ase.units.kcal / ase.units.mol
+        unit_convert = 1
         self.calculate(atoms, properties=["energy", "forces"])
         self.energy_free = self.results["energy"] * unit_convert
         self.forces = self.results["forces"].astype(np.float64) * unit_convert
+
+    def set_nproc(self, nproc):
+      self.nproc = int(nproc)

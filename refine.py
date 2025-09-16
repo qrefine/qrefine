@@ -259,6 +259,8 @@ def set_qm_defaults(params, log):
       params.quantum.method="aimnet2-qr"
       print(f"  Default Aimnet2 model: {params.quantum.method}", file=log)
       try:
+        import warnings
+        warnings.filterwarnings('ignore', module='aimnet2calc')
         from aimnet2calc import AIMNet2ASE
       except ModuleNotFoundError as e:
         print(str(e), file=log)
