@@ -114,7 +114,9 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 #### AQuaRef
 
 Roman Zubatyuk, Malgorzata Biczysko, Kavindri Ranasinghe, Nogel W. Moriarty, Hatice Gokcan, Holger Kruse, Billy K. Poon, Paul D. Adams, Mark P. Waller, Adrian E. Roitberg, Olexandr Isayev, and Pavel V. Afonine
+
 AQuaRef: machine learning accelerated quantum refinement of protein structures. 
+
 (2025) Nat. Commun. 16, 9224. 
 DOI: [10.1038/s41467-025-64313-1](https://doi.org/10.1038/s41467-025-64313-1)
 
