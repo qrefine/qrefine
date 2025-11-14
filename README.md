@@ -35,9 +35,12 @@ Depending on your use case, installation of qrefine follows 3 paths:
  - For Apple Silicon architecture please see the [additional notes](#apple-silicon)!
 
 
-**AQuaRef notes (aimnet2)**:
-To use AQuaRef follow the installation instructions above and request installation of `aimnet2`.
-A few extra notes, also for [performance](aimnet2.md#performance), are provided here: [AQuaRef notes](aimnet2.md)
+**AQuaRef notes**:
+AQuaRef is fully integrated into Phenix  starting dev-5395 version.
+To use AQuaRef it is recommended to install [recent Phenix version] (https://phenix-online.org/download/nightly_builds.cgi).
+Usage instructions are [here] (https://phenix-online.org/version_docs/2.0-5867/reference/AQuaRef.html)
+
+A few extra notes for open-souce only, also for [performance](aimnet2.md#performance), are provided here: [AQuaRef notes](aimnet2.md)
 
 
 ### Apple Silicon
@@ -88,7 +91,7 @@ qr.refine tests/unit/data_files/helix.pdb engine=mopac clustering=0 gradient_onl
 ```
 for AQuaRef run
 ```
-qr.refine your_pdb.pdb your_map.map mode=refine engine=aimnet2 
+qr.aquaref your_pdb.pdb your_map.map
 ```
 
 ### Contact us
@@ -104,6 +107,15 @@ The best way to get a hold of us is by sending us an email: qrefine@googlegroups
 - [Holger Kruse](https://github.com/hokru)
 
 ### Citations:
+
+#### AQuaRef
+
+Roman Zubatyuk, Malgorzata Biczysko, Kavindri Ranasinghe, Nogel W. Moriarty, Hatice Gokcan, Holger Kruse, Billy K. Poon, Paul D. Adams, Mark P. Waller, Adrian E. Roitberg, Olexandr Isayev, and Pavel V. Afonine
+AQuaRef: machine learning accelerated quantum refinement of protein structures. 
+(2025) Nat. Commun. 16, 9224. 
+DOI: [10.1038/s41467-025-64313-1](https://doi.org/10.1038/s41467-025-64313-1)
+
+#### Q|R
 
 Min Zheng, Jeffrey Reimers, Mark P. Waller, and Pavel V. Afonine,
 Q|R: Quantum-based Refinement,
