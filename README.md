@@ -36,6 +36,7 @@ Depending on your use case, installation of qrefine follows 3 paths:
 
 
 **AQuaRef notes**:
+
 AQuaRef is fully integrated into Phenix  starting dev-5395 version.
 
 To use AQuaRef it is recommended to install [recent Phenix version](https://phenix-online.org/download/nightly_builds.cgi).
