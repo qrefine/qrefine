@@ -404,7 +404,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       # PRE-OPTIMIZATION (CODITIONAL)
       #
       stats = monitor.get_stats()
-      if(stats.rama_z_score().whole.value is not None and (
+      if(params.refine.refine_sites is True and stats.rama_z_score().whole.value is not None and (
          stats.rama_z_score().whole.value<-2.5 or
          stats.clash().score>10 or
          fmodel.f_obs().d_min()>3)):

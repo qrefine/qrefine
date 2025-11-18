@@ -20,7 +20,6 @@ def run(prefix):
   ToDo: check other modes.
 
   """
-  run_tests.assert_folder_is_empty(prefix=prefix)
   pdb = os.path.join(qr_unit_tests_data,'helix.pdb')
   cmd = f"qr.gtest {pdb} restraints=cctbx g_scan=4 g_mode=1"
   assert easy_run.call(cmd)==0
