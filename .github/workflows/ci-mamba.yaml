@@ -30,12 +30,12 @@ jobs:
 
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: df
         run: df -h
 
-      - uses: mamba-org/setup-micromamba@v1.8.0
+      - uses: mamba-org/setup-micromamba@v2
         with:
           environment-file: environment.yaml
           cache-environment: false
@@ -60,6 +60,8 @@ jobs:
           cd testing_workdir
           source $CONDA_PREFIX/lib/$PY/site-packages/build/setpaths.sh
           qr.test | tee ../qr_test.txt
+          X=`grep FAILED ../qr_test.txt | sed s/qrefine_tst_// | awk 'BEGIN{print "The following tests FAILED:"} {print " * "$1'}`
+          echo "$X" >> $GITHUB_STEP_SUMMARY
 
       - name: looks at testing_workdir
         if: always()
@@ -68,14 +70,14 @@ jobs:
 
       - name: Archive qr test output
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: qr-test-output
           path: ./qr_test.txt
 
       - name: Archive qr-log files output
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: tests-dir
           path: /home/runner/work/qrefine/qrefine/testing_workdir
