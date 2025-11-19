@@ -60,11 +60,12 @@ jobs:
           cd testing_workdir
           source $CONDA_PREFIX/lib/$PY/site-packages/build/setpaths.sh
           qr.test | tee ../qr_test.txt
-          grep FAILED ../qr_test.txt | sed s/qrefine_tst_// | awk 'BEGIN{print "The following tests FAILED:"} {print " * "$1'} >> $GITHUB_STEP_SUMMARY
 
-      - name: looks at testing_workdir
+      - name: check tests and testing_workdir
         if: always()
-        run: ls -R
+        run: |
+         ls -R
+         grep FAILED ../qr_test.txt | sed s/qrefine_tst_// | awk 'BEGIN{print "The following tests FAILED:"} {print " * "$1'} >> $GITHUB_STEP_SUMMARY
         working-directory: /home/runner/work/qrefine/qrefine/testing_workdir
 
       - name: Archive qr test output
