@@ -96,6 +96,7 @@ def cctbx_opt(model, restraints_manager, max_shift=0.2, max_iterations=25):
     calculator     = C,
     mode           = "lbfgs",
     gradient_only  = True,
+    core_params    = core_params,
     max_iterations = max_iterations)
   C.apply_x()
   print("Moved by:", flex.mean(flex.sqrt((s1 - C.model.get_sites_cart()).dot())))
