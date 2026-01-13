@@ -408,27 +408,30 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
          stats.rama_z_score().whole.value<-2.5 or
          stats.clash().score>10 or
          fmodel.f_obs().d_min()>3)):
-        print("Initial geometry regularization:")
-        print("  r_work: %6.4f r_free: %6.4f"%(
-          fmodel.r_work(), fmodel.r_free()))
-        calculator_sites_opt_pre = calculator.sites_opt(
-          restraints_manager      = restraints_manager,
-          model                   = model,
-          dump_gradients          = False,
-          max_shift               = params.refine.stpmax,
-          shift_eval              = params.refine.shift_evaluation,
-          use_callback_after_step = True,
-          convergence_threshold   = 0.3)
-        driver.opt(
-          params     = params,
-          calculator = calculator_sites_opt_pre,
-          monitor    = monitor)
-        fmodel.xray_structure.set_sites_cart(
-          sites_cart = monitor.model.get_sites_cart())
-        fmodel.update_xray_structure(update_f_calc  = True)
-        print("  r_work: %6.4f r_free: %6.4f"%(
-          fmodel.r_work(), fmodel.r_free()))
-      # PRE-OPTIMIZATION (CODITIONAL) END
+        if params.refine.exclude is not None:
+          print("Initial geometry regularization skipped because of exclude_selection.", file=log)
+        else:
+          print("Initial geometry regularization:")
+          print("  r_work: %6.4f r_free: %6.4f"%(
+            fmodel.r_work(), fmodel.r_free()))
+          calculator_sites_opt_pre = calculator.sites_opt(
+            restraints_manager      = restraints_manager,
+            model                   = model,
+            dump_gradients          = False,
+            max_shift               = params.refine.stpmax,
+            shift_eval              = params.refine.shift_evaluation,
+            use_callback_after_step = True,
+            convergence_threshold   = 0.3)
+          driver.opt(
+            params     = params,
+            calculator = calculator_sites_opt_pre,
+            monitor    = monitor)
+          fmodel.xray_structure.set_sites_cart(
+            sites_cart = monitor.model.get_sites_cart())
+          fmodel.update_xray_structure(update_f_calc  = True)
+          print("  r_work: %6.4f r_free: %6.4f"%(
+            fmodel.r_work(), fmodel.r_free()))
+        # PRE-OPTIMIZATION (CODITIONAL) END
       driver.refine(
         params                = params,
         fmodel                = fmodel,

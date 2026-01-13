@@ -517,24 +517,29 @@ class from_qm(object):
     #
     # set to appropriate values
     #
-    for attr in ['charge',
-                 'basis',
-                 'method',
-                 'memory',
-                 'nproc',
-                 ]:
-      value = getattr(self, attr, None)
-      func = getattr(calculator, 'set_%s' % attr, None)
-      action=False
-      if func is not None:
-        if value is not None:
-          #print '  Setting %s to %s' % (attr, value)
-          func(value)
-          action=True
-      # XXX Avoid bare prints. Fix by propagating log channel.
-      #if not action:
-      #  if value and not func:
-      #    print '  No function available to set %s to %s' % (attr, value)
+    # aimnet2-qr plugin doesnt use these, however set_charge exists in the AIMNET2
+    #  base calculator but expects an Atom object (it tries to update tensors)
+    # set_charge is done inside our AIMNet2Calculator
+    # This is needed for the offical https://github.com/isayevlab/AIMNet2 not Romans version
+    if not self.qm_engine_name == "aimnet2":
+      for attr in ['charge',
+                   'basis',
+                   'method',
+                   'memory',
+                   'nproc',
+                   ]:
+        value = getattr(self, attr, None)
+        func = getattr(calculator, 'set_%s' % attr, None)
+        action=False
+        if func is not None:
+          if value is not None:
+            #print '  Setting %s to %s' % (attr, value)
+            func(value)
+            action=True
+        # XXX Avoid bare prints. Fix by propagating log channel.
+        #if not action:
+        #  if value and not func:
+        #    print '  No function available to set %s to %s' % (attr, value)
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
