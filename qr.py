@@ -214,7 +214,7 @@ refine {
   pre_opt_gconv = 3000
     .type = float
     .help = gradient norm convergence threshold for pre-optimizer
-  minimizer = *lbfgs lbfgsb
+  minimizer = lbfgs *lbfgsb
     .type = choice(multi=False)
     .help = Choice of minimizer to use. LBFGS-B requires target and gradients.\
             LBFGS can use either gradients only or both, target and gradients.
