@@ -345,7 +345,7 @@ class sites_real_space(object):
                line_search,
                data_weight,
                refine_cycles,
-               skip_weight_search,
+               number_of_weight_search_cycles,
                log,
                map_data=None,
                restraints_manager=None,
@@ -365,7 +365,6 @@ class sites_real_space(object):
     if(self.weight is None):
       self.weight = 1.
     self.refine_cycles = refine_cycles
-    self.skip_weight_search = skip_weight_search
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = self.max_iterations)
     self.lbfgs_core_params = scitbx.lbfgs.core_parameters(
@@ -406,7 +405,7 @@ class sites_real_space(object):
     bond_rmsds = []
     cntr = 0
     sites_cart_start = self.model.get_sites_cart().deep_copy()
-    while True and self.skip_weight_search: # Endless loop!
+    while True: # Termination at the bottom of the loop
       self.model.set_sites_cart(sites_cart = sites_cart_start.deep_copy())
       print("cycle:", cntr)
       cntr+=1
@@ -439,6 +438,9 @@ class sites_real_space(object):
             slow_down = 0
       if(up>0 and down>0):
         print("<<<<< weight optimization oscillates: quitting >>>>>")
+        break
+      if cntr > self.number_of_weight_search_cycles:
+        print("number_of_weight_search_cycles exceeded, stopping now")
         break
     ####
     print()

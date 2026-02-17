@@ -312,13 +312,13 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
     #
     # AIMNet2 specific settings (as used in tests for the paper).
     #
-    if(self.params.refine.mode=="refine" and
-       self.params.quantum.engine_name=="aimnet2"):
+    if(self.params.quantum.engine_name=="aimnet2"):
       msg="""
 The following settings have been auto-set to match refine.mode=refine
 and quantum.engine_name=aimnet2:
 """
-      self.params.restraints="qm"
+      if self.params.debug: self.params.restraints="cctbx"
+      else:                 self.params.restraints="qm"
       self.params.cluster.clustering=False
       self.params.refine.number_of_weight_search_cycles=10
       self.params.refine.number_of_refine_cycles=5
@@ -329,9 +329,7 @@ and quantum.engine_name=aimnet2:
         self.params.expansion=True
         self.params.refine.minimizer="lbfgs"
         self.params.refine.gradient_only=True
-
         d_min = self.fmodel.f_obs().d_min()
-
         if(d_min<1.2):
           self.params.refine.max_bond_rmsd=0.025
           self.params.refine.max_angle_rmsd=2.5
@@ -346,7 +344,10 @@ and quantum.engine_name=aimnet2:
         self.params.expansion=False
         self.params.refine.minimizer="lbfgsb"
         self.params.refine.gradient_only=False
-      else: assert 0
+      else: # Optimization
+        assert self.params.refine.mode=="opt"
+        self.params.expansion=True
+
       self.params.refine.stop_one_found_first_good_weight=False
       print(msg, file=self.logger)
       print("  restraints                              ", self.params.restraints, file=self.logger)

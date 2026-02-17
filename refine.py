@@ -264,7 +264,8 @@ def set_qm_defaults(params, log):
         from aimnet2calc import AIMNet2ASE
       except ModuleNotFoundError as e:
         print(str(e), file=log)
-        raise Sorry("AIMNet2 does not seem to be installed or available.")
+        if not params.debug:
+          raise Sorry("AIMNet2 does not seem to be installed or available.")
   else:
     if params.quantum.method==Auto:
       params.quantum.method='HF'
@@ -364,10 +365,10 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       map_data              = map_data,
       data_weight           = params.refine.data_weight,
       refine_cycles         = params.refine.number_of_refine_cycles,
-      skip_weight_search    = params.refine.skip_weight_search,
       stpmax                = params.refine.stpmax,
       gradient_only         = params.refine.gradient_only,
       line_search           = params.refine.line_search,
+      number_of_weight_search_cycles = params.refine.number_of_weight_search_cycles,
       restraints_manager    = restraints_manager,
       max_iterations        = params.refine.max_iterations_refine,
       log                   = log)
