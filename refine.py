@@ -23,21 +23,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import sys
 import time
 import pickle
 
-from numpy.lib.function_base import select
-import mmtbx.command_line
-import mmtbx.f_model
-import mmtbx.utils
 from libtbx.utils import Sorry
 from libtbx import easy_pickle
-from libtbx import group_args
-from libtbx.utils import null_out
-from mmtbx import monomer_library
-import mmtbx.monomer_library.pdb_interpretation
-import mmtbx.restraints
 from qrefine.fragment import fragments
 
 from qrefine import calculator
@@ -47,14 +37,11 @@ from qrefine import cluster_restraints
 from qrefine import results
 
 from qrefine.super_cell import expand
-import mmtbx.model.statistics
 from libtbx import Auto
-from ase.io import read as ase_io_read
 from cctbx import maptbx
 from scitbx.array_family import flex
 
 def show_cc(map_data, xray_structure, log=None):
-  import mmtbx.maps.mtriage
   from mmtbx.maps.correlation import five_cc
   xrs = xray_structure
   xrs.scattering_type_registry(table="electron")
@@ -261,7 +248,7 @@ def set_qm_defaults(params, log):
       try:
         import warnings
         warnings.filterwarnings('ignore', module='aimnet2calc')
-        from aimnet2calc import AIMNet2ASE
+        from aimnet2calc import AIMNet2ASE # intentional
       except ModuleNotFoundError as e:
         print(str(e), file=log)
         if not params.debug:
