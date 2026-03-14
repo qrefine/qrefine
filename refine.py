@@ -222,7 +222,8 @@ def create_calculator(params, restraints_manager, model, fmodel=None, hdm=None,
         model              = model,
         dump_gradients     = params.dump_gradients,
         max_shift          = params.refine.stpmax,
-        shift_eval         = params.refine.shift_evaluation)
+        shift_eval         = params.refine.shift_evaluation,
+        exclude_selection  = exclude_selection)
 
 def set_qm_defaults(params, log):
   outl = ''
@@ -330,7 +331,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print("Using hd_mapper again!")
     model_for_restraints = hdm.get_single_model()
   elif exclude_selection is not None:
-    model_for_restraints = model.select(~exclude_selection)
+    model_for_restraints = model#.select(~exclude_selection)
   else:
     model_for_restraints = model
 

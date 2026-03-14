@@ -97,7 +97,7 @@ class sites_opt(object):
   def __init__(self, model, max_shift, restraints_manager, shift_eval,
                dump_gradients=False, convergence_threshold=1.e-3,
                convergence_reached_times=3, use_callback_after_step=False,
-               ):
+               exclude_selection=None):
     self.use_callback_after_step = use_callback_after_step
     self.model = model
     self.restraints_manager = restraints_manager
@@ -124,6 +124,10 @@ class sites_opt(object):
     self.number_of_target_and_gradients_calls = 0
     self.sites_plus_x = self.set_sites_plus_x()
     self._converged = False
+    self.exclude_selection = exclude_selection
+    self.keep_selection = None
+    if self.exclude_selection is not None:
+      self.keep_selection = ~self.exclude_selection
 
   def set_sites_plus_x(self):
     self.sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
@@ -144,6 +148,10 @@ class sites_opt(object):
     self.set_sites_plus_x()
     self.f, self.g = self.restraints_manager.target_and_gradients(
       sites_cart = self.sites_plus_x)
+
+    if self.keep_selection is not None:
+      self.g = self.g.set_selected(self.exclude_selection, [0,0,0])
+
     self.g = self.g.as_double()
     # For tests
     if(self.dump_gradients):
@@ -156,6 +164,7 @@ class sites_opt(object):
     self.max_shift_between_resets = self.shift_eval_func(flex.sqrt((
       self.sites_cart - self.sites_plus_x).dot()))
     self.total_time += (time.time()-t0)
+
     return self.f, self.g
 
   def compute_functional_and_gradients(self):
