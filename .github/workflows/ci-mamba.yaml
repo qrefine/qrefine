@@ -15,7 +15,7 @@ on:
 env:
   # MOPAC_COMMAND: $CONDA_PREFIX/bin/mopac
   # XTBHOME: $CONDA_PREFIX
-  PY: "python3.10"
+  PY: "python3.12"
   #CLEANUP_TESTS: 'FALSE'
 
 permissions:
