@@ -22,6 +22,7 @@ def get_model(file_name):
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
   params.pdb_interpretation.sort_atoms = False
+  params.pdb_interpretation.const_shrink_donor_acceptor=0.6
   model.process(make_restraints=True, grm_normalization=False,
     pdb_interpretation_params = params)
   return model

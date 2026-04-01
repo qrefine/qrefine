@@ -34,6 +34,7 @@ def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=
   params.pdb_interpretation.sort_atoms = False
   params.pdb_interpretation.flip_symmetric_amino_acids = False
   params.pdb_interpretation.correct_hydrogens=False
+  # params.pdb_interpretation.const_shrink_donor_acceptor=0.6 # XXX change back to old default?
   if log is None: log = null_out()
   model = mmtbx.model.manager(
     model_input       = None,

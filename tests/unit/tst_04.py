@@ -19,6 +19,7 @@ def get_model(file_name):
   pdb_inp = iotbx.pdb.input(file_name)
   model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.const_shrink_donor_acceptor=0.6
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
   params.pdb_interpretation.sort_atoms = False
