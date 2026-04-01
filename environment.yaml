@@ -11,6 +11,7 @@ dependencies:
   # essentials
   - numpy=1.26
   - python=3.12
+  - networkx
   - pymongo
   - ase=3.22.1
   # Calculators
