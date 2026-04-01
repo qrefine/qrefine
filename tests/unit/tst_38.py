@@ -299,6 +299,7 @@ def run(prefix, verbose=False):
             "altloc_method=subtract",
             "stpmax=0.2",
             "gradient_only=true",
+            "minimizer=lbfgs",
             "clustering=%s"%clustering,
             #"dump_gradients=cluster_%s.pkl"%clustering,
             "dump_gradients=cluster_%s.pkl"%expansion,

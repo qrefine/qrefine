@@ -105,6 +105,7 @@ def run(prefix):
         "mode=opt",
         "stpmax=0.2",
         "gradient_only=true",
+        "minimizer=lbfgs",
         "clustering=%s"%clustering,
         "dump_gradients=cluster_%s.pkl"%clustering,
         "restraints=qm",

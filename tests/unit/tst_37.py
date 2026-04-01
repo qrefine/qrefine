@@ -94,6 +94,7 @@ def run(prefix):
     "stpmax=0.2",
     "gradient_only=true",
     "clustering=true",
+    "minimizer=lbfgs",
     "number_of_micro_cycles=1",
     "max_iterations_refine=5",
     "> %s.log"%prefix])
