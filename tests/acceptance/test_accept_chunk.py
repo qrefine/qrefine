@@ -11,7 +11,7 @@ phenix_source="/home/xuyanting/phenix/phenix-1.11.1-2575/build/setpaths_all.sh"
 
 def acceptance_tests():
   return  {
-    "hierarchy"      : "phenix.pdb.hierarchy"
+    "hierarchy"      : "phenix.pdb.hierarchy",
     " finalise"      : "qr.final" ,
     " chunk"         : "qr.chunk",
     " restraints"    : "qr.restrain",
