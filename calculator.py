@@ -199,53 +199,59 @@ class sites_opt(object):
 class sites(object):
   def __init__(self,
                fmodel,
+               geometry_rmsd_manager,
+               max_bond_rmsd,
+               max_shift,
                hdm=None,
                exclude_selection=None,
                restraints_manager=None,
                dump_gradients=None):
     adopt_init_args(self, locals())
-    self.x = None
-    self.x_target_functor = None
-    self.not_hd_selection = None # XXX UGLY
-    self.sites_cart_start = None
+    #
     self._initialize(fmodel = self.fmodel)
-    self.total_time = 0
-    self.number_of_target_and_gradients_calls = 0
+    #
+    self.f                = None
+    self.g                = None
+    self.f_start          = None
+    #
+    self.bound_flags  = flex.int(self.n, 2)
+    self.lower_bound  = flex.double([-1*max_shift]*self.n)
+    self.upper_bound  = flex.double([   max_shift]*self.n)
+    #
     self.data_weight = 1.
     self.restraints_weight_scale = 1.
     self.restraints_weight = 1.
-    self.r_works = flex.double()
-    self.n_converged = 0
+    #
     self.keep_selection = None
     if self.exclude_selection is not None:
       self.keep_selection = ~self.exclude_selection
 
+  def set_sites_plus_x(self):
+    self.sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
+    return self.sites_plus_x
+
   def _initialize(self, fmodel):
-    self.sites_cart_start = fmodel.xray_structure.sites_cart().deep_copy()
-    self.r_works = flex.double()
-    self.n_converged = 0
-    self.not_hd_selection = ~self.fmodel.xray_structure.hd_selection() # XXX UGLY
-    assert fmodel is not None
     self.fmodel = fmodel
+    self.fmodel.xray_structure.tidy_us()
+    self.fmodel.xray_structure.apply_symmetry_sites()
+    self.fmodel.update_xray_structure(update_f_calc = True)
     self.fmodel.xray_structure.scatterers().flags_set_grads(state=False)
     xray.set_scatterer_grad_flags(
       scatterers = self.fmodel.xray_structure.scatterers(),
       site       = True)
-    self.x = self.fmodel.xray_structure.sites_cart().as_double()
+    self.sites_cart       = self.fmodel.xray_structure.sites_cart()
+    self.sites_cart_start = self.sites_cart.deep_copy()
+    self.x                = flex.double(self.sites_cart.size()*3, 0)
+    self.sites_plus_x     = self.set_sites_plus_x()
+    self.n                = self.x.size()
     self.x_target_functor = self.fmodel.target_functor()
-
-  def update_fmodel(self):
-    self.fmodel.xray_structure.tidy_us()
-    self.fmodel.xray_structure.apply_symmetry_sites()
-    self.fmodel.update_xray_structure(
-      xray_structure = self.fmodel.xray_structure,
-      update_f_calc  = True,
-      #update_f_mask  = True
-      )
+    self.r_works          = flex.double()
+    self.mean_shifts      = flex.double()
+    self.n_converged      = 0 # ??????
+    self.n_tg_calls       = 0
 
   def reset_fmodel(self, fmodel):
     self._initialize(fmodel=fmodel)
-    self.update_fmodel()
 
   def setw(self,
            data_weight = None,
@@ -266,50 +272,68 @@ class sites(object):
 
   def update(self, x):
     self.x = flex.vec3_double(x)
-    self.fmodel.xray_structure.set_sites_cart(sites_cart = self.x)
+    self.set_sites_plus_x()
+    self.fmodel.xray_structure.set_sites_cart(sites_cart = self.sites_plus_x)
     self.fmodel.update_xray_structure(
       xray_structure = self.fmodel.xray_structure,
       update_f_calc  = True)
+    self.target_and_gradients(x=x)
     # This is to monitor convergence
     r_work = self.fmodel.r_work()
+    r_free = self.fmodel.r_free()
     self.r_works.append(r_work)
-
-    diff = flex.sqrt((self.x - self.sites_cart_start).dot())
+    diff = flex.sqrt((self.sites_plus_x - self.sites_cart_start).dot())
     shift_me = flex.mean(diff)
     shift_ma = flex.max(diff)
-    print("r_work: %7.5f shift mean: %7.3f shift max: %7.3f"%(
-      r_work, shift_me, shift_ma), self.r_works.size())
-    self.sites_cart_start = self.x.deep_copy()
-
-    # Early termination
-    #
-    #if self.r_works.size()>20:
-    #  a = self.r_works[-3:]
-    #  aa = list(set([abs(i-j) for i in a for j in a if i != j]))
-    #  if len(aa)>0:
-    #    d = max(aa)
-    #    d = True if d<0.0003 else False
-    #    if d: self.n_converged += 1
-    #    else:
-    #      if self.n_converged>0: self.n_converged -= 1
+    fmt = "r_work: %7.5f r_work: %7.5f shift mean: %7.3f max: %7.3f t: %10.6f"
+    #print(fmt%(r_work, r_free, shift_me, shift_ma, self.f), self.r_works.size())
+    assert self.n_tg_calls == self.r_works.size()
+    self.sites_cart_start = self.sites_plus_x.deep_copy()
 
   def converged(self):
     if self.n_converged >= 3: return True
     else:                     return False
 
-  def target_and_gradients(self, x):
-    self.number_of_target_and_gradients_calls+=1
-    t0=time.time()
+  def target(self): return self.f
 
-    if self.hdm is not None:
+  def gradients(self): return self.g
+
+  def apply_x(self):
+    self.update(x = self.x)
+
+  #def _get_bond_rmsd(self):
+  #  b_mean = None
+  #  if(self.geometry_rmsd_manager is not None):
+  #    b_mean = self.geometry_rmsd_manager.bond_rmsd(
+  #      sites_cart = self.fmodel.xray_structure.sites_cart())
+  #  return b_mean
+  #
+  def callback_after_step(self, minimizer=None):
+    # Early stop
+    if(self.r_works.size()>3):
+      rs = self.r_works[-3:]
+      rs = list(set([round(_, 5) for _ in rs]))
+      if len(rs)==1: return True
+  #  print("CALLING BACK")
+  #  if(self.geometry_rmsd_manager is not None):
+  #    assert self.max_bond_rmsd is not None
+  #    b_mean = self._get_bond_rmsd()
+  #    print("    self.max_bond_rmsd", self.max_bond_rmsd, b_mean,
+  #       self.number_of_target_and_gradients_calls)
+  #    if(b_mean>self.max_bond_rmsd and
+  #       self.number_of_target_and_gradients_calls-3>20):
+  #      return True
+  #  if(self.converged()): return True
+
+  def target_and_gradients(self, x):
+    self.n_tg_calls+=1
+
+    if self.hdm is not None: # XXX perhaps now broken
       x = self.hdm.average(array = flex.vec3_double(x)).as_double()
 
-    self.update(x = x)
-
-    XG = self.x
+    XG = self.sites_plus_x
     if self.hdm is not None:
       XG = self.hdm.shrink(array=XG)
-
     if self.keep_selection is not None:
       XG = XG.select(self.keep_selection)
 
@@ -335,14 +359,16 @@ class sites(object):
       self.restraints_weight*rt*self.restraints_weight_scale
     g = dg*self.data_weight + \
       self.restraints_weight*rg*self.restraints_weight_scale
+
     if(self.dump_gradients is not None):
       from libtbx import easy_pickle
       easy_pickle.dump(self.dump_gradients+"_dg", dg.as_double())
       easy_pickle.dump(self.dump_gradients+"_rg", rg.as_double())
       easy_pickle.dump(self.dump_gradients+"_g", g.as_double())
       STOP()
-    self.total_time += (time.time()-t0)
-    return t, g.as_double()
+    self.f = t
+    self.g = g.as_double()
+    return self.f, self.g
 
 class sites_real_space(object):
   def __init__(self,

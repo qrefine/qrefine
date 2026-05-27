@@ -202,17 +202,25 @@ def create_restraints_manager(params, model, altlocs_present):
       # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
 
-def create_calculator(params, restraints_manager, model, fmodel=None, hdm=None,
+def create_calculator(params,
+                      restraints_manager,
+                      model,
+                      geometry_rmsd_manager,
+                      fmodel=None,
+                      hdm=None,
                       exclude_selection=None):
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
       assert model is not None
       return calculator.sites(
-        fmodel             = fmodel,
-        hdm                = hdm,
-        exclude_selection  = exclude_selection,
-        restraints_manager = restraints_manager,
-        dump_gradients     = params.dump_gradients)
+        fmodel                = fmodel,
+        geometry_rmsd_manager = geometry_rmsd_manager,
+        max_bond_rmsd         = params.refine.max_bond_rmsd,
+        hdm                   = hdm,
+        exclude_selection     = exclude_selection,
+        restraints_manager    = restraints_manager,
+        dump_gradients        = params.dump_gradients,
+        max_shift             = params.refine.stpmax)
     else:
       # XXX
       # XXX exclude_selection and hdm are not used XXX
@@ -331,7 +339,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     print("Using hd_mapper again!")
     model_for_restraints = hdm.get_single_model()
   elif exclude_selection is not None:
-    model_for_restraints = model#.select(~exclude_selection)
+    model_for_restraints = model.select(~exclude_selection)
   else:
     model_for_restraints = model
 
@@ -372,12 +380,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     return
   else:
     calculator_manager = create_calculator(
-      fmodel             = start_fmodel,
-      model              = model,
-      params             = params,
-      restraints_manager = restraints_manager,
-      hdm                = hdm,
-      exclude_selection  = exclude_selection)
+      fmodel                = start_fmodel,
+      model                 = model,
+      geometry_rmsd_manager = geometry_rmsd_manager,
+      params                = params,
+      restraints_manager    = restraints_manager,
+      hdm                   = hdm,
+      exclude_selection     = exclude_selection)
     if(params.refine.mode == "refine"):
       #
       # Optimize H
@@ -393,10 +402,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       # PRE-OPTIMIZATION (CODITIONAL)
       #
       stats = monitor.get_stats()
-      if(params.refine.refine_sites is True and stats.rama_z_score().whole.value is not None and (
+      if(params.refine.refine_sites is True and
+         stats.rama_z_score().whole.value is not None and (
          stats.rama_z_score().whole.value<-2.5 or
-         stats.clash().score>10 or
-         fmodel.f_obs().d_min()>3)):
+         stats.clash().score>10) and
+         fmodel.f_obs().d_min()>3):
         if params.refine.exclude is not None:
           print("Initial geometry regularization skipped because of exclude_selection.", file=log)
         else:
