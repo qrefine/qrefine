@@ -367,8 +367,12 @@ and quantum.engine_name=aimnet2:
       print("\n***", file=self.logger)
       print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
       print("***\n", file=self.logger)
-      if(self.model.altlocs_present() and not
-         self.model.altlocs_present_only_hd()):
+      #
+      m = self.model.deep_copy()
+      if self.params.refine.exclude is not None:
+        sel_excl = self.model.selection(string = self.params.refine.exclude)
+        m = self.model.select(sel_excl)
+      if(m.altlocs_present() and not m.altlocs_present_only_hd()):
         raise Sorry("Alternative conformations are not supported with AIMNet2.")
 
   def run(self):
