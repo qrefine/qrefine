@@ -370,7 +370,7 @@ and quantum.engine_name=aimnet2:
       #
       m = self.model.deep_copy()
       if self.params.refine.exclude is not None:
-        sel_excl = self.model.selection(string = self.params.refine.exclude)
+        sel_excl = ~self.model.selection(string = self.params.refine.exclude)
         m = self.model.select(sel_excl)
       if(m.altlocs_present() and not m.altlocs_present_only_hd()):
         raise Sorry("Alternative conformations are not supported with AIMNet2.")
