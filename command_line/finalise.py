@@ -2,7 +2,7 @@ from __future__ import division
 from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.finalise
 import sys, time
-from qrefine import finalise, __version__
+from qrefine import finalise
 import iotbx
 import mmtbx
 from mmtbx import utils
@@ -110,6 +110,5 @@ def run(args, log):
 if __name__ == '__main__':
   t0 = time.time()
   print("Starting Q|R finalise", file=log)
-  print('version: ',__version__, file=log)
   run(args=sys.argv[1:], log=log)
   print("Time: %6.4f" % (time.time() - t0), file=log)
