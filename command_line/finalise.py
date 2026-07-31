@@ -97,6 +97,7 @@ def run(args, log):
   if params.action=='capping': model_completion=False
   finalise.run(params.model_file_name,
                model_completion=model_completion,
+               calculate_charge=params.calculate_charge,
                keep_alt_loc=params.keep_alt_loc,
                skip_validation=params.skip_validation,
                append_to_end_of_model=params.append_to_end_of_model,
