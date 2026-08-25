@@ -14,8 +14,6 @@ from qrefine.utils import hierarchy_utils
 from qrefine.tests.unit.skip import skip
 import mmtbx.model
 from libtbx.utils import null_out
-from libtbx.utils import Sorry
-from pathlib import Path
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -64,7 +62,7 @@ def run(pdb_filename,
         model_completion=True,
         keep_alt_loc=False,
         skip_validation=False,
-        calculate_charge=False,
+        #calculate_charge=False,
         append_to_end_of_model=False,
         neutron_option=None,
         hydrogen_atom_occupancies=0.,
@@ -72,12 +70,7 @@ def run(pdb_filename,
         shift_to_origin=True,
         remove_selection=None,
         ):
-  file_type = None
-  if   pdb_filename.endswith(".pdb"): file_type = "pdb"
-  elif pdb_filename.endswith(".cif"): file_type = "mmcif"
-  else: raise Sorry("Filemust be PDB of mmCIF")
   ppf = hierarchy_utils.get_processed_pdb(pdb_filename=pdb_filename)
-  crystal_symmetry = ppf.xray_structure().crystal_symmetry()
   #
   if(remove_selection is not None):
     asc = ppf.all_chain_proxies.pdb_hierarchy.atom_selection_cache()
@@ -90,13 +83,17 @@ def run(pdb_filename,
     hierarchy = remove_alternative_locations(
       ppf.all_chain_proxies.pdb_hierarchy
     )
+
+
   if shift_to_origin:
-    ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(crystal_symmetry)
-  ppf.all_chain_proxies.pdb_hierarchy.remove_residue_groups_with_atoms_on_special_positions_selective(crystal_symmetry)
-  ppf = completion.__HELPER1(
-    crystal_symmetry = crystal_symmetry,
-    hierarchy        = ppf.all_chain_proxies.pdb_hierarchy,
-    params           = None)
+    ppf.all_chain_proxies.pdb_hierarchy.shift_to_origin(
+      ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
+  ppf.all_chain_proxies.pdb_hierarchy.remove_residue_groups_with_atoms_on_special_positions_selective(ppf.all_chain_proxies.pdb_inp.crystal_symmetry())
+  raw_records = hierarchy_utils.get_raw_records(
+    ppf.all_chain_proxies.pdb_inp,
+    ppf.all_chain_proxies.pdb_hierarchy,
+  )
+  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records)
   #
   # extends side chains and add hydrogens
   #
@@ -111,12 +108,12 @@ def run(pdb_filename,
     ppf.all_chain_proxies.pdb_hierarchy,
     ppf.geometry_restraints_manager(),
     pdb_filename=pdb_filename,
-    crystal_symmetry=crystal_symmetry,
+    crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     use_capping_hydrogens=use_capping_hydrogens,
     append_to_end_of_model=append_to_end_of_model,
     use_reduce=use_reduce
   )
-  cs = crystal_symmetry
+
   # Idealize H as riding
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
@@ -127,7 +124,7 @@ def run(pdb_filename,
   model = mmtbx.model.manager(
     model_input               = None,
     pdb_hierarchy             = ppf.all_chain_proxies.pdb_hierarchy,
-    crystal_symmetry          = crystal_symmetry,
+    crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
     log                       = null_out())
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
@@ -149,48 +146,24 @@ def run(pdb_filename,
       neh_kwds["exchange_sites_only"] = False
     elif neutron_option=="hd_and_d":
       neh_kwds["perdeuterate"]=True
-    hierarchy = neutron_exchange_hydrogens(hierarchy, **neh_kwds)
-
+    hierarchy = neutron_exchange_hydrogens(hierarchy,
+                                           **neh_kwds)
     model=mmtbx.model.manager(
-      model_input               = None,
-      pdb_hierarchy             = hierarchy,
-      crystal_symmetry          = crystal_symmetry,
-      log                       = null_out())
-    model.set_occupancies(
-      values    = hydrogen_atom_occupancies,
-      selection = model.get_xray_structure().hd_selection())
+    model_input               = None,
+    pdb_hierarchy             = hierarchy,
+    crystal_symmetry          = ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+    log                       = null_out())
+    h=model.get_hierarchy()
+    asc = h.atom_selection_cache()
+    sel = asc.selection("element H or element D")
 
-  rc = None
-  if calculate_charge:
-    from qrefine import charges
-    cc = charges.charges_class(
-      pdb_hierarchy         = model.get_hierarchy(),
-      crystal_symmetry      = crystal_symmetry,
-      ligand_cif_file_names = None,
-      electrons             = True,
-      verbose               = True,
-    )
-    rc = cc.get_total_charge(
-      list_charges=False,
-      assert_correct_chain_terminii=True,
-    )
+  model.set_occupancies(hydrogen_atom_occupancies, selection=sel)
 
-  if   file_type == "pdb":
-    omo = model.model_as_pdb()
-    ext = "pdb"
-  elif file_type == "mmcif":
-    omo = model.model_as_mmcif()
-    ext = "cif"
-  else: assert 0
-
-  pdb_filename = Path(pdb_filename).name
-  if rc is None:
-    output = "%s_%s.%s" % (pdb_filename[:-4], fname, ext)
-  else:
-    output = "%s_%s_charge%s.%s" % (pdb_filename[:-4], fname, str(rc), ext)
-  with open(output, "w") as fo:
-    fo.write(omo)
-  print("\n  Output written to: %s" % output)
+  ## after no error getting total charge, write the completed pdb file
+  hierarchy_utils.write_hierarchy(pdb_filename, # uses to get output filename
+                                  ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+                                  model.get_hierarchy(),
+                                  fname)
 
 if __name__=="__main__":
   def _fake_phil_parse(arg):

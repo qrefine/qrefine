@@ -153,13 +153,29 @@ class charges_class:
                       ):
     if self.electrons:
       from mmtbx.ligands import electrons
-      charge = electrons.run(pdb_hierarchy=self.pdb_hierarchy,
-                             crystal_symmetry=self.crystal_symmetry,
+      if self.pdb_filename is None and self.raw_records is None:
+        self.raw_records = hierarchy_utils.get_raw_records(
+          pdb_hierarchy=self.pdb_hierarchy,
+          crystal_symmetry=self.crystal_symmetry,
+        )
+      charge = electrons.run(pdb_filename=self.pdb_filename,
+                             raw_records=self.raw_records,
                              cif_objects=self.cif_objects,
                              return_formal_charges=list_charges,
                              verbose=verbose,
       )
       return charge
+    assert 0
+    total_charge = self.calculate_pdb_hierarchy_charge(
+      self.pdb_hierarchy,
+      hetero_charges=self.hetero_charges,
+      inter_residue_bonds=self.inter_residue_bonds,
+      list_charges=list_charges,
+      assert_correct_chain_terminii=assert_correct_chain_terminii,
+      check=check,
+      verbose=verbose,
+    )
+    return total_charge
 
   def write_pdb_hierarchy_qxyz_file(self,
                                     file_name="qxyz_cctbx.dat",
@@ -466,6 +482,85 @@ class charges_class:
         charge = int(total)
         annot = 'ligand'
     return charge, rc, annot
+
+  def calculate_pdb_hierarchy_charge(self,
+                                     hierarchy,
+                                     hetero_charges=None,
+                                     inter_residue_bonds=None,
+                                     assert_no_alt_loc=True,
+                                     list_charges=False,
+                                     check=None,
+                                     assert_correct_chain_terminii=True,
+                                     verbose=False,
+                                     ):
+    if self.verbose: verbose=True
+    charge = 0
+    charges = []
+    annotations = []
+    if inter_residue_bonds is None: inter_residue_bonds=[]
+    if assert_no_alt_loc:
+      # see if we can squash into a single conf.
+      hierarchy = attempt_to_squash_alt_loc(hierarchy)
+      if hierarchy is None: raise Sorry('too many alt locs to squash')
+    residue_types = []
+    for residue in hierarchy_utils.generate_residue_groups(
+        hierarchy,
+        assert_no_alt_loc=assert_no_alt_loc,
+        exclude_water=True,
+        ):
+      validate_all_atoms(residue)
+      assert len(residue.atom_groups())==1
+      residue_types.append(get_class(residue.atom_groups()[0].resname))
+      tmp, rc, annot = self.calculate_residue_charge(
+        residue,
+        hetero_charges=hetero_charges,
+        inter_residue_bonds=inter_residue_bonds,
+        assert_no_alt_loc=assert_no_alt_loc,
+        verbose=verbose,
+      )
+      annotations.append(annot)
+      if annot=='non-polymer':
+        charge = tmp
+        break
+      if check:
+        print(residue)
+        key = 'PRO%s' % residue.parent().id
+        key += '.%s' % residue.resseq.strip()
+        key += '.%s' % residue.atom_groups()[0].resname
+        key = key.replace('HIS', 'HSD')
+        print(key)
+        print(' CHARMM %f Phenix %f' % (check[key], tmp))
+        if 1:
+          print(inter_residue_bonds)
+        assert abs(check[key]-tmp)<0.001
+        assert 0
+      if list_charges:
+        outl = residue.id_str()
+        for ag in residue.atom_groups():
+          outl += '%s ' % ag.resname
+        #print 'CHARGE %s %2d (%2d) %s' % (outl, tmp, rc, annot)
+        charges.append([outl, tmp, annot])
+      charge += tmp
+      if verbose: # or display_residue_charges:
+        if tmp:
+          outl = '-'*80
+          outl += '\nNON-ZERO CHARGE current %2d base %2d total %2d' % (tmp,rc,charge)
+          for i, atom in enumerate(residue.atoms()):
+            if i==0:
+              outl += ' "%s"' % (atom.parent().id_str())
+              if tmp!=rc: outl += ' DIFF %2d' % (tmp-rc)
+            assert abs(tmp-rc)<=2, outl
+            outl += "\n%s" % atom.quote()
+          outl += '\n%s' % ('-'*80)
+          print(outl)
+    # check annotations
+    if residue_types and assert_correct_chain_terminii:
+      assert filter(None, annotations), 'No terminal or capping hydrogens found'
+    if list_charges:
+      #print 'CHARGE',charge
+      charges.append(['Total', charge])
+      return charges
+    return charge
 
 def get_aa_charge(code):
   # get from cache first

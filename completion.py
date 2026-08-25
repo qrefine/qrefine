@@ -11,8 +11,6 @@ from iotbx.pdb import amino_acid_codes as aac
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
 
-from mmtbx import monomer_library
-
 from qrefine.utils import hierarchy_utils
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_add_cys_hg_to_atom_group
 from mmtbx.hydrogens.specialised_hydrogen_atoms import conditional_remove_cys_hg_to_atom_group
@@ -228,23 +226,11 @@ def remove_acid_side_chain_hydrogens(hierarchy, selection=None):
   return hierarchy
 
 def __HELPER1(crystal_symmetry, hierarchy, params):
-  if params is None:
-    params = hierarchy_utils.get_pdb_interpretation_params()
-  mon_lib_srv = monomer_library.server.server()
-  #if cif_objects:
-  #  for cif_object in cif_objects:
-  #    mon_lib_srv.process_cif_object(cif_object[1])
-  ener_lib = monomer_library.server.ener_lib()
-  ppf = monomer_library.pdb_interpretation.process(
-    mon_lib_srv           = mon_lib_srv,
-    ener_lib              = ener_lib,
-    params                = params,
-    pdb_hierarchy         = hierarchy,
-    crystal_symmetry      = crystal_symmetry,
-    file_name             = None,
-    pdb_inp               = None,
-    raw_records           = None,
-    keep_monomer_mappings = True)
+  raw_records = hierarchy_utils.get_raw_records(
+    crystal_symmetry=crystal_symmetry, pdb_hierarchy=hierarchy)
+  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+                                          params=params,
+                                        )
   sites_cart = hierarchy.atoms().extract_xyz()
   ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
   return ppf
@@ -277,7 +263,6 @@ def complete_pdb_hierarchy(hierarchy,
   if use_capping_hydrogens:
     params.link_distance_cutoff=1.8 # avoid linking across a single missing AA
     if original_pdb_filename:
-      assert 0 # PVA: mmCIF compliance
       original_pdb_inp = iotbx.pdb.input(original_pdb_filename)
       original_hierarchy = original_pdb_inp.construct_hierarchy()
   #
@@ -296,19 +281,16 @@ def complete_pdb_hierarchy(hierarchy,
       add_hydrogens=False,
     )
 
-
+    output = hierarchy_utils.write_hierarchy(
+      pdb_filename,
+      crystal_symmetry,
+      ppf.all_chain_proxies.pdb_hierarchy,
+      'readyset_input',
+    )
     if(use_reduce):
       print("Using reduce to add hydrogens",file=log)
-      hierarchy = hierarchy_utils.add_hydrogens_using_reduce(
-        pdb_hierarchy    = ppf.all_chain_proxies.pdb_hierarchy,
-        crystal_symmetry = crystal_symmetry)
+      hierarchy = hierarchy_utils.add_hydrogens_using_reduce(output)
     else:
-      output = hierarchy_utils.write_hierarchy(
-        pdb_filename,
-        crystal_symmetry,
-        ppf.all_chain_proxies.pdb_hierarchy,
-        'readyset_input',
-      )
       print("Using ReadySet to add hydrogens",file=log)
       hierarchy = hierarchy_utils.add_hydrogens_using_ReadySet(output)
   #
