@@ -226,20 +226,20 @@ def remove_acid_side_chain_hydrogens(hierarchy, selection=None):
   return hierarchy
 
 def __HELPER1(crystal_symmetry, hierarchy, params):
-  import mmtbx.model
-  from libtbx import group_args
-  model = mmtbx.model.manager(
-    pdb_hierarchy    = hierarchy,
-    crystal_symmetry = crystal_symmetry)
-  p = model.get_default_pdb_interpretation_params()
-  p.pdb_interpretation = params
-  model.process(pdb_interpretation_params = p, make_restraints=True)
-  return model
+  raw_records = hierarchy_utils.get_raw_records(
+    crystal_symmetry=crystal_symmetry, pdb_hierarchy=hierarchy)
+  ppf = hierarchy_utils.get_processed_pdb(raw_records=raw_records,
+                                          params=params,
+                                        )
+  sites_cart = hierarchy.atoms().extract_xyz()
+  ppf.all_chain_proxies.pdb_hierarchy.atoms().set_xyz(sites_cart)
+  return ppf
 
 def complete_pdb_hierarchy(hierarchy,
                            geometry_restraints_manager,
                            use_capping_hydrogens=False,
                            append_to_end_of_model=False,
+                           pdb_filename=None,
                            crystal_symmetry=None,
                            original_pdb_filename=None,
                            verbose=False,
@@ -250,6 +250,9 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # some validations
   #
+  for ag in hierarchy.atom_groups():
+    if get_class(ag.resname) in ['common_rna_dna']:
+      raise Sorry('Nucleotides are not currently supported. e.g. %s' % ag.resname)
   if not hierarchy.is_hierarchy_altloc_consistent():
     hierarchy.is_hierarchy_altloc_consistent(verbose=True)
     raise Sorry('Altloc structure of model not consistent. Make each altloc the same depth or remove completely.')
@@ -266,58 +269,60 @@ def complete_pdb_hierarchy(hierarchy,
   # assume model is heavy-atom complete
   #
   if not use_capping_hydrogens:
-    model = __HELPER1(crystal_symmetry=crystal_symmetry,
-      hierarchy=hierarchy, params=params)
+    ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
   #
   # need to use Reduce/ReadySet! to add hydrogens
   #
   if not use_capping_hydrogens:
     from mmtbx.building import extend_sidechains
     n_changed = extend_sidechains.extend_protein_model(
-      model.get_hierarchy(),
+      ppf.all_chain_proxies.pdb_hierarchy,
       mon_lib_server,
       add_hydrogens=False,
     )
 
+    output = hierarchy_utils.write_hierarchy(
+      pdb_filename,
+      crystal_symmetry,
+      ppf.all_chain_proxies.pdb_hierarchy,
+      'readyset_input',
+    )
     if(use_reduce):
       print("Using reduce to add hydrogens",file=log)
-      hierarchy = hierarchy_utils.add_hydrogens_using_reduce(
-      pdb_hierarchy    = model.get_hierarchy(),
-      crystal_symmetry = crystal_symmetry
-      )
+      hierarchy = hierarchy_utils.add_hydrogens_using_reduce(output)
     else:
       print("Using ReadySet to add hydrogens",file=log)
       hierarchy = hierarchy_utils.add_hydrogens_using_ReadySet(output)
   #
   # remove side chain acid hydrogens - maybe not required since recent changes
   #
-  model = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
+  ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
 
   if not use_capping_hydrogens:
     remove_acid_side_chain_hydrogens(
-      hierarchy=model.get_hierarchy(),
+      hierarchy=ppf.all_chain_proxies.pdb_hierarchy,
       selection=selection)
   #
   # add hydrogens in special cases
   #  eg ETA
   #  eg N - H, H2
   #
-  hierarchy = model.get_hierarchy()
-  model = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
+  hierarchy = ppf.all_chain_proxies.pdb_hierarchy
+  ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=hierarchy, params=params)
   #
   # maybe more to cctbx
   #
-  add_terminal_hydrogens_qr( model.get_hierarchy(),
-                             model.get_restraints_manager().geometry,
+  add_terminal_hydrogens_qr( ppf.all_chain_proxies.pdb_hierarchy,
+                             ppf.geometry_restraints_manager(),
                              use_capping_hydrogens=use_capping_hydrogens,
                              append_to_end_of_model=append_to_end_of_model,
                              original_hierarchy=original_hierarchy,
                              verbose=verbose,
                              selection=selection,
                             ) # in place
-  model.get_hierarchy().atoms().set_chemical_element_simple_if_necessary()
-  model.get_hierarchy().sort_atoms_in_place()
-  return model
+  ppf.all_chain_proxies.pdb_hierarchy.atoms().set_chemical_element_simple_if_necessary()
+  ppf.all_chain_proxies.pdb_hierarchy.sort_atoms_in_place()
+  return ppf
 
 def run(pdb_filename=None,
         pdb_hierarchy=None,
@@ -360,18 +365,19 @@ def run(pdb_filename=None,
     pdb_hierarchy = pi.construct_hierarchy()
     crystal_symmetry = pi.crystal_symmetry()
 
-  MH = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=pdb_hierarchy, params=params)
+  ppf = __HELPER1(crystal_symmetry=crystal_symmetry, hierarchy=pdb_hierarchy, params=params)
 
   #
   # guts
   #
-  model = complete_pdb_hierarchy(
-    MH.get_hierarchy(),
-    MH.get_restraints_manager(),
+  ppf = complete_pdb_hierarchy(
+    ppf.all_chain_proxies.pdb_hierarchy,
+    ppf.geometry_restraints_manager(),
     use_capping_hydrogens=use_capping_hydrogens,
     append_to_end_of_model=append_to_end_of_model, # needed for clustering
                                                    # code and Molprobity
-    crystal_symmetry=MH.crystal_symmetry(), # used in get_raw_records. why
+    pdb_filename=pdb_filename,   # used just for naming of debug output
+    crystal_symmetry=ppf.all_chain_proxies.pdb_inp.crystal_symmetry(), # used in get_raw_records. why
     original_pdb_filename=original_pdb_filename,
     verbose=False,
     use_reduce=use_reduce,
@@ -380,11 +386,11 @@ def run(pdb_filename=None,
   if pdb_filename:
     output = hierarchy_utils.write_hierarchy(
       pdb_filename,
-      model.crystal_symmetry(),
-      model.get_hierarchy(),
+      ppf.all_chain_proxies.pdb_inp.crystal_symmetry(),
+      ppf.all_chain_proxies.pdb_hierarchy,
       fname,
     )
-  return model.get_hierarchy()
+  return ppf.all_chain_proxies.pdb_hierarchy
 
 def display_hierarchy_atoms(hierarchy, n=5):
   print('-'*80)
