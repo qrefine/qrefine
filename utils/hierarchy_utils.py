@@ -106,21 +106,22 @@ def get_raw_records(pdb_inp=None,
     lines = pdb_hierarchy.as_pdb_string(crystal_symmetry=pdb_inp.crystal_symmetry())
   return lines
 
-def add_hydrogens_using_reduce(pdb_filename):
-    from mmtbx.hydrogens import reduce_hydrogen
-    import mmtbx.model
-    import iotbx.pdb
-    pdb_inp = iotbx.pdb.input(file_name=pdb_filename, source_info=None)
-    model_to_reduce = mmtbx.model.manager(model_input = pdb_inp, log = "h_reduce.out")
-    reduce_add_h_obj = reduce_hydrogen.place_hydrogens(model = model_to_reduce,
-       use_neutron_distances=True,
-       keep_existing_H=True,
-       exclude_water=False, # Not implemented. No H added to water?
-       validate_e=False # crucial to keep False! Not working with altloc, calling elbow
-       )
-    reduce_add_h_obj.run()
-    hierarchy = reduce_add_h_obj.get_model().get_hierarchy()
-    return hierarchy
+def add_hydrogens_using_reduce(pdb_hierarchy, crystal_symmetry):
+  from mmtbx.hydrogens import reduce_hydrogen
+  import mmtbx.model
+  model_to_reduce = mmtbx.model.manager(
+    pdb_hierarchy    = pdb_hierarchy,
+    crystal_symmetry = crystal_symmetry,
+    log              = "h_reduce.out")
+  reduce_add_h_obj = reduce_hydrogen.place_hydrogens(model = model_to_reduce,
+     use_neutron_distances=True,
+     keep_existing_H=True,
+     exclude_water=False,
+     validate_e=False # crucial to keep False! Not working with altloc, calling elbow
+     )
+  reduce_add_h_obj.run()
+  hierarchy = reduce_add_h_obj.get_model().get_hierarchy()
+  return hierarchy
 
 def add_hydrogens_using_ReadySet(pdb_filename, ligand_cache_directory=None):
   from elbow.command_line.ready_set import run_though_all_the_options
