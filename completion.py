@@ -227,13 +227,26 @@ def remove_acid_side_chain_hydrogens(hierarchy, selection=None):
 
 def __HELPER1(crystal_symmetry, hierarchy, params):
   import mmtbx.model
+  import iotbx.pdb
   from libtbx import group_args
+  # 1. Provide an explicit model_input to avoid the model.manager bug
+  # that destroys the hierarchy, and to prevent in-place mutation.
+  raw_records = hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
+  pdb_inp = iotbx.pdb.input(source_info=None, lines=raw_records)
+  # 2. Use model.manager with stop_for_unknowns=False to mimic the more
+  # permissive behavior of the older hierarchy_utils
   model = mmtbx.model.manager(
-    pdb_hierarchy    = hierarchy,
-    crystal_symmetry = crystal_symmetry)
+    model_input       = pdb_inp,
+    crystal_symmetry  = crystal_symmetry,
+    stop_for_unknowns = False)
   p = model.get_default_pdb_interpretation_params()
   p.pdb_interpretation = params
   model.process(pdb_interpretation_params = p, make_restraints=True)
+  # 3. Restore the exact original Cartesian coordinates. Converting to a PDB
+  # string truncated them to 3 decimal places. Setting the sites_cart
+  # directly from the original hierarchy restores the exact floating-point values.
+  sites_cart = hierarchy.atoms().extract_xyz()
+  model.get_hierarchy().atoms().set_xyz(sites_cart)
   return model
 
 def complete_pdb_hierarchy(hierarchy,
