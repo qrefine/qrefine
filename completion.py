@@ -231,7 +231,7 @@ def __HELPER1(crystal_symmetry, hierarchy, params):
   from libtbx import group_args
   # 1. Provide an explicit model_input to avoid the model.manager bug
   # that destroys the hierarchy, and to prevent in-place mutation.
-  raw_records = hierarchy.as_pdb_string(crystal_symmetry=crystal_symmetry)
+  raw_records = hierarchy.as_mmcif_string(crystal_symmetry=crystal_symmetry)
   pdb_inp = iotbx.pdb.input(source_info=None, lines=raw_records)
   # 2. Use model.manager with stop_for_unknowns=False to mimic the more
   # permissive behavior of the older hierarchy_utils
