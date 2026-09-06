@@ -115,9 +115,6 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
       d = flex.sqrt((gt - gf).dot())
       # XXX DEBUG: below must be all ZERO
       print(i, d.min_max_mean().as_tuple())
-    
-    
-    
 
 if(__name__ == "__main__"):
   run()

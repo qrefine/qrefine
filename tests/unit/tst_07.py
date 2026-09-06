@@ -45,5 +45,4 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   assert len(result) < 3, result # Allow some differences due to numerics
 
 if(__name__ == "__main__"):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()

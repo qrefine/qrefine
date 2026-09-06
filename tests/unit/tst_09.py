@@ -57,5 +57,4 @@ def check_buffer(ph, clusters, qms):
   assert approx_equal(qms, qms_calculated)
 
 if(__name__ == "__main__"):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()

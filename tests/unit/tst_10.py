@@ -126,5 +126,4 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
       assert d < 0.5
 
 if(__name__ == "__main__"):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()

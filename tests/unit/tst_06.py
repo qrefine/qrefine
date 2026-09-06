@@ -105,5 +105,4 @@ def cctbx_opt(model, restraints_manager, max_shift=0.2, max_iterations=25):
   return C.model.get_sites_cart()
 
 if(__name__ == "__main__"):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()
