@@ -2,13 +2,11 @@ from __future__ import division
 from __future__ import absolute_import
 
 import os
-from qrefine.tests.unit import run_tests
 import libtbx.load_env
 import iotbx.pdb
 import mmtbx.restraints
 from libtbx.test_utils import approx_equal
 from qrefine import restraints
-from scitbx.array_family import flex
 import mmtbx.model
 from qrefine.command_line import granalyse
 

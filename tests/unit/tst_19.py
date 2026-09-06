@@ -1,8 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
-import os, sys
+import os
 from qrefine.tests.unit import run_tests
-from libtbx import easy_run
 import libtbx.load_env
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")

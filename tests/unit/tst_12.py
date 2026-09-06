@@ -5,17 +5,14 @@ from __future__ import absolute_import
 import os
 import sys
 import random
-import time
 import numpy as np
 import iotbx.pdb
 import mmtbx.command_line
 import libtbx.load_env
 from libtbx.test_utils import approx_equal
-from qrefine.tests.unit import run_tests
 
 from ase.io import write
 from ase.io import read as ase_io_read
-from ase.io import write as ase_io_write
 from ase.optimize.lbfgs import LBFGS
 from scitbx.array_family import flex
 from qrefine.restraints import from_qm

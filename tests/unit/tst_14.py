@@ -2,22 +2,15 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import time, os
+import os
 import iotbx.pdb
 from libtbx.test_utils import approx_equal
 import iotbx.pdb
 from scitbx.array_family import flex
-import string
-from cctbx import uctbx
-from cctbx import crystal
-from libtbx.utils import null_out
 import mmtbx
 import mmtbx.monomer_library.server
-import mmtbx.monomer_library.pdb_interpretation
-import mmtbx.restraints
 from mmtbx import monomer_library
 import libtbx.load_env
-from qrefine.tests.unit import run_tests
 from qrefine import restraints as qr_restraints
 
 mon_lib_srv = mmtbx.monomer_library.server.server()
@@ -217,9 +210,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
   #
-  run1()
-  run2()
-  run3()
+  run1(prefix = prefix+"1")
+  run2(prefix = prefix+"2")
+  run3(prefix = prefix+"3")
 
 if(__name__ == '__main__'):
   run()

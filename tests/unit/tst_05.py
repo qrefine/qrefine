@@ -2,7 +2,6 @@ from __future__ import division
 from __future__ import absolute_import
 
 import os
-from qrefine.tests.unit import run_tests
 import libtbx.load_env
 import iotbx.pdb
 import mmtbx.restraints

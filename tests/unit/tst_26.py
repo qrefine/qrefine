@@ -7,9 +7,7 @@ import libtbx.load_env
 from scitbx.array_family import flex
 import mmtbx.model
 from qrefine import qr, refine
-from qrefine.utils import hierarchy_utils
 from libtbx.utils import null_out
-from qrefine.tests.unit import run_tests
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")

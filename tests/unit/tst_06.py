@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import os
 import iotbx.pdb
 import libtbx.load_env
-from qrefine.tests.unit import run_tests
 
 from scitbx.array_family import flex
 from qrefine import qr

@@ -2,9 +2,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 import os
-import time
 import libtbx.load_env
-from qrefine.tests.unit import run_tests
 from libtbx import easy_run
 
 qrefine = libtbx.env.find_in_repositories("qrefine")

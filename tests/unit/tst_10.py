@@ -12,7 +12,6 @@ from qrefine.cluster_restraints import from_cluster
 from qrefine.restraints import from_qm, from_cctbx
 from qrefine.fragment import fragments
 from qrefine.clustering import betweenness_centrality_clustering
-from qrefine.tests.unit import run_tests
 from libtbx.utils import null_out
 
 import mmtbx.monomer_library.server
@@ -82,10 +81,8 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.chdir(prefix)
   #
   for restraints in ["cctbx","qm"]:
-    if verbose: print("Using restraints:", restraints)
     result = []
     for clustering in [True, False]:
-      if verbose: print("  clustering", clustering, "-"*30)
       rm, cs, h = get_model()
       if(restraints=="qm"):
         fq = from_qm(

@@ -2,10 +2,8 @@ from __future__ import division
 from __future__ import absolute_import
 
 import os
-import time
 import iotbx.pdb
 import mmtbx.f_model
-from scitbx.array_family import flex
 from qrefine.tests.unit import run_qrefine, run_fmodel
 
 pdb_str_good = """

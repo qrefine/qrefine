@@ -2,11 +2,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import time, os
+import os
 import iotbx.pdb
 from qrefine import super_cell
 from libtbx.test_utils import approx_equal
-from qrefine.tests.unit import run_tests
 
 pdb_str = """
 CRYST1   10.000   10.000   10.000  90.00  90.00  90.00 P 1

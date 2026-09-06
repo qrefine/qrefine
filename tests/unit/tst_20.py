@@ -1,7 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
-import os, sys
-from qrefine.tests.unit import run_tests
+import os
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -585,10 +584,26 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
               ]:
     assert line not in lines, 'found %s' % line
   assert ' HE  ARG A  10' in lines, 'not found HE  ARG A  10'
-  if 1:
+  """
+  DISABLED DUE TO A BUG two different results from exact same command run twice: 
+  
+   qr.charges test_remove_hg_from_zn_cys_capping.pdb verbose=1
+Starting Q|R charge
+Charge: 1
+Time: 2.3095
+
+
+qr.charges test_remove_hg_from_zn_cys_capping.pdb verbose=1
+Starting Q|R charge
+Charge: -1
+Time: 2.5313
+  """
+  if 0:
     cmd = 'qr.charges %s verbose=1' % (fnc)
-    if 0: print(cmd)
+    if 1: print(cmd)
     rc = easy_run.go(cmd)
+    for l in rc.stdout_lines:
+      print(l)
     assert 'Charge: -1' in rc.stdout_lines
   return rc
 

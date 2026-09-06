@@ -1,7 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
-import os, sys
-from qrefine.tests.unit import run_tests
+import os
 from libtbx import easy_run
 import libtbx.load_env
 

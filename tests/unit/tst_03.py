@@ -2,12 +2,10 @@ from __future__ import division
 from __future__ import absolute_import
 
 import os
-import time
 import iotbx.pdb
-import mmtbx.f_model
 from libtbx import easy_pickle
 from scitbx.array_family import flex
-from qrefine.tests.unit import run_qrefine, run_fmodel
+from qrefine.tests.unit import run_qrefine
 
 pdb_str_poor = """
 CRYST1   21.937    4.866   23.477  90.00 107.08  90.00 P 1 21 1
