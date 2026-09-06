@@ -82,7 +82,7 @@ def run(model,
     log                       = null_out())
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = params)
-  model.idealize_h_riding()
+  # VERY BAD IDEA model.idealize_h_riding()
   hierarchy=model.get_hierarchy()
 
   if neutron_option=='all_h':
