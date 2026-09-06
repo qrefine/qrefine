@@ -17,10 +17,13 @@ def get_hierarchy():
     qr_unit_tests,"data_files","2lvr.pdb"))
   return pdb_inp.construct_hierarchy()
 
-def run(prefix):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Exercise interaction graph construction.
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
   ph = get_hierarchy()
   interaction_list_cpp = pair_interaction.run(ph)
   expected_list_cpp = [

@@ -74,10 +74,13 @@ def get_model():
   return mmtbx.restraints.manager(
      geometry = geometry, normalization = False), pdb_inp.crystal_symmetry(),h
 
-def run(prefix, verbose=False):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Exercise combined energy and gradients from cluster qm.
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
   for restraints in ["cctbx","qm"]:
     if verbose: print("Using restraints:", restraints)
     result = []

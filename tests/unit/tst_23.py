@@ -1,143 +1,82 @@
+from __future__ import division
 from __future__ import absolute_import
-import os, sys
+
+import os
+import time
+import iotbx.pdb
+import mmtbx.f_model
+from scitbx.array_family import flex
 from qrefine.tests.unit import run_tests
-from qrefine.charges import charges_class
+import mmtbx.model
+from libtbx.utils import null_out
+from libtbx.test_utils import approx_equal
+from libtbx import easy_run
 
-def get_charge(fn, assert_correct_chain_terminii=True, verbose=False):
-  cc=charges_class(pdb_filename=fn)
-  return cc.get_total_charge(
-    assert_correct_chain_terminii=assert_correct_chain_terminii,
-    verbose=verbose)
+pdb_str_in = """
+CRYST1   23.260   22.914   22.580  90.00  90.00  90.00 P 1
+ATOM      1  N   ALA A   6      12.490  10.000  11.308  1.00 99.80           N
+ATOM      2  CA  ALA A   6      11.516  11.071  11.540  1.00103.38           C
+ATOM      3  C   ALA A   6      11.169  11.789  10.247  1.00105.41           C
+ATOM      4  O   ALA A   6      10.000  12.117  10.000  1.00 98.78           O
+ATOM      5  CB  ALA A   6      12.044  12.068  12.580  1.00114.34           C
+ATOM      6  H   ALA A   6      13.260  10.127  11.670  0.00 99.80           H
+ATOM      7  HA  ALA A   6      10.706  10.664  11.884  0.00103.38           H
+ATOM      8  HB2 ALA A   6      12.985  12.230  12.409  0.00114.34           H
+ATOM      9  HB3 ALA A   6      11.584  12.914  12.465  0.00114.34           H
+TER
+END
+"""
 
-pdbs = {
-  'ACY' : {
-    'ph_7' : '''
-CRYST1  100.846  117.207  186.414  90.00  90.00  90.00 P 1
-HETATM  305  C   ACY B 202       9.141  -2.833  -6.329  1.00 19.63           C
-HETATM  306  O   ACY B 202       9.864  -1.976  -5.776  1.00 19.27           O
-HETATM  307  CH3 ACY B 202       9.093  -2.854  -7.828  1.00 17.69           C
-HETATM  308  OXT ACY B 202       8.460  -3.679  -5.708  1.00 16.11           O
-HETATM  309  H1  ACY B 202       9.837  -2.163  -8.224  0.00 17.69           H
-HETATM  310  H2  ACY B 202       9.303  -3.862  -8.186  0.00 17.69           H
-HETATM  311  H3  ACY B 202       8.102  -2.547  -8.163  0.00 17.69           H
-''',
-      },
-  'GLU' : {
-    'polymer' : '''
-CRYST1  155.738  152.261  119.955  90.00  90.00  90.00 P 1
-ATOM     64  N   GLU A  66      26.383  32.549   0.663  1.00 28.08           N
-ATOM     65  CA  GLU A  66      26.929  32.850  -0.611  1.00 30.46           C
-ATOM     66  C   GLU A  66      25.993  32.476  -1.705  1.00 32.90           C
-ATOM     67  O   GLU A  66      26.243  32.768  -2.863  1.00 33.11           O
-ATOM     68  CB  GLU A  66      28.337  32.264  -0.790  1.00 29.74           C
-ATOM     69  CG  GLU A  66      29.263  32.540   0.443  1.00 32.04           C
-ATOM     70  CD  GLU A  66      29.956  33.866   0.313  1.00 32.83           C
-ATOM     71  OE1 GLU A  66      30.149  34.362  -0.823  1.00 34.77           O
-ATOM     72  OE2 GLU A  66      30.257  34.427   1.497  1.00 32.63           O
-ATOM     73  H   GLU A  66      26.672  31.858   1.087  1.00 28.08           H
-ATOM     74  HA  GLU A  66      27.030  33.814  -0.659  1.00 30.46           H
-ATOM     75  HB2 GLU A  66      28.268  31.303  -0.905  1.00 29.74           H
-ATOM     76  HB3 GLU A  66      28.750  32.664  -1.571  1.00 29.74           H
-ATOM     77  HG2 GLU A  66      28.727  32.554   1.251  1.00 32.04           H
-ATOM     78  HG3 GLU A  66      29.939  31.847   0.499  1.00 32.04           H
-''',
-    'terminii' : '''
-CRYST1  155.738  152.261  119.955  90.00  90.00  90.00 P 1
-ATOM      1  N   GLU A  66      26.383  32.549   0.663  1.00 28.08           N
-ATOM      2  CA  GLU A  66      26.929  32.850  -0.611  1.00 30.46           C
-ATOM      3  C   GLU A  66      25.993  32.476  -1.705  1.00 32.90           C
-ATOM      4  O   GLU A  66      26.243  32.768  -2.863  1.00 33.11           O
-ATOM      5  CB  GLU A  66      28.337  32.264  -0.790  1.00 29.74           C
-ATOM      6  CG  GLU A  66      29.263  32.540   0.443  1.00 32.04           C
-ATOM      7  CD  GLU A  66      29.956  33.866   0.313  1.00 32.83           C
-ATOM      8  OE1 GLU A  66      30.149  34.362  -0.823  1.00 34.77           O
-ATOM      9  OE2 GLU A  66      30.257  34.427   1.497  1.00 32.63           O
-ATOM         OXT GLU A  66      24.955  31.866  -1.446  1.00 32.90           O
-ATOM     10  H   GLU A  66      26.672  31.859   1.087  1.00 28.08           H
-ATOM         H2  GLU A  66      26.531  33.237   1.224  1.00 28.08           H
-ATOM         H3  GLU A  66      25.497  32.412   0.585  1.00 28.08           H
-ATOM     11  HA  GLU A  66      27.030  33.814  -0.659  1.00 30.46           H
-ATOM     12  HB2 GLU A  66      28.268  31.303  -0.905  1.00 29.74           H
-ATOM     13  HB3 GLU A  66      28.750  32.664  -1.571  1.00 29.74           H
-ATOM     14  HG2 GLU A  66      28.727  32.554   1.251  1.00 32.04           H
-ATOM     15  HG3 GLU A  66      29.939  31.847   0.499  1.00 32.04           H
-''',
-    'mixed' : '''
-CRYST1  155.738  152.261  119.955  90.00  90.00  90.00 P 1
-ATOM      1  N   GLU A  66      26.383  32.549   0.663  1.00 28.08           N
-ATOM      2  CA  GLU A  66      26.929  32.850  -0.611  1.00 30.46           C
-ATOM      3  C   GLU A  66      25.993  32.476  -1.705  1.00 32.90           C
-ATOM      4  O   GLU A  66      26.243  32.768  -2.863  1.00 33.11           O
-ATOM      5  CB  GLU A  66      28.337  32.264  -0.790  1.00 29.74           C
-ATOM      6  CG  GLU A  66      29.263  32.540   0.443  1.00 32.04           C
-ATOM      7  CD  GLU A  66      29.956  33.866   0.313  1.00 32.83           C
-ATOM      8  OE1 GLU A  66      30.149  34.362  -0.823  1.00 34.77           O
-ATOM      9  OE2 GLU A  66      30.257  34.427   1.497  1.00 32.63           O
-ATOM         OXT GLU A  66      24.955  31.866  -1.446  1.00 32.90           O
-ATOM     10  H   GLU A  66      26.672  31.859   1.087  1.00 28.08           H
-ATOM         H2  GLU A  66      26.531  33.237   1.224  1.00 28.08           H
-ATOM     11  HA  GLU A  66      27.030  33.814  -0.659  1.00 30.46           H
-ATOM     12  HB2 GLU A  66      28.268  31.303  -0.905  1.00 29.74           H
-ATOM     13  HB3 GLU A  66      28.750  32.664  -1.571  1.00 29.74           H
-ATOM     14  HG2 GLU A  66      28.727  32.554   1.251  1.00 32.04           H
-ATOM     15  HG3 GLU A  66      29.939  31.847   0.499  1.00 32.04           H
-''',
-    'capping' : '''
-CRYST1  155.738  152.261  119.955  90.00  90.00  90.00 P 1
-ATOM      1  N   GLU A  66      26.383  32.549   0.663  1.00 28.08           N
-ATOM      2  CA  GLU A  66      26.929  32.850  -0.611  1.00 30.46           C
-ATOM      3  C   GLU A  66      25.993  32.476  -1.705  1.00 32.90           C
-ATOM      4  O   GLU A  66      26.243  32.768  -2.863  1.00 33.11           O
-ATOM      5  CB  GLU A  66      28.337  32.264  -0.790  1.00 29.74           C
-ATOM      6  CG  GLU A  66      29.263  32.540   0.443  1.00 32.04           C
-ATOM      7  CD  GLU A  66      29.956  33.866   0.313  1.00 32.83           C
-ATOM      8  OE1 GLU A  66      30.149  34.362  -0.823  1.00 34.77           O
-ATOM      9  OE2 GLU A  66      30.257  34.427   1.497  1.00 32.63           O
-ATOM     10  H   GLU A  66      26.672  31.858   1.087  1.00 28.08           H
-ATOM         H2  GLU A  66      26.532  33.237   1.224  1.00 28.08           H
-ATOM     11  HA  GLU A  66      27.030  33.814  -0.659  1.00 30.46           H
-ATOM     12  HB2 GLU A  66      28.268  31.303  -0.905  1.00 29.74           H
-ATOM     13  HB3 GLU A  66      28.750  32.664  -1.571  1.00 29.74           H
-ATOM     14  HG2 GLU A  66      28.727  32.554   1.251  1.00 32.04           H
-ATOM     15  HG3 GLU A  66      29.939  31.847   0.499  1.00 32.04           H
-ATOM         HC  GLU A  66      25.150  31.981  -1.494  1.00 32.90           H
-''',
-  },
-}
+pdb_str_out = """
+CRYST1   23.260   22.914   22.580  90.00  90.00  90.00 P 1
+SCALE1      0.042992  0.000000  0.000000        0.00000
+SCALE2      0.000000  0.043641  0.000000        0.00000
+SCALE3      0.000000  0.000000  0.044287        0.00000
+ATOM      1  N   ALA A   6      12.490  10.000  11.308  1.00 99.80           N
+ATOM      2  CA  ALA A   6      11.516  11.071  11.540  1.00103.38           C
+ATOM      3  C   ALA A   6      11.169  11.789  10.247  1.00105.41           C
+ATOM      4  O   ALA A   6      10.000  12.117  10.000  1.00 98.78           O
+ATOM      5  CB  ALA A   6      12.044  12.068  12.580  1.00114.34           C
+ATOM      6  OXT ALA A   6      12.053  12.051   9.432  1.00105.41           O
+ATOM      7  H   ALA A   6      12.129   9.064  11.493  0.00 99.80           H
+ATOM      8  H2  ALA A   6      12.786  10.019  10.353  0.00 99.80           H
+ATOM      9  H3  ALA A   6      13.282  10.134  11.904  0.00 99.80           H
+ATOM     10  HA  ALA A   6      10.602  10.628  11.934  0.00103.38           H
+ATOM     11  HB1 ALA A   6      12.973  12.504  12.214  0.00114.34           H
+ATOM     12  HB2 ALA A   6      12.225  11.541  13.517  0.00114.34           H
+ATOM     13  HB3 ALA A   6      11.300  12.850  12.731  0.00114.34           H
+TER
+"""
 
-results = {'ACY':{'ph_7': -1},
-           'GLU':{'polymer'  : -3,
-                  'terminii' : -1,
-                  'capping'  : -1,
-                  'mixed'    : -2,
-                  },
-           }
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
+  """
+  Exercise "qr.finalise m.pdb" produces expected (and meaningful) output.
+  Do not modify this test before checking the result on graphics (eg, PyMol)!
+  """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
+  pdb_in = "%s.pdb"%prefix
+  open(pdb_in, "w").write(pdb_str_in)
+  cmd = "qr.finalise %s > %s.log"%(pdb_in, prefix)
+  assert easy_run.call(cmd)==0
+  h_answer = iotbx.pdb.input(
+    source_info=None, lines = pdb_str_out).construct_hierarchy()
+  h_result = iotbx.pdb.input(
+    file_name = "%s_complete.pdb"%prefix).construct_hierarchy()
+  open("%s_answer.pdb"%prefix, "w").write(pdb_str_out)
+  #
+  s1 = h_answer.atoms().extract_xyz()
+  s2 = h_result.atoms().extract_xyz()
+  print(s1.size(), s2.size())
+  r = flex.mean(flex.sqrt((s1 - s2).dot()))
+  assert r < 0.016, r
+  #
+  asc = h_result.atom_selection_cache()
+  sel = asc.selection("element H or element D")
+  assert sel.count(True) == 7
+  occ = h_result.atoms().extract_occ().select(sel)
+  assert flex.max(occ)<1.e-6
 
-def run(prefix):
-  for code, item in pdbs.items():
-    for action, lines in item.items():
-      print (code, action)
-      fn = '%s_%s.pdb' % (code, action)
-      f=open(fn, 'w')
-      f.write(lines)
-      f.close()
-
-      rc = get_charge(fn,
-                      assert_correct_chain_terminii=False,
-                      verbose=1,
-      )
-      ans = None
-      level1 = results.get(code, None)
-      if level1:
-        ans = level1.get(action, None)
-      if ans is not None:
-        assert ans==rc, 'calculated charge %d not equal to expected %s for %s' % (
-            rc,
-            ans,
-            fn,
-            )
-        os.remove(fn)
-
-if(__name__=='__main__'):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=True)
+if(__name__ == "__main__"):
+  run()

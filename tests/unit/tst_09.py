@@ -22,10 +22,12 @@ def normalize(x):
   r.sort()
   return r
 
-def run(prefix):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Exercise buffer region of cluster.
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
   #
   pdb_inp = iotbx.pdb.input(file_name= os.path.join(qr_unit_tests,"data_files","2lvr.pdb"))
   ph = pdb_inp.construct_hierarchy()

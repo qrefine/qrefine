@@ -1,27 +1,38 @@
 from __future__ import division
-from __future__ import print_function
 from __future__ import absolute_import
+
 import os
 import time
-import libtbx.load_env
+import iotbx.pdb
+import mmtbx.f_model
+from scitbx.array_family import flex
 from qrefine.tests.unit import run_tests
-from libtbx import easy_run
+import mmtbx.model
+from libtbx.utils import null_out
+from libtbx.test_utils import approx_equal
 
-qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
-
-def run(prefix):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
-  Make sure 'qr.charges tst_22.pdb' runs without errors (finishes successfully).
+  Exercise standard (cctbx-based restraints) optimization (no data required).
   """
-  pdb_name = os.path.join(qr_unit_tests_data, "tst_22.pdb")
-  cmd = "qr.charges %s verbose=False"%pdb_name
-  if(0): print(cmd)
-  r = easy_run.go(cmd)
-  # Make sure no
-  assert len(r.stderr_lines)==0, r.stderr_lines
-  assert len(r.stdout_lines)==0, r.stdout_lines
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
+  args = ["restraints=cctbx mode=opt use_convergence_test=False",
+          "number_of_micro_cycles=3",
+          "max_iterations_refine=100"]
+  xrs_good,xrs_poor,f_obs,r_free_flags = run_tests.setup_helix_example()
+  run_tests.run_cmd(
+    prefix   = prefix,
+    args     = args,
+    mtz_name = "")
+  # Check results
+  pdb_inp = iotbx.pdb.input(
+    file_name = os.path.join(prefix,"m00_poor_refined.pdb"))
+  model_1 = mmtbx.model.manager(model_input = pdb_inp, log=null_out())
+  model_1.process(make_restraints=True)
+  s1 = model_1.geometry_statistics().result()
+  assert s1.bond.mean < 0.005
 
-if(__name__ == '__main__'):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+if(__name__ == "__main__"):
+  run()

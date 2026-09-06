@@ -1,217 +1,58 @@
-from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
-
-import time, os
-import iotbx.pdb
-from libtbx.test_utils import approx_equal
-import iotbx.pdb
-from scitbx.array_family import flex
-import string
-from cctbx import uctbx
-from cctbx import crystal
-from libtbx.utils import null_out
-import mmtbx
-import mmtbx.monomer_library.server
-import mmtbx.monomer_library.pdb_interpretation
-import mmtbx.restraints
-from mmtbx import monomer_library
-import libtbx.load_env
+import os, sys
 from qrefine.tests.unit import run_tests
-from qrefine import restraints as qr_restraints
+from libtbx import easy_run
+import libtbx.load_env
 
-mon_lib_srv = mmtbx.monomer_library.server.server()
-ener_lib    = mmtbx.monomer_library.server.ener_lib()
+qrefine_path = libtbx.env.find_in_repositories("qrefine")
 
-qrefine = libtbx.env.find_in_repositories("qrefine")
-qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
+pdb_lines = '''
+CRYST1   81.798   80.030   79.804  90.00  90.00  90.00 P 1
+ATOM   1163  N   CYS A  78      11.141  13.078  17.954  1.00  8.15           N
+ANISOU 1163  N   CYS A  78      368   2009    718    -21     61    -57       N
+ATOM   1164  CA  CYS A  78      10.932  12.280  19.167  1.00  8.14           C
+ANISOU 1164  CA  CYS A  78      335   2060    698     37     66   -116       C
+ATOM   1165  C   CYS A  78      12.067  11.265  19.234  1.00  7.84           C
+ANISOU 1165  C   CYS A  78      482   1942    556    -72    125   -132       C
+ATOM   1166  O   CYS A  78      12.293  10.604  18.236  1.00 10.09           O
+ANISOU 1166  O   CYS A  78      760   2315    759     85    -15   -185       O
+ATOM   1167  CB  CYS A  78       9.596  11.643  19.135  1.00  9.23           C
+ANISOU 1167  CB  CYS A  78      350   2159    997     -5     45    -59       C
+ATOM   1168  SG  CYS A  78       9.430  10.394  20.434  1.00  9.81           S
+ANISOU 1168  SG  CYS A  78      707   2210    809   -188     50    -25       S
+ATOM   1169  H   CYS A  78      10.663  12.707  17.133  1.00  8.15           H
+ATOM   1170  HA  CYS A  78      10.991  12.924  20.044  1.00  8.14           H
+ATOM   1171  HB2 CYS A  78       8.830  12.403  19.291  1.00  9.23           H
+ATOM   1172  HB3 CYS A  78       9.453  11.155  18.172  1.00  9.23           H
+HETATM 1832 CU    CU A 201       7.545   9.241  20.314  0.40  8.15          Cu
+ANISOU 1832 CU    CU A 201      503   1903    690    -55    119      0      Cu
+'''
 
-def get_grm(ph, cs):
-  return qr_restraints.get_cctbx_gradients(
-    ph=ph, cs=cs).model.get_restraints_manager()
-
-def get_grads(sel_f_str, sel_buffer_str, file_name):
-  pdb_inp = iotbx.pdb.input(file_name=file_name)
-  ph = pdb_inp.construct_hierarchy()
-  grm = get_grm(ph=ph, cs=pdb_inp.crystal_symmetry())
-  es = grm.energies_sites(sites_cart=ph.atoms().extract_xyz(),
-    compute_gradients=True)
-  asc = ph.atom_selection_cache()
-  sel_f = asc.selection(sel_f_str)
-  sel_buffer = asc.selection(sel_buffer_str)
-  return es.gradients, sel_f, sel_buffer
-
-def run3(prefix):
-  file_name=os.path.join(qr_unit_tests_data,"h_altconf_2.pdb")
-
-  s_b_W1_A_str = "altloc A or resseq 95:97"
-  s_f_W1_A_str = "resseq 87:93 or altloc A or resseq 95:97"
-
-  s_b_W1_B_str = "altloc B or resseq 95:97"
-  s_f_W1_B_str = "resseq 87:93 or altloc B or resseq 95:97"
-
-  s_b_W1_AB_str = "resseq 95:97"
-  s_f_W1_AB_str = "resseq 87:93 or resseq 95:97"
-
-  s_b_W2_str = "altloc B or resseq 91:93"
-  s_f_W2_str = "resseq 95:99 or altloc B or resseq 91:93"
-
-  s_b_A_str = "resseq 90:93 or resseq 95:96"
-  s_f_A_str = "altloc A or resseq 90:93 or resseq 95:96"
-
-  s_b_B_str = "resseq 90:93 or resseq 95:96"
-  s_f_B_str = "altloc B or resseq 90:93 or resseq 95:96"
-
-  g    , junk1, junk2           = get_grads(file_name=file_name, sel_f_str = "all",     sel_buffer_str = "not all")
-  gA_f , s_A_f,s_A_b            = get_grads(file_name=file_name, sel_f_str =s_f_A_str,  sel_buffer_str = s_b_A_str)
-  gB_f , s_B_f,s_B_b            = get_grads(file_name=file_name, sel_f_str =s_f_B_str,  sel_buffer_str = s_b_B_str)
-  gW1_A_f, s_W1_A_f,s_W1_A_b    = get_grads(file_name=file_name, sel_f_str =s_f_W1_A_str, sel_buffer_str = s_b_W1_A_str)
-  gW1_B_f, s_W1_B_f,s_W1_B_b    = get_grads(file_name=file_name, sel_f_str =s_f_W1_B_str, sel_buffer_str = s_b_W1_B_str)
-  gW1_AB_f, s_W1_AB_f,s_W1_AB_b = get_grads(file_name=file_name, sel_f_str =s_f_W1_AB_str, sel_buffer_str = s_b_W1_AB_str)
-  gW2_f, s_W2_f,s_W2_b          = get_grads(file_name=file_name, sel_f_str =s_f_W2_str, sel_buffer_str = s_b_W2_str)
-
-  g = flex.vec3_double(g.size())
-  g_W1_A = g.set_selected(s_W1_A_f, gW1_A_f)
-  g_W1_A = g_W1_A.set_selected(s_W1_A_b, [0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_W1_B = g.set_selected(s_W1_B_f, gW1_B_f)
-  g_W1_B = g_W1_B.set_selected(s_W1_B_b, [0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_W1_AB = g.set_selected(s_W1_AB_f, gW1_AB_f)
-  g_W1_AB = g_W1_AB.set_selected(s_W1_AB_b, [0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_W2 = g.set_selected(s_W2_f, gW2_f)
-  g_W2 = g_W2.set_selected(s_W2_b,  [0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_A = g.set_selected(s_A_f, gA_f)
-  g_A = g_A.set_selected(s_A_b,[0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_B = g.set_selected(s_B_f, gB_f)
-  g_B = g_B.set_selected(s_B_b,[0,0,0])
-
-  g1, junk1,junk2 = get_grads(file_name=file_name, sel_f_str = "all", sel_buffer_str = "not all")
-  g2 = g_A + g_B + g_W1_A + g_W1_B + g_W2  -g_W1_AB
-
-  diff = g1-g2
-  assert approx_equal(diff.max(), [0,0,0])
-  if(0):
-    print(diff.max())
-    for d in diff:
-      print(d)
-
-def run2(prefix):
-  file_name=os.path.join(qr_unit_tests_data,"h_altconf.pdb")
-
-  s_b_W1_str = "altloc A or resseq 95:97"
-  s_f_W1_str = "resseq 87:93 or altloc A or resseq 95:97"
-
-  s_b_W2_str = "altloc B or resseq 91:93"
-  s_f_W2_str = "resseq 95:99 or altloc B or resseq 91:93"
-
-  s_b_A_str = "resseq 90:93 or resseq 95:96"
-  s_f_A_str = "altloc A or resseq 90:93 or resseq 95:96"
-
-  s_b_B_str = "resseq 90:93 or resseq 95:96"
-  s_f_B_str = "altloc B or resseq 90:93 or resseq 95:96"
-
-  g    , junk1, junk2  = get_grads(file_name=file_name, sel_f_str = "all",     sel_buffer_str = "not all")
-  gA_f , s_A_f, s_A_b  = get_grads(file_name=file_name, sel_f_str =s_f_A_str,  sel_buffer_str = s_b_A_str)
-  gB_f , s_B_f, s_B_b  = get_grads(file_name=file_name, sel_f_str =s_f_B_str,  sel_buffer_str = s_b_B_str)
-  gW1_f, s_W1_f,s_W1_b = get_grads(file_name=file_name, sel_f_str =s_f_W1_str, sel_buffer_str = s_b_W1_str)
-  gW2_f, s_W2_f,s_W2_b = get_grads(file_name=file_name, sel_f_str =s_f_W2_str, sel_buffer_str = s_b_W2_str)
-
-  g = flex.vec3_double(g.size())
-  g_W1 = g.set_selected(s_W1_f, gW1_f)
-  g_W1 = g_W1.set_selected(s_W1_b, [0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_W2 = g.set_selected(s_W2_f, gW2_f)
-  g_W2 = g_W2.set_selected(s_W2_b,  [0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_A = g.set_selected(s_A_f, gA_f)
-  g_A = g_A.set_selected(s_A_b,[0,0,0])
-
-  g = flex.vec3_double(g.size())
-  g_B = g.set_selected(s_B_f, gB_f)
-  g_B = g_B.set_selected(s_B_b,[0,0,0])
-
-  g1, junk1,junk2 = get_grads(file_name=file_name,sel_f_str = "all", sel_buffer_str = "not all")
-  g2 = g_A + g_B + g_W1 + g_W2
-
-  diff = g1-g2
-  assert approx_equal(diff.max(), [0,0,0])
-  if(0):
-    print(diff.max())
-    for d in diff:
-      print(d)
-
-def run1(prefix):
-  pdb_inp = iotbx.pdb.input(file_name=os.path.join(qr_unit_tests_data,"m.pdb"))
-  ph = pdb_inp.construct_hierarchy()
-  grm = get_grm(ph=ph, cs=pdb_inp.crystal_symmetry())
-  es = grm.energies_sites(sites_cart=ph.atoms().extract_xyz(),
-    compute_gradients=True)
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
+  """
+  Make sure charges works in this special case
+  """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
   #
-  asc = ph.atom_selection_cache()
-  sA = asc.selection("altloc A or altloc ' '")
-  if 0: print(sA.count(True))
-  phA = ph.select(sA)
-  phA.write_pdb_file("A.pdb")
+  fn='test_cu_cys.pdb'
+  f=open(fn, 'w')
+  f.write(pdb_lines)
+  f.close()
+  cmd = 'qr.finalise %s action="capping"' % (fn)
+  if 1: print(cmd)
+  rc = easy_run.go(cmd)
+  fnc = '%s_capping.pdb' % fn.replace('.pdb','')
+  f=open(fnc, 'r')
+  lines=f.read()
+  f.close()
+  assert ' HG  CYS A  78' not in lines
+  cmd = 'qr.charges %s verbose=1' % (fnc)
+  if 1: print(cmd)
+  rc = easy_run.go(cmd)
+  assert 'Charge: 0' in rc.stdout_lines, rc.stdout_lines
+  return rc
 
-  sB = asc.selection("altloc B or altloc ' '")
-  if 0: print(sB.count(True))
-  phB = ph.select(sB)
-  phB.write_pdb_file("B.pdb")
-
-  sW  = asc.selection("altloc ' '")
-  if 0: print(sW.count(True))
-  phW = ph.select(sW)
-  phW.write_pdb_file("W.pdb")
-  #
-  grmA = grm.select(sA)
-  esA = grmA.energies_sites(sites_cart=phA.atoms().extract_xyz(),
-    compute_gradients=True)
-
-  grmB = grm.select(sB)
-  esB = grmB.energies_sites(sites_cart=phB.atoms().extract_xyz(),
-    compute_gradients=True)
-
-  grmW = grm.select(sW)
-  esW = grmW.energies_sites(sites_cart=phW.atoms().extract_xyz(),
-    compute_gradients=True)
-  #
-  if 0:
-    print(list(phW.atoms())[0].name)
-    print(esW.gradients[0])
-    print()
-
-    print(list(ph.atoms())[0].name)
-    print(es.gradients[0])
-    print(esA.gradients[0])
-    print(esB.gradients[0])
-    print()
-    print(list(phA.atoms())[5].name, list(ph.atoms())[5].name)
-    print(es.gradients[5])
-    print(esA.gradients[5])
-    print()
-    print(list(phB.atoms())[5].name, list(ph.atoms())[12].name)
-    print(es.gradients[12])
-    print(esB.gradients[5])
-    print()
-    print("-------")
-  result = list(flex.double(esA.gradients[0])+
-                flex.double(esB.gradients[0])-
-                flex.double(esW.gradients[0]))
-  assert approx_equal(result, es.gradients[0])
-
-if(__name__ == '__main__'):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run1, prefix=prefix+"_run1", disable=False)
-  run_tests.runner(function=run2, prefix=prefix+"_run2", disable=False)
-  run_tests.runner(function=run3, prefix=prefix+"_run3", disable=False)
+if(__name__=='__main__'):
+  run()

@@ -6,10 +6,13 @@ from libtbx.test_utils import approx_equal
 import qrefine.clustering as clustering
 from qrefine.tests.unit import run_tests
 
-def run(prefix):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Exercise interaction graph clustering.
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
   interaction_list = [[24, 27], [19, 22], [5, 11], [18, 22], [25, 26], [23, 26], [2, 3], [5, 7], [9, 11], [27, 29],
                    [5, 10], [9, 10], [18, 21], [11, 12], [24, 25], [5, 12], [6, 10], [6, 7], [20, 21], [10, 11],
                    [21, 25], [5, 6], [21, 24], [17, 21], [6, 11], [12, 13], [5, 13], [17, 20], [4, 5], [3, 12],
