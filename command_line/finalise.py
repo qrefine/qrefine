@@ -36,6 +36,8 @@ calculate_charge = False
   .help = Will calculate total charge of molecule.
 append_to_end_of_model = False
   .type = bool
+stop_if_n_changed_is_gt_zero = False
+  .type = bool
 reduce = True
   .type = bool
   .help = Use reduce to add hydrogens or fall back to Phenix.elbow
@@ -99,7 +101,7 @@ def run(args, log):
   model.process(make_restraints=True, grm_normalization=True,
     pdb_interpretation_params = pi_params)
   # Run!
-  model = finalise.run(
+  model, suffix = finalise.run(
     model                     = model,
     model_completion          = model_completion,
     skip_validation           = params.skip_validation,
@@ -107,6 +109,7 @@ def run(args, log):
     neutron_option            = params.options.neutron,
     hydrogen_atom_occupancies = params.options.hydrogen_atom_occupancies,
     use_reduce                = params.reduce,
+    stop_if_n_changed_is_gt_zero = params.stop_if_n_changed_is_gt_zero,
     )
   # Calculate charge
   rc = None
@@ -132,9 +135,9 @@ def run(args, log):
     ext = ".pdb"
   prefix = Path(params.model_file_name).stem
   if rc is None:
-    output = "%s_complete%s"%(prefix, ext)
+    output = "%s_%s%s"%(prefix, suffix, ext)
   else:
-    output = "%s_complete_charge%s%s"%(prefix, str(rc), ext)
+    output = "%s_%s_charge%s%s"%(prefix, suffix, str(rc), ext)
   with open(output, "w") as fo:
     fo.write(omo)
   print("\n  Output written to: %s" % output)

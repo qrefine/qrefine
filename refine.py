@@ -228,10 +228,10 @@ def create_calculator(params,
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
         model              = model,
-        dump_gradients     = params.dump_gradients,
         max_shift          = params.refine.stpmax,
         shift_eval         = params.refine.shift_evaluation,
-        exclude_selection  = exclude_selection)
+        exclude_selection  = exclude_selection,
+        debug              = params.debug)
 
 def set_qm_defaults(params, log):
   outl = ''

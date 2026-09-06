@@ -94,14 +94,20 @@ class sites_opt(object):
   dump_gradients is used for debugging.
   """
 
-  def __init__(self, model, max_shift, restraints_manager, shift_eval,
-               dump_gradients=False, convergence_threshold=1.e-3,
-               convergence_reached_times=3, use_callback_after_step=False,
-               exclude_selection=None):
+  def __init__(self,
+               model,
+               max_shift,
+               restraints_manager,
+               shift_eval,
+               convergence_threshold=1.e-3,
+               convergence_reached_times=3,
+               use_callback_after_step=False,
+               exclude_selection=None,
+               debug=False):
+
     self.use_callback_after_step = use_callback_after_step
     self.model = model
     self.restraints_manager = restraints_manager
-    self.dump_gradients = dump_gradients
     self.convergence_threshold = convergence_threshold
     self.convergence_reached_times = convergence_reached_times
     self.meet_convergence_criteria = 0
@@ -128,6 +134,9 @@ class sites_opt(object):
     self.keep_selection = None
     if self.exclude_selection is not None:
       self.keep_selection = ~self.exclude_selection
+    self.all_gradients = []
+    self.all_targets   = flex.double()
+    self.debug = debug
 
   def set_sites_plus_x(self):
     self.sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
@@ -148,23 +157,17 @@ class sites_opt(object):
     self.set_sites_plus_x()
     self.f, self.g = self.restraints_manager.target_and_gradients(
       sites_cart = self.sites_plus_x)
-
     if self.keep_selection is not None:
       self.g = self.g.set_selected(self.exclude_selection, [0,0,0])
-
+    if self.debug:
+      self.all_gradients.append(self.g)
+      self.all_targets  .append(self.f)
     self.g = self.g.as_double()
-    # For tests
-    if(self.dump_gradients):
-      from libtbx import easy_pickle
-      easy_pickle.dump(self.dump_gradients, self.g)
-      STOP()
-    #
     if(self.f_start is None):
       self.f_start = self.f
     self.max_shift_between_resets = self.shift_eval_func(flex.sqrt((
       self.sites_cart - self.sites_plus_x).dot()))
     self.total_time += (time.time()-t0)
-
     return self.f, self.g
 
   def compute_functional_and_gradients(self):

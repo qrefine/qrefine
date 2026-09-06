@@ -7,6 +7,7 @@ from mmtbx.monomer_library import server
 from libtbx.utils import Sorry
 
 from iotbx.pdb import amino_acid_codes as aac
+from libtbx.utils import Sorry
 
 mon_lib_server = server.server()
 get_class = iotbx.pdb.common_residue_names_get_class
@@ -259,6 +260,7 @@ def complete_pdb_hierarchy(hierarchy,
                            debug=False,
                            use_reduce=True,
                            selection=None,# ONLY APPLIES FOR CAPPING
+                           stop_if_n_changed_is_gt_zero=False,
                           ):
   #
   # some validations
@@ -291,6 +293,8 @@ def complete_pdb_hierarchy(hierarchy,
       mon_lib_server,
       add_hydrogens=False,
     )
+    if stop_if_n_changed_is_gt_zero and n_changed > 0:
+      raise Sorry("n_changed = %d"%n_changed)
 
     if(use_reduce):
       print("Using reduce to add hydrogens",file=log)

@@ -1,5 +1,4 @@
 import sys, time, os
-from qrefine import __version__
 import libtbx
 import mmtbx
 from qrefine.utils import hierarchy_utils

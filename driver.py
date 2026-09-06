@@ -38,7 +38,7 @@ class clustering_update(object):
     try:    sites_cart = calculator.fmodel.xray_structure.sites_cart()
     except: sites_cart = calculator.model.get_sites_cart()
     rmsd_diff = self.pre_sites_cart.rms_difference(sites_cart)
-    print(rmsd_diff, self.rmsd_tolerance)
+    #print(rmsd_diff, self.rmsd_tolerance)
     if(rmsd_diff > self.rmsd_tolerance):
       print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
@@ -262,3 +262,9 @@ def opt(params, monitor, calculator):
   print("calculator(opt), total_time (target_and_gradients)", calculator.total_time)
   print("calculator(opt), number_of_target_and_gradients_calls (target_and_gradients)",
     calculator.number_of_target_and_gradients_calls)
+  if calculator.debug:
+    o = group_args(
+      targets   = calculator.all_targets,
+      gradients = calculator.all_gradients)
+    easy_pickle.dump(
+      "debug_optimization_clustering%s.pkl"%str(params.cluster.clustering), o)

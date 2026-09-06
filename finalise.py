@@ -45,6 +45,7 @@ def run(model,
         hydrogen_atom_occupancies=0.,
         use_reduce=True,
         remove_selection=None,
+        stop_if_n_changed_is_gt_zero=False,
         ):
   #
   # extends side chains and add hydrogens
@@ -63,7 +64,8 @@ def run(model,
     crystal_symmetry            = model.crystal_symmetry(),
     use_capping_hydrogens       = use_capping_hydrogens,
     append_to_end_of_model      = append_to_end_of_model,
-    use_reduce                  = use_reduce
+    use_reduce                  = use_reduce,
+    stop_if_n_changed_is_gt_zero=stop_if_n_changed_is_gt_zero,
   )
 
   # Idealize H as riding
@@ -111,7 +113,7 @@ def run(model,
     sel = asc.selection("element H or element D")
 
   model.set_occupancies(hydrogen_atom_occupancies, selection=sel)
-  return model
+  return model, fname
 
 if __name__=="__main__":
   def _fake_phil_parse(arg):
