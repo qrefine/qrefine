@@ -75,9 +75,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   # Check all three files are the same
   #
   cwd = os.getcwd()
-  s1 = iotbx.pdb.input("%s/qrefine_tst_02a_from_altlocs.pdb"%cwd).atoms().extract_xyz()
-  s2 = iotbx.pdb.input("%s/qrefine_tst_02a_from_cctbx.pdb"%cwd).atoms().extract_xyz()
-  s3 = iotbx.pdb.input("%s/qrefine_tst_02a/qrefine_tst_02a_refined.pdb"%cwd).atoms().extract_xyz()
+  s1 = iotbx.pdb.input("%s/qrefine_tst_06_from_altlocs.pdb"%cwd).atoms().extract_xyz()
+  s2 = iotbx.pdb.input("%s/qrefine_tst_06_from_cctbx.pdb"%cwd).atoms().extract_xyz()
+  s3 = iotbx.pdb.input("%s/qrefine_tst_06/qrefine_tst_06_refined.pdb"%cwd).atoms().extract_xyz()
   d1 = flex.mean(flex.sqrt((s1 - s2).dot()))
   d2 = flex.mean(flex.sqrt((s1 - s3).dot()))
   assert d1 < 1.e-4, d1 # This is what we expect!
