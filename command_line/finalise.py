@@ -106,7 +106,7 @@ def run(args, log):
     pdb_interpretation_params = pi_params)
   # STOP if poor model
   if params.stop_if_poor_model:
-    g = model_box.geometry_statistics().result(slim = True)
+    g = model.geometry_statistics().result(slim = True)
     if g.nonbonded.min < 1.0:
       raise Sorry("Bad clash prevents finalise.")
   #
