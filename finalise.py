@@ -46,6 +46,7 @@ def run(model,
         use_reduce=True,
         remove_selection=None,
         stop_if_n_changed_is_gt_zero=False,
+        add_terminal_hydrogens=True,
         ):
   #
   # extends side chains and add hydrogens
@@ -66,6 +67,7 @@ def run(model,
     append_to_end_of_model      = append_to_end_of_model,
     use_reduce                  = use_reduce,
     stop_if_n_changed_is_gt_zero=stop_if_n_changed_is_gt_zero,
+    add_terminal_hydrogens      = add_terminal_hydrogens
   )
 
   # Idealize H as riding

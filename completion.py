@@ -261,6 +261,7 @@ def complete_pdb_hierarchy(hierarchy,
                            use_reduce=True,
                            selection=None,# ONLY APPLIES FOR CAPPING
                            stop_if_n_changed_is_gt_zero=False,
+                           add_terminal_hydrogens=True,
                           ):
   #
   # some validations
@@ -324,14 +325,15 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # maybe more to cctbx
   #
-  add_terminal_hydrogens_qr( model.get_hierarchy(),
-                             model.get_restraints_manager().geometry,
-                             use_capping_hydrogens=use_capping_hydrogens,
-                             append_to_end_of_model=append_to_end_of_model,
-                             original_hierarchy=original_hierarchy,
-                             verbose=verbose,
-                             selection=selection,
-                            ) # in place
+  if add_terminal_hydrogens:
+    add_terminal_hydrogens_qr( model.get_hierarchy(),
+                               model.get_restraints_manager().geometry,
+                               use_capping_hydrogens=use_capping_hydrogens,
+                               append_to_end_of_model=append_to_end_of_model,
+                               original_hierarchy=original_hierarchy,
+                               verbose=verbose,
+                               selection=selection,
+                              ) # in place
   model.get_hierarchy().atoms().set_chemical_element_simple_if_necessary()
   model.get_hierarchy().sort_atoms_in_place()
   return model
