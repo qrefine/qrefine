@@ -416,7 +416,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           calculator_sites_opt_pre = calculator.sites_opt(
             restraints_manager      = restraints_manager,
             model                   = model,
-            dump_gradients          = False,
+#            dump_gradients          = False,
             max_shift               = params.refine.stpmax,
             shift_eval              = params.refine.shift_evaluation,
             use_callback_after_step = True,
