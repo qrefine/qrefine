@@ -155,14 +155,10 @@ class sites_opt(object):
     self.number_of_target_and_gradients_calls+=1
     t0=time.time()
     self.set_sites_plus_x()
-    sites_cart = self.sites_plus_x
-    if self.keep_selection is not None:
-      sites_cart = sites_cart.select(self.keep_selection)
     self.f, self.g = self.restraints_manager.target_and_gradients(
-      sites_cart = sites_cart)
+      sites_cart = self.sites_plus_x)
     if self.keep_selection is not None:
-      g_full = flex.vec3_double(self.model.size(), [0,0,0])
-      self.g = g_full.set_selected(self.keep_selection, self.g)
+      self.g = self.g.set_selected(self.exclude_selection, [0,0,0])
     if self.debug:
       self.all_gradients.append(self.g)
       self.all_targets  .append(self.f)
