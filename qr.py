@@ -223,7 +223,10 @@ refine {
     .help = Use mean or max coordinate shift to decide on convergence
   exclude = None
     .type = str
-    .help = Atom selection string to select atoms to be exluded from refinement
+    .help = Atom selection string for atoms omitted from restraints and optimization
+  freeze = None
+    .type = str
+    .help = Atom selection string for atoms included in restraints but fixed during optimization
 }
 
 parallel {

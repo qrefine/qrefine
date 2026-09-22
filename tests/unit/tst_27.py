@@ -50,12 +50,15 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   params.cluster.clustering = False
 
   #
-  # Freeze GLY 87.
+  # Exclude GLY 87 from the restraints system.
   #
   exclude_selection = model.selection(
     string="chain A and resseq 87")
 
   keep_selection = ~exclude_selection
+
+  freeze_selection = flex.bool(model.size(), False)
+  freeze_selection[list(keep_selection).index(True)] = True
 
   assert exclude_selection.count(True) > 0
   assert keep_selection.count(True) > 0
@@ -79,9 +82,7 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
     debug=False)
 
   #
-  # Before the fix this call failed because full-model coordinates
-  # were passed to a restraints manager constructed for the reduced
-  # model defined by exclude_selection.
+  # The restraints manager must receive only the non-excluded coordinates.
   #
   f, g = calc.target_and_gradients()
 
@@ -95,7 +96,7 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   assert g.size() == model.size()
 
   #
-  # All excluded atoms must have zero gradient.
+  # Excluded atoms are absent from restraints and therefore have zero gradient.
   #
   for gi in g.select(exclude_selection):
     assert gi == (0,0,0), gi
@@ -110,6 +111,27 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
       break
 
   assert non_zero
+
+  # Combining exclude and freeze must preserve both semantics: excluded atoms
+  # are absent from restraints, while frozen atoms remain in restraints and
+  # are masked only after the reduced gradient is expanded.
+  calc = calculator.sites_opt(
+    model=model,
+    max_shift=0.5,
+    restraints_manager=restraints_manager,
+    shift_eval="max",
+    exclude_selection=exclude_selection,
+    freeze_selection=freeze_selection,
+    debug=False)
+  _, combined_g = calc.target_and_gradients()
+  combined_g = flex.vec3_double(combined_g)
+  for gi in combined_g.select(exclude_selection):
+    assert gi == (0,0,0), gi
+  for gi in combined_g.select(freeze_selection):
+    assert gi == (0,0,0), gi
+
+  movable_selection = keep_selection & ~freeze_selection
+  assert any(gi != (0,0,0) for gi in combined_g.select(movable_selection))
 
   print("OK")
 

@@ -208,7 +208,8 @@ def create_calculator(params,
                       geometry_rmsd_manager,
                       fmodel=None,
                       hdm=None,
-                      exclude_selection=None):
+                      exclude_selection=None,
+                      freeze_selection=None):
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
       assert model is not None
@@ -223,7 +224,7 @@ def create_calculator(params,
         max_shift             = params.refine.stpmax)
     else:
       # XXX
-      # XXX exclude_selection and hdm are not used XXX
+      # XXX hdm is not used XXX
       # XXX
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
@@ -231,6 +232,7 @@ def create_calculator(params,
         max_shift          = params.refine.stpmax,
         shift_eval         = params.refine.shift_evaluation,
         exclude_selection  = exclude_selection,
+        freeze_selection   = freeze_selection,
         debug              = params.debug)
 
 def set_qm_defaults(params, log):
@@ -329,6 +331,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   if params.refine.exclude is not None:
     exclude_selection = model.selection(string = params.refine.exclude)
 
+  freeze_selection = None
+  if params.refine.freeze is not None:
+    if params.refine.mode != "opt":
+      raise Sorry("freeze is currently supported only with refine.mode=opt")
+    freeze_selection = model.selection(string = params.refine.freeze)
+
   if [exclude_selection, hdm].count(None)==0:
     raise Sorry("exclude_selection is incompatible with presence of H/D.")
   if params.cluster.clustering:
@@ -386,7 +394,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       params                = params,
       restraints_manager    = restraints_manager,
       hdm                   = hdm,
-      exclude_selection     = exclude_selection)
+      exclude_selection     = exclude_selection,
+      freeze_selection      = freeze_selection)
     if(params.refine.mode == "refine"):
       #
       # Optimize H
