@@ -8,12 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
    - `refine.freeze` selection for fixing atoms during geometry optimization
-     while retaining them in the restraints system.
-
-### Changed
-   - updating documentation.
-   - Restored `refine.exclude` semantics so excluded atoms are omitted from
-     restraints and their gradients are expanded back to the full model.
+     while retaining them in the restraints system and gradient calculations.
 
 ## [1.0-0] - 2019.1.19
 ### 
