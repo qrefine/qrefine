@@ -104,7 +104,6 @@ class sites_opt(object):
                use_callback_after_step=False,
                exclude_selection=None,
                debug=False):
-
     self.use_callback_after_step = use_callback_after_step
     self.model = model
     self.restraints_manager = restraints_manager
@@ -155,10 +154,17 @@ class sites_opt(object):
     self.number_of_target_and_gradients_calls+=1
     t0=time.time()
     self.set_sites_plus_x()
-    self.f, self.g = self.restraints_manager.target_and_gradients(
-      sites_cart = self.sites_plus_x)
+
     if self.keep_selection is not None:
-      self.g = self.g.set_selected(self.exclude_selection, [0,0,0])
+      self.f, self.g = self.restraints_manager.target_and_gradients(
+        sites_cart = self.sites_plus_x.select(self.keep_selection))
+      g = flex.vec3_double(self.model.size())
+      g = g.set_selected(self.keep_selection, self.g)
+      self.g = g
+    else:
+      self.f, self.g = self.restraints_manager.target_and_gradients(
+        sites_cart = self.sites_plus_x)
+
     if self.debug:
       self.all_gradients.append(self.g)
       self.all_targets  .append(self.f)
