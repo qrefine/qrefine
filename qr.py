@@ -224,6 +224,16 @@ refine {
   exclude = None
     .type = str
     .help = Atom selection string to select atoms to be exluded from refinement
+  freeze {
+    selection = None
+      .type = str
+    r_min = 4
+      .type = float
+    level = 0 1 2 *3
+      .type=choice(multi=False)
+    passes = 1
+      .type = int
+  }
 }
 
 parallel {

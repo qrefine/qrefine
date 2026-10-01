@@ -209,6 +209,17 @@ def create_calculator(params,
                       fmodel=None,
                       hdm=None,
                       exclude_selection=None):
+  # Define freeze selection
+  fr = params.refine.freeze
+  freeze_selection = None
+  if fr.selection is not None:
+    iselection = model.selection(string = fr.selection).iselection()
+    freeze_selection = ~model.select_nearby_atoms(
+      iselection = iselection,
+      r_min      = fr.r_min,
+      level      = int(fr.level),
+      passes     = fr.passes)
+  #
   if(params.refine.refine_sites):
     if(params.refine.mode == "refine"):
       assert model is not None
@@ -223,7 +234,7 @@ def create_calculator(params,
         max_shift             = params.refine.stpmax)
     else:
       # XXX
-      # XXX exclude_selection and hdm are not used XXX
+      # XXX hdm are not used XXX
       # XXX
       return calculator.sites_opt(
         restraints_manager = restraints_manager,
@@ -231,6 +242,7 @@ def create_calculator(params,
         max_shift          = params.refine.stpmax,
         shift_eval         = params.refine.shift_evaluation,
         exclude_selection  = exclude_selection,
+        freeze_selection   = freeze_selection,
         debug              = params.debug)
 
 def set_qm_defaults(params, log):
