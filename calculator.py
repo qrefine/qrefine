@@ -105,6 +105,7 @@ class sites_opt(object):
                exclude_selection=None,
                freeze_selection=None,
                debug=False):
+    assert [exclude_selection, freeze_selection].count(None) != 0, "untested"
     self.freeze_selection = freeze_selection
     self.use_callback_after_step = use_callback_after_step
     self.model = model
