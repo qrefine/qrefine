@@ -1,0 +1,11 @@
+.git
+.gitignore
+.github
+__pycache__
+*.pyc
+*.pyo
+.env
+.venv
+*.egg-info
+.DS_Store
+plugin/yoink
