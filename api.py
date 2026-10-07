@@ -306,8 +306,9 @@ ENGINES = {
   "gaussian": _engine(True, _gaussian_found,
     "g16 or g09 in PATH", "Obtain Gaussian from its vendor and put g16 or "
     "g09 in PATH"),
-  "aimnet2": _engine(False, _importable("aimnet2calc"),
-    "import of aimnet2calc", _aimnet2_hint),
+  # The plugin imports the aimnet package, or aimnet2calc as a fallback.
+  "aimnet2": _engine(False, _importable("qrefine.plugin.ase.aimnet2_qr"),
+    "import of aimnet or aimnet2calc", _aimnet2_hint),
   "aimnet2-old": _engine(False, _importable("aimnet2calc"),
     "import of aimnet2calc", _aimnet2_hint),
   # pyscf, torchani: unverified: the plugin sets a cwd-relative chkfile /
