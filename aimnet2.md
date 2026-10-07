@@ -1,5 +1,32 @@
 ### AIMNET2-based AQua plugins
 
+Two AIMNet2 python packages are supported:
+
+* `aimnet` from [isayevlab/aimnetcentral](https://github.com/isayevlab/aimnetcentral) (current, preferred)
+* `aimnet2calc` from [zubatyuk/aimnet2calc](https://github.com/zubatyuk/aimnet2calc) (legacy)
+
+If both are installed, `aimnet` is used.
+
+#### Using the `aimnet` package
+
+```
+  qrefine.python -m pip install git+https://github.com/isayevlab/aimnetcentral.git
+```
+
+Notes:
+
+* The AQuaRef model `aimnet2-qr` is a legacy TorchScript model that is not in
+  the `aimnet` model registry. Q|R looks for the file
+  `aimnet2-qr_b97md4_qzvp_2.jpt` in the `aimnet` cache directory
+  (`$AIMNET_CACHE_DIR`, default `~/.cache/aimnet`) and downloads it from the
+  original model zoo on first use. To work offline, copy the file there yourself.
+* On CUDA, the `aimnet` neighbour-list kernels are compiled with Triton, which
+  needs the CUDA `ptxas` binary. Q|R sets `TRITON_PTXAS_PATH` to the `ptxas`
+  shipped in the Phenix conda environment (from the `cuda-nvcc-tools` package)
+  if it is not already set.
+
+#### Using the legacy `aimnet2calc` package
+
 in general please follow the general installation notes. To update your qrefine installation use:
 
 For cctbx
