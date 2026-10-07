@@ -6,7 +6,7 @@ from ase.io import write
 from ase.units import kcal
 from ase.units import  mol as unit_mol
 from ase.units import Hartree, Bohr
-from ase.calculators.general import Calculator
+from .general import Calculator
 import copy
 try:
   import pyscf

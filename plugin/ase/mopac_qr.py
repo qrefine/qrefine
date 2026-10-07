@@ -15,7 +15,7 @@ import numpy as np
 import platform
 
 from ase.units import kcal, mol
-from ase.calculators.general import Calculator
+from .general import Calculator
 
 str_keys = ['functional', 'job_type']
 int_keys = ['restart', 'spin', 'charge']

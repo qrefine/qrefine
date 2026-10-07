@@ -9,7 +9,7 @@ import numpy as np
 from ase.io import write
 from ase.units import kcal, mol
 from ase.units import Hartree, Bohr
-from ase.calculators.general import Calculator
+from .general import Calculator
 import copy
 import platform
 

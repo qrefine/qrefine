@@ -6,7 +6,7 @@ from . import ani
 from .ani.ase_interface import aniensloader
 from .ani.ase_interface import ANIENS
 import numpy as np
-from ase.calculators.general import Calculator
+from .general import Calculator
 
 class Ani(Calculator):
     def __init__(self,label="ase",atoms=None,coordinates='tmp_ase.pdb',**kwargs):

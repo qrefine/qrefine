@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import os
 import numpy as np
 import ase.units as ase_units
-from ase.calculators.general import Calculator
+from .general import Calculator
 from .ani.ani_interface import ANIRPCCalculator
 import torch
 
