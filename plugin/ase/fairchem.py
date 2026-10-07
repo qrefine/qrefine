@@ -1,6 +1,6 @@
 from fairchem.core import pretrained_mlip
 from fairchem.core import FAIRChemCalculator as FAIRCalc
-from ase.calculators.general import Calculator
+from .general import Calculator
 import numpy as np
 import ase.units as ase_units
 import torch

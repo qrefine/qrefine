@@ -15,7 +15,7 @@ import numpy as np
 from ase.units import mol, kcal
 from ase.units import Hartree, Bohr
 from ase.io import read, write
-from ase.calculators.general import Calculator
+from .general import Calculator
 from subprocess import Popen, PIPE, STDOUT
 import copy
 
