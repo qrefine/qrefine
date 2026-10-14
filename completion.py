@@ -56,6 +56,14 @@ def from_simple_connectivity(
         append_to_end_of_model=append_to_end_of_model,
       )
       if rc: additional_hydrogens.append(rc)
+    if(use_capping_hydrogens and a.name == ' N  ' and len(v)!=3):
+      rc = add_n_terminal_hydrogens_to_residue_group(
+        rg,
+        bonds=bonds,
+        use_capping_hydrogens=use_capping_hydrogens,
+        append_to_end_of_model=append_to_end_of_model,
+      )
+      if rc: additional_hydrogens.append(rc)
 
   for rg in hierarchy.residue_groups():
     if use_capping_hydrogens:
