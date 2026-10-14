@@ -56,15 +56,6 @@ def from_simple_connectivity(
         append_to_end_of_model=append_to_end_of_model,
       )
       if rc: additional_hydrogens.append(rc)
-    if(a.name == ' N  ' and len(v)!=3):
-      #print(a.name, [atoms[i].name for i in v], rg.resseq)
-      rc = add_n_terminal_hydrogens_to_residue_group(
-        rg,
-        bonds=bonds,
-        use_capping_hydrogens=use_capping_hydrogens,
-        append_to_end_of_model=append_to_end_of_model,
-      )
-      if rc: additional_hydrogens.append(rc)
 
   for rg in hierarchy.residue_groups():
     if use_capping_hydrogens:
@@ -85,90 +76,6 @@ def from_simple_connectivity(
       conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager, rg)
   return additional_hydrogens
 
-def iterate_over_threes(hierarchy,
-                        geometry_restraints_manager,
-                        use_capping_hydrogens=False,
-                        append_to_end_of_model=False,
-                        verbose=False,
-                        ):
-  atoms = hierarchy.atoms()
-  ###
-  def get_residue_group(residue):
-    for atom in residue.atoms():
-      atom = atoms[atom.i_seq]
-      break
-    return atom.parent().parent()
-  ###
-  bonds=get_bonds_as_dict(geometry_restraints_manager)
-  ###
-  additional_hydrogens=hierarchy_utils.smart_add_atoms()
-  for three in generate_protein_fragments(
-    hierarchy,
-    geometry_restraints_manager,
-    backbone_only=False,
-    use_capping_hydrogens=use_capping_hydrogens,
-  ):
-    if verbose: print(three)
-    if not len(three): continue
-    ptr=0
-    assert three.are_linked()
-    if use_capping_hydrogens:
-      for i in range(len(three)):
-        rg = get_residue_group(three[i])
-        rc = conditional_add_cys_hg_to_atom_group(
-          geometry_restraints_manager,
-          rg,
-          append_to_end_of_model=append_to_end_of_model,
-          )
-        if rc:
-          additional_hydrogens.append(rc)
-    else:
-      for i in range(len(three)):
-        rg = get_residue_group(three[i])
-        conditional_remove_cys_hg_to_atom_group(geometry_restraints_manager,
-                                                rg,
-                                                )
-    # check if N-term residue - FVA
-    n_term_done = False
-    if three[0].resname in ['FVA',
-                            ]:
-      n_term_done = True
-      ptr+=1
-      assert ptr==1, 'ptr (%d) is not 1' % ptr
-    if three.start and not n_term_done:
-      ptr+=1
-      assert ptr==1, 'ptr (%d) is not 1' % ptr
-      rg = get_residue_group(three[0])
-      #print("add_n_terminal_hydrogens_to_residue_group",rg.resseq)
-      rc = add_n_terminal_hydrogens_to_residue_group(
-        rg,
-        bonds=bonds,
-        use_capping_hydrogens=use_capping_hydrogens,
-        append_to_end_of_model=append_to_end_of_model,
-      )
-      if rc: additional_hydrogens.append(rc)
-      #hierarchy.reset_i_seq_if_necessary()
-    c_term_done = False
-    if three[-1].resname in ['ETA',
-                             ]:
-      c_term_done = True
-      ptr-=1
-      assert ptr==0, 'ptr (%d) is not 0' % ptr
-    if three.end and not c_term_done:
-      ptr-=1
-      assert ptr==0, 'ptr (%d) is not 0' % ptr
-      rg = get_residue_group(three[-1])
-      #print("add_c_terminal_oxygens_to_residue_group",rg.resseq)
-      rc = add_c_terminal_oxygens_to_residue_group(
-        rg,
-        bonds=bonds,
-        use_capping_hydrogens=use_capping_hydrogens,
-        append_to_end_of_model=append_to_end_of_model,
-      )
-      if rc: additional_hydrogens.append(rc)
-    else:
-      pass
-  return additional_hydrogens
 
 def add_terminal_hydrogens_qr(
     hierarchy,
@@ -182,20 +89,12 @@ def add_terminal_hydrogens_qr(
     ):
   # add N terminal hydrogens because Reduce only does it to resseq=1
   # needs to be alt.loc. aware for non-quantum-refine
-  if True:
-    additional_hydrogens = from_simple_connectivity(
-      hierarchy,
-      geometry_restraints_manager,
-      use_capping_hydrogens=use_capping_hydrogens,
-      append_to_end_of_model=append_to_end_of_model,
-      selection=selection,
-      )
-  else:
-    additional_hydrogens=iterate_over_threes(
-      hierarchy,
-      geometry_restraints_manager,
-      use_capping_hydrogens=use_capping_hydrogens,
-      append_to_end_of_model=append_to_end_of_model,
+  additional_hydrogens = from_simple_connectivity(
+    hierarchy,
+    geometry_restraints_manager,
+    use_capping_hydrogens=use_capping_hydrogens,
+    append_to_end_of_model=append_to_end_of_model,
+    selection=selection,
     )
 
   if append_to_end_of_model and additional_hydrogens:
@@ -260,8 +159,6 @@ def complete_pdb_hierarchy(hierarchy,
                            debug=False,
                            use_reduce=True,
                            selection=None,# ONLY APPLIES FOR CAPPING
-                           stop_if_n_changed_is_gt_zero=False,
-                           add_terminal_hydrogens=True,
                           ):
   #
   # some validations
@@ -288,15 +185,13 @@ def complete_pdb_hierarchy(hierarchy,
   # need to use Reduce/ReadySet! to add hydrogens
   #
   if not use_capping_hydrogens:
-    from mmtbx.building import extend_sidechains
-    n_changed = extend_sidechains.extend_protein_model(
-      model.get_hierarchy(),
-      mon_lib_server,
-      add_hydrogens=False,
-    )
-    if stop_if_n_changed_is_gt_zero and n_changed > 0:
-      raise Sorry("n_changed = %d"%n_changed)
-
+    for m in model.get_hierarchy().models():
+      for c in m.chains():
+        for r in c.residues():
+          ma = r.missing_atoms(mon_lib_srv=mon_lib_srv, mode="non_h")
+          if ma is None: continue
+          if len(ma)>0:
+            raise Sorry("Model must be (non-H) atom complete!")
     if(use_reduce):
       print("Using reduce to add hydrogens",file=log)
       hierarchy = hierarchy_utils.add_hydrogens_using_reduce(
@@ -325,15 +220,14 @@ def complete_pdb_hierarchy(hierarchy,
   #
   # maybe more to cctbx
   #
-  if add_terminal_hydrogens:
-    add_terminal_hydrogens_qr( model.get_hierarchy(),
-                               model.get_restraints_manager().geometry,
-                               use_capping_hydrogens=use_capping_hydrogens,
-                               append_to_end_of_model=append_to_end_of_model,
-                               original_hierarchy=original_hierarchy,
-                               verbose=verbose,
-                               selection=selection,
-                              ) # in place
+  add_terminal_hydrogens_qr( model.get_hierarchy(),
+                             model.get_restraints_manager().geometry,
+                             use_capping_hydrogens=use_capping_hydrogens,
+                             append_to_end_of_model=append_to_end_of_model,
+                             original_hierarchy=original_hierarchy,
+                             verbose=verbose,
+                             selection=selection,
+                            ) # in place
   model.get_hierarchy().atoms().set_chemical_element_simple_if_necessary()
   model.get_hierarchy().sort_atoms_in_place()
   return model

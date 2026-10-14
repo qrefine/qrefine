@@ -14,6 +14,7 @@ from qrefine.utils import hierarchy_utils
 from qrefine.tests.unit.skip import skip
 import mmtbx.model
 from libtbx.utils import null_out
+from libtbx.utils import Sorry
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 
@@ -45,13 +46,12 @@ def run(model,
         hydrogen_atom_occupancies=0.,
         use_reduce=True,
         remove_selection=None,
-        stop_if_n_changed_is_gt_zero=False,
-        add_terminal_hydrogens=True,
         ):
   #
   # extends side chains and add hydrogens
   #
   if model_completion:
+    raise Sorry("Use mmtbx.reduce2 with qmready=True flag")
     use_capping_hydrogens=False
     fname = 'complete'
   else:
@@ -66,8 +66,6 @@ def run(model,
     use_capping_hydrogens       = use_capping_hydrogens,
     append_to_end_of_model      = append_to_end_of_model,
     use_reduce                  = use_reduce,
-    stop_if_n_changed_is_gt_zero=stop_if_n_changed_is_gt_zero,
-    add_terminal_hydrogens      = add_terminal_hydrogens
   )
 
   # Idealize H as riding

@@ -36,12 +36,8 @@ calculate_charge = False
   .help = Will calculate total charge of molecule.
 append_to_end_of_model = False
   .type = bool
-stop_if_n_changed_is_gt_zero = False
-  .type = bool
 stop_if_poor_model = False
   .type = bool
-add_terminal_hydrogens = True
-  .type=bool
 reduce = True
   .type = bool
   .help = Use reduce to add hydrogens or fall back to Phenix.elbow
@@ -119,8 +115,6 @@ def run(args, log):
     neutron_option            = params.options.neutron,
     hydrogen_atom_occupancies = params.options.hydrogen_atom_occupancies,
     use_reduce                = params.reduce,
-    stop_if_n_changed_is_gt_zero = params.stop_if_n_changed_is_gt_zero,
-    add_terminal_hydrogens    = params.add_terminal_hydrogens,
     )
   # Calculate charge
   rc = None

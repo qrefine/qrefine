@@ -114,10 +114,11 @@ def add_hydrogens_using_reduce(pdb_hierarchy, crystal_symmetry):
     crystal_symmetry = crystal_symmetry,
     log              = "h_reduce.out")
   reduce_add_h_obj = reduce_hydrogen.place_hydrogens(model = model_to_reduce,
-     use_neutron_distances=True,
-     keep_existing_H=True,
-     exclude_water=False,
-     validate_e=False # crucial to keep False! Not working with altloc, calling elbow
+     use_neutron_distances = True,
+     n_terminal_charge     = "first_in_chain",
+     keep_existing_H       = True,
+     exclude_water         = False,
+     validate_e            = False # crucial to keep False! Not working with altloc, calling elbow
      )
   reduce_add_h_obj.run()
   hierarchy = reduce_add_h_obj.get_model().get_hierarchy()
