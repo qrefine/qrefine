@@ -37,11 +37,6 @@ def get_restraints_manager(expansion, clustering, file_name):
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Exercise expansion=False / expansion=True
-  
-  XXX
-  XXX test passes if const_shrink_donor_acceptor=0.6 in central location.
-  XXX (same for tst_44)
-  XXX
   """
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
@@ -66,13 +61,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     #
     diff = flex.abs(g1.as_double()-g2.as_double())
     print(diff.min_max_mean().as_tuple())
-    for d in diff:
-      print(d)
-    #
-    # DISABLED DUE TO A BUG
-    #
-    #assert flex.max(diff) < 1.e-6, flex.max(diff)
-    #
+    assert flex.max(diff) < 1.e-6, flex.max(diff)
     done = True
   assert done
 
