@@ -56,8 +56,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   assert easy_run.call(cmd)==0
   h_answer = iotbx.pdb.input(
     source_info=None, lines = pdb_str_out).construct_hierarchy()
+  # qmready=true adds the total charge to the default output file name
   h_result = iotbx.pdb.input(
-    file_name = "%sH.pdb"%prefix).construct_hierarchy()
+    file_name = "%sH_charge0.pdb"%prefix).construct_hierarchy()
   open("%s_answer.pdb"%prefix, "w").write(pdb_str_out)
   #
   s1 = h_answer.atoms().extract_xyz()
