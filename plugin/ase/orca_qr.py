@@ -10,7 +10,7 @@ import numpy as np
 from ase.io import write
 from ase.units import kcal, mol
 from ase.units import Hartree, Bohr
-from ase.calculators.general import Calculator
+from ase.calculators.calculator import Calculator
 import copy
 
 key_parameters = {'seed': 1351351,
@@ -261,4 +261,3 @@ class Orca(Calculator):
 
     def set_memory(self, memory):
       self.key_parameters['memory'] = memory
-

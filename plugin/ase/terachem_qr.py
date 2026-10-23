@@ -9,7 +9,7 @@ import numpy as np
 from ase.io import write
 from ase.units import kcal, mol
 from ase.units import Hartree, Bohr
-from ase.calculators.general import Calculator
+from ase.calculators.calculator import Calculator
 import copy
 import platform
 
@@ -110,8 +110,8 @@ class TeraChem(Calculator):
                 if terachem_library_path not in os.environ['LD_LIBRARY_PATH']:
                         os.environ['LD_LIBRARY_PATH'] +=':'+ terachem_library_path
             except Exception as e:
-                print("failed to load terachem library files")       
-       
+                print("failed to load terachem library files")
+
         #print ('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         #exitcode = os.system('%s %s' % (command, finput) + '  >     '+ foutput + '  2>&1')
         import subprocess

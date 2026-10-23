@@ -45,8 +45,7 @@ def get_master_phil():
 class lbfgs_gradient(object):
   def __init__(self, atoms, restraints):
     self.restraints = restraints
-    # force_consistent defaults to True and runs calc.run() which we need to avoid!
-    self.opt = LBFGS(atoms=atoms,force_consistent=False)
+    self.opt = LBFGS(atoms=atoms)
 
   def step(self):
     pos = self.opt.atoms.get_positions()
@@ -95,7 +94,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   diff = diff.select(sel)
   for a, b, c in zip(g1[:10], g2[:10], diff[:10]):
     print("%10.6f %10.6f %10.6f"%(a,b,c))
-  
+
   #old & wrong, but kept to know the original intention: assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"

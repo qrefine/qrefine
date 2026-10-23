@@ -2,7 +2,7 @@ from __future__ import print_function
 """This module defines a QR-specific ASE interface to Turbomole
 
 command line define:
- set "basis=cefine" -> set "method=<cefine command>" 
+ set "basis=cefine" -> set "method=<cefine command>"
 eg: qr.refine [...] quantum.method='cefine -func pbe0 -fon -bas minix -ri -noopt -d3 ' quantum.basis='cefine'
 
 
@@ -15,7 +15,7 @@ import numpy as np
 from ase.units import mol, kcal
 from ase.units import Hartree, Bohr
 from ase.io import read, write
-from ase.calculators.general import Calculator
+from ase.calculators.calculator import Calculator
 from subprocess import Popen, PIPE, STDOUT
 import copy
 
@@ -156,7 +156,7 @@ class Turbomole(Calculator):
         write('coord', atoms)
 
         if not self.key_parameters["basis"] == 'cefine':
-            string='\n\na coord\n*\nno\nb all '+self.key_parameters['basis']+'\n*\neht\n\n'+str(self.key_parameters['charge'])+'\n\nscf\niter\n'+str(self.key_parameters['maxit'])+'\n\ncc\nmemory\n1000\n*\ndft\non\nfunc\n'+self.key_parameters['method']+'\n*\nri\non\nm\n3000\n*\n*' 
+            string='\n\na coord\n*\nno\nb all '+self.key_parameters['basis']+'\n*\neht\n\n'+str(self.key_parameters['charge'])+'\n\nscf\niter\n'+str(self.key_parameters['maxit'])+'\n\ncc\nmemory\n1000\n*\ndft\non\nfunc\n'+self.key_parameters['method']+'\n*\nri\non\nm\n3000\n*\n*'
             self.define_str = string
             with open('def.inp', 'w') as f:
                 f.write(self.define_str)
@@ -164,15 +164,15 @@ class Turbomole(Calculator):
         else:
             self.define_str = self.key_parameters['method']+'-chrg '+str(self.key_parameters['charge'])
             command = self.define_str+' > cefine.out'
-            
+
         # run define
         proc = Popen([command], shell=True, stderr=PIPE)
         error = proc.communicate()[1]
         if 'abnormally' in error:
             raise OSError(error)
-        Calculator.set_atoms(self, atoms)
+        self.atoms = atoms.copy()
         # energy and forces must be re-calculated
-        self.update_energy = True  
+        self.update_energy = True
         self.update_forces = True
 
 
@@ -223,7 +223,7 @@ class Turbomole(Calculator):
         for i in range(iline, nline):
             line = lines[i].replace('D', 'E')
             if "***" in line:  # is this a real thing?
-                 raise RuntimeError('Please check TURBOMOLE gradients')  
+                 raise RuntimeError('Please check TURBOMOLE gradients')
             tmp = np.array([[float(f) for f in line.split()[0:3]]])
             forces = np.concatenate((forces, tmp))
         # Note the '-' sign for turbomole, to get forces
@@ -292,7 +292,7 @@ class Turbomole(Calculator):
         import subprocess
         self.atoms = atoms
         self.key_parameters['charge'] = charge
-        
+
         self.coordinates = coordinates
         working_dir = os.getcwd()
         if self.pointcharges is not None:
@@ -315,15 +315,15 @@ class Turbomole(Calculator):
               f.writelines( contents )
               f.close()
 
-            self.set_modules() # ridft or dscf  
+            self.set_modules() # ridft or dscf
             command = self.calculate_energy + ' > ASE.TM.energy.out'
             print(command) #debug
             proc = subprocess.Popen([command], shell=True, stderr=PIPE)
             error = proc.communicate()[1]
             proc.wait()
             exitcode = proc.returncode
-        
-            
+
+
             if exitcode != 0:
                 print(str(exitcode))
                 raise RuntimeError('Turbomole exited with error code')

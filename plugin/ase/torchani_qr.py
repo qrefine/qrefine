@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import os
 import numpy as np
 import ase.units as ase_units
-from ase.calculators.general import Calculator
+from ase.calculators.calculator import Calculator
 from .ani.ani_interface import ANIRPCCalculator
 import torch
 
@@ -76,7 +76,7 @@ class TorchAni(Calculator):
       command (str) not used in this calculator
       define_str() not used in this calculator, legacy from Turbomole?
     """
-  
+
     self.atoms = atoms
     self.check_trained_atoms()
     atoms.calc = self.calc

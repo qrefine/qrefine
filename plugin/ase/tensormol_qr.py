@@ -12,7 +12,7 @@ from __future__ import absolute_import
 import os, sys
 import numpy as np
 from TensorMol import *
-from ase.calculators.general import Calculator
+from ase.calculators.calculator import Calculator
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ""  # set to use CPU
 

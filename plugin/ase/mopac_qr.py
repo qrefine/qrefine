@@ -15,7 +15,7 @@ import numpy as np
 import platform
 
 from ase.units import kcal, mol
-from ase.calculators.general import Calculator
+from ase.calculators.calculator import Calculator
 
 str_keys = ['functional', 'job_type']
 int_keys = ['restart', 'spin', 'charge']
@@ -38,7 +38,7 @@ class Mopac(Calculator):
         for key in str_keys:
             self.str_params[key] = None
         for key in int_keys:
-            self.int_params[key] = None 
+            self.int_params[key] = None
         for key in bool_keys:
             self.bool_params[key] = None
         for key in float_keys:
@@ -202,7 +202,7 @@ class Mopac(Calculator):
 
         # def run_timeout(cmd, timeout_sec):
         #   proc = subprocess.Popen(shlex.split(cmd),
-        #   # proc = subprocess.Popen(cmd, 
+        #   # proc = subprocess.Popen(cmd,
         #                           stdout=subprocess.PIPE,
         #                           shell=True,
         #                           stderr=subprocess.PIPE)
