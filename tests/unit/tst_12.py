@@ -14,6 +14,7 @@ from libtbx.test_utils import approx_equal
 from ase.io import write
 from ase.io import read as ase_io_read
 from ase.optimize.lbfgs import LBFGS
+from ase.calculators.calculator import Calculator, all_changes
 from scitbx.array_family import flex
 from qrefine.restraints import from_qm
 from qrefine.fragment import fragments
@@ -41,19 +42,35 @@ def get_master_phil():
   return mmtbx.command_line.generate_master_phil_with_inputs(
     phil_string=master_params_str)
 
+class restraints_calculator(Calculator):
+  """
+  ASE calculator that returns the energy and forces of a qrefine restraints
+  manager, so that the ASE optimizer drives the restraints through the normal
+  calculator interface instead of the removed step(forces) argument.
+  """
+  implemented_properties = ["energy", "forces"]
+
+  def __init__(self, restraints, **kwargs):
+    Calculator.__init__(self, **kwargs)
+    self.restraints = restraints
+
+  def calculate(self, atoms=None, properties=["energy"],
+                system_changes=all_changes):
+    Calculator.calculate(self, atoms, properties, system_changes)
+    sites_cart = flex.vec3_double(self.atoms.get_positions())
+    e, g = self.restraints.target_and_gradients(sites_cart)
+    self.results["energy"] = e
+    self.results["forces"] = -np.array(g)
+
 # gradient-only LBFGS without line search
 class lbfgs_gradient(object):
   def __init__(self, atoms, restraints):
-    self.restraints = restraints
+    atoms.calc = restraints_calculator(restraints)
     self.opt = LBFGS(atoms=atoms)
 
   def step(self):
-    pos = self.opt.atoms.get_positions()
-    sites_cart = flex.vec3_double(pos)
-    e, g = self.restraints.target_and_gradients(sites_cart)
-    forces = np.array(g) * -1
-    print(e)
-    self.opt.step(forces)
+    print(self.opt.atoms.get_potential_energy())
+    self.opt.step()
 
   def write(self, file):
     write(file, self.opt.atoms)
@@ -76,7 +93,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   pdb_inp = iotbx.pdb.input(os.path.join(qr_unit_tests,"data_files","helix.pdb"))
   ph = pdb_inp.construct_hierarchy()
   cs = pdb_inp.crystal_symmetry()
-  restraints_entire, qr_ase_calc = generate_restraints(cs, ph, clustering=False)
+  restraints_entire, _ = generate_restraints(cs, ph, clustering=False)
   # ## compare the absolute value of gradients
   g_entire = qm_gradient(ph, restraints_entire).as_double()
   restraints_cluster, _ = generate_restraints(cs, ph, clustering=True)
@@ -98,10 +115,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   #old & wrong, but kept to know the original intention: assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
   ## compare the geometry rmsd after 5 steps optimization
   file_entire_qm = "entire_qm.pdb"
-  qm_opt(restraints_entire,file_entire_qm, qr_ase_calc)
+  qm_opt(restraints_entire, file_entire_qm)
   file_cluster_qm = "cluster_qm.pdb"
-  # qr_ase_calc doesnt change for cluster restraints
-  qm_opt(restraints_cluster,file_cluster_qm, qr_ase_calc)
+  qm_opt(restraints_cluster, file_cluster_qm)
   sites_cart_entire_qm = iotbx.pdb.input(file_entire_qm).atoms().extract_xyz()
   sites_cart_cluster_qm = iotbx.pdb.input(file_cluster_qm).atoms().extract_xyz()
   rmsd_diff = sites_cart_entire_qm.rms_difference(sites_cart_cluster_qm)
@@ -142,10 +158,9 @@ def qm_gradient(ph, restraints):
   e,g = restraints.target_and_gradients(sites_cart)
   return g
 
-def qm_opt(restraints, file, calc):
+def qm_opt(restraints, file):
   sys = ase_io_read(os.path.join(qr_unit_tests,"data_files/helix.pdb"))
   sys.set_pbc((False,False,False))
-  sys.calc = calc # ase > 3.17 expects a calculatur but we dont actually use it below.
   opt = lbfgs_gradient(sys, restraints)
   opt.run(3)
   print("AFTER RUN")
