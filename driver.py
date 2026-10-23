@@ -10,7 +10,6 @@ from cctbx import xray
 from scitbx.array_family import flex
 from . import calculator as calculator_module
 from libtbx import group_args
-from ase.optimize.lbfgs import LBFGS
 import numpy
 from libtbx.test_utils import approx_equal
 from scitbx import minimizers

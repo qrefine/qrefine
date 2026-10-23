@@ -2,7 +2,6 @@ from __future__ import print_function
 import os
 import string
 import numpy as np
-from ase.io import write
 from ase.units import kcal
 from ase.units import  mol as unit_mol
 from ase.units import Hartree, Bohr

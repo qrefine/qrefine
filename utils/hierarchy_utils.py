@@ -201,7 +201,6 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
   import iotbx.pdb
   from libtbx.utils import null_out
   from libtbx import group_args
-  from ase.io import read as ase_io_read
   params = mmtbx.model.manager.get_default_pdb_interpretation_params()
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
@@ -220,7 +219,6 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
     pdb_hierarchy      = model.get_hierarchy(),
     xray_structure     = model.get_xray_structure(),
     cif_objects        = cif_objects,
-    ase_atoms          = ase_io_read(pdb_file_name), # To be able to use ASE LBFGS
     crystal_symmetry   = model.get_xray_structure().crystal_symmetry()
     )
 

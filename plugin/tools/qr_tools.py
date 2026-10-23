@@ -6,7 +6,7 @@ contains:
 from __future__ import print_function
 import os
 import sys
-from ase.io import read, write
+from ase.io import write
 
 import numpy as np
 from ase.units import mol, kcal
@@ -66,7 +66,7 @@ def read_gcp(outfile,atoms):
                     tmp = np.array([[float(f) for f in nline.split()[:3]]])
                     gradient[j,:3]=tmp[:3]
 
-                    
+
     print('E(GCP): ', energy)
     energy*=(Hartree)/(kcal / mol)
     gradient*=(Hartree/Bohr)/(kcal / mol)
@@ -104,7 +104,7 @@ def read_dftd3(outfile,atoms):
             tmp = np.array([[float(f) for f in nline.split()[:3]]])
             gradient[j,:3]=tmp[:3]
 
-                    
+
     print('E(D3): ', energy)
     energy*=(Hartree)/(kcal / mol)
     gradient*=(Hartree/Bohr)/(kcal / mol)
@@ -125,8 +125,8 @@ def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
     if not os.path.exists(wdir):
         os.mkdir(wdir)
     os.chdir(wdir)
-    
-    # select helper program 
+
+    # select helper program
     # return E/G in kcal/mol/Angstrom
     if 'gcp-d3' in addon.lower():
         print()
@@ -138,9 +138,9 @@ def qm_toolbox(atoms,charge,pointcharges,label,addon,addon_method):
         energy,gradient=run_gcp(atoms,addon_method)
     elif 'dftd3' in addon.lower():
         energy,gradient=run_dftd3(atoms,addon_method)
-    
+
     else:
        raise RuntimeError('invalid qm_addon')
 
     os.chdir(cwd)
-    return energy, gradient 
+    return energy, gradient

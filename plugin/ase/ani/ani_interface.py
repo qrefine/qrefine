@@ -41,9 +41,9 @@ class ANI_interface(object):
 
         arrays_out = self.calculate(flag, R, Z, pbc, cell)
         return arrays_out
-        
+
     def prepare_in(self, R, Z, pbc, cell):
-    
+
         natom = Z.shape[-1]
         R = R.reshape(-1, natom, 3)
         Z = Z.reshape(-1, natom)
@@ -61,7 +61,7 @@ class ANI_interface(object):
 
         R = torch.as_tensor(R, dtype=torch.float32, device=self.device)
         Z = torch.as_tensor(Z, dtype=torch.int64, device=self.device)
-        
+
         if flag > 0:
             R.requires_grad_(True)
 
@@ -93,10 +93,9 @@ class ANI_interface(object):
 
         arrays = [t.detach().cpu().numpy() for t in tensors_out]
         return arrays
-        
 
-# class ANIRPCCalculator(calculator.Calculator):
-class ANIRPCCalculator(Calculator):
+
+class ANIRPCCalculator(calculator.Calculator):
     implemented_properties = ['energy', 'forces', 'stress', 'free_energy']
 
     def __init__(self,model):
@@ -113,8 +112,8 @@ class ANIRPCCalculator(Calculator):
             calc_type = 1
         if 'stress' in properties:
             calc_type = 2
-        
-    
+
+
         R = self.atoms.get_positions()[None, ...].astype(np.float32)
         Z = self.atoms.get_atomic_numbers()[None, ...].astype(np.uint8)
         pbc = self.atoms.get_pbc().astype(np.bool_)
@@ -128,4 +127,3 @@ class ANIRPCCalculator(Calculator):
             self.results['forces'] = results[1][0] * units.Hartree
         if calc_type == 2:
             self.results['stress'] = results[2] * units.Hartree
-

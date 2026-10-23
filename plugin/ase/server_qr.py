@@ -1,7 +1,5 @@
 import numpy as np
-import ase
 import time
-from ase import units
 from ase.calculators.calculator import Calculator, all_changes
 import requests
 
