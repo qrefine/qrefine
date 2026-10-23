@@ -52,7 +52,8 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   #
   pdb_in = "%s.pdb"%prefix
   open(pdb_in, "w").write(pdb_str_in)
-  cmd = "mmtbx.reduce2 qmready=true %s > %s.log"%(pdb_in, prefix)
+  cmd = "mmtbx.reduce2 qmready=true %s output.filename=%sH.pdb > %s.log"%(
+    pdb_in, prefix, prefix)
   assert easy_run.call(cmd)==0
   h_answer = iotbx.pdb.input(
     source_info=None, lines = pdb_str_out).construct_hierarchy()
