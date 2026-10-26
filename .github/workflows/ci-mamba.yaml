@@ -66,14 +66,15 @@ jobs:
         if: always()
         run: |
          ls -R
-         failed_names=$(awk '/^FAILED tests:$/{flag=1; next} /^====/{flag=0} flag' ../qr_test.txt | awk '{print $1}')
+         failed_names=$(sed -nE "s/^[[:space:]]*\\('([^']+\\.py)',[[:space:]]*True\\)[[:space:]]+[1-9][0-9]*[[:space:]]*$/\\1/p" ../qr_test.txt | sort -u)
          if [ -n "$failed_names" ]; then
            echo "$failed_names" | awk 'BEGIN{print "The following tests FAILED:"} {print " * "$1}' >> $GITHUB_STEP_SUMMARY
          fi
          {
            echo "failed_tests<<EOF"
            if [ -n "$failed_names" ]; then
-             echo "$failed_names" | sed 's/^/ * /'
+             echo "*Failed tests:*"
+             echo "$failed_names" | sed 's/^/• /'
            fi
            echo "EOF"
          } >> "$GITHUB_OUTPUT"
@@ -94,11 +95,28 @@ jobs:
           path: /home/runner/work/qrefine/qrefine/testing_workdir
 
       - name: Report Status
-        if: always()
-        uses: ravsamhq/notify-slack-action@v2
+        if: ${{ success() || failure() }}
+        uses: slackapi/slack-github-action@v4.0.0
         with:
-          status: ${{ job.status }}
-          notify_when: 'failure'
-          message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}@{branch}> on <{commit_url}|{commit_sha}>\n${{ steps.check_tests.outputs.failed_tests }}'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.ACTION_MONITORING_SLACK }}
+          webhook: ${{ secrets.ACTION_MONITORING_SLACK }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "${{ github.workflow }} ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ job.status == 'success' && ':white_check_mark:' || ':x:' }} *${{ github.workflow }}* ${{ job.status == 'success' && 'succeeded' || 'failed' }}\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|View Commit> | <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ${{ toJSON(job.status == 'success' && 'All tests passed.' || steps.check_tests.outputs.failed_tests || 'No failed-test names were captured.') }}
+                  }
+                }
+              ]
+            }
