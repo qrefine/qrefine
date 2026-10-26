@@ -30,12 +30,12 @@ jobs:
 
     steps:
       - name: checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: df
         run: df -h
 
-      - uses: mamba-org/setup-micromamba@v2
+      - uses: mamba-org/setup-micromamba@v3
         with:
           environment-file: environment.yaml
           cache-environment: false
@@ -62,22 +62,33 @@ jobs:
           qr.test | tee ../qr_test.txt
 
       - name: check tests and testing_workdir
+        id: check_tests
         if: always()
         run: |
          ls -R
-         grep FAILED ../qr_test.txt | sed s/qrefine_tst_// | awk 'BEGIN{print "The following tests FAILED:"} {print " * "$1'} >> $GITHUB_STEP_SUMMARY
+         failed_names=$(awk '/^FAILED tests:$/{flag=1; next} /^====/{flag=0} flag' ../qr_test.txt | awk '{print $1}')
+         if [ -n "$failed_names" ]; then
+           echo "$failed_names" | awk 'BEGIN{print "The following tests FAILED:"} {print " * "$1}' >> $GITHUB_STEP_SUMMARY
+         fi
+         {
+           echo "failed_tests<<EOF"
+           if [ -n "$failed_names" ]; then
+             echo "$failed_names" | sed 's/^/ * /'
+           fi
+           echo "EOF"
+         } >> "$GITHUB_OUTPUT"
         working-directory: /home/runner/work/qrefine/qrefine/testing_workdir
 
       - name: Archive qr test output
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: qr-test-output
           path: ./qr_test.txt
 
       - name: Archive qr-log files output
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: tests-dir
           path: /home/runner/work/qrefine/qrefine/testing_workdir
@@ -88,5 +99,6 @@ jobs:
         with:
           status: ${{ job.status }}
           notify_when: 'failure'
+          message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}@{branch}> on <{commit_url}|{commit_sha}>\n${{ steps.check_tests.outputs.failed_tests }}'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.ACTION_MONITORING_SLACK }}
