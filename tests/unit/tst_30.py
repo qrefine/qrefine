@@ -10,10 +10,13 @@ from libtbx import easy_run
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-def run(prefix):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
-  Make sure real-space-refinement works (runs).
+  Make sure real-space-refinement works (runs)
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
   pdb_name = os.path.join(qr_unit_tests_data, "tst_46.pdb")
   mtz_name = os.path.join(qr_unit_tests_data, "tst_46.map")
   cmd = "qr.refine %s %s restraints=cctbx clustering=false"%(
@@ -24,5 +27,4 @@ def run(prefix):
   assert len(r.stderr_lines)==0, r.stderr_lines
 
 if(__name__ == '__main__'):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()

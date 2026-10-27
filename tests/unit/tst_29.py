@@ -36,10 +36,13 @@ def get_restraints_manager(expansion, clustering, file_name):
   return refine.create_restraints_manager(params=params, model=model,
          altlocs_present=False), model.get_sites_cart()
 
-def run(prefix, verbose=False):
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Exercise expansion=False / expansion=True
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  #
   if(verbose): print("clustering=", clustering, "-"*40)
   path = qr_unit_tests+"/data_files/"
   for fn in os.listdir(path):
@@ -64,5 +67,4 @@ def run(prefix, verbose=False):
     assert flex.max(diff) < 1.e-6, flex.max(diff)
 
 if(__name__ == "__main__"):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()

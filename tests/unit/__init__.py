@@ -30,19 +30,31 @@ class run_fmodel(object):
     assert [self.f_obs, self.flags].count(None)==0
 
 class run_qrefine(object):
-  def __init__(self, args, prefix):
+  def __init__(self, args, prefix, sorry_expected=False):
     self.log     = "%s_real_space_refined_000.log"%prefix
     self.std_out = "%s.log"%prefix
+    self.sorry_expected = sorry_expected
     #
     self.cmd = " ".join(
-      ["qr.refine"] + args + [">%s"%self.std_out])
+      ["qr.refine"] + args + [">%s 2>&1"%self.std_out])
     print(self.cmd)
-    assert easy_run.call(self.cmd)==0
-    self.pdb = str(next(pathlib.Path('pdb').glob('*_refined.pdb'), None))
-    pdb_inp = iotbx.pdb.input(file_name = self.pdb)
-    self.model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
-    self.model.setup_scattering_dictionaries(
-      scattering_table = qr.get_default_params().scattering_table)
+    rc = easy_run.call(self.cmd)
+    self.std_out_text = open(self.std_out).read()
+    if(self.sorry_expected):
+      assert rc != 0
+      assert self.std_out_text.find("Sorry") > -1, self.std_out_text
+    else:
+      assert rc == 0, self.std_out_text
+      assert self.std_out_text.find("Sorry") == -1, self.std_out_text
+    # No refined model for a dry run or a Sorry.
+    self.pdb = next(pathlib.Path('pdb').glob('*_refined.pdb'), None)
+    self.model = None
+    if(self.pdb is not None):
+      self.pdb = str(self.pdb)
+      pdb_inp = iotbx.pdb.input(file_name = self.pdb)
+      self.model = mmtbx.model.manager(model_input = pdb_inp, log = null_out())
+      self.model.setup_scattering_dictionaries(
+        scattering_table = qr.get_default_params().scattering_table)
     #
     #log_lines = self.get_lines(fn = self.log)
     #buf_lines = self.get_lines(fn = self.std_out)

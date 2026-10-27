@@ -27,6 +27,7 @@ import time
 import pickle
 
 from libtbx.utils import Sorry
+from cctbx.crystal.super_cell import get_siiu
 from libtbx import easy_pickle
 from qrefine.fragment import fragments
 
@@ -299,8 +300,35 @@ def set_qm_defaults(params, log):
       params.quantum.method='PM7'
 
 
+def check_qm_sees_crystal_neighbours(model, params, map_data):
+  """
+  With restraints=qm the QM engine only sees the asymmetric unit unless the
+  model is expanded (expansion=True) or fragments are built from the expansion
+  (cluster.clustering=True). Refuse to silently ignore crystal neighbours that
+  are within cluster.select_within_radius. Real-space refinement is exempt: the
+  map box is not a physical lattice.
+  """
+  if(params.restraints != "qm"): return
+  if(params.cluster.clustering or params.expansion): return
+  if(map_data is not None): return
+  radius = params.cluster.select_within_radius
+  siiu, ops = get_siiu(
+    pdb_hierarchy        = model.get_hierarchy(),
+    crystal_symmetry     = model.crystal_symmetry(),
+    select_within_radius = radius)
+  if(len(ops) == 0): return
+  raise Sorry(
+    "Symmetry-related neighbours are within cluster.select_within_radius=%g A "
+    "of the model, but with restraints=qm, clustering=False and expansion=False "
+    "the QM engine only sees the asymmetric unit and ignores them. Set "
+    "expansion=True (QM on the model and its neighbours) or clustering=True "
+    "(fragments built with neighbours), or reduce select_within_radius if the "
+    "neighbours are known to be negligible." % radius)
+
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   set_qm_defaults(params,log)
+  check_qm_sees_crystal_neighbours(
+    model = model, params = params, map_data = map_data)
   if(params.cluster.clustering):
     params.refine.gradient_only = True
     print(" params.gradient_only", params.refine.gradient_only, file=log)
