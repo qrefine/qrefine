@@ -5,6 +5,7 @@ import sys
 import iotbx
 from mmtbx.monomer_library import server
 from libtbx.utils import Sorry
+from libtbx.utils import null_out
 
 from iotbx.pdb import amino_acid_codes as aac
 from libtbx.utils import Sorry
@@ -146,7 +147,8 @@ def __HELPER1(crystal_symmetry, hierarchy, params):
   model = mmtbx.model.manager(
     model_input       = pdb_inp,
     crystal_symmetry  = crystal_symmetry,
-    stop_for_unknowns = False)
+    stop_for_unknowns = False,
+    log               = null_out())
   p = model.get_default_pdb_interpretation_params()
   p.pdb_interpretation = params
   model.process(pdb_interpretation_params = p, make_restraints=True)

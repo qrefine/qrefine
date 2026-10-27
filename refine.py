@@ -74,6 +74,8 @@ def create_fragment_manager(
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
     two_buffers                = params.cluster.two_buffers,
+    distance_buffer            = params.cluster.distance_buffer,
+    distance_buffer_radius     = params.cluster.distance_buffer_radius,
     pdb_hierarchy              = model.get_hierarchy(),
     qm_engine_name             = params.quantum.engine_name,
     crystal_symmetry           = model.crystal_symmetry(),

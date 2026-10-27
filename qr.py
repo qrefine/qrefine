@@ -47,6 +47,18 @@ cluster{
     .type = bool
     .help = two-buffers are used when gradients for the whole system do not match the joined gradients from fragments \
             when only as single buffer was used to surround each clusters.
+  distance_buffer = False
+    .type = bool
+    .help = In addition to the interaction-based buffer, add to each fragment \
+            every residue of the expanded system that has an atom within \
+            distance_buffer_radius of the cluster. Captures neighbors that \
+            are too far for the interaction criterion but still affect the \
+            gradients (e.g. charged or polar groups 4-6 A away).
+  distance_buffer_radius = 5.0
+    .type = float
+    .help = Radius (Angstrom) for distance_buffer. Larger values improve \
+            agreement with the non-clustered gradients at the cost of larger \
+            fragments.
   maxnum_residues_in_cluster = 15
     .type = int
     .help = maximum number of residues in a cluster

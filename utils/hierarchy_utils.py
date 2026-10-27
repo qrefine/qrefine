@@ -3,6 +3,7 @@ import os, sys
 from io import StringIO
 import iotbx
 from libtbx.utils import Sorry
+from libtbx.utils import null_out
 from mmtbx import monomer_library
 from mmtbx.monomer_library import server
 from mmtbx.monomer_library import pdb_interpretation
@@ -80,7 +81,8 @@ def get_processed_pdb(pdb_filename=None,
     file_name             = pdb_filename,
     pdb_inp               = pdb_inp,
     raw_records           = raw_records,
-    keep_monomer_mappings = True)
+    keep_monomer_mappings = True,
+    log                   = null_out())
   return ppf
 
 def write_hierarchy(pdb_filename, crystal_symmetry, hierarchy, underscore, verbose=False):

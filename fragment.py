@@ -6,6 +6,8 @@ import itertools
 import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
+from cctbx import uctbx
+from cctbx import crystal
 from .utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
@@ -40,6 +42,31 @@ def check_selection_integrity(atoms, indices, verbose=False):
 def check_hierarchy(hierarchy, verbose=False):
   check_atoms_integrity(hierarchy.atoms(), verbose=verbose)
 
+def residues_within_radius(pdb_hierarchy, selection, radius):
+  """
+  Return positional indices (into pdb_hierarchy.atoms()) of all atoms of the
+  residue groups having at least one atom within radius of the selection.
+  Non-periodic: the hierarchy is placed in a P1 box with a buffer layer
+  larger than radius so that no images are picked up.
+  """
+  atoms = pdb_hierarchy.atoms()
+  xyz = atoms.extract_xyz()
+  box = uctbx.non_crystallographic_unit_cell_with_the_sites_in_its_center(
+    sites_cart = xyz, buffer_layer = radius+1.0)
+  cs = crystal.symmetry(unit_cell=box.unit_cell, space_group_symbol="P1")
+  tmp = pdb_hierarchy.deep_copy()
+  tmp.atoms().set_xyz(box.sites_cart)
+  xrs = tmp.extract_xray_structure(crystal_symmetry=cs)
+  within = xrs.selection_within(radius=radius, selection=selection)
+  result = flex.size_t()
+  offset = 0
+  for rg in pdb_hierarchy.residue_groups():
+    n = rg.atoms().size()
+    if(within[offset:offset+n].count(True)>0):
+      result.extend(flex.size_t(range(offset, offset+n)))
+    offset += n
+  return result
+
 class fragments(object):
 
   def __init__(self,
@@ -51,6 +78,8 @@ class fragments(object):
       bcc_threshold              = 9,
       charge_embedding           = False,
       two_buffers                = False,
+      distance_buffer            = False,
+      distance_buffer_radius     = 5.0,
       pdb_hierarchy              = None,
       qm_engine_name             = None,
       crystal_symmetry           = None,
@@ -66,6 +95,8 @@ class fragments(object):
     self.select_within_radius = select_within_radius
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
+    self.distance_buffer = distance_buffer
+    self.distance_buffer_radius = distance_buffer_radius
     self.crystal_symmetry = crystal_symmetry
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
@@ -84,6 +115,18 @@ class fragments(object):
     self.clusters = None
     self.clusters_only = clusters_only
     self.charge_service = None
+    if(self.charge_embedding):
+      if(self.qm_engine_name in ["mopac"]):
+        raise Sorry(
+          "cluster.charge_embedding=True is not supported by the %s engine: "
+          "it ignores external point charges." % self.qm_engine_name)
+      # Point charges for charge embedding. Only the monomer library server
+      # and ion charge table are reused; the hierarchy is replaced per
+      # fragment in write_mm_charge_file.
+      self.charge_service = charges_class(
+        pdb_hierarchy    = pdb_hierarchy,
+        crystal_symmetry = crystal_symmetry,
+        cif_objects      = cif_objects)
     #
     if(os.path.exists(self.working_folder) is not True):
       if(make_working_folder):
@@ -191,6 +234,11 @@ class fragments(object):
           atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
                                                      atoms_in_one_fragment, ph)
           fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
+      if(self.distance_buffer):
+        fragment_super_atoms_in_ph = self.add_distance_buffer(
+          ph                         = ph,
+          cluster_atoms_in_ph        = cluster_atoms_in_ph,
+          fragment_super_atoms_in_ph = fragment_super_atoms_in_ph)
       cluster_atoms_in_phs.append(cluster_atoms_in_ph)
       fragment_super_atoms_in_phs.append(fragment_super_atoms_in_ph)
     #
@@ -286,6 +334,29 @@ class fragments(object):
          self.fragment_super_atoms.append(fragment_super)
          self.fragment_scales.append(scale_list)
 
+  def add_distance_buffer(self, ph, cluster_atoms_in_ph,
+                          fragment_super_atoms_in_ph):
+    """
+    Extend each fragment with all residues of ph having an atom within
+    self.distance_buffer_radius of the cluster. Atom indices in the input and
+    output lists are serial numbers in the entire super-sphere hierarchy;
+    ph may be an altloc-specific selection of it.
+    """
+    serials = [int(sn) for sn in ph.atoms().extract_serial()]
+    serial_to_pos = dict((sn, i) for i, sn in enumerate(serials))
+    result = []
+    for cluster, fragment in zip(cluster_atoms_in_ph, fragment_super_atoms_in_ph):
+      selection = flex.bool(len(serials), False)
+      selection = selection.set_selected(
+        flex.size_t([serial_to_pos[sn] for sn in cluster]), True)
+      positions = residues_within_radius(
+        pdb_hierarchy = ph,
+        selection     = selection,
+        radius        = self.distance_buffer_radius)
+      extra = [serials[i] for i in positions]
+      result.append(sorted(set(fragment) | set(extra)))
+    return result
+
   def bond_with_altloc(self, atom_index, bond_with_altloc_flag):
     if(not bond_with_altloc_flag): return False
     ph_atoms = list(self.pdb_hierarchy.atoms())
@@ -347,13 +418,13 @@ class fragments(object):
       raw_records = charge_hierarchy.as_pdb_string(
         crystal_symmetry=self.expansion.cs_box)
 
-      self.charge_service = charges_class(
+      fragment_charge = charges_class(
         pdb_hierarchy=charge_hierarchy,
         crystal_symmetry=self.expansion.cs_box).get_total_charge()
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
-      self.fragment_charges.append(self.charge_service)
+      self.fragment_charges.append(fragment_charge)
       cluster_selection = pdb_hierarchy_select(
         self.pdb_hierarchy.atoms_size(), self.cluster_atoms[i])
       self.cluster_selections.append(cluster_selection)
