@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import os
 import iotbx.pdb
 import mmtbx.f_model
-from qrefine.tests.unit import run_qrefine, run_fmodel
+from qrefine.tests.unit import run_qrefine_in, run_fmodel
 
 pdb_str_good = """
 CRYST1   21.937    4.866   23.477  90.00 107.08  90.00 P 1 21 1
@@ -172,7 +172,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     fo.write(pdb_str_poor)
   #
   r_fm = run_fmodel(prefix = prefix, args=[pdb_good, "high_res=2"])
-  r_qr = run_qrefine(prefix = prefix, args=[pdb_poor, r_fm.mtz, 
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_poor, r_fm.mtz, 
     "restraints=cctbx", "stpmax=1", "clustering=True"])
   fmodel = mmtbx.f_model.manager(
     f_obs          = r_fm.f_obs,

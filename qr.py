@@ -11,7 +11,7 @@ from cctbx.array_family import flex
 import mmtbx.model
 from libtbx.utils import null_out
 
-from qrefine import refine
+from qrefine import refine, conformers
 
 
 master_phil_str = """
@@ -68,17 +68,9 @@ cluster{
   clustering_method = gnc  *bcc
     .type = choice(multi=False)
     .help = type of clustering algorithm
-  altloc_method = average *subtract
-    .type = choice(multi=False)
-    .help = two strategies on how to join energies from multiple energy and \
-            gradient calculations are performed for alternate locations.\
-            altloc_method=average does not work! (known issue).
   save_clusters = True
     .type = bool
     .help = save currently used fragments and clusters to disk as PDBs.
-  bond_with_altloc = True
-    .type = bool
-    .help = Disable bond_with_altloc check
   re_calculate_rmsd_tolerance = 0.5
     .type = float
     .help = Re-calculate clusters once the model shifted by more than \
@@ -88,6 +80,19 @@ cluster{
 restraints = cctbx *qm
   .type = choice(multi=False)
   .help = Choice of restraints: cctbx (fast) or any of available QM engines.
+altlocs {
+  handling = *conformers native
+    .type = choice(multi=False)
+    .help = conformers: split the model into single-conformer models, compute \
+            gradients for each and combine them (works with any restraints \
+            source). native: hand the model with altlocs to the restraints \
+            source as is. Only restraints=cctbx can do this.
+  reconcile = True
+    .type = bool
+    .help = Relabel altlocs of interacting residues so that the same label \
+            means the same conformer (iotbx.pdb.hierarchy.reconcile_altlocs) \
+            before restraints are built.
+}
 expansion = False
   .type = bool
   .help = Expand input model into super-sphere
@@ -384,13 +389,6 @@ and quantum.engine_name=aimnet2:
       print("\n***", file=self.logger)
       print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
       print("***\n", file=self.logger)
-      #
-      m = self.model.deep_copy()
-      if self.params.refine.exclude is not None:
-        sel_excl = ~self.model.selection(string = self.params.refine.exclude)
-        m = self.model.select(sel_excl)
-      if(m.altlocs_present() and not m.altlocs_present_only_hd()):
-        raise Sorry("Alternative conformations are not supported with AIMNet2.")
 
   def run(self):
     self.header("Refinement start")
@@ -430,6 +428,42 @@ and quantum.engine_name=aimnet2:
     model_file_name = self.data_manager.get_model_names()[0]
     model_names = self.data_manager.get_model_names()
     self.model = self.data_manager.get_model(filename = model_file_name)
+    if(self.params.altlocs.reconcile and
+       conformers.n_conformers(self.model.get_hierarchy()) > 1):
+      self.header("Reconciling altlocs")
+      # Relabel a fresh hierarchy in input-file order: the hierarchy of
+      # self.model is built with sort_atoms=True, and process() below rebuilds
+      # the hierarchy from the input (sort_atoms=False) anyway.
+      model_input = self.model.get_model_input()
+      if(model_input is not None):
+        hierarchy = model_input.construct_hierarchy(
+          sort_atoms=False).deep_copy()
+      else:
+        hierarchy = self.model.get_hierarchy().deep_copy()
+      r = hierarchy.reconcile_altlocs(
+        crystal_symmetry = self.model.crystal_symmetry(), log = self.logger)
+      print("  %d residues relabeled" % len(r.swaps), file=self.logger)
+      if(len(r.swaps) > 0):
+        # Model without input: process() would rebuild the hierarchy from the
+        # input, undoing the relabel. The HELIX/SHEET annotation is carried
+        # over; input-file LINK/SSBOND records and TER positions are lost.
+        hierarchy.atoms().reset_i_seq()
+        hierarchy.atoms_reset_serial()
+        ss_annotation = self.model.get_ss_annotation()
+        self.model = mmtbx.model.manager(
+          model_input       = None,
+          pdb_hierarchy     = hierarchy,
+          crystal_symmetry  = self.model.crystal_symmetry(),
+          restraint_objects = self.model.get_restraint_objects(),
+          log               = null_out())
+        if(ss_annotation is not None):
+          self.model.set_ss_annotation(ann = ss_annotation)
+        print("  model rebuilt from its hierarchy (input-file LINK/SSBOND "
+          "records not used)", file=self.logger)
+      if(r.unresolved):
+        print("  WARNING: altlocs of %d groups of residues cannot be made "
+          "consistent; refinement continues with the labels as they are." %
+          len(r.unresolved), file=self.logger)
     if(self.params.scattering_table == "electron"):
       self.model.neutralize_scatterers()
     params = mmtbx.model.manager.get_default_pdb_interpretation_params()

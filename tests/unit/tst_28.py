@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import os
 import iotbx.pdb
 import mmtbx.model
-from qrefine.tests.unit import run_qrefine
+from qrefine.tests.unit import run_qrefine_in
 from libtbx.utils import null_out
 from scitbx.array_family import flex
 
@@ -332,12 +332,12 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     log         = null_out())
   sel_moving = m_start.selection(string="resname ZZY")
   #
-  r_freeze = run_qrefine(prefix = prefix, args=[pdb_in,
+  r_freeze = run_qrefine_in(prefix = prefix, args=[pdb_in,
     "restraints=cctbx", "clustering=false", "number_of_micro_cycles=5",
     "freeze.selection='resname ZZY'", "level=0"])
   m_freeze = r_freeze.model
   #
-  r_exclude = run_qrefine(prefix = prefix, args=[pdb_in,
+  r_exclude = run_qrefine_in(prefix = prefix, args=[pdb_in,
     "restraints=cctbx", "clustering=false", "number_of_micro_cycles=5",
     "exclude='not (resname ZZY)'"])
   m_exclude = r_exclude.model

@@ -5,7 +5,7 @@ import os
 import iotbx.pdb
 from libtbx import easy_pickle
 from scitbx.array_family import flex
-from qrefine.tests.unit import run_qrefine
+from qrefine.tests.unit import run_qrefine_in
 
 pdb_str_poor = """
 CRYST1   21.937    4.866   23.477  90.00 107.08  90.00 P 1 21 1
@@ -93,11 +93,11 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   with open(pdb_poor, "w") as fo:
     fo.write(pdb_str_poor)
   #
-  r_qr = run_qrefine(prefix = prefix, args=[pdb_poor, "number_of_micro_cycles=3",
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_poor, "number_of_micro_cycles=3",
     "restraints=cctbx", "stpmax=1", "mode=opt", "clustering=True", "debug=True"])
   sc1 = r_qr.model.get_sites_cart()
   #
-  r_qr = run_qrefine(prefix = prefix, args=[pdb_poor, "number_of_micro_cycles=3",
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_poor, "number_of_micro_cycles=3",
     "restraints=cctbx", "stpmax=1", "mode=opt", "clustering=False", "debug=True"])
   sc2 = r_qr.model.get_sites_cart()
   #
@@ -106,8 +106,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   print(mmm)
   assert mmm[2] < 0.03
   #
-  cf = easy_pickle.load("debug_optimization_clusteringFalse.pkl")
-  ct = easy_pickle.load("debug_optimization_clusteringTrue.pkl")
+  cf = easy_pickle.load(os.path.join(r_qr.folder,
+    "debug_optimization_clusteringFalse.pkl"))
+  ct = easy_pickle.load(os.path.join(r_qr.folder,
+    "debug_optimization_clusteringTrue.pkl"))
   if 0:
     for i, (gt, gf) in enumerate(zip(cf.gradients, ct.gradients)):
       d = flex.sqrt((gt - gf).dot())

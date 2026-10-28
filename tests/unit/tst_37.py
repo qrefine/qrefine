@@ -6,7 +6,7 @@ import libtbx.load_env
 from scitbx.array_family import flex
 from libtbx import easy_pickle
 from libtbx.test_utils import approx_equal
-from qrefine.tests.unit import run_qrefine
+from qrefine.tests.unit import run_qrefine_in
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
@@ -28,14 +28,16 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     "max_iterations_refine=1",
     "parallel.nproc=1"]
   for clustering in ["False", "True"]:
-    r_qr = run_qrefine(prefix = prefix,
+    r_qr = run_qrefine_in(prefix = prefix,
       args = common+["clustering=%s"%clustering])
   #
   # Gradients at the starting coordinates match. Later gradients are not
   # comparable: the two optimizations diverge after the first step.
   #
-  g1 = easy_pickle.load("debug_optimization_clusteringFalse.pkl").gradients[0]
-  g2 = easy_pickle.load("debug_optimization_clusteringTrue.pkl").gradients[0]
+  g1 = easy_pickle.load(os.path.join(r_qr.folder,
+    "debug_optimization_clusteringFalse.pkl")).gradients[0]
+  g2 = easy_pickle.load(os.path.join(r_qr.folder,
+    "debug_optimization_clusteringTrue.pkl")).gradients[0]
   assert g1.size() == g2.size()
   diff = flex.sqrt((g1-g2).dot())
   assert approx_equal(flex.max(diff), 0, 1.e-6)

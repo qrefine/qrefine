@@ -33,8 +33,8 @@ def get_restraints_manager(expansion, clustering, file_name):
   params.restraints="cctbx"
   params.expansion = expansion
   params.cluster.clustering=clustering
-  return refine.create_restraints_manager(params=params, model=model,
-         altlocs_present=False), model.get_sites_cart()
+  return refine.create_restraints_manager(params=params, model=model), \
+         model.get_sites_cart()
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
@@ -43,15 +43,12 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
   #
-  print("clustering=", clustering, "-"*40)
   path = qr_unit_tests+"/data_files/"
   for fn in os.listdir(path):
     if not fn.endswith(".pdb"): continue
-    if fn == "2lvr.pdb": continue # too slow and memory hungry
     fn = path + fn
     ph = iotbx.pdb.input(fn).construct_hierarchy()
     if list(ph.altloc_indices()) != ['']: continue
-    if(verbose): print(fn)
     #
     rm1, sites_cart = get_restraints_manager(
       expansion=False, clustering=True, file_name=fn)
@@ -62,7 +59,6 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     t2, g2 = rm2.target_and_gradients(sites_cart = sites_cart)
     #
     diff = flex.abs(g1.as_double()-g2.as_double())
-    if(verbose):  print(diff.min_max_mean().as_tuple())
     #
     assert flex.max(diff) < 1.e-6, flex.max(diff)
 

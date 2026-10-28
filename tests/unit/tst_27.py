@@ -38,9 +38,9 @@ def get_model(file_name):
 
 
 def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
-
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
+
 
   model = get_model("helix.pdb")
 
@@ -67,8 +67,7 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
 
   restraints_manager = refine.create_restraints_manager(
     params=params,
-    model=model_for_restraints,
-    altlocs_present=False)
+    model=model_for_restraints)
 
   calc = calculator.sites_opt(
     model=model,

@@ -4,60 +4,59 @@ from __future__ import absolute_import
 import os
 import libtbx.load_env
 import iotbx.pdb
+import iotbx.pdb.hierarchy
+import mmtbx.model
 from libtbx.test_utils import approx_equal
-from libtbx.utils import Sorry
+from libtbx.utils import Sorry, null_out
 from scitbx.array_family import flex
 from qrefine import restraints
-from qrefine.tests.unit import run_tests
+from qrefine import conformers
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests_data = os.path.join(qrefine,"tests","unit","data_files")
 
-def gradients_from_conformers(ph, crystal_symmetry, calculator):
-  """
-  Gradients for a model with altlocs from a calculator that only accepts
-  single-conformer models (e.g. QM).
+def build_cctbx(conformer_model, working_folder):
+  return restraints.from_cctbx(restraints_manager=restraints.get_cctbx_gradients(
+    ph=conformer_model.get_hierarchy(), cs=conformer_model.crystal_symmetry()
+    ).model.get_restraints_manager())
 
-  Conformer X = blank atoms + atoms with altloc X. Each conformer is passed
-  to calculator(ph, crystal_symmetry) as a complete molecule; it must return
-  gradients in the order of ph.atoms(). Per atom i:
-
-    g_i = (1/m_i) * sum over conformers c containing i of g_c,i
-
-  where m_i is the number of conformers atom i belongs to: altloc atoms get
-  the gradient of their own conformer, blank atoms the mean over conformers.
-  Only gradients are defined (no energy). Occupancies are not used.
-  """
-  ci = ph.get_conformer_indices().conformer_indices
-  n_conformers = flex.max(ci)
-  if(n_conformers == 0):
-    return calculator(ph, crystal_symmetry)
-  # Each conformer must be a complete molecule: every residue with altlocs
-  # must have all altloc labels present in the model.
-  all_labels = set([a.parent().altloc for a in ph.atoms()]) - set([""])
-  for rg in ph.residue_groups():
-    labels = set([ag.altloc for ag in rg.atom_groups()]) - set([""])
-    if(len(labels) > 0 and labels != all_labels):
-      raise Sorry("Residue %s has altlocs %s but model has %s: conformers "
-        "would be incomplete." % (rg.id_str(), sorted(labels),
-        sorted(all_labels)))
-  blank = ci == 0
-  g = flex.vec3_double(ci.size(), [0,0,0])
-  m = flex.double(ci.size(), 0)
-  for c in range(1, n_conformers+1):
-    isel = ((ci == c) | blank).iselection()
-    g_c = calculator(ph.select(isel), crystal_symmetry)
-    assert g_c.size() == isel.size()
-    g = g.set_selected(isel, g.select(isel) + g_c)
-    m = m.set_selected(isel, m.select(isel) + 1)
-  assert m.all_gt(0)
-  return g * (1/m)
+def gradients_from_conformers(model):
+  fc = conformers.from_conformers(model=model, build=build_cctbx)
+  return fc.target_and_gradients(sites_cart=model.get_sites_cart())[1]
 
 def cctbx_calculator(ph, crystal_symmetry):
   """
-  Stand-in for QM: builds its own restraints from the hierarchy it is given.
+  Gradients from cctbx restraints built for the given hierarchy.
   """
   return restraints.get_cctbx_gradients(ph = ph, cs = crystal_symmetry).gradients
+
+def duplicate(model, labels, residue_indices):
+  """
+  Copy of model where each residue group in residue_indices (each having one
+  atom group) is replaced by identical conformers, one per label, with
+  occupancies 1/len(labels). Returns the new model and, per atom of it, the
+  i_seq of the original atom.
+  """
+  ph = model.get_hierarchy().deep_copy()
+  for a in ph.atoms(): a.tmp = a.i_seq
+  rgs = list(ph.residue_groups())
+  for i in residue_indices:
+    rg = rgs[i]
+    ag = rg.only_atom_group()
+    for label in labels:
+      ag_c = ag.detached_copy()
+      for a_c, a in zip(ag_c.atoms(), ag.atoms()): # detached_copy resets tmp
+        a_c.tmp = a.tmp
+      ag_c.altloc = label
+      ag_c.atoms().set_occ(flex.double(ag_c.atoms_size(), 1.0/len(labels)))
+      rg.append_atom_group(ag_c)
+    rg.remove_atom_group(ag)
+  ph.atoms_reset_serial()
+  ph.atoms().reset_i_seq()
+  original = flex.size_t([a.tmp for a in ph.atoms()])
+  dup_model = mmtbx.model.manager(model_input=None, pdb_hierarchy=ph,
+    crystal_symmetry=model.crystal_symmetry(), log=null_out())
+  return dup_model, original
 
 def exercise_vs_cctbx():
   """
@@ -71,11 +70,18 @@ def exercise_vs_cctbx():
   for file_name in ["gly2_1.pdb", "gly2_2.pdb", "h_altconf_complete.pdb",
                     "h_altconf_2_complete.pdb", "altlocs2.pdb", "altlocs.pdb"]:
     pi = iotbx.pdb.input(file_name = os.path.join(qr_unit_tests_data,file_name))
-    ph = pi.construct_hierarchy()
-    cs = pi.crystal_symmetry()
+    model = mmtbx.model.manager(model_input=pi, log=null_out())
+    ph = model.get_hierarchy()
+    cs = model.crystal_symmetry()
     g_cctbx = cctbx_calculator(ph, cs)
-    g = gradients_from_conformers(
-      ph = ph, crystal_symmetry = cs, calculator = cctbx_calculator)
+    g = gradients_from_conformers(model)
+    # energies_sites (real-space refinement): energy 0, same gradients
+    fc = conformers.from_conformers(model=model, build=build_cctbx)
+    es = fc.energies_sites(sites_cart=model.get_sites_cart())
+    assert es.target == 0
+    assert approx_equal(es.gradients, fc.target_and_gradients(
+      sites_cart=model.get_sites_cart())[1], 0)
+    assert approx_equal(es.gradients, g, 0)
     ci = ph.get_conformer_indices().conformer_indices
     n_conformers = flex.max(ci)
     assert n_conformers == 2
@@ -93,44 +99,109 @@ def exercise_vs_cctbx():
 
 def exercise_no_altlocs():
   """
-  Without altlocs the calculator is called once on the whole model.
+  Without altlocs there are no conformer labels, so the caller
+  (create_restraints_manager) never builds from_conformers.
   """
   pi = iotbx.pdb.input(
     file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb"))
   ph = pi.construct_hierarchy()
   ph.remove_alt_confs(always_keep_one_conformer=True)
-  cs = pi.crystal_symmetry()
-  g = gradients_from_conformers(
-    ph = ph, crystal_symmetry = cs, calculator = cctbx_calculator)
-  assert approx_equal(g, cctbx_calculator(ph, cs))
+  assert conformers.n_conformers(ph) == 0
 
-def exercise_duplicate():
+def exercise_duplicate(labels):
   """
-  Duplicate a residue into identical conformers A and B: every atom must get
-  the gradient of the original single-conformer model.
+  Duplicate a residue into identical conformers (one per label): every atom
+  must get the gradient of the original single-conformer model.
   """
   pi = iotbx.pdb.input(
     file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb"))
   ph = pi.construct_hierarchy()
   ph.remove_alt_confs(always_keep_one_conformer=True)
-  cs = pi.crystal_symmetry()
-  g_single = cctbx_calculator(ph, cs)
-  # Map each atom of the duplicated model to its original atom
-  for a in ph.atoms(): a.tmp = a.i_seq
-  rg = list(ph.residue_groups())[2]
-  ag_a = rg.only_atom_group()
-  ag_b = ag_a.detached_copy()
-  for a_b, a_a in zip(ag_b.atoms(), ag_a.atoms()): # detached_copy resets tmp
-    a_b.tmp = a_a.tmp
-  ag_a.altloc = "A"
-  ag_b.altloc = "B"
-  rg.append_atom_group(ag_b)
-  ph.atoms_reset_serial()
-  original = flex.size_t([a.tmp for a in ph.atoms()])
-  g = gradients_from_conformers(
-    ph = ph, crystal_symmetry = cs, calculator = cctbx_calculator)
-  assert flex.max(ph.get_conformer_indices().conformer_indices) == 2
+  model = mmtbx.model.manager(model_input=None, pdb_hierarchy=ph,
+    crystal_symmetry=pi.crystal_symmetry(), log=null_out())
+  g_single = cctbx_calculator(ph, model.crystal_symmetry())
+  dup_model, original = duplicate(model=model, labels=labels,
+    residue_indices=[2])
+  ph = dup_model.get_hierarchy()
+  assert conformers.conformer_labels(ph) == labels
+  g = gradients_from_conformers(dup_model)
   assert approx_equal(g, g_single.select(original))
+  assert flex.max(conformers.multiplicity(ph)) == len(labels)
+
+class _dummy_fragment_manager(object):
+  def __init__(self):
+    self.n_calls = 0
+    self.interaction_list = [(1,2)]
+  def set_up_cluster_qm(self):
+    self.n_calls += 1
+
+class _dummy_manager(object):
+  def __init__(self, with_fragment_manager):
+    if(with_fragment_manager):
+      self.fragment_manager = _dummy_fragment_manager()
+  def target_and_gradients(self, sites_cart):
+    return 0, flex.vec3_double(sites_cart.size(), (0,0,0))
+
+def exercise_proxy():
+  """
+  fragment_manager of from_conformers forwards set_up_cluster_qm to every
+  conformer and concatenates their interaction lists.
+  """
+  pi = iotbx.pdb.input(
+    file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb"))
+  model = mmtbx.model.manager(model_input=pi, log=null_out())
+  managers = []
+  def build(conformer_model, working_folder):
+    managers.append(_dummy_manager(with_fragment_manager=True))
+    return managers[-1]
+  fc = conformers.from_conformers(model=model, build=build)
+  assert len(managers) == 2
+  fc.fragment_manager.set_up_cluster_qm()
+  assert [m.fragment_manager.n_calls for m in managers] == [1, 1]
+  assert fc.fragment_manager.interaction_list == [(1,2),(1,2)]
+  fc = conformers.from_conformers(model=model,
+    build=lambda conformer_model, working_folder: _dummy_manager(False))
+  assert fc.fragment_manager is None
+
+def exercise_microheterogeneity():
+  """
+  Conformers with different residue names (microheterogeneity): in conformer
+  X's model the residue takes the resname of the atom group with label X,
+  blank atoms included. GLY 95 has blank, A and B atom groups; TYR 94 has
+  A and B only (no merge needed).
+  """
+  file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb")
+  for i_rg, original in [(8, "GLY"), (7, "TYR")]:
+    pi = iotbx.pdb.input(file_name = file_name)
+    ph = pi.construct_hierarchy()
+    rg = list(ph.residue_groups())[i_rg]
+    altlocs = [ag.altloc for ag in rg.atom_groups()]
+    assert altlocs == {8: ["", "A", "B"], 7: ["A", "B"]}[i_rg]
+    rg.atom_groups()[-1].resname = "ALA"
+    ph.atoms().reset_i_seq()
+    model = mmtbx.model.manager(model_input=None, pdb_hierarchy=ph,
+      crystal_symmetry=pi.crystal_symmetry(), log=null_out())
+    rg_isel = set(rg.atoms().extract_i_seq())
+    parts = conformers.split(model)
+    assert [p.label for p in parts] == ["A", "B"]
+    for p, resname in zip(parts, [original, "ALA"]):
+      h = p.model.get_hierarchy()
+      assert list(h.altloc_indices().keys()) == [""]
+      assert max(r.atom_groups_size() for r in h.residue_groups()) == 1
+      assert list(h.atoms().extract_name()) == list(
+        ph.atoms().select(p.iselection).extract_name())
+      assert h.atoms().extract_xyz().max_distance(
+        ph.atoms().extract_xyz().select(p.iselection)) < 1.e-6
+      ag = list(h.residue_groups())[i_rg].only_atom_group()
+      assert ag.resname == resname
+      # every atom of this residue in this conformer, blank atoms included
+      rg_atoms = [k for k, i in enumerate(p.iselection) if i in rg_isel]
+      assert rg_atoms == list(ag.atoms().extract_i_seq())
+      for a in h.atoms().select(flex.size_t(rg_atoms)):
+        assert a.parent().resname == resname
+      if(i_rg == 8):
+        n_blank = rg.atom_groups()[0].atoms_size()
+        assert len(rg_atoms) == n_blank + 1
 
 def exercise_incomplete_conformers():
   """
@@ -139,30 +210,81 @@ def exercise_incomplete_conformers():
   """
   pi = iotbx.pdb.input(
     file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb"))
-  ph = pi.construct_hierarchy()
-  cs = pi.crystal_symmetry()
+  model = mmtbx.model.manager(model_input=pi, log=null_out())
+  ph = model.get_hierarchy()
   rgs = [rg for rg in ph.residue_groups() if rg.atom_groups_size() > 1]
   assert len(rgs) > 1
   ag_c = rgs[0].atom_groups()[-1].detached_copy()
   ag_c.altloc = "C"
   rgs[0].append_atom_group(ag_c)
+  ph.atoms().reset_i_seq()
   try:
-    gradients_from_conformers(
-      ph = ph, crystal_symmetry = cs, calculator = cctbx_calculator)
+    conformers.split(model)
   except Sorry as e:
     assert str(e).find("conformers would be incomplete") > -1
   else: raise AssertionError("Expected Sorry for incomplete conformers")
 
-def run(prefix):
+def exercise_split():
+  """
+  Conformer labels, multiplicity and single-conformer models of
+  conformers.split.
+  """
+  pi = iotbx.pdb.input(file_name=os.path.join(qr_unit_tests_data, "h_altconf_complete.pdb"))
+  model = mmtbx.model.manager(model_input=pi, log=null_out())
+  ph = model.get_hierarchy()
+  assert conformers.conformer_labels(ph) == ["A", "B"]
+  assert conformers.n_conformers(ph) == 2
+  m = conformers.multiplicity(ph)
+  ci = ph.get_conformer_indices().conformer_indices
+  assert m.select(ci == 0).all_eq(2.0) and m.select(ci != 0).all_eq(1.0)
+  parts = conformers.split(model)
+  assert [p.label for p in parts] == ["A", "B"]
+  for p, c in zip(parts, [1, 2]):
+    assert p.iselection.size() == ((ci == c) | (ci == 0)).count(True)
+    assert list(p.iselection) == list(((ci == c) | (ci == 0)).iselection())
+    h = p.model.get_hierarchy()
+    assert list(h.altloc_indices().keys()) == [""]
+    assert max(rg.atom_groups_size() for rg in h.residue_groups()) == 1
+    assert h.atoms().extract_xyz().max_distance(
+      ph.atoms().extract_xyz().select(p.iselection)) < 1.e-6
+    assert list(h.atoms().extract_name()) == list(ph.atoms().select(p.iselection).extract_name())
+  # no conformer labels: multiplicity 1, nothing to split
+  h = ph.deep_copy()
+  h.remove_alt_confs(always_keep_one_conformer=True)
+  assert conformers.n_conformers(h) == 0
+  assert conformers.multiplicity(h).all_eq(1.0)
+  model_h = mmtbx.model.manager(model_input=None, pdb_hierarchy=h,
+    crystal_symmetry=model.crystal_symmetry(), log=null_out())
+  assert conformers.split(model_h) == []
+  # hydrogen-only labels are not conformers
+  rg = list(ph.residue_groups())[1] # GLY 88: first residue with atom H
+  ag = rg.only_atom_group()
+  h_atom = [a for a in ag.atoms() if a.name.strip() == "H"][0]
+  ag_h = iotbx.pdb.hierarchy.atom_group(altloc="C", resname=ag.resname)
+  ag_h.append_atom(h_atom.detached_copy())
+  ag.remove_atom(h_atom)
+  rg.append_atom_group(ag_h)
+  ph.atoms().reset_i_seq()
+  assert conformers.conformer_labels(ph) == ["A", "B"]
+  assert conformers.multiplicity(ph)[ag_h.atoms()[0].i_seq] == 2.0
+  for p in conformers.split(model):
+    assert ag_h.atoms()[0].i_seq in p.iselection
+
+def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Combine gradients from single-conformer calculations (the QM route) for
   models with altlocs. cctbx is used as a stand-in for the QM calculator.
   """
+  os.makedirs(prefix, exist_ok=True)
+  os.chdir(prefix)
+  exercise_split()
   exercise_vs_cctbx()
   exercise_no_altlocs()
-  exercise_duplicate()
+  for labels in [["A","B"], ["A","B","C"], ["A","B","C","D"]]:
+    exercise_duplicate(labels=labels)
+  exercise_proxy()
   exercise_incomplete_conformers()
+  exercise_microheterogeneity()
 
 if(__name__ == '__main__'):
-  prefix = os.path.basename(__file__).replace(".py","")
-  run_tests.runner(function=run, prefix=prefix, disable=False)
+  run()

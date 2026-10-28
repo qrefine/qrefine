@@ -12,20 +12,6 @@ from .fragment import write_cluster_and_fragments_pdbs
 from .restraints import from_qm
 from libtbx import group_args
 
-def check_no_altlocs(h, file_name):
-  altlocs = []
-  for m in h.models():
-    for c in m.chains():
-      for rg in c.residue_groups():
-        for ag in rg.atom_groups():
-          altlocs.append(ag.altloc)
-  altlocs = list(set(altlocs))
-  assert len(altlocs)<=2, [file_name, altlocs]
-  cntr = 0
-  for a in altlocs:
-    if(len(a)==0): cntr+=1
-  assert cntr==1, [file_name, altlocs]
-
 class from_cluster(object):
   def __init__(self, restraints_manager, fragment_manager, parallel_params):
     adopt_init_args(self, locals())
@@ -66,23 +52,6 @@ class from_cluster(object):
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
       selection_and_sites_cart.append([selection_fragment, sites_cart,index])
-       ## DEBUG begin
-       #try:
-       #  super_selection = self.restraints_manager.\
-       #    fragment_extracts.fragment_super_selections[index]
-       #  tmp_h = self.fragment_manager.pdb_hierarchy_super.select(super_selection)
-       #  fn = self.restraints_manager.file_name.replace(".pdb","_%s.pdb"%str(index))
-       #  tmp_h.write_pdb_file(
-       #    file_name        = fn,
-       #    crystal_symmetry = self.fragment_manager.expansion.cs_box)
-       #  check_no_altlocs(h=tmp_h, file_name=fn)
-       #  self.restraints_manager.target_and_gradients(sites_cart=sites_cart,
-       #    selection=selection_fragment, index=index)
-       #except Exception as e:
-       #  print "Failed before entering lbfgs minimization"
-       #  print str(e)
-       #  STOP()
-       ## DEBUG end
     if(self.parallel_params.nproc is None):
       self.parallel_params.nproc = Auto
     ncount=0

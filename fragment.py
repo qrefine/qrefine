@@ -2,7 +2,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 import os
 import copy
-import itertools
 import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
@@ -20,15 +19,23 @@ qrefine = libtbx.env.find_in_repositories("qrefine")
 
 def check_atoms_integrity(atoms, verbose=False):
   rc = {}
+  names = {}
   for atom in atoms:
     resid = atom.parent().parent().id_str()
     rc.setdefault(resid, [])
+    names.setdefault(resid, set())
     if atom.name in [' CA ', ' CB ']:
       if atom.quote().find('GLY')==-1:
         rc[resid].append(atom.quote())
+        names[resid].add(atom.name)
   for key, item in rc.items():
     if verbose: print(key, item)
-    assert len(item) in [0,2], 'error in cluster %s %s' % (key, item)
+    # CA and CB come together; a residue group with several conformers
+    # contributes one CA/CB pair per conformer
+    assert names[key] in [set(), set([' CA ', ' CB '])], \
+      'error in cluster: residue %s has %s without %s: %s' % (key,
+      " CA " in names[key] and "CA" or "CB",
+      " CA " in names[key] and "CB" or "CA", item)
 
 def check_selection_integrity(atoms, indices, verbose=False):
   selection = []
@@ -72,7 +79,6 @@ class fragments(object):
       working_folder             = "ase",
       make_working_folder        = True, # A way to not make it if not needed
       clustering_method          = None,
-      altloc_method              = None,
       maxnum_residues_in_cluster = 20,
       bcc_threshold              = 9,
       charge_embedding           = False,
@@ -88,12 +94,10 @@ class fragments(object):
       save_clusters              = False,
       select_within_radius       = 10.0,
       clusters_only              = False,
-      bond_with_altloc_flag      = True,
       cap_fragments              = True):
     # cap_fragments: cap the fragments and compute their charges (needed
     # for QM restraints only; cctbx restraints use the fragment selections)
     self.cap_fragments = cap_fragments
-    self.bond_with_altloc_flag = bond_with_altloc_flag
     self.select_within_radius = select_within_radius
     self.charge_embedding = charge_embedding
     self.two_buffers = two_buffers
@@ -104,10 +108,8 @@ class fragments(object):
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
     self.charge_cutoff = charge_cutoff
-    self.system_size = pdb_hierarchy.atoms_size()
     self.qm_engine_name = qm_engine_name
     self.clustering_method = clustering_method
-    self.altloc_method =  altloc_method
     self.debug = debug
     self.maxnum_residues_in_cluster =  maxnum_residues_in_cluster
     self.bcc_threshold = bcc_threshold
@@ -131,13 +133,10 @@ class fragments(object):
         crystal_symmetry = crystal_symmetry,
         cif_objects      = cif_objects)
     #
-    if(os.path.exists(self.working_folder) is not True):
-      if(make_working_folder):
-        os.mkdir(self.working_folder)
+    if(make_working_folder):
+      os.makedirs(self.working_folder, exist_ok=True)
     self.backbone_connections = fragment_utils.get_backbone_connections(
       self.pdb_hierarchy)
-    self.altloc_atoms = [atom for atom in list(pdb_hierarchy.atoms())
-                           if atom.pdb_label_columns()[4]!=" "]
     self._expand()
     self.set_up_cluster_qm()
 
@@ -166,7 +165,6 @@ class fragments(object):
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
     self.interaction_list = pair_interaction.run(copy.deepcopy(self.pdb_hierarchy))  ##deepcopy
     self.interaction_list += self.backbone_connections # XXX WHY IS THIS?
-    ## isolate altloc molecules
     from . import clustering
     clusters = clustering.betweenness_centrality_clustering(
       self.interaction_list,
@@ -186,164 +184,58 @@ class fragments(object):
       return selected_atom_indices_in_entire_ph
 
     self.pdb_hierarchy_super.atoms_reset_serial()
-    phs = [self.pdb_hierarchy_super]
-    altloc_size = self.pdb_hierarchy_super.altloc_indices().size()
-    if(altloc_size>1):
-      ## generate pdb_hierarchy for each altloc case
-      phs = []
-      asc = self.pdb_hierarchy_super.atom_selection_cache()
-      ## the first one altloc is " ", A B.. altlocs start from 1
-      altlocs = self.pdb_hierarchy_super.altloc_indices().keys()
-      altlocs.sort()
-      for altloc in altlocs:
-        if(altloc==""): continue
-        sel = asc.selection("altloc '%s' or altloc '' or altloc ' '"%altloc)
-        ph_altloc = self.pdb_hierarchy_super.select(sel)
-        phs.append(ph_altloc)
-    cluster_atoms_in_phs = []
-    fragment_super_atoms_in_phs = []
+    ph = self.pdb_hierarchy_super
     clusters = self.clusters##from graph clustring, molecular indices
-    ##loop over each cluster in every pdb_hierarchy to define buffer region
+    ##loop over each cluster to define buffer region
     ##fragment consists of cluster and buffer
-    ##all pdb_hierarchies have the same clusters at molecular level
-    for ph in phs:
-      cluster_atoms_in_ph = []
+    cluster_atoms_in_ph = []
+    fragment_super_atoms_in_ph = []
+    molecules_in_fragments = []
+    for i in range(len(clusters)):
+      # print 'processing cluster', i
+      atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
+        pair_interaction.run(copy.deepcopy(ph), clusters[i])  ##deepcopy
+      # print("clusters[i]",clusters[i])
+      # print("molecules_in_one_fragment:", molecules_in_one_fragment)
+      # print("atoms_in_one_fragment",atoms_in_one_fragment)
+
+      atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
+                                                  atoms_in_one_cluster, ph)
+      cluster_atoms_in_ph.append(atoms_in_one_cluster)
+
+      atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
+                                                   atoms_in_one_fragment, ph)
+      fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
+      molecules_in_fragments.append(molecules_in_one_fragment)
+      atoms = self.pdb_hierarchy_super.atoms()
+      check_selection_integrity(atoms, atoms_in_one_cluster)
+    # print "cluster->fragments done"
+    if(self.two_buffers):## define a second buffer layer
+      # print "adding second layer"
       fragment_super_atoms_in_ph = []
-      molecules_in_fragments = []
-      for i in range(len(clusters)):
-        # print 'processing cluster', i
-        atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
-          pair_interaction.run(copy.deepcopy(ph), clusters[i])  ##deepcopy
-        # print("clusters[i]",clusters[i])
-        # print("molecules_in_one_fragment:", molecules_in_one_fragment)
-        # print("atoms_in_one_fragment",atoms_in_one_fragment)
-
-        atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
-                                                    atoms_in_one_cluster, ph)
-        cluster_atoms_in_ph.append(atoms_in_one_cluster)
-
+      for molecules in molecules_in_fragments:
+        junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(copy.deepcopy(ph),molecules)
         atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
-                                                     atoms_in_one_fragment, ph)
+                                                   atoms_in_one_fragment, ph)
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
-        molecules_in_fragments.append(molecules_in_one_fragment)
-        atoms = self.pdb_hierarchy_super.atoms()
-        check_selection_integrity(atoms, atoms_in_one_cluster)
-      # print "cluster->fragments done"
-      if(self.two_buffers):## define a second buffer layer
-        # print "adding second layer"
-        fragment_super_atoms_in_ph = []
-        for molecules in molecules_in_fragments:
-          junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(copy.deepcopy(ph),molecules)
-          atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
-                                                     atoms_in_one_fragment, ph)
-          fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
-      if(self.distance_buffer):
-        fragment_super_atoms_in_ph = self.add_distance_buffer(
-          ph                         = ph,
-          cluster_atoms_in_ph        = cluster_atoms_in_ph,
-          fragment_super_atoms_in_ph = fragment_super_atoms_in_ph)
-      cluster_atoms_in_phs.append(cluster_atoms_in_ph)
-      fragment_super_atoms_in_phs.append(fragment_super_atoms_in_ph)
+    if(self.distance_buffer):
+      fragment_super_atoms_in_ph = self.add_distance_buffer(
+        ph                         = ph,
+        cluster_atoms_in_ph        = cluster_atoms_in_ph,
+        fragment_super_atoms_in_ph = fragment_super_atoms_in_ph)
     #
-    ##always collect the clustering result from phs[0]
     self.cluster_atoms = []
     self.fragment_super_atoms = []
-    self.fragment_scales = []
     for i_cluster in range(len(clusters)):
-      self.collect_cluster_and_fragment(cluster_atoms_in_phs,
-                                    fragment_super_atoms_in_phs, i_cluster, 0)
-    ##check alternative locations and get all clusters and fragments
-    overlap_clusters={}
-    overlap_fragments_super = {}
-    if(len(phs)>1):
-      for i_cluster in range(len(clusters)):
-        for j_ph in range(1, len(phs)):
-          fragment_same = (set(fragment_super_atoms_in_phs[0][i_cluster])==
-               set(fragment_super_atoms_in_phs[j_ph][i_cluster]))
-          # two same fragments for same non-altloc clusters
-          if(fragment_same):continue
-          # check the overlap
-          overlap_atoms_in_one_cluster = self.atoms_overlap(
-                                        cluster_atoms_in_phs, i_cluster, j_ph)
-          empty_overlap_cluster = (len(overlap_atoms_in_one_cluster)==0)
-          #substract the contribution from overlap
-          if(self.altloc_method=="subtract"):
-            self.collect_cluster_and_fragment(cluster_atoms_in_phs,
-                              fragment_super_atoms_in_phs, i_cluster, j_ph)
-            # different fragments for different altloc clusters
-            if(empty_overlap_cluster):continue
-            else:
-            # two same non-altloc clusters, the overlap is a cluster
-            # two different altloc clusters, the overlap is part of a residue,
-            # even an atom
-            # the cluster overlap will cause troubles for QM calculation,
-            # expecially when it is an atom
-              atoms = self.pdb_hierarchy_super.atoms()
-              overlap_atoms_in_one_fragment = self.atoms_overlap(
-                                  fragment_super_atoms_in_phs,
-                                  i_cluster,
-                                  j_ph)
-              check_selection_integrity(atoms, overlap_atoms_in_one_fragment)
-              self.cluster_atoms.append(list(overlap_atoms_in_one_cluster))
-              self.fragment_super_atoms.append(list(overlap_atoms_in_one_fragment))
-              scale_list = [-1.0]*sum(i <= self.system_size
-                                      for i in overlap_atoms_in_one_fragment)
-              self.fragment_scales.append(scale_list)
-          ##average the contributions from overlap
-          elif(self.altloc_method=="average"):
-            # different fragments for different altloc clusters
-            if(empty_overlap_cluster):
-              self.collect_cluster_and_fragment(cluster_atoms_in_phs,
-                              fragment_super_atoms_in_phs, i_cluster, j_ph)
-            else:
-            # two same non-altloc clusters, the overlap is a cluster
-            # two different altloc clusters, the overlap is part of a residue, even an atom
-            # collect all overlap clusters and fragments
-              try:
-                overlap_clusters[i_cluster] = overlap_clusters[i_cluster].append(
-                                   cluster_atoms_in_phs[j_ph][i_cluster])
-                overlap_fragments_super[i_cluster] = \
-                  overlap_fragments_super[i_cluster].append(
-                                   fragment_super_atoms_in_phs[j_ph][i_cluster])
-              except:
-                overlap_clusters[i_cluster] = \
-                  [cluster_atoms_in_phs[j_ph][i_cluster]]
-                overlap_fragments_super[i_cluster] = \
-                  [fragment_super_atoms_in_phs[j_ph][i_cluster]]
-    overlap_atoms = []
-    for i_cluster, overlap_cluster in overlap_clusters.items():
-      overlap_atoms = overlap_atoms+list(itertools.chain.from_iterable(
-        overlap_cluster +[self.cluster_atoms[i_cluster]]))#[atom_index, atom_index]
-    frequency_overlap_atoms =  {x:overlap_atoms.count(x) for x in overlap_atoms}#{atom_index,frequency}
-    for i_cluster, clusters in overlap_clusters.items():
-      ## reset the fragment scale for the ith fragment in ph[0]
-      for index, atom in enumerate([i for i in self.fragment_super_atoms[i_cluster]
-                                       if i <= self.system_size]):
-          if(atom in self.cluster_atoms[i_cluster] and
-             atom in frequency_overlap_atoms.keys() and
-               not self.bond_with_altloc(atom, self.bond_with_altloc_flag)):
-              self.fragment_scales[i_cluster][index] = \
-                1.0/frequency_overlap_atoms[atom]
-      ## add overlap clusters and fragments
-      for index, fragment_super in  enumerate(overlap_fragments_super[i_cluster]):
-         scale_list = []
-         for atom in [i for i in fragment_super if i <= self.system_size]:
-           if(atom in clusters[index] and atom in frequency_overlap_atoms.keys()
-              and not self.bond_with_altloc(atom, self.bond_with_altloc_flag)):
-
-             scale_list.append(1.0/frequency_overlap_atoms[atom])
-           else: scale_list.append(1.0)
-         self.cluster_atoms.append(clusters[index])
-         self.fragment_super_atoms.append(fragment_super)
-         self.fragment_scales.append(scale_list)
+      self.collect_cluster_and_fragment(cluster_atoms_in_ph,
+                                    fragment_super_atoms_in_ph, i_cluster)
 
   def add_distance_buffer(self, ph, cluster_atoms_in_ph,
                           fragment_super_atoms_in_ph):
     """
-    Extend each fragment with all residues of ph having an atom within
-    self.distance_buffer_radius of the cluster. Atom indices in the input and
-    output lists are serial numbers in the entire super-sphere hierarchy;
-    ph may be an altloc-specific selection of it.
+    Extend each fragment with all residues of ph (the super-sphere hierarchy)
+    having an atom within self.distance_buffer_radius of the cluster. Atom
+    indices in the input and output lists are serial numbers in ph.
     """
     serials = [int(sn) for sn in ph.atoms().extract_serial()]
     serial_to_pos = dict((sn, i) for i, sn in enumerate(serials))
@@ -360,32 +252,10 @@ class fragments(object):
       result.append(sorted(set(fragment) | set(extra)))
     return result
 
-  def bond_with_altloc(self, atom_index, bond_with_altloc_flag):
-    if(not bond_with_altloc_flag): return False
-    ph_atoms = list(self.pdb_hierarchy.atoms())
-    ph_atom = ph_atoms[atom_index-1]
-    bond = False
-    for altloc_atom in self.altloc_atoms:
-      distance = ph_atom.distance(altloc_atom)
-      if(distance<1.7):
-        bond =True
-        break
-      ##TODO
-      ##check bond, better from bond topology
-    return bond
-
-  def atoms_overlap(self, cluster_atoms_in_phs, i_cluster, j_ph):
-    overlap_atoms_in_one_cluster = set(cluster_atoms_in_phs[0][i_cluster]) & \
-                                   set(cluster_atoms_in_phs[j_ph][i_cluster])
-    return overlap_atoms_in_one_cluster
-
-  def collect_cluster_and_fragment(self, cluster_atoms_in_phs,
-                                fragment_super_atoms_in_phs, i_cluster, j_ph):
-    self.cluster_atoms.append(cluster_atoms_in_phs[j_ph][i_cluster])
-    self.fragment_super_atoms.append(fragment_super_atoms_in_phs[j_ph][i_cluster])
-    scale_list = [1.0]*sum(i <= self.system_size
-                          for i in fragment_super_atoms_in_phs[j_ph][i_cluster])
-    self.fragment_scales.append(scale_list)
+  def collect_cluster_and_fragment(self, cluster_atoms_in_ph,
+                                fragment_super_atoms_in_ph, i_cluster):
+    self.cluster_atoms.append(cluster_atoms_in_ph[i_cluster])
+    self.fragment_super_atoms.append(fragment_super_atoms_in_ph[i_cluster])
 
   def make_capper(self, fragment_super_selection):
     """
@@ -476,7 +346,6 @@ class fragments(object):
       pdb_hierarchy_super       = self.pdb_hierarchy_super,
       expansion_cs              = self.expansion.cs_box,
       buffer_selections         = self.buffer_selections,
-      fragment_scales           = self.fragment_scales,
       debug                     = self.debug,
       charge_service            = self.charge_service,
       charge_cutoff             = self.charge_cutoff,
@@ -515,8 +384,6 @@ def write_mm_charge_file(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   file_name = None
   if (fragment_extracts.charge_embedding is True):
-    altlocs = fragment_extracts.pdb_hierarchy_super.altloc_indices().keys()
-    altlocs.sort()
     if(fragment_extracts.charge_cutoff is not None):
       if(fragment_extracts.debug):
         print("charge_cutoff: ",fragment_extracts.charge_cutoff)
@@ -530,29 +397,8 @@ def write_mm_charge_file(fragment_extracts, index):
     else:
       non_fragment_hierarchy_super = fragment_extracts.pdb_hierarchy_super.\
                        select(~fragment_selection)
-    # the pdb has no altlocs
-    if (len(altlocs)==1):
-      non_fragment_hierarchy = non_fragment_hierarchy_super
-      ph = fragment_extracts.pdb_hierarchy_super
-    # the pdb has  altlocs
-    else:
-      fragment_altlocs = fragment_extracts.pdb_hierarchy_super.\
-                        select(fragment_selection).altloc_indices().keys()
-      fragment_altlocs.sort()
-      asc_ph = fragment_extracts.pdb_hierarchy_super.atom_selection_cache()
-      asc_non_fragment = non_fragment_hierarchy_super.atom_selection_cache()
-      # the fragment has  altlocs
-      if (len(fragment_altlocs)==2):
-        sel_non_fragment = asc_non_fragment.\
-          selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[1])
-        sel_ph = asc_ph.selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[1])
-      # the fragment has no altlocs
-      else:
-        sel_non_fragment = asc_non_fragment.\
-          selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[0])
-        sel_ph = asc_ph.selection("altloc '%s' or altloc '' or altloc ' '"%fragment_altlocs[0])
-      non_fragment_hierarchy = non_fragment_hierarchy_super.select(sel_non_fragment)
-      ph = fragment_extracts.pdb_hierarchy_super.select(sel_ph)
+    non_fragment_hierarchy = non_fragment_hierarchy_super
+    ph = fragment_extracts.pdb_hierarchy_super
     sub_working_folder = fragment_extracts.working_folder + "/" + str(index) + "/"
     if (not os.path.isdir(sub_working_folder)):
       os.mkdir(sub_working_folder)

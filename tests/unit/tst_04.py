@@ -31,7 +31,7 @@ def get_restraints_manager(expansion, clustering, file_name):
   params.restraints="cctbx"
   params.expansion = expansion
   params.cluster.clustering=clustering
-  return refine.create_restraints_manager(params=params, model=model, altlocs_present=False), \
+  return refine.create_restraints_manager(params=params, model=model), \
          model.get_sites_cart()
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):

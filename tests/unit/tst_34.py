@@ -6,7 +6,7 @@ import iotbx.pdb
 import mmtbx.model
 from libtbx.utils import Sorry, null_out
 from qrefine import qr, refine
-from qrefine.tests.unit import run_qrefine
+from qrefine.tests.unit import run_qrefine_in
 
 # Three CYS and a HIS coordinating ZN in a tiny P1 cell: symmetry copies of the
 # molecule are only 3.9 A away from it.
@@ -140,14 +140,14 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   common = ["mode=opt", "dry_run=True", "restraints=qm",
             "quantum.engine_name=mopac"]
   # Neighbours in range, QM engine would only see the asymmetric unit: stops.
-  r_qr = run_qrefine(prefix = prefix, args=[pdb_small_box,
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_small_box,
     "clustering=False", "expansion=False"]+common, sorry_expected=True)
   assert r_qr.std_out_text.find("expansion=True") > -1, r_qr.std_out_text
   # Neighbours are part of the fragments: runs.
-  r_qr = run_qrefine(prefix = prefix, args=[pdb_small_box,
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_small_box,
     "clustering=True"]+common)
   # No neighbours in range: runs.
-  r_qr = run_qrefine(prefix = prefix, args=[pdb_big_box,
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_big_box,
     "clustering=False", "expansion=False"]+common)
 
 if(__name__ == "__main__"):

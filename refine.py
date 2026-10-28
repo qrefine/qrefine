@@ -26,7 +26,9 @@ import os
 import time
 import pickle
 
-from libtbx.utils import Sorry
+from libtbx.utils import Sorry, null_out
+import iotbx.pdb.hierarchy
+import mmtbx.model
 from cctbx.crystal.super_cell import get_siiu
 from libtbx import easy_pickle
 from qrefine.fragment import fragments
@@ -35,6 +37,7 @@ from qrefine import calculator
 from qrefine import driver
 from qrefine import restraints
 from qrefine import cluster_restraints
+from qrefine import conformers
 from qrefine import results
 
 from qrefine.super_cell import expand
@@ -65,13 +68,12 @@ def show_cc(map_data, xray_structure, log=None):
 def create_fragment_manager(
       model,
       params,
-      file_name = os.path.join("ase","tmp_ase.pdb")):
+      working_folder = "ase"):
   if(not params.cluster.clustering): return None
   return fragments(
     cif_objects                = model._restraint_objects,
-    working_folder             = os.path.split(file_name)[0]+ "/",
+    working_folder             = working_folder + "/",
     clustering_method          = params.cluster.clustering_method,
-    altloc_method              = params.cluster.altloc_method,
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
     two_buffers                = params.cluster.two_buffers,
@@ -84,47 +86,130 @@ def create_fragment_manager(
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters,
     select_within_radius       = params.cluster.select_within_radius,
-    bond_with_altloc_flag      = params.cluster.bond_with_altloc,
     cap_fragments              = params.restraints == "qm")
+
+def exchangeable_hd_pairs(pdb_hierarchy, tolerance=0.01):
+  """
+  Exchangeable H/D sites as [[i_seq_H_or_D], [i_seq_D_or_H]]: the pairs of
+  pdb_hierarchy.exchangeable_hd_selections() (H and D in atom groups with
+  different altlocs, at least one of them H/D-only), plus H and D atoms with
+  equal name.strip()[1:] at the same position (within tolerance) in two atom
+  groups with different altlocs that both have heavy atoms (neutron models
+  where the H/D labels are those of a disordered side chain).
+  """
+  result = list(pdb_hierarchy.exchangeable_hd_selections())
+  if(len(result) == 0):
+    elements = set(e.strip() for e in pdb_hierarchy.atoms().extract_element())
+    if(not ("H" in elements and "D" in elements)): return result
+  known = set([(p[0][0], p[1][0]) for p in result])
+  for rg in pdb_hierarchy.residue_groups():
+    ags = [ag for ag in rg.atom_groups() if ag.altloc.strip() != ""]
+    heavy = [ag for ag in ags if any(
+      [a.element.strip() not in ("H", "D") for a in ag.atoms()])]
+    for k, ag1 in enumerate(heavy):
+      for ag2 in heavy[k+1:]:
+        if(ag1.altloc == ag2.altloc): continue
+        for a1 in ag1.atoms():
+          e1 = a1.element.strip()
+          if(e1 not in ("H", "D")): continue
+          for a2 in ag2.atoms():
+            e2 = a2.element.strip()
+            if(e2 not in ("H", "D") or e1 == e2): continue
+            if(a1.name.strip()[1:] != a2.name.strip()[1:]): continue
+            if(a1.distance(a2) > tolerance): continue
+            key = (a1.i_seq, a2.i_seq)
+            if(key in known): continue
+            known.add(key)
+            result.append([[a1.i_seq], [a2.i_seq]])
+  return result
 
 class hd_mapper(object):
   """
   Utility function that allows to use a model with exhangeable H/D sites as
   single protonated model by re-mapping 'short' gradients into the full-size
   gradients.
+
+  The single model drops the D of every exchangeable pair and moves its H into
+  the blank atom group of its residue group (the parent atom of an exchangeable
+  site is blank, so the H belongs to every conformer), then de-deuterates the
+  rest. Atom order changes: self.order[k] is the full-model index of atom k of
+  the single model.
   """
 
   def __init__(self, model):
     self.model = model
-    self.ehd = model.get_hierarchy().exchangeable_hd_selections()
-    self.elements = [e.strip().upper() for e in
-      model.get_hierarchy().atoms().extract_element()]
+    ph = model.get_hierarchy().deep_copy()
+    ph.atoms().reset_i_seq()
+    self.ehd = exchangeable_hd_pairs(ph)
+    self.elements = [e.strip().upper() for e in ph.atoms().extract_element()]
     self.size = model.size()
-    self.keep = flex.bool(self.size, True)
+    keep = flex.bool(self.size, True)
+    self.pairs = [] # (kept H, dropped D)
     for pair in self.ehd:
       i,j = pair[0][0], pair[1][0]
-      for it in [i,j]:
-        if self.elements[it]=="D": self.keep[it] = False
-    self.n_keep = self.keep.count(True)
-    self._model = model.select(self.keep)
-    self._model.de_deuterate()
+      if(self.elements[i] == "D"): i,j = j,i
+      assert self.elements[i] == "H" and self.elements[j] == "D", [i, j]
+      keep[j] = False
+      self.pairs.append((i, j))
+    kept_h = set([i for i, j in self.pairs])
+    for a in ph.atoms():
+      a.tmp = a.i_seq
+    # Without copy_atoms the selection keeps the tmp of the atoms of ph (copies
+    # do not); deep_copy below detaches it from ph.
+    h = ph.select(keep)
+    # Move the kept H of every pair into the blank atom group.
+    for rg in h.residue_groups():
+      moves = []
+      for ag in rg.atom_groups():
+        if(ag.altloc.strip() == ""): continue
+        for a in ag.atoms():
+          if(a.tmp in kept_h): moves.append((ag, a))
+      if(len(moves) == 0): continue
+      blank = [ag for ag in rg.atom_groups() if ag.altloc.strip() == ""]
+      if(len(blank) > 0):
+        blank = blank[0]
+      else:
+        blank = iotbx.pdb.hierarchy.atom_group(altloc="",
+          resname=moves[0][0].resname)
+        rg.insert_atom_group(0, blank)
+      for ag, a in moves:
+        a_new = a.detached_copy()
+        a_new.tmp = a.tmp
+        a_new.occ = 1.0
+        ag.remove_atom(a)
+        blank.append_atom(a_new)
+      for ag in rg.atom_groups():
+        if(ag.atoms_size() == 0): rg.remove_atom_group(ag)
+    self.order = flex.size_t(h.atoms().extract_tmp_as_size_t())
+    assert self.order.size() == keep.count(True)
+    self.n_keep = self.order.size()
+    h = h.deep_copy()
+    h.atoms().reset_i_seq()
+    h.de_deuterate()
+    assert h.atoms_size() == self.n_keep
+    h.atoms().reset_i_seq()
+    h.atoms_reset_serial()
+    self._model = mmtbx.model.manager(
+      model_input       = None,
+      pdb_hierarchy     = h,
+      crystal_symmetry  = model.crystal_symmetry(),
+      restraint_objects = model.get_restraint_objects(),
+      log               = null_out())
 
   def get_single_model(self):
     return self._model
 
   def shrink(self, array):
-    return array.select(self.keep)
+    assert array.size() == self.size
+    return array.select(self.order)
 
   def check(self, array):
     assert array.size() == self.size
-    for pair in self.ehd:
-      i,j = pair[0][0], pair[1][0]
+    for i, j in self.pairs:
       assert array[i] == array[j]
 
   def average(self, array):
-    for pair in self.ehd:
-      i,j = pair[0][0], pair[1][0]
-      ai = array[i]
+    for i, j in self.pairs:
       ai = flex.vec3_double([array[i],])
       aj = flex.vec3_double([array[j],])
       aa = (ai+aj)*0.5
@@ -134,33 +219,33 @@ class hd_mapper(object):
 
   def expand(self, g_short):
     assert self.n_keep == g_short.size()
-    g_all = flex.vec3_double(self.size, [0,0,0])
-    g_all = g_all.set_selected(self.keep, g_short)
-    for pair in self.ehd:
-      i,j = pair[0][0], pair[1][0]
-      if   g_all[i] == (0,0,0): g_all[i] = g_all[j]
-      elif g_all[j] == (0,0,0): g_all[j] = g_all[i]
-      else: assert 0, [g_all[j] , g_all[i]]
-      #if self.elements[i]=="H": g_all[j] = g_all[i]
-      #else:                     g_all[i] = g_all[j]
+    g_all = flex.vec3_double(self.size, (0,0,0))
+    g_all = g_all.set_selected(self.order, g_short)
+    for i, j in self.pairs:
+      assert g_all[i] != (0,0,0), i
+      assert g_all[j] == (0,0,0), j
+    for i, j in self.pairs:
+      g_all[j] = g_all[i]
     for g in g_all:
       assert g != (0,0,0)
     return g_all
 
-def create_restraints_manager(params, model, altlocs_present):
-  restraints_source = restraints.restraints(params = params, model = model)
+def create_restraints_manager(params, model, working_folder="ase", log=None):
   #
-  # General case of altlocs. Developmenal code. NOT IN PRODUCTION.
+  # Conformers: one restraints manager per single-conformer model (built by
+  # the routes below), gradients combined; scratch folder working_folder/<X>.
   #
-  if(altlocs_present):
-    print("altlocs_present", altlocs_present)
-    assert not model.altlocs_present_only_hd()
-    return restraints.from_altlocs2(
-      model  = model,
-      params = params,
-      method = params.cluster.altloc_method)
-
-  # No altlocs of any kind with expansion.
+  if(conformers.n_conformers(model.get_hierarchy()) > 1 and
+     params.altlocs.handling == "conformers"):
+    return conformers.from_conformers(
+      model          = model,
+      build          = lambda m, f: create_restraints_manager(params, m, f, log),
+      working_folder = working_folder,
+      log            = log)
+  restraints_source = restraints.restraints(params = params, model = model,
+    working_folder = working_folder)
+  #
+  # Expansion.
   #
   if(params.expansion):
     assert not params.cluster.clustering
@@ -193,11 +278,12 @@ def create_restraints_manager(params, model, altlocs_present):
       params            = params,
       restraints_source = restraints_source)
   #
-  # No altlocs of any kind, no expansion
+  # No expansion
   #
   else:
     if(params.cluster.clustering):
-      fragment_manager = create_fragment_manager(params = params, model = model)
+      fragment_manager = create_fragment_manager(params = params, model = model,
+        working_folder = working_folder)
       return cluster_restraints.from_cluster(
         restraints_manager = restraints_source.restraints_manager,
         fragment_manager   = fragment_manager,
@@ -328,6 +414,14 @@ def check_qm_sees_crystal_neighbours(model, params, map_data):
 
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   set_qm_defaults(params,log)
+  n_conf = conformers.n_conformers(model.get_hierarchy())
+  if(n_conf > 1 and params.altlocs.handling == "native" and
+     params.restraints == "qm"):
+    raise Sorry("altlocs.handling=native needs restraints=cctbx: a QM engine cannot handle alternative conformations. Use altlocs.handling=conformers.")
+  if(n_conf > 1 and params.altlocs.handling == "conformers"):
+    params.refine.minimizer = "lbfgs"
+    params.refine.gradient_only = True
+    print("  alternative conformations require minimizer=lbfgs and gradient_only=True", file=log)
   check_qm_sees_crystal_neighbours(
     model = model, params = params, map_data = map_data)
   if(params.cluster.clustering):
@@ -359,14 +453,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   start_fmodel = fmodel
   start_ph = None # is it used anywhere? I don't see where it is used!
 
-  # XXX This needs to be consolidated !
-  altlocs_present = model.altlocs_present()
-
   hdm = None
-  if model.altlocs_present_only_hd():
-    print("Using hd_mapper")
+  use_hdm = len(exchangeable_hd_pairs(model.get_hierarchy())) > 0
+  if use_hdm:
+    print("Using hd_mapper", file=log)
     hdm = hd_mapper(model = model)
-    altlocs_present = False
 
   exclude_selection = None
   if params.refine.exclude is not None:
@@ -379,7 +470,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       raise Sorry("exclude_selection is incompatible with clustering=True")
 
   if hdm is not None:
-    print("Using hd_mapper again!")
+    print("Using hd_mapper again!", file=log)
     model_for_restraints = hdm.get_single_model()
   elif exclude_selection is not None:
     model_for_restraints = model.select(~exclude_selection)
@@ -387,7 +478,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     model_for_restraints = model
 
   restraints_manager = create_restraints_manager(
-    params=params, model=model_for_restraints, altlocs_present=altlocs_present)
+    params=params, model=model_for_restraints, log=log)
 
   # XXX This needs to be consolidated !
 

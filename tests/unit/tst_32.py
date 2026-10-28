@@ -47,8 +47,8 @@ def get_restraints_manager(expansion, file_name, two_buffers=False,
   params.cluster.distance_buffer_radius=distance_buffer_radius
   params.cluster.maxnum_residues_in_cluster=2
 
-  result = refine.create_restraints_manager(params=params, model=model,
-         altlocs_present=False), model.get_sites_cart()
+  result = refine.create_restraints_manager(params=params, model=model), \
+         model.get_sites_cart()
   return result
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py",""),

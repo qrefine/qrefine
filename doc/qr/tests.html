@@ -80,12 +80,12 @@
 </td>
 </tr>
 <tr><td>tst_5</td>
-<td>Exercise max_atoms.</td>
-<td>4</td>
+<td>Altlocs: conformers vs native (cctbx) handling, gradients and minimization.</td>
+<td>63</td>
 </tr>
 <tr><td>tst_6</td>
-<td>Exercise altlocs. (NO ASSERT)</td>
-<td>6</td>
+<td>qr.refine with altlocs (cctbx restraints, altlocs.handling=conformers): altlocs and occupancies kept, R drops; handling=native with restraints=qm gives a Sorry.</td>
+<td>82</td>
 </tr>
 <tr><td>tst_7</td>
 <td>Exercise interaction graph construction.</td>
@@ -104,8 +104,8 @@
 <td>10</td>
 </tr>
 <tr><td>tst_11</td>
-<td>Exercise structure completion by finalise.py</td>
-<td>Skipped</td>
+<td>create_restraints_manager with altlocs: conformers vs native handling, all routes, conformer scratch folders.</td>
+<td>59</td>
 </tr>
 <tr><td>tst_12</td>
 <td>Exercise structure preparation including charge, capping, completion</td>
@@ -160,8 +160,8 @@
 <td>8</td>
 </tr>
 <tr><td>tst_25</td>
-<td>Exercise finalise and charges both work</td>
-<td>7</td>
+<td>H/D exchange (hd_mapper) together with heavy-atom altlocs: C/D and A/B H/D labels, H/D inside conformer atom groups, one qr.refine run.</td>
+<td>79</td>
 </tr>
 <tr><td>tst_26</td>
 <td>Exercise charges  are calculated correctly</td>
@@ -184,8 +184,8 @@
 <td>38</td>
 </tr>
 <tr><td>tst_31</td>
-<td>Exercise TorchANI calculator works as expected</td>
-<td>0</td>
+<td>Unit test of conformers.py: split, gradient combination vs cctbx, duplicate-conformer identity (2, 3, 4 labels), energies_sites, completeness Sorry.</td>
+<td>33</td>
 </tr>
 <tr><td>tst_32</td>
 <td>Exercise TorchANI calculator raising an error with non supported atoms</td>
@@ -194,6 +194,30 @@
 <tr><td>tst_33</td>
 <td>Exercise PySCF can compute an Energy and Gradient for a given system</td>
 <td>0</td>
+</tr>
+<tr><td>tst_39</td>
+<td>qr.refine with altlocs (conformers, cctbx) with expansion, and with expansion plus refine.exclude.</td>
+<td>107</td>
+</tr>
+<tr><td>tst_40</td>
+<td>Duplicate-conformer identity with MOPAC (plain, expansion, clustering) and a qr.refine mode=opt clustering run with re-clustering.</td>
+<td>71</td>
+</tr>
+<tr><td>tst_41</td>
+<td>altlocs.reconcile: swapped labels are relabeled by qr.refine, reconcile=False keeps them, atom order unchanged.</td>
+<td>56</td>
+</tr>
+<tr><td>tst_42</td>
+<td>qr.refine on a model whose atoms all carry altloc labels (no blank atoms).</td>
+<td>67</td>
+</tr>
+<tr><td>tst_43</td>
+<td>qr.refine with altlocs: altlocs.handling=conformers with clustering, and altlocs.handling=native.</td>
+<td>104</td>
+</tr>
+<tr><td>tst_44</td>
+<td>Real-space qr.refine (model + map) of a model with altlocs: altlocs and occupancies kept, CC_mask improves.</td>
+<td>82</td>
 </tr>
 </tbody>
 </table>
