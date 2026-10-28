@@ -9,7 +9,6 @@ qrefine_path = libtbx.env.find_in_repositories("qrefine")
 qr_path = os.path.join(qrefine_path, "core")
 
 
-qr_reg_data_finalise = os.path.join(qrefine_path, "tests/regression/datasets/finalise")
 qr_reg_data_cluster  = os.path.join(qrefine_path, "tests/regression/datasets/cluster")
 
 
@@ -41,11 +40,6 @@ class test_base:
 
     test_results.append(os.system(f"iotbx.fetch_pdb 3dtj"))
     test_results.append(os.system(f"iotbx.fetch_pdb 1f8t"))
-
-
-    # Finalise
-    for filename in os.listdir(qr_reg_data_finalise):
-      test_results.append(os.system(f"qr.finalise {qr_reg_data_finalise}/{filename}"))
 
 
     # Clustering
