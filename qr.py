@@ -30,9 +30,6 @@ debug = False
 scattering_table = *wk1995  it1992  n_gaussian electron neutron
   .type = choice
   .help = Choices of scattering table for structure factors calculations
-use_reduce = True
-  .type = bool
-  .help = Use Reduce/ReadySet in completion/capping
 cluster{
   charge_cutoff = 8.0
     .type = float
@@ -344,7 +341,6 @@ and quantum.engine_name=aimnet2:
       self.params.cluster.clustering=False
       self.params.refine.number_of_weight_search_cycles=10
       self.params.refine.number_of_refine_cycles=5
-      self.params.use_reduce=False
       self.params.cluster.select_within_radius=7
       self.params.refine.max_iterations_weight=100
       if self.fmodel is not None:
@@ -378,7 +374,6 @@ and quantum.engine_name=aimnet2:
       print("  refine.number_of_weight_search_cycles   ", self.params.refine.number_of_weight_search_cycles, file=self.logger)
       print("  refine.number_of_refine_cycles          ", self.params.refine.number_of_refine_cycles, file=self.logger)
       print("  expansion                               ", self.params.expansion, file=self.logger)
-      print("  use_reduce                              ", self.params.use_reduce, file=self.logger)
       print("  cluster.select_within_radius            ", self.params.cluster.select_within_radius, file=self.logger)
       print("  refine.max_iterations_weight            ", self.params.refine.max_iterations_weight, file=self.logger)
       print("  refine.max_bond_rmsd                    ", self.params.refine.max_bond_rmsd, file=self.logger)
