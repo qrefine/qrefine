@@ -43,7 +43,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
   #
-  if(verbose): print("clustering=", clustering, "-"*40)
+  print("clustering=", clustering, "-"*40)
   path = qr_unit_tests+"/data_files/"
   for fn in os.listdir(path):
     if not fn.endswith(".pdb"): continue
