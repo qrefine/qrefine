@@ -1,22 +1,27 @@
-===============================
-Generating a QM complete model
-===============================
+==============================
+Preparing a QM-ready model
+==============================
 
 .. contents::
 
 Overview
 --------
 
-A program to complete a model ready for Q|R refinement. This includes hydrogens,
-terminal oxygens and side-chains.
+``qr.finalise`` prepares a model for Q|R refinement by running
+``mmtbx.reduce2`` with ``qmready=True``: it adds hydrogens (water included),
+uses neutron X-H distances, adds OXT and NH3+ at chain ends and breaks, checks
+for clashes, calculates the total charge and writes ``modelH_charge<q>.pdb``
+(the charge in the name). Truncated side chains must be rebuilt first; a
+model capped with ``capping=True`` is for QM calculations only and cannot be
+refined.
 
 Running the program
 -------------------
 
-``qr.finalise`` can be executed on a PDB model file.
-
+``qr.finalise model.pdb`` is ``mmtbx.reduce2 model.pdb qmready=True``. Any
+other argument is passed to ``mmtbx.reduce2``.
 
 List of all available keywords
 ------------------------------
 
-{{phil:qrefine.command_line.finalise}}
+{{phil:mmtbx.programs.reduce2}}
