@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
+import glob
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -559,7 +560,8 @@ TER
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
-  Exercise qr.finalise + capping
+  Exercise qr.finalise (runs mmtbx.reduce2 qmready=True): the Zn-bound CYS
+  stay thiolates (no HG), ARG gets its HE, the output carries the charge.
   """
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
@@ -568,11 +570,15 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
-  cmd = 'qr.finalise %s action="capping"' % (fn)
+  cmd = 'qr.finalise %s' % (fn)
   if 0: print(cmd)
   rc = easy_run.go(cmd)
-  fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  f=open(fnc, 'r')
+  assert rc.return_code == 0, rc.stdout_lines + rc.stderr_lines
+  assert 'qr.finalise now runs mmtbx.reduce2 qmready=True' in \
+    '\n'.join(rc.stdout_lines)
+  outs = glob.glob('test_remove_hg_from_zn_cysH_charge*.pdb')
+  assert len(outs) == 1, outs
+  f=open(outs[0], 'r')
   lines=f.read()
   f.close()
   for line in [' HG  CYS A   3',
@@ -584,27 +590,6 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
               ]:
     assert line not in lines, 'found %s' % line
   assert ' HE  ARG A  10' in lines, 'not found HE  ARG A  10'
-  """
-  DISABLED DUE TO A BUG two different results from exact same command run twice: 
-  
-   qr.charges test_remove_hg_from_zn_cys_capping.pdb verbose=1
-Starting Q|R charge
-Charge: 1
-Time: 2.3095
-
-
-qr.charges test_remove_hg_from_zn_cys_capping.pdb verbose=1
-Starting Q|R charge
-Charge: -1
-Time: 2.5313
-  """
-  if 0:
-    cmd = 'qr.charges %s verbose=1' % (fnc)
-    if 1: print(cmd)
-    rc = easy_run.go(cmd)
-    for l in rc.stdout_lines:
-      print(l)
-    assert 'Charge: -1' in rc.stdout_lines
   return rc
 
 if(__name__=='__main__'):
