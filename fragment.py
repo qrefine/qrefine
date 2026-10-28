@@ -11,8 +11,7 @@ from cctbx import crystal
 from .utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
-#import qrefine.completion as model_completion
-from . import completion
+from . import fragment_capping
 from .charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
 from functools import cmp_to_key
@@ -89,8 +88,11 @@ class fragments(object):
       save_clusters              = False,
       select_within_radius       = 10.0,
       clusters_only              = False,
-      bond_with_altloc_flag      = True):
-    #
+      bond_with_altloc_flag      = True,
+      cap_fragments              = True):
+    # cap_fragments: cap the fragments and compute their charges (needed
+    # for QM restraints only; cctbx restraints use the fragment selections)
+    self.cap_fragments = cap_fragments
     self.bond_with_altloc_flag = bond_with_altloc_flag
     self.select_within_radius = select_within_radius
     self.charge_embedding = charge_embedding
@@ -98,6 +100,7 @@ class fragments(object):
     self.distance_buffer = distance_buffer
     self.distance_buffer_radius = distance_buffer_radius
     self.crystal_symmetry = crystal_symmetry
+    self.cif_objects = cif_objects
     self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
     self.charge_cutoff = charge_cutoff
@@ -384,6 +387,27 @@ class fragments(object):
                           for i in fragment_super_atoms_in_phs[j_ph][i_cluster])
     self.fragment_scales.append(scale_list)
 
+  def make_capper(self, fragment_super_selection):
+    """
+    The capper of the fragment fragment_super_selection (a selection on
+    pdb_hierarchy_super, the super sphere). Cut bonds are found against the
+    super cell, not the sphere: a symmetry-copy residue at the edge of the
+    sphere has its peptide partner outside the sphere, a cut bond (one H),
+    not an unsatisfied valence.
+    """
+    SCM = self.expansion.SCM
+    keep = SCM.keep_selection.iselection()
+    selection = flex.bool(SCM.super_cell_hierarchy.atoms().size(),
+      keep.select(fragment_super_selection.iselection()))
+    c = fragment_capping.capper(
+      parent_hierarchy = SCM.super_cell_hierarchy,
+      selection        = selection,
+      crystal_symmetry = self.expansion.cs_box,
+      cif_objects      = self.cif_objects)
+    assert c.fragment_hierarchy.is_similar_hierarchy(
+      self.pdb_hierarchy_super.select(fragment_super_selection))
+    return c
+
   def get_fragment_hierarchies_and_charges(self):
 
     def pdb_hierarchy_select(atoms_size, selection):
@@ -400,6 +424,7 @@ class fragments(object):
     self.buffer_selections = []
     self.cluster_selections = []
     self.fragment_capped_initial = []
+    self.fragment_cappers = []
     for i in range(len(self.fragment_super_atoms)):
       fragment_selection = pdb_hierarchy_select(
           self.pdb_hierarchy.atoms_size(),
@@ -410,17 +435,17 @@ class fragments(object):
         self.fragment_super_atoms[i])
       fragment_super_hierarchy = self.pdb_hierarchy_super.select(
         fragment_super_selection)
-      charge_hierarchy = completion.run(pdb_hierarchy=fragment_super_hierarchy,
-                      crystal_symmetry=self.expansion.cs_box,
-                      model_completion=False,
-                      original_pdb_filename=self.expansion_file)
-      self.fragment_capped_initial.append(charge_hierarchy)
-      raw_records = charge_hierarchy.as_pdb_string(
-        crystal_symmetry=self.expansion.cs_box)
-
-      fragment_charge = charges_class(
-        pdb_hierarchy=charge_hierarchy,
-        crystal_symmetry=self.expansion.cs_box).get_total_charge()
+      # caps (and the charge of the capped fragment) as reduce2 capping=True
+      # places them; the capper re-places them at every gradient evaluation
+      if self.cap_fragments:
+        c = self.make_capper(fragment_super_selection)
+        self.fragment_cappers.append(c)
+        self.fragment_capped_initial.append(c.cap().pdb_hierarchy)
+        fragment_charge = c.charge
+      else:
+        self.fragment_cappers.append(None)
+        self.fragment_capped_initial.append(fragment_super_hierarchy)
+        fragment_charge = None
       self.fragment_super_selections.append(fragment_super_selection)
       #
       self.fragment_selections.append(fragment_selection)
@@ -440,6 +465,7 @@ class fragments(object):
       fragment_selections       = self.fragment_selections,
       fragment_super_selections = self.fragment_super_selections,
       fragment_capped_initial   = self.fragment_capped_initial,
+      fragment_cappers          = self.fragment_cappers,
       working_folder            = self.working_folder,
       fragment_super_atoms      = self.fragment_super_atoms,
       cluster_atoms             = self.cluster_atoms,
@@ -474,14 +500,13 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
       file_name=qm_pdb_file,
       crystal_symmetry=fragment_extracts.expansion_cs)
   # re-capping because geometry of the fragment has changed.
-  ph = completion.run(pdb_hierarchy=fragment_hierarchy,
-                      crystal_symmetry=fragment_extracts.expansion_cs,
-                      model_completion=False,
-                      original_pdb_filename=fragment_extracts.expansion_file)
+  r = fragment_extracts.fragment_cappers[index].cap(
+    sites_cart = fragment_hierarchy.atoms().extract_xyz())
   # we now want this file by default
-  ph.write_pdb_file(file_name=complete_qm_pdb_file,
+  r.pdb_hierarchy.write_pdb_file(file_name=complete_qm_pdb_file,
                     crystal_symmetry=fragment_extracts.expansion_cs)
-  return os.path.abspath(complete_qm_pdb_file), ph
+  return os.path.abspath(complete_qm_pdb_file), r.pdb_hierarchy, \
+    r.fragment_selection
 
 def charge(fragment_extracts, index):
   return fragment_extracts.fragment_charges[index]
@@ -569,7 +594,6 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
   from shutil import rmtree
   cwd = os.getcwd()
   frag_dir = os.path.join(cwd,directory)
-  expansion_file = os.path.join(cwd,fragments.expansion_file)
   if os.path.exists(frag_dir):
     rmtree(frag_dir)
   os.mkdir(frag_dir)
@@ -588,13 +612,12 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
     index_frag.write_pdb_file(
     file_name        = filename_frag,
     crystal_symmetry = F.expansion_cs)
-    capped_hierarchy = completion.run(pdb_hierarchy=index_frag,
-               crystal_symmetry=F.expansion_cs,
-               model_completion=False,
-               original_pdb_filename=expansion_file)
-    #capped_hierarchy = F.fragment_capped_initial[index]
-    capped_hierarchy.write_pdb_file(file_name=filename_capped,
-              crystal_symmetry=F.expansion_cs)
+    capper = F.fragment_cappers[index]
+    if capper is not None: # cctbx restraints: no caps (cap_fragments=False)
+      capped_hierarchy = capper.cap(
+        sites_cart = index_frag.atoms().extract_xyz()).pdb_hierarchy
+      capped_hierarchy.write_pdb_file(file_name=filename_capped,
+                crystal_symmetry=F.expansion_cs)
 
   log=open('fragment_info.txt','w')
   print('~  # clusters  : ',len(F.cluster_atoms), file=log)
