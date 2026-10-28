@@ -60,17 +60,17 @@ Step 1. Fetch the pdb of interest  and structure factors from the https://www.rc
 
         ``phenix.fetch_pdb 1yjp --mtz``
 
-Step 2. Complete your pdb by adding hydrogen and by adding missing atoms
+Step 2. Prepare your pdb for QM: hydrogens, terminal OXT and NH3+, charge
 
-         ``qr.finalise 1yjp.pdb``
+         ``qr.finalise 1yjp.pdb``   (runs ``mmtbx.reduce2 1yjp.pdb qmready=True``)
 
         output from running this script is
 
-         ``1yjp_complete.pdb``
+         ``1yjpH_charge<q>.pdb``   (``<q>`` is the total charge)
 
 Step 3.  Check the overall charge of your system by running
 
-         ``qr.charges 1yjp_complete.pdb  verbose=true``
+         ``qr.charges 1yjpH_charge<q>.pdb  verbose=true``
 
          this will print out the charge, and is a useful sanity check before running a refinement.
 
