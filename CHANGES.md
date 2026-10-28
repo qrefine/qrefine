@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
    - updating documentation.
+   - qr.finalise runs mmtbx.reduce2 qmready=True (output modelH_charge<q>.pdb).
+   - QM fragment capping uses mmtbx.hydrogens.capping (qrefine/fragment_capping.py,
+     shared with mmtbx.reduce2 capping=True): one H per cut bond (NH2 on N, one H
+     on C, HG on a cut SG), truncated side chains capped, charge from the capped
+     fragment; caps sit inside their residues, the cut carbonyl cap is named HOXT.
+### Removed
+   - finalise.py, completion.py and the use_reduce parameter.
 
 ## [1.0-0] - 2019.1.19
 ### 
