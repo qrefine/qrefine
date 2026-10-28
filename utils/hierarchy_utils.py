@@ -2,6 +2,7 @@ from __future__ import print_function
 import os, sys
 from io import StringIO
 import iotbx
+import mmtbx.model
 from libtbx.utils import Sorry
 from libtbx.utils import null_out
 from mmtbx import monomer_library
@@ -85,19 +86,6 @@ def get_processed_pdb(pdb_filename=None,
     log                   = null_out())
   return ppf
 
-def write_hierarchy(pdb_filename, crystal_symmetry, hierarchy, underscore, verbose=False):
-  output = "%s_%s.pdb" % (pdb_filename[:-4],
-                          underscore,
-                          )
-  output = os.path.basename(output)
-  f=open(output, "w")
-  f.write(hierarchy.as_pdb_string(
-    crystal_symmetry=crystal_symmetry),
-          )
-  f.close()
-  if verbose: print("\n  Output written to: %s" % output)
-  return output
-
 def get_raw_records(pdb_inp=None,
                     pdb_hierarchy=None,
                     crystal_symmetry=None,
@@ -107,92 +95,6 @@ def get_raw_records(pdb_inp=None,
   else:
     lines = pdb_hierarchy.as_pdb_string(crystal_symmetry=pdb_inp.crystal_symmetry())
   return lines
-
-def add_hydrogens_using_reduce(pdb_hierarchy, crystal_symmetry):
-  from mmtbx.hydrogens import reduce_hydrogen
-  import mmtbx.model
-  model_to_reduce = mmtbx.model.manager(
-    pdb_hierarchy    = pdb_hierarchy,
-    crystal_symmetry = crystal_symmetry,
-    log              = "h_reduce.out")
-  reduce_add_h_obj = reduce_hydrogen.place_hydrogens(model = model_to_reduce,
-     use_neutron_distances = True,
-     n_terminal_charge     = "first_in_chain",
-     keep_existing_H       = True,
-     exclude_water         = False,
-     validate_e            = False # crucial to keep False! Not working with altloc, calling elbow
-     )
-  reduce_add_h_obj.run()
-  hierarchy = reduce_add_h_obj.get_model().get_hierarchy()
-  return hierarchy
-
-def add_hydrogens_using_ReadySet(pdb_filename, ligand_cache_directory=None):
-  from elbow.command_line.ready_set import run_though_all_the_options
-  pdb_lines = open(pdb_filename, 'r').read()
-  output_file_name=pdb_filename.replace('.pdb',
-                                        '.updated.pdb',
-                                        )
-  sys_std = None
-  if 1:
-    sys_std = sys.stdout
-    sys.stdout = StringIO()
-    print('NOT'*20)
-  rc = run_though_all_the_options(
-    pdb_lines,
-    [], # args
-    hydrogens=True,
-    reduce_args=['-BUILD'],
-    ligands=True,
-    ligand_cache_directory=ligand_cache_directory,
-    add_h_to_water=True,
-    metals=False,
-    output_file_name=output_file_name, # needed
-    )
-  if sys_std:
-    print('NOT'*20)
-    sys.stdout = sys_std
-  if 0:
-    #print 'overwriting',pdb_filename
-    f=open(pdb_filename, 'w')
-    for line in rc['cryst1']:
-      f.write('%s\n' % line)
-    f.write(rc['model_hierarchy'].as_pdb_string())
-    f.close()
-  else:
-    return rc['model_hierarchy']
-
-def remove_atom_from_chain(chain, atom):
-  for rg in chain.residue_groups():
-    for ag in rg.atom_groups():
-      for at in ag.atoms():
-        if atom==at:
-          ag.remove_atom(atom)
-          break
-
-class smart_add_atoms(list):
-  def __init__(self): pass
-
-  def append(self, item):
-    for chain1 in item:
-      remove = []
-      for atom1 in chain1.atoms():
-        for chain_list in self:
-          for chain2 in chain_list:
-            for atom2 in chain2.atoms():
-              if atom1.quote()==atom2.quote():
-                remove.append(atom1)
-      if remove:
-        for atom in remove:
-          remove_atom_from_chain(chain1, atom)
-    list.append(self, item)
-
-def is_n_terminal_residue(residue_group):
-  residues = []
-  for atom_group in residue_group.atom_groups():
-    if atom_group.resname not in residues: residues.append(atom_group.resname)
-  assert len(residues)==1
-  if residues[0] in n_terminal_amino_acid_codes: return True
-  return False
 
 def is_n_terminal_atom_group(atom_group):
   if atom_group.resname in n_terminal_amino_acid_codes: return True
@@ -245,3 +147,22 @@ def process_model_file(pdb_file_name, cif_objects, crystal_symmetry):
 #     d_min             = 1.0,
 #     log               = log)
 #   return model
+
+def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=None):
+  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+  params.pdb_interpretation.use_neutron_distances = True
+  params.pdb_interpretation.restraints_library.cdl = False
+  params.pdb_interpretation.sort_atoms = False
+  params.pdb_interpretation.flip_symmetric_amino_acids = False
+  params.pdb_interpretation.correct_hydrogens=False
+  # params.pdb_interpretation.const_shrink_donor_acceptor=0.6 # XXX change back to old default?
+  if log is None: log = null_out()
+  model = mmtbx.model.manager(
+    model_input       = None,
+    pdb_hierarchy     = pdb_hierarchy,
+    crystal_symmetry  = crystal_symmetry,
+    restraint_objects = cif_objects,
+    log               = log)
+  model.process(make_restraints=True, grm_normalization=False,
+    pdb_interpretation_params = params,)
+  return model
