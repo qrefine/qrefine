@@ -289,6 +289,7 @@ class charges_class:
       return rc
     def c_capping(atom_names):
       rc = _terminal(atom_names, [' HC '])
+      if not rc: rc = _terminal(atom_names, ['HOXT']) # mmtbx.hydrogens.capping
       return rc
     def covalent_bond(i_seqs, inter_residue_bonds):
       for i_seq in i_seqs:
@@ -592,6 +593,7 @@ def calculate_residue_charge(rg,
     return rc
   def c_capping(atom_names):
     rc = _terminal(atom_names, [' HC '])
+    if not rc: rc = _terminal(atom_names, ['HOXT']) # mmtbx.hydrogens.capping
     return rc
   def covalent_bond(i_seqs, inter_residue_bonds):
     for i_seq in i_seqs:
