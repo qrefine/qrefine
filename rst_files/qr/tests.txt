@@ -66,11 +66,11 @@ List of all currently implemented tests
 +------------+----------------------------------------------------------------------------+---------+
 | tst_17     | Exercise altlocs                                                           |    1    |
 +------------+----------------------------------------------------------------------------+---------+
-| tst_18     | Exercise gradients match: pdbs with altlocs                                |   174   |
+| tst_18     | Expansion; cap a fragment cut from it (fragment_capping.capper)            |   174   |
 +------------+----------------------------------------------------------------------------+---------+
 | tst_19     | Exercise altlocs using subtract vs using average                           |   273   |
 +------------+----------------------------------------------------------------------------+---------+
-| tst_20     | Make sure expand works for this particular file.                           |    18   |
+| tst_20     | Exercise qr.finalise (runs mmtbx.reduce2 qmready=True)                     |    18   |
 +------------+----------------------------------------------------------------------------+---------+
 | tst_21     | Exercise charges are calculated correctly                                  |     ?   |
 +------------+----------------------------------------------------------------------------+---------+
@@ -97,4 +97,6 @@ List of all currently implemented tests
 | tst_32     | Exercise TorchANI calculator raising an error with non supported atoms     |     0   |
 +------------+----------------------------------------------------------------------------+---------+
 | tst_33     | Exercise PySCF can compute an Energy and Gradient for a given system       |     0   |
++------------+----------------------------------------------------------------------------+---------+
+| tst_38     | Exercise fragment capping (fragment_capping.capper), no QM engine          |    30   |
 +------------+----------------------------------------------------------------------------+---------+
