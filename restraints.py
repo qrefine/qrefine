@@ -19,32 +19,14 @@ from .plugin.tools import qr_tools
 from libtbx import group_args
 import math
 from qrefine.super_cell import expand
-import qrefine.completion as model_completion
+from qrefine import fragment_capping
 from libtbx.utils import null_out
 from libtbx.test_utils import approx_equal
 from collections import OrderedDict
 from libtbx import adopt_init_args
 import time
 from libtbx import easy_pickle
-
-def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=None):
-  params = mmtbx.model.manager.get_default_pdb_interpretation_params()
-  params.pdb_interpretation.use_neutron_distances = True
-  params.pdb_interpretation.restraints_library.cdl = False
-  params.pdb_interpretation.sort_atoms = False
-  params.pdb_interpretation.flip_symmetric_amino_acids = False
-  params.pdb_interpretation.correct_hydrogens=False
-  # params.pdb_interpretation.const_shrink_donor_acceptor=0.6 # XXX change back to old default?
-  if log is None: log = null_out()
-  model = mmtbx.model.manager(
-    model_input       = None,
-    pdb_hierarchy     = pdb_hierarchy,
-    crystal_symmetry  = crystal_symmetry,
-    restraint_objects = cif_objects,
-    log               = log)
-  model.process(make_restraints=True, grm_normalization=False,
-    pdb_interpretation_params = params,)
-  return model
+from qrefine.utils.hierarchy_utils import model_from_hierarchy
 
 class restraints(object):
   """
@@ -65,7 +47,9 @@ class restraints(object):
   def source_of_restraints_qm(self):
     return self.params.restraints == "qm"
 
-  def update(self, pdb_hierarchy, crystal_symmetry):
+  def update(self, pdb_hierarchy, crystal_symmetry, charge=None):
+    # charge: the total charge of pdb_hierarchy when the caller knows it (a
+    # capped expansion); quantum.charge set by the user wins.
     #
     if self.restraints_manager is not None:
       if(not self.source_of_restraints_qm()):
@@ -95,7 +79,8 @@ class restraints(object):
           method           = self.params.quantum.method,
           basis            = self.params.quantum.basis,
           pdb_hierarchy    = pdb_hierarchy,
-          charge           = self.params.quantum.charge,
+          charge           = self.params.quantum.charge if
+            self.params.quantum.charge is not None else charge,
           qm_engine_name   = self.params.quantum.engine_name,
           qm_addon         = self.params.quantum.qm_addon,
           qm_addon_method  = self.params.quantum.qm_addon_method,
@@ -105,23 +90,6 @@ class restraints(object):
           crystal_symmetry = crystal_symmetry,
           clustering       = self.params.cluster.clustering)
     return self.restraints_manager
-
-def h_diff_sel(h1, h2):
-  def getids(a):
-    return a.name + a.parent().resname + a.parent().parent().resid() + \
-           a.parent().parent().parent().id
-  d = {}
-  for a in h1.atoms():
-    d[getids(a)]=a.i_seq
-  #
-  sel = flex.size_t()
-  for a in h2.atoms():
-    if not getids(a) in d:
-      sel.append(a.i_seq)
-  s1,s2 = h2.atoms().size() , h1.atoms().size()
-  assert sel.size() == s1-s2, [sel.size(), s1-s2]
-  result = ~flex.bool(h2.atoms().size(), sel)
-  return result
 
 class from_expansion(object):
   def __init__(self, params, restraints_source):
@@ -144,63 +112,43 @@ class from_expansion(object):
     #  crystal_symmetry = self.expansion.cs_box)
 
     if restraints_source.source_of_restraints_qm():
-      master_selection = flex.bool(
-        self.expansion.ph_super_sphere.atoms().size(), False)
-      master_selection = master_selection.set_selected(
-        flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
-      self.pdb_hierarchy_super_completed = model_completion.run(
-        pdb_hierarchy          = self.expansion.ph_super_sphere.deep_copy(),
-        crystal_symmetry       = self.expansion.cs_box,
-        model_completion       = False,
-        original_pdb_filename  = None,
-        append_to_end_of_model = False, #XXX
-        selection              = ~master_selection, # DO NOT TOUCH THE MASTER!
-        use_reduce             = self.params.use_reduce)
+      # Cap the super sphere (cut out of the super cell) as reduce2
+      # capping=True would, one H per cut bond; the master is complete
+      # (reduce2 qmready=True) and gets no caps. The capper re-places the
+      # caps on every geometry update (_update).
+      self.capper = fragment_capping.capper(
+        parent_hierarchy = self.expansion.SCM.super_cell_hierarchy,
+        selection        = self.expansion.SCM.keep_selection,
+        crystal_symmetry = self.expansion.cs_box,
+        cif_objects      = restraints_source.cif_objects)
+      assert self.capper.fragment_hierarchy.is_similar_hierarchy(
+        self.expansion.ph_super_sphere)
+      r = self.capper.cap(
+        sites_cart = self.expansion.ph_super_sphere.atoms().extract_xyz())
+      self.pdb_hierarchy_super_completed = r.pdb_hierarchy
+      # Selection of master copy: the first self.size fragment atoms
+      self.selection = flex.bool(r.pdb_hierarchy.atoms().size(),
+        r.fragment_selection.iselection()[:self.size])
       # ASSERT MASTER IS UNTOUCHED
-      hm = self.expansion.ph_super_sphere.select(master_selection)
-      master_selection = flex.bool(
-        self.pdb_hierarchy_super_completed.atoms().size(), False)
-      master_selection = master_selection.set_selected(
-        flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
-      hc = self.pdb_hierarchy_super_completed.select(master_selection)
-      assert hc.is_similar_hierarchy(hm)
+      assert self.pdb_hierarchy_super_completed.select(
+        self.selection).is_similar_hierarchy(self.model.get_hierarchy())
     else:
-      self.pdb_hierarchy_super_completed = self.expansion.ph_super_sphere.deep_copy()
-
-    # DEBUGGING
-    #self.pdb_hierarchy_super_completed.write_pdb_file(
-    #  file_name = "ss_completed0.pdb",
-    #  crystal_symmetry = self.expansion.cs_box)
-
-    # Selection of master copy
-    selection = flex.bool(
-      self.pdb_hierarchy_super_completed.atoms().size(), False)
-    self.selection = selection.set_selected(
-      flex.size_t(range(self.model.get_hierarchy().atoms().size())), True)
-#    # At this point here we are sure the model is complete. So make sure the
-#    # call above only changes (completes) the explansion part and leaves the
-#    # master copy intact!
-#    sites_cart_master = self.model.get_hierarchy().atoms().extract_xyz()
-#    sites_cart_all = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
-#    sites_cart_all = sites_cart_all.set_selected(self.selection, sites_cart_master)
-#    self.pdb_hierarchy_super_completed.atoms().set_xyz(sites_cart_all)
+      self.capper = None
+      self.pdb_hierarchy_super_completed = \
+        self.expansion.ph_super_sphere.deep_copy()
+      # Selection of master copy
+      self.selection = flex.bool(
+        self.pdb_hierarchy_super_completed.atoms().size(),
+        flex.size_t(range(self.size)))
     #
     self.model.get_hierarchy().atoms().reset_i_seq()
     self.expansion.ph_super_sphere.atoms().reset_i_seq()
     self.pdb_hierarchy_super_completed.atoms().reset_i_seq()
 
-    # DEBUGGING
-    #self.pdb_hierarchy_super_completed.write_pdb_file(
-    #  file_name = "ss_completed1.pdb",
-    #  crystal_symmetry = self.expansion.cs_box)
-
     self.restraints_manager = self.restraints_source.update(
         pdb_hierarchy    = self.pdb_hierarchy_super_completed,
-        crystal_symmetry = self.expansion.cs_box)
-
-    self.h_diff_sel = h_diff_sel(
-      h1 = self.expansion.ph_super_sphere,
-      h2 = self.pdb_hierarchy_super_completed)
+        crystal_symmetry = self.expansion.cs_box,
+        charge           = self.capper.charge if self.capper else None)
 
   def __call__(self, selection_and_sites_cart):
     # XXX Not sure what this is and why!?
@@ -231,9 +179,11 @@ class from_expansion(object):
     # Propagate the update into expanded hierarchy
     self.expansion.update(
       sites_cart = self.model.get_hierarchy().atoms().extract_xyz())
-    xyz = self.pdb_hierarchy_super_completed.atoms().extract_xyz()
-    xyz = xyz.set_selected(self.h_diff_sel,
-      self.expansion.ph_super_sphere.atoms().extract_xyz())
+    xyz = self.expansion.ph_super_sphere.atoms().extract_xyz()
+    if self.capper is not None:
+      # re-place the caps on the new geometry (same atoms every time)
+      xyz = self.capper.cap(sites_cart=xyz).pdb_hierarchy.atoms().extract_xyz()
+    assert xyz.size() == self.pdb_hierarchy_super_completed.atoms().size()
     self.pdb_hierarchy_super_completed.atoms().set_xyz(xyz)
 
 #-------------------------------------------------------------------------------
@@ -561,7 +511,7 @@ class from_qm(object):
       from .fragment import charge
       from .fragment import write_mm_charge_file
       #
-      qm_pdb_file, ph = get_qm_file_name_and_pdb_hierarchy(
+      qm_pdb_file, ph, fragment_selection = get_qm_file_name_and_pdb_hierarchy(
                           fragment_extracts=self.fragment_extracts,
                           index=index)
       #
@@ -577,7 +527,8 @@ class from_qm(object):
       qm_pdb_file = self.file_name
       qm_charge = self.charge
       charge_file = None
-      selection =flex.bool(self.system_size, True)
+      selection = flex.bool(self.system_size, True)
+      fragment_selection = selection
       gradients_scale = [1.0]*self.system_size
     define_str=''
     atoms = ase_atoms_from_pdb_hierarchy(ph, self.crystal_symmetry, self.qm_engine_name)
@@ -616,9 +567,13 @@ class from_qm(object):
     else:
       energy = self.qm_engine.energy_free*unit_convert
       ase_gradients = (-1.0) * self.qm_engine.forces*unit_convert
-    # remove capping and neigbouring buffer
-    gradients = ase_gradients[:selection.count(True)]
-    gradients =  flex.vec3_double(gradients)
+    # drop the capping H (fragment_selection), then the buffer atoms from
+    # symmetry copies: the fragment's master atoms come first (the super
+    # sphere starts with the master copy) and selection counts them
+    gradients = flex.vec3_double(ase_gradients).select(fragment_selection)
+    gradients = gradients[:selection.count(True)]
+    assert gradients.size() == len(gradients_scale), (
+      gradients.size(), len(gradients_scale))
     ## TODO
     ## unchange the altloc gradient, averagely scale the non-altloc gradient
     gradients = gradients*flex.double(gradients_scale)
