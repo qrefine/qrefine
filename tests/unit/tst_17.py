@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
+import glob
 from libtbx import easy_run
 import libtbx.load_env
 
@@ -24,13 +25,17 @@ ATOM   1169  H   CYS A  78      10.663  12.707  17.133  1.00  8.15           H
 ATOM   1170  HA  CYS A  78      10.991  12.924  20.044  1.00  8.14           H
 ATOM   1171  HB2 CYS A  78       8.830  12.403  19.291  1.00  9.23           H
 ATOM   1172  HB3 CYS A  78       9.453  11.155  18.172  1.00  9.23           H
-HETATM 1832 CU    CU A 201       7.545   9.241  20.314  0.40  8.15          Cu
+HETATM 1832 CU    CU A 201       7.545   9.241  20.314  1.00  8.15          Cu
 ANISOU 1832 CU    CU A 201      503   1903    690    -55    119      0      Cu
 '''
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
-  Make sure charges works in this special case
+  Make sure charges works in this special case: a Cu-bound CYS (the Cu at
+  full occupancy: with a partially occupied metal reduce2 keeps HG and
+  flags the site). qr.finalise
+  (mmtbx.reduce2 qmready=True) leaves SG a thiolate (no HG) and puts the
+  total charge into the output name; qr.charges on that output agrees.
   """
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
@@ -39,10 +44,14 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   f=open(fn, 'w')
   f.write(pdb_lines)
   f.close()
-  cmd = 'qr.finalise %s action="capping"' % (fn)
+  cmd = 'qr.finalise %s' % (fn)
   if 1: print(cmd)
   rc = easy_run.go(cmd)
-  fnc = '%s_capping.pdb' % fn.replace('.pdb','')
+  assert rc.return_code == 0, rc.stdout_lines + rc.stderr_lines
+  outs = glob.glob('test_cu_cysH_charge*.pdb')
+  assert len(outs) == 1, outs
+  fnc = outs[0]
+  charge = int(fnc.replace('test_cu_cysH_charge', '').replace('.pdb', ''))
   f=open(fnc, 'r')
   lines=f.read()
   f.close()
@@ -50,7 +59,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   cmd = 'qr.charges %s verbose=1' % (fnc)
   if 1: print(cmd)
   rc = easy_run.go(cmd)
-  assert 'Charge: 0' in rc.stdout_lines, rc.stdout_lines
+  assert 'Charge: %d' % charge in rc.stdout_lines, (charge, rc.stdout_lines)
   return rc
 
 if(__name__=='__main__'):
