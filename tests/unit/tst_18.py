@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import os
 from libtbx import easy_run
 import libtbx.load_env
+import iotbx.pdb
+from qrefine import fragment_capping
 
 qrefine_path = libtbx.env.find_in_repositories("qrefine")
 
@@ -335,20 +337,17 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   f=open(fn, 'w')
   f.write(expansion)
   f.close()
-  fn='test_alt_loc_original.pdb'
-  f=open(fn, 'w')
-  f.write(pdb_lines)
-  f.close()
-  cmd = 'qrefine.python %s/completion.py %s model_completion=False original_pdb_filename=expansion.pdb' % (qrefine_path, fn)
-  if 0: print(cmd)
-  easy_run.go(cmd)
-  fnc = '%s_capping.pdb' % fn.replace('.pdb','')
-  cmd = 'mmtbx.pdb_interpretation %s' % fnc
-  if 0: print(cmd)
-  rc = easy_run.go(cmd)
-  assert '     H      47      1.00' in rc.stdout_lines
-  os.remove(fn)
-  os.remove(fnc)
+  # cap GLY 89-91 cut out of the expansion: NH2 on N 89, one H on C 91
+  pi = iotbx.pdb.input(file_name='expansion.pdb')
+  ph = pi.construct_hierarchy()
+  sel = ph.atom_selection_cache().selection("chain A and resseq 89:91")
+  c = fragment_capping.capper(ph, sel, pi.crystal_symmetry())
+  r = c.cap()
+  names = sorted(a.name.strip()
+    for a in r.pdb_hierarchy.atoms().select(~r.fragment_selection))
+  assert names == ['H2', 'HOXT'], names
+  assert c.charge == 0, c.charge
+  rc = c
   return rc
 
 if(__name__=='__main__'):
