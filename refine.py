@@ -84,7 +84,8 @@ def create_fragment_manager(
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters,
     select_within_radius       = params.cluster.select_within_radius,
-    bond_with_altloc_flag      = params.cluster.bond_with_altloc)
+    bond_with_altloc_flag      = params.cluster.bond_with_altloc,
+    cap_fragments              = params.restraints == "qm")
 
 class hd_mapper(object):
   """
