@@ -41,6 +41,7 @@ tst_list = [
   "$D/tests/unit/tst_35.py",
   "$D/tests/unit/tst_36.py",
   "$D/tests/unit/tst_37.py",
+  "$D/tests/unit/tst_38.py",
   ]
 
 def run():
