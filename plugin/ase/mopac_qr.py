@@ -20,7 +20,7 @@ from ase.calculators.calculator import Calculator
 str_keys = ['functional', 'job_type']
 int_keys = ['restart', 'spin', 'charge']
 bool_keys = ['OPT']
-float_keys = ['RELSCF']
+float_keys = ['RELSCF', 'EPS']
 
 
 class Mopac(Calculator):
@@ -53,7 +53,8 @@ class Mopac(Calculator):
                  OPT=False,
                  functional=functional,
                  job_type=' 1SCF  GRADIENTS AUX(0,PRECISION=9) ',
-                 RELSCF= None)
+                 RELSCF= None,
+                 EPS=78.4) # COSMO solvent, water; None: vacuum
         # set user values
         self.set(**kwargs)
 
@@ -124,7 +125,8 @@ class Mopac(Calculator):
         mopac_input += ' THREADS=%i' %(self.int_params['nproc'])
 
         # add solvent
-        mopac_input += '  EPS=78.4'
+        if self.float_params['EPS'] != None:
+            mopac_input += '  EPS=' + str(self.float_params['EPS'])
 
         #write spin
         spin = self.int_params['spin']

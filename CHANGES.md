@@ -28,6 +28,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - altlocs.handling=native with restraints=qm stops with a Sorry.
    - A residue whose altloc labels are a non-empty proper subset of the
      model's labels stops with a Sorry (its conformers would be incomplete).
+   - tst_45: finite-difference check of the gradients refinement uses with
+     altlocs (cctbx, both handlings; MOPAC, conformers). The sum of the
+     conformer energies is the test function: its finite differences must
+     equal multiplicity times the combined gradient.
+   - tst_46: the same for the expansion and clustering routes, whose
+     gradients are partial derivatives with the symmetry copies, buffer
+     atoms and caps frozen: the frozen-environment energies are
+     differentiated (cctbx, both handlings; MOPAC, conformers), and the
+     cctbx routes are compared with plain cctbx restraints on an explicit
+     2x2x2 supercell in a box where the images clash with the model.
+   - MOPAC calculator keyword EPS (COSMO dielectric, default 78.4 as before;
+     None runs in vacuum). With COSMO, MOPAC's energy is not smooth at the
+     0.01 kcal/mol level, so its gradients agree with finite differences only
+     to a few percent; in vacuum they agree to 0.2 %.
 ### Changed
    - updating documentation.
    - qr.finalise runs mmtbx.reduce2 qmready=True (output modelH_charge<q>.pdb).
