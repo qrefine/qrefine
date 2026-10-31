@@ -1,8 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
-import copy
-import libtbx.load_env
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
 from cctbx import uctbx
@@ -13,40 +11,22 @@ from qrefine.super_cell import expand
 from . import fragment_capping
 from .charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
-from functools import cmp_to_key
 
-qrefine = libtbx.env.find_in_repositories("qrefine")
-
-def check_atoms_integrity(atoms, verbose=False):
-  rc = {}
-  names = {}
-  for atom in atoms:
-    resid = atom.parent().parent().id_str()
-    rc.setdefault(resid, [])
-    names.setdefault(resid, set())
-    if atom.name in [' CA ', ' CB ']:
-      if atom.quote().find('GLY')==-1:
-        rc[resid].append(atom.quote())
-        names[resid].add(atom.name)
-  for key, item in rc.items():
-    if verbose: print(key, item)
-    # CA and CB come together; a residue group with several conformers
-    # contributes one CA/CB pair per conformer
-    assert names[key] in [set(), set([' CA ', ' CB '])], \
-      'error in cluster: residue %s has %s without %s: %s' % (key,
-      " CA " in names[key] and "CA" or "CB",
-      " CA " in names[key] and "CB" or "CA", item)
-
-def check_selection_integrity(atoms, indices, verbose=False):
-  selection = []
-  for j in indices:
-    atom = atoms[j-1]
-    if verbose: print(atom.quote())
-    selection.append(atom)
-  check_atoms_integrity(selection, verbose=verbose)
-
-def check_hierarchy(hierarchy, verbose=False):
-  check_atoms_integrity(hierarchy.atoms(), verbose=verbose)
+def check_residue_integrity(pdb_hierarchy, selection):
+  """
+  Assert that selection (flex.bool over the atoms of pdb_hierarchy) takes
+  every residue group of pdb_hierarchy either whole or not at all: clusters
+  and fragments are made of whole residues.
+  """
+  assert selection.size() == pdb_hierarchy.atoms_size()
+  offset = 0
+  for rg in pdb_hierarchy.residue_groups():
+    n = rg.atoms_size()
+    n_selected = selection[offset:offset+n].count(True)
+    assert n_selected in (0, n), \
+      'error in cluster: residue %s has %d of %d atoms selected' % (
+        rg.id_str(), n_selected, n)
+    offset += n
 
 def residues_within_radius(pdb_hierarchy, selection, radius):
   """
@@ -135,8 +115,6 @@ class fragments(object):
     #
     if(make_working_folder):
       os.makedirs(self.working_folder, exist_ok=True)
-    self.backbone_connections = fragment_utils.get_backbone_connections(
-      self.pdb_hierarchy)
     self._expand()
     self.set_up_cluster_qm()
 
@@ -163,23 +141,24 @@ class fragments(object):
 
   def get_clusters(self):
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
-    self.interaction_list = pair_interaction.run(copy.deepcopy(self.pdb_hierarchy))  ##deepcopy
-    self.interaction_list += self.backbone_connections # XXX WHY IS THIS?
+    # pair_interaction.run changes the coordinates of the hierarchy it gets
+    # (Angstrom to Bohr): give it a copy.
+    self.interaction_list = pair_interaction.run(self.pdb_hierarchy.deep_copy())
     from . import clustering
     clusters = clustering.betweenness_centrality_clustering(
       self.interaction_list,
       size = n_residues,
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster,
       bcc_threshold = self.bcc_threshold).get_clusters()
-    self.clusters=sorted(clusters,
-      key=cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1 if len(x) > len(y) else 0))
+    self.clusters = sorted(clusters, key=len, reverse=True)
 
   def get_fragments(self):
 
     def selected_atom_indices_in_entire_ph(selected_atom_indices_in_sub_ph, sub_ph):
+      selected = set(selected_atom_indices_in_sub_ph)
       selected_atom_indices_in_entire_ph = []
       for index, number in enumerate(sub_ph.atoms().extract_serial()):
-        if(index+1 in selected_atom_indices_in_sub_ph):
+        if(index+1 in selected):
           selected_atom_indices_in_entire_ph.append(int(number))
       return selected_atom_indices_in_entire_ph
 
@@ -192,13 +171,9 @@ class fragments(object):
     fragment_super_atoms_in_ph = []
     molecules_in_fragments = []
     for i in range(len(clusters)):
-      # print 'processing cluster', i
+      # pair_interaction.run changes the coordinates of the hierarchy it gets
       atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
-        pair_interaction.run(copy.deepcopy(ph), clusters[i])  ##deepcopy
-      # print("clusters[i]",clusters[i])
-      # print("molecules_in_one_fragment:", molecules_in_one_fragment)
-      # print("atoms_in_one_fragment",atoms_in_one_fragment)
-
+        pair_interaction.run(ph.deep_copy(), clusters[i])
       atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
                                                   atoms_in_one_cluster, ph)
       cluster_atoms_in_ph.append(atoms_in_one_cluster)
@@ -207,14 +182,10 @@ class fragments(object):
                                                    atoms_in_one_fragment, ph)
       fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
       molecules_in_fragments.append(molecules_in_one_fragment)
-      atoms = self.pdb_hierarchy_super.atoms()
-      check_selection_integrity(atoms, atoms_in_one_cluster)
-    # print "cluster->fragments done"
     if(self.two_buffers):## define a second buffer layer
-      # print "adding second layer"
       fragment_super_atoms_in_ph = []
       for molecules in molecules_in_fragments:
-        junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(copy.deepcopy(ph),molecules)
+        junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(ph.deep_copy(),molecules)
         atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
                                                    atoms_in_one_fragment, ph)
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
@@ -292,7 +263,6 @@ class fragments(object):
     self.fragment_charges = []
     self.cluster_selections = []
     self.buffer_selections = []
-    self.cluster_selections = []
     self.fragment_capped_initial = []
     self.fragment_cappers = []
     for i in range(len(self.fragment_super_atoms)):
@@ -326,9 +296,15 @@ class fragments(object):
       s = fragment_selection==cluster_selection
       buffer_selection = fragment_selection.deep_copy().set_selected(s, False)
       self.buffer_selections.append(buffer_selection)
-      check_hierarchy(fragment_super_hierarchy)
+      check_residue_integrity(self.pdb_hierarchy_super, fragment_super_selection)
+      check_residue_integrity(self.pdb_hierarchy, cluster_selection)
 
-  def get_fragment_extracts(self):
+  def get_fragment_extracts(self, with_super_sphere_grm=False):
+    # with_super_sphere_grm: include the cctbx restraints manager of the
+    # super sphere (built on first use; cctbx restraints of fragments only)
+    super_sphere_grm = None
+    if(with_super_sphere_grm):
+      super_sphere_grm = self.expansion.super_sphere_geometry_restraints_manager
     return group_args(
       cluster_selections        = self.cluster_selections,
       fragment_charges          = self.fragment_charges,
@@ -351,8 +327,7 @@ class fragments(object):
       charge_cutoff             = self.charge_cutoff,
       expansion_file            = self.expansion_file,
       save_clusters             = self.save_clusters,
-      super_sphere_geometry_restraints_manager = \
-        self.expansion.super_sphere_geometry_restraints_manager)
+      super_sphere_geometry_restraints_manager = super_sphere_grm)
 
 def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
@@ -363,15 +338,15 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
   complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
-  # if(fragment_extracts.debug):
-  if(1): # at least for now
-    fragment_hierarchy.write_pdb_file(
-      file_name=qm_pdb_file,
-      crystal_symmetry=fragment_extracts.expansion_cs)
+  # The fragment (user information) and the capped fragment (user
+  # information; its name is the QM engine's label) are written at every
+  # call; the QM engine gets the capped hierarchy, not the file.
+  fragment_hierarchy.write_pdb_file(
+    file_name=qm_pdb_file,
+    crystal_symmetry=fragment_extracts.expansion_cs)
   # re-capping because geometry of the fragment has changed.
   r = fragment_extracts.fragment_cappers[index].cap(
     sites_cart = fragment_hierarchy.atoms().extract_xyz())
-  # we now want this file by default
   r.pdb_hierarchy.write_pdb_file(file_name=complete_qm_pdb_file,
                     crystal_symmetry=fragment_extracts.expansion_cs)
   return os.path.abspath(complete_qm_pdb_file), r.pdb_hierarchy, \
@@ -407,9 +382,8 @@ def write_mm_charge_file(fragment_extracts, index):
     non_fragment_hierarchy.write_pdb_file(
       file_name=non_fragment_pdb_file,
       crystal_symmetry=fragment_extracts.expansion_cs)
-    non_qm_edge_positions = fragment_utils.get_edge_atom_positions(
+    charge_scaling_positions = fragment_utils.get_edge_atom_positions(
       ph, non_fragment_hierarchy, charge_embed=True)
-    charge_scaling_positions = non_qm_edge_positions
     fragment_extracts.charge_service.update_pdb_hierarchy(
       non_fragment_hierarchy,
       fragment_extracts.expansion_cs,

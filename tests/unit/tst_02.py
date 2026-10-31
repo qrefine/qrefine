@@ -172,8 +172,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     fo.write(pdb_str_poor)
   #
   r_fm = run_fmodel(prefix = prefix, args=[pdb_good, "high_res=2"])
-  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_poor, r_fm.mtz, 
-    "restraints=cctbx", "stpmax=1", "clustering=True"])
+  # a short weight search: three cycles are enough to reach r_work < 0.005
+  r_qr = run_qrefine_in(prefix = prefix, args=[pdb_poor, r_fm.mtz,
+    "restraints=cctbx", "stpmax=1", "clustering=True",
+    "number_of_weight_search_cycles=3"])
   fmodel = mmtbx.f_model.manager(
     f_obs          = r_fm.f_obs,
     r_free_flags   = r_fm.flags,

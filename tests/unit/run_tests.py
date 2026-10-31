@@ -3,14 +3,12 @@ from __future__ import print_function
 import os
 import sys
 import time
-import shutil
 import iotbx.pdb
 import libtbx.load_env
 from libtbx import easy_run
 from scitbx.array_family import flex
 from libtbx import easy_mp
 import traceback
-from libtbx.utils import Sorry
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
 qr_unit_tests = os.path.join(qrefine, "tests","unit")

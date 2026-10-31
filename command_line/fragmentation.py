@@ -3,12 +3,9 @@ from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.fragmentation
 import sys
 import time
-import os.path
-import libtbx
 import iotbx.pdb
 from qrefine.fragment import fragments
 from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
-from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
 
 

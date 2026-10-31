@@ -5,7 +5,6 @@ from iotbx import reflection_file_reader
 import mmtbx.model
 import iotbx.pdb
 from libtbx.utils import null_out
-import qrefine
 from qrefine import qr
 
 class run_fmodel(object):

@@ -23,14 +23,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import time
-import pickle
 
 from libtbx.utils import Sorry, null_out
 import iotbx.pdb.hierarchy
 import mmtbx.model
 from cctbx.crystal.super_cell import get_siiu
-from libtbx import easy_pickle
 from qrefine.fragment import fragments
 
 from qrefine import calculator
@@ -40,7 +37,6 @@ from qrefine import cluster_restraints
 from qrefine import conformers
 from qrefine import results
 
-from qrefine.super_cell import expand
 from libtbx import Auto
 from cctbx import maptbx
 from scitbx.array_family import flex
@@ -249,31 +245,7 @@ def create_restraints_manager(params, model, working_folder="ase", log=None):
   #
   if(params.expansion):
     assert not params.cluster.clustering
-    #
-    # TMP development insert to investigate Rss BEGIN
-    #
-    if(params.debug_rss):
-      from collections import OrderedDict
-      import time
-      from libtbx import easy_pickle
-      result = OrderedDict()
-      RSS = [10,9,8,7,6,5,4,3,2,1]
-      for i, rss in enumerate(RSS):
-        t0 = time.time()
-        params.cluster.select_within_radius=rss
-        FE = restraints.from_expansion(
-          params            = params,
-          restraints_source = restraints_source)
-        _, g = FE.target_and_gradients(sites_cart = model.get_sites_cart())
-        result[rss] = g
-        print("Trying rss", rss, time.time()-t0)
-      easy_pickle.dump(
-        file_name="%s_gradients.pkl"%params.output_file_name_prefix, obj = result)
-      STOP()
-    #
-    # TMP development insert to investigate Rss END
-    #
-    print("Restraints are from restraints.from_expansion")
+    print("Restraints are from restraints.from_expansion", file=log)
     return restraints.from_expansion(
       params            = params,
       restraints_source = restraints_source)
@@ -359,7 +331,7 @@ def set_qm_defaults(params, log):
       try:
         import warnings
         warnings.filterwarnings('ignore', module='aimnet2calc')
-        from aimnet2calc import AIMNet2ASE # intentional
+        from aimnet2calc import AIMNet2ASE # import dependency
       except ModuleNotFoundError as e:
         print(str(e), file=log)
         if not params.debug:
@@ -428,7 +400,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     params.refine.gradient_only = True
     print(" params.gradient_only", params.refine.gradient_only, file=log)
   if (model.size() > params.max_atoms):
-    print("Too many atoms. Can take forever or crash."*50, file=log)
+    print("WARNING: %d atoms (max_atoms=%d). Can take forever or crash." % (
+      model.size(), params.max_atoms), file=log)
 
   geometry_rmsd_manager = calculator.cctbx_geometry(model=model)
 
@@ -451,7 +424,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   if os.path.isfile(params.rst_file):
     os.remove(params.rst_file)
   start_fmodel = fmodel
-  start_ph = None # is it used anywhere? I don't see where it is used!
 
   hdm = None
   use_hdm = len(exchangeable_hd_pairs(model.get_hierarchy())) > 0
@@ -470,7 +442,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       raise Sorry("exclude_selection is incompatible with clustering=True")
 
   if hdm is not None:
-    print("Using hd_mapper again!", file=log)
     model_for_restraints = hdm.get_single_model()
   elif exclude_selection is not None:
     model_for_restraints = model.select(~exclude_selection)
@@ -503,9 +474,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       max_iterations        = params.refine.max_iterations_refine,
       log                   = log)
     model = O.run()
-    of = open("real_space_refined.pdb", "w")
-    print(model.model_as_pdb(output_cs=True), file=of)
-    of.close()
+    with open("real_space_refined.pdb", "w") as of:
+      print(model.model_as_pdb(output_cs=True), file=of)
     model.geometry_statistics(use_hydrogens=False).show()
     show_cc(
       map_data=map_data,
@@ -528,9 +498,11 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       if fmodel.f_obs().d_min()<1.2:
         import mmtbx.hydrogens
         print("Optimize H with d.o.f.", file=log)
-        print ("  start: r_work=%6.4f r_free=%6.4f"%(fmodel.r_work(), fmodel.r_free()))
+        print("  start: r_work=%6.4f r_free=%6.4f"%(
+          fmodel.r_work(), fmodel.r_free()), file=log)
         mmtbx.hydrogens.fit_rotatable2(model=model, fmodel=fmodel)
-        print ("  final: r_work=%6.4f r_free=%6.4f"%(fmodel.r_work(), fmodel.r_free()))
+        print("  final: r_work=%6.4f r_free=%6.4f"%(
+          fmodel.r_work(), fmodel.r_free()), file=log)
         monitor.update(fmodel = fmodel, model = model)
       #
       # PRE-OPTIMIZATION (CODITIONAL)
@@ -544,13 +516,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         if params.refine.exclude is not None:
           print("Initial geometry regularization skipped because of exclude_selection.", file=log)
         else:
-          print("Initial geometry regularization:")
+          print("Initial geometry regularization:", file=log)
           print("  r_work: %6.4f r_free: %6.4f"%(
-            fmodel.r_work(), fmodel.r_free()))
+            fmodel.r_work(), fmodel.r_free()), file=log)
           calculator_sites_opt_pre = calculator.sites_opt(
             restraints_manager      = restraints_manager,
             model                   = model,
-#            dump_gradients          = False,
             max_shift               = params.refine.stpmax,
             shift_eval              = params.refine.shift_evaluation,
             use_callback_after_step = True,
@@ -563,7 +534,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
             sites_cart = monitor.model.get_sites_cart())
           fmodel.update_xray_structure(update_f_calc  = True)
           print("  r_work: %6.4f r_free: %6.4f"%(
-            fmodel.r_work(), fmodel.r_free()))
+            fmodel.r_work(), fmodel.r_free()), file=log)
         # PRE-OPTIMIZATION (CODITIONAL) END
       driver.refine(
         params                = params,

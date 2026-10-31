@@ -16,8 +16,6 @@ import shutil
 import warnings
 warnings.filterwarnings('ignore')
 
-from libtbx import easy_run
-
 def draw_box_around_text(msg, width=78, log=None):
   def _draw_lines(msg, terminating_char):
     rc = ''
@@ -41,7 +39,7 @@ def draw_box_around_text(msg, width=78, log=None):
                   ),
           file=log,
           )
-  except:
+  except Exception:
     ascii_128 = True
     top_line = '%s' % ('%s%s%s' % ('|',
                                    '-'*width,
@@ -130,19 +128,19 @@ def run():
 
     if name == 'PyScf':
       try:
-        import pyscf
+        import pyscf # import dependency
         print(" - PyScf successfully imported")
         qm_engines_python_installed[name] = description
-      except:
+      except Exception:
         print(" - PyScf could not be imported")
 
     if name == 'TorchANI':
       try:
-        import torch
-        import torchani
+        import torch # import dependency
+        import torchani # import dependency
         print(" - TorchANI successfully imported")
         qm_engines_python_installed[name] = description
-      except:
+      except Exception:
         print("  TorchANI could not be imported")
 
 

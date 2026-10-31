@@ -1,15 +1,10 @@
 from __future__ import absolute_import, division, print_function
 from libtbx.program_template import ProgramTemplate
-from libtbx import group_args
-import iotbx.pdb
-import iotbx.pdb.fetch
+import iotbx.phil
 import os
-import sys
-from libtbx import easy_pickle
-from libtbx.utils import Sorry
+from libtbx.utils import Sorry, null_out
 from cctbx.array_family import flex
 import mmtbx.model
-from libtbx.utils import null_out
 
 from qrefine import refine, conformers
 
@@ -22,8 +17,6 @@ auto_cust = True
 max_atoms = 50000
   .type = int
   .help = maximum number of atoms
-debug_rss = False
-  .type=bool
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
@@ -65,9 +58,9 @@ cluster{
   select_within_radius = 10
     .type = int
     .help = supersphere expansion radius
-  clustering_method = gnc  *bcc
+  clustering_method = *bcc
     .type = choice(multi=False)
-    .help = type of clustering algorithm
+    .help = clustering algorithm (betweenness centrality clustering)
   save_clusters = True
     .type = bool
     .help = save currently used fragments and clusters to disk as PDBs.
@@ -426,7 +419,6 @@ and quantum.engine_name=aimnet2:
     self._print(self.get_program_phil_str())
     self.header("Extracting model")
     model_file_name = self.data_manager.get_model_names()[0]
-    model_names = self.data_manager.get_model_names()
     self.model = self.data_manager.get_model(filename = model_file_name)
     if(self.params.altlocs.reconcile and
        conformers.n_conformers(self.model.get_hierarchy()) > 1):
@@ -487,5 +479,5 @@ and quantum.engine_name=aimnet2:
       map_data = self.map_data,
       params   = self.params,
       rst_file = self.params.rst_file,
-      prefix   = model_file_name[:-4],
+      prefix   = os.path.splitext(model_file_name)[0],
       log      = self.logger)

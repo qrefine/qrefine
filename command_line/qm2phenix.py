@@ -3,7 +3,6 @@ from __future__ import print_function
 import os, sys
 
 from iotbx import pdb
-from qrefine.plugin.ase import gaussian_qr
 
 '''
 Optimization completed.

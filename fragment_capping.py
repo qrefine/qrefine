@@ -24,7 +24,6 @@ import iotbx.pdb
 import mmtbx.model
 from libtbx import group_args
 from libtbx.utils import Sorry, null_out
-from scitbx.array_family import flex
 from mmtbx.hydrogens import capping
 from qrefine.utils.hierarchy_utils import model_from_hierarchy
 

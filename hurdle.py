@@ -2,9 +2,7 @@
 from __future__ import absolute_import, division, print_function
 #
 import os
-import iotbx
 from libtbx.utils import Sorry
-from libtbx import Auto
 from libtbx.program_template import ProgramTemplate
 
 # =============================================================================

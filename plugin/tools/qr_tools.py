@@ -5,7 +5,6 @@ contains:
 """
 from __future__ import print_function
 import os
-import sys
 from ase.io import write
 
 import numpy as np
@@ -16,7 +15,7 @@ def run_command(command):
     """
     execute <command> in a subprocess and check error code
     """
-    from subprocess import Popen, PIPE, STDOUT
+    from subprocess import Popen, PIPE
     if command == '':
        raise RuntimeError('no command for run_command :(')
     print('Running: ', command) #debug

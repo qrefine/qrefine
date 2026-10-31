@@ -1,36 +1,19 @@
 
-def get_backbone_connections(pdb_hierarchy):
-  # XXX This does not handle insertion codes
-  backbone_connections = []
-  count = 0
-  for chain in pdb_hierarchy.chains():
-    residues = chain.residue_groups()
-    if(not is_amino_acid(residues[0])):
-      count = count + len(residues)
-    else:
-      for i in range(len(residues)):
-        residue = residues[i]
-        resid = residue.resseq_as_int()
-        count = count + 1
-        if(len(residues) > 1 and i < len(residues) - 1):
-          if(resid == residues[i + 1].resseq_as_int() - 1):
-            backbone_connections.append([count, count + 1])
-  return backbone_connections
+"""
+Backbone atom positions at the edges of a sub-hierarchy (the point charges
+around a QM fragment): the charges of the atoms whose bond to the fragment
+was cut are scaled (charge embedding).
+"""
+import iotbx.pdb
+
+AMINO_ACID_CLASSES = ("common_amino_acid", "modified_amino_acid",
+                      "d_amino_acid")
 
 def is_amino_acid(residue):
-  atom_C, atom_N, atom_O, atom_CA, amino_acid = (False,) * 5
-  for atom in residue.atoms():
-    if(atom.name.strip() == "N"):
-      atom_N = True
-    if(atom.name.strip() == "CA"):
-      atom_CA = True
-    if(atom.name.strip() == "O"):
-      atom_O = True
-    if(atom.name.strip() == "C"):
-      atom_C = True
-  if(atom_C is True and atom_N is True and atom_O is True and atom_CA is True):
-    amino_acid = True
-  return amino_acid
+  get_class = iotbx.pdb.common_residue_names_get_class
+  for ag in residue.atom_groups():
+    if(get_class(name=ag.resname) in AMINO_ACID_CLASSES): return True
+  return False
 
 def backbone_nitrogen(residue):
   if(is_amino_acid(residue) is True):
@@ -72,7 +55,6 @@ def is_cterminal_residue(chain_id, residue_id, pdb_hierarchy):
       break
   return cterminal
 
-  ## just for amino acids
 def get_edge_atom_positions(pdb_hierarchy, sub_pdb_hierarchy, charge_embed=False):
   positions = []
   for chain in sub_pdb_hierarchy.chains():
@@ -117,5 +99,4 @@ def get_edge_atom_positions(pdb_hierarchy, sub_pdb_hierarchy, charge_embed=False
             positions.append(backbone_nitrogen(residue))
             if(charge_embed):
               positions.append(backbone_nitrogen_H(residue))
-  positions = filter(lambda x: x is not None, positions)
-  return positions
+  return [x for x in positions if x is not None]

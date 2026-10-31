@@ -10,15 +10,13 @@ See accompanying license files for details.
 """
 from __future__ import print_function
 import os
-import string
 import numpy as np
-import platform
 
 from ase.units import kcal, mol
 from ase.calculators.calculator import Calculator
 
 str_keys = ['functional', 'job_type']
-int_keys = ['restart', 'spin', 'charge']
+int_keys = ['restart', 'spin', 'charge', 'nproc']
 bool_keys = ['OPT']
 float_keys = ['RELSCF', 'EPS']
 
@@ -50,6 +48,7 @@ class Mopac(Calculator):
         if env: functional = env
         self.set(restart=0,
                  spin=0,
+                 nproc=1,
                  OPT=False,
                  functional=functional,
                  job_type=' 1SCF  GRADIENTS AUX(0,PRECISION=9) ',
@@ -182,41 +181,23 @@ class Mopac(Calculator):
         """
         execute <command> in a subprocess and check error code
         """
-        from subprocess import Popen, PIPE, STDOUT
+        from subprocess import Popen, PIPE
         if command == '':
             raise RuntimeError('no command for run_command :(')
         # print 'Running: ', command #debug
         proc = Popen([command], shell=True, stderr=PIPE, stdout=PIPE)
-        proc.wait()
+        # communicate (not wait): drain the pipes so that a chatty MOPAC
+        # cannot block on a full pipe
+        stdout, stderr = proc.communicate()
         exitcode = proc.returncode
         if exitcode != 0:
-            # print exitcode,'label:', self.calc_dir
             error='%s exited with error code %i in %s' % (
                            command,exitcode,self.calc_dir)
-            stdout,stderr = proc.communicate()
             print('shell output: ',stdout,stderr)
             raise RuntimeError(error)
         return 0
 
     def run(self):
-        import subprocess, shlex
-        from threading import Timer
-
-        # def run_timeout(cmd, timeout_sec):
-        #   proc = subprocess.Popen(shlex.split(cmd),
-        #   # proc = subprocess.Popen(cmd,
-        #                           stdout=subprocess.PIPE,
-        #                           shell=True,
-        #                           stderr=subprocess.PIPE)
-        #   kill_proc = lambda p: p.kill()
-        #   timer = Timer(timeout_sec, kill_proc, [proc])
-        #   try:
-        #     timer.start()
-        #     stdout,stderr = proc.communicate()
-        #     print(stdout,stderr)
-        #   finally:
-        #     timer.cancel()
-
         """
         Writes input in label.mop
         Runs MOPAC
@@ -227,30 +208,14 @@ class Mopac(Calculator):
         foutput = self.label + '.out'
         self.write_input(finput, self.atoms)
 
-         # directory
+        # directory
         self.calc_dir = os.getcwd()
 
         command = self.command
         if command is None:
           raise RuntimeError('MOPAC_COMMAND is not specified')
-
-        # Conda based Mopac does not need this anymore. 
-        #WhatOS=platform.system()
-        #if "Linux" in WhatOS:
-        #    if ('MOPAC_DIR' in os.environ):
-        #        mdir = os.environ['MOPAC_DIR']
-        #    else:
-        #        raise RuntimeError('MOPAC_DIR is not specified')
-        #    command_exc= "LD_PRELOAD=%s/libiomp5.so %s  %s" % (mdir,command,finput)
-        #if "Darwin" in WhatOS:
         command_exc= "  ".join([command , finput])
-
-        # run_timeout(command_exc ,72000)# 20hours
         self.run_command(command_exc)
-#        exitcode = os.system('%s %s' % (command, finput)+ '  > /dev/null 2>&1    ')
-
-#        if exitcode != 0:
-#            raise RuntimeError('MOPAC exited with error code')
 
         self.version = self.read_version(foutput)
         energy = self.read_energy(foutput)

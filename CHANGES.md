@@ -42,8 +42,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      None runs in vacuum). With COSMO, MOPAC's energy is not smooth at the
      0.01 kcal/mol level, so its gradients agree with finite differences only
      to a few percent; in vacuum they agree to 0.2 %.
+   - tst_47: the auxiliary command lines qr.cluster, qr.charges, qr.restraint
+     and qr.gtest run (cctbx restraints).
+### Fixed
+   - Re-clustering during refinement (cluster.re_calculate_rmsd_tolerance)
+     never happened in mode=refine: the check looked for an attribute the
+     clustered restraints manager does not have, and the call it guarded
+     would have failed (an unknown keyword argument). mode=refine now
+     re-clusters like mode=opt once the model moved by more than
+     cluster.re_calculate_rmsd_tolerance.
+   - qr.cluster failed with a NameError (undefined log) and its dispatcher
+     imported the wrong module; qr.gtest failed with a TypeError (missing
+     argument of create_calculator); qr.restraint called functions that no
+     longer exist and is now a thin wrapper of qr.refine (mode=opt,
+     number_of_micro_cycles=1, max_iterations_refine=1, clustering=False).
+   - Real-space refinement with data_weight=None failed with a NameError when
+     printing the initial weight estimate.
+   - Charge embedding: the point charges of all cut-bond atoms but the first
+     were not scaled (an exhausted filter iterator), and the Turbomole charge
+     file writer (write_pdb_hierarchy_xyzq_file) did not exist.
+   - MOPAC plugin: the subprocess pipes are drained with communicate() (a
+     chatty MOPAC could block on a full pipe); nproc is a proper keyword.
+   - The backbone-connection list added to the interaction graph before
+     clustering treated every residue of a chain that starts with an amino
+     acid as an amino acid (waters numbered consecutively were "bonded"); the
+     list is gone, bonded residues are found by the interaction analysis.
 ### Changed
    - updating documentation.
+   - The cluster/fragment integrity check (fragment.check_residue_integrity)
+     asserts that every residue group is taken whole, for any residue type,
+     instead of looking for CA/CB atom names.
+   - The cctbx restraints manager of the super sphere is built on first use
+     only (super_cell.expand.super_sphere_geometry_restraints_manager): QM
+     restraints (expansion and clustering) no longer interpret the super
+     sphere with pdb_interpretation for nothing.
+   - charges.charges_class computes the total charge with
+     mmtbx.ligands.electrons directly (no second pdb_interpretation of the
+     model, no PDB serialization); the hard-wired per-residue charge
+     bookkeeping, utils/electrons.py and the unused helpers of
+     utils/hierarchy_utils.py are gone. qr.charges lost the debug options
+     electrons and assert_correct_chain_terminii.
+   - Fragments: pair_interaction.run gets hierarchy.deep_copy() instead of
+     copy.deepcopy(); selection index lookups use sets.
+   - dump_gradients stops the program cleanly after writing the files.
+   - Dead code removed: debug_rss, the Girvan-Newman clustering (needed a
+     plugin that does not exist; clustering_method keeps bcc only), the
+     unused driver helpers, commented-out blocks and unused imports.
+   - cctbx (outside this repository): mmtbx.validation.rama_z loads its
+     database once per process (it was reloaded and converted on every call,
+     4 s each, most of the run time of a small refinement), and
+     libtbx.introspection queries the macOS memory size with sysctl instead
+     of system_profiler (10 s on recent macOS). Both shorten every qr.refine
+     run and the test suite.
    - qr.finalise runs mmtbx.reduce2 qmready=True (output modelH_charge<q>.pdb).
    - QM fragment capping uses mmtbx.hydrogens.capping (qrefine/fragment_capping.py,
      shared with mmtbx.reduce2 capping=True): one H per cut bond (NH2 on N, one H
@@ -63,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      absolute output paths (folder, std_out, pdb).
 ### Removed
    - finalise.py, completion.py and the use_reduce parameter.
+   - debug_rss, cluster.clustering_method=gnc, utils/electrons.py.
    - cluster.altloc_method, cluster.bond_with_altloc,
      restraints.from_altlocs2/from_cctbx_altlocs/from_altlocs and the
      per-altloc fragment code. Old .eff files that set the removed parameters

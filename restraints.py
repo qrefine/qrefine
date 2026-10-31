@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 import os
 import ase.units as ase_units
-import mmtbx.restraints
 from libtbx.utils import Sorry
 from .charges import charges_class
 from scitbx.array_family import flex
@@ -17,13 +16,8 @@ from .plugin.ase.xtb_qr import GFNxTB
 from .plugin.ase.server_qr import RestAPICalculator
 from .plugin.tools import qr_tools
 from libtbx import group_args
-import math
 from qrefine.super_cell import expand
 from qrefine import fragment_capping
-from libtbx.utils import null_out
-from libtbx.test_utils import approx_equal
-import time
-from libtbx import easy_pickle
 from qrefine.utils.hierarchy_utils import model_from_hierarchy
 
 class restraints(object):
@@ -105,12 +99,6 @@ class from_expansion(object):
       pdb_hierarchy        = self.model.get_hierarchy().deep_copy(),
       crystal_symmetry     = self.model.crystal_symmetry(),
       select_within_radius = self.params.cluster.select_within_radius)
-
-    # DEBUGGING
-    #self.expansion.ph_super_sphere.write_pdb_file(
-    #  file_name = "ss.pdb",
-    #  crystal_symmetry = self.expansion.cs_box)
-
     if restraints_source.source_of_restraints_qm():
       # Cap the super sphere (cut out of the super cell) as reduce2
       # capping=True would, one H per cut bond; the master is complete
@@ -150,22 +138,14 @@ class from_expansion(object):
         crystal_symmetry = self.expansion.cs_box,
         charge           = self.capper.charge if self.capper else None)
 
-  def __call__(self, selection_and_sites_cart):
-    # XXX Not sure what this is and why!?
-    return self.target_and_gradients(
-      sites_cart = selection_and_sites_cart[1],
-      selection  = selection_and_sites_cart[0],
-      index      = selection_and_sites_cart[2])
-
-  def target_and_gradients(self, sites_cart, selection=None, index=None):
+  def target_and_gradients(self, sites_cart):
     self._update(sites_cart = sites_cart)
     energy, gradients = self.restraints_manager.target_and_gradients(
         sites_cart = self.pdb_hierarchy_super_completed.atoms().extract_xyz())
     gradients = gradients.select(self.selection)
-    energy=0 # XXX UNDEFINED in most cases (or may be even all cases since
-             # selection above)
-    #
-    return energy, gradients
+    # The energy of the master copy alone is undefined (the super sphere
+    # energy includes the symmetry copies and caps).
+    return 0, gradients
 
   def energies_sites(self, sites_cart, compute_gradients=True):
     tg = self.target_and_gradients(sites_cart=sites_cart)
@@ -228,13 +208,11 @@ class from_cctbx(object):
   def target_and_gradients(self, sites_cart, selection=None, index=None):
 
     if(selection is not None): ### clustering
+      # Restraints of the fragment cut out of the super sphere (bonds to
+      # atoms outside the fragment are dropped); the fragment's master atoms
+      # come first (the super sphere starts with the master copy).
       super_selection = self.fragment_extracts.fragment_super_selections[index]
       grm = self.fragment_extracts.super_sphere_geometry_restraints_manager
-
-      #es = grm.energies_sites(
-      #  sites_cart=sites_cart, compute_gradients=True)
-      #es.gradients = es.gradients.select(super_selection)[:selection.count(True)]
-      # Is this the same?
       es = grm.select(super_selection).energies_sites(
         sites_cart=sites_cart.select(super_selection), compute_gradients=True)
       es.gradients = es.gradients[:selection.count(True)]
@@ -341,16 +319,8 @@ class from_qm(object):
                    ]:
         value = getattr(self, attr, None)
         func = getattr(calculator, 'set_%s' % attr, None)
-        action=False
-        if func is not None:
-          if value is not None:
-            #print '  Setting %s to %s' % (attr, value)
-            func(value)
-            action=True
-        # XXX Avoid bare prints. Fix by propagating log channel.
-        #if not action:
-        #  if value and not func:
-        #    print '  No function available to set %s to %s' % (attr, value)
+        if func is not None and value is not None:
+          func(value)
     return calculator
 
   def __call__(self,fragment_selection_and_sites_cart):
@@ -388,37 +358,23 @@ class from_qm(object):
       charge_file = None
       selection = flex.bool(self.system_size, True)
       fragment_selection = selection
-    define_str=''
     atoms = ase_atoms_from_pdb_hierarchy(ph, self.crystal_symmetry, self.qm_engine_name)
     unit_convert = ase_units.mol/ase_units.kcal # ~ 23.06
-    self.qm_engine.set_label(qm_pdb_file[:-4])
+    label = os.path.splitext(qm_pdb_file)[0]
+    self.qm_engine.set_label(label)
     cwd = os.getcwd()
-
-    #FOR DEBUGGING distance check
-    # print ''
-    # print '*distance check before QM calc*'
-    # thr=0.6
-    # for i in range(0,len(atoms)-1):
-    #   for j in range(i,len(atoms)):
-    #       if i==j: continue
-    #       x=atoms[i].position[0]-atoms[j].position[0]
-    #       y=atoms[i].position[1]-atoms[j].position[1]
-    #       z=atoms[i].position[2]-atoms[j].position[2]
-    #       dist=math.sqrt(x*x+y*y+z*z)
-    #       if(dist<=thr):
-    #         print 'WARNING: atoms ', i,j,' are closer than', thr,' A -> ',dist
     self.qm_engine.run_qr(atoms,
                           charge       = qm_charge,
                           pointcharges = charge_file,
-                          coordinates  = qm_pdb_file[:-4]+".xyz",
-                          define_str   = define_str, # for Turbomole
+                          coordinates  = label+".xyz",
+                          define_str   = '', # for Turbomole
       )
     os.chdir(cwd)
     if self.qm_addon is not None:
       tool_e,tool_g= qr_tools.qm_toolbox(atoms,
                               charge=qm_charge,
                               pointcharges=charge_file,
-                              label=qm_pdb_file[:-4],
+                              label=label,
                               addon=self.qm_addon,addon_method=self.qm_addon_method)
       energy = (self.qm_engine.energy_free+tool_e)*unit_convert
       ase_gradients = (tool_g-self.qm_engine.forces)*unit_convert

@@ -3,8 +3,7 @@
 """
 from __future__ import division
 from __future__ import print_function
-import os,sys
-import mmtbx.utils
+import os
 from scitbx.array_family import flex
 
 class manager(object):

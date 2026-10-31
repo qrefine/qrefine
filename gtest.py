@@ -1,16 +1,6 @@
-import sys, time, os
-import libtbx
-import mmtbx
-from qrefine.utils import hierarchy_utils
-from iotbx.cli_parser import run_program
-from qrefine import gtest
 from qrefine import qr
 from libtbx.program_template import ProgramTemplate
 from .refine import set_qm_defaults
-
-def get_default_params():
-    return iotbx.phil.parse(input_string=master_phil_str, process_includes=True).extract()
-
 
 local_phil = """
     gtest{
@@ -23,11 +13,11 @@ local_phil = """
         }
     """
 
-def run_g_test(params, model, weights, start_fmodel, log):
+def run_g_test(params, model, log):
   import numpy as np
   import time
   from .fragment import write_cluster_and_fragments_pdbs
-  from .refine import create_fragment_manager, create_restraints_manager,create_calculator
+  from .refine import create_restraints_manager, create_calculator
 
   # determine what kind of buffer to calculate
   g_mode=[]
@@ -86,11 +76,10 @@ def run_g_test(params, model, weights, start_fmodel, log):
       t0 = time.time()
       print("~max cluster size ",max_cluster, file=log)
       params.cluster.maxnum_residues_in_cluster=max_cluster
-      fragment_manager = create_fragment_manager(params = params, model = model)
-      restraints_manager = create_restraints_manager(params, model)
-      rm = restraints_manager
+      restraints_manager = create_restraints_manager(params, model, log=log)
+      fragment_manager = getattr(restraints_manager, "fragment_manager", None)
       if(fragment_manager is not None):
-        print(f"time taken for fragments {time.time() - t0:.2f}")
+        print(f"time taken for fragments {time.time() - t0:.2f}", file=log)
         frags=fragment_manager
         print('~  # clusters  : ',len(frags.clusters), file=log)
         print('~  list of atoms per cluster:', file=log)
@@ -105,11 +94,12 @@ def run_g_test(params, model, weights, start_fmodel, log):
           fragments=frags.get_fragment_extracts(),directory=label)
 
       calculator_manager = create_calculator(
-        fmodel             = start_fmodel,
-        model              = model,
-        params             = params,
-        restraints_manager = rm)
-      grad=list(calculator_manager.target_and_gradients())[1]
+        fmodel                = None,
+        model                 = model,
+        params                = params,
+        geometry_rmsd_manager = None,
+        restraints_manager    = restraints_manager)
+      grad = np.array(calculator_manager.target_and_gradients()[1])
       print(f"~   gnorm {np.linalg.norm(grad):.4f}", file=log)
       print(f"~   max_g {max(abs(i) for i in grad):.4f}  min_g {min(abs(i) for i in grad):.4f}", file=log)
       name="-".join(map(str,idl[idx]))
@@ -142,7 +132,6 @@ class Program(ProgramTemplate):
         set_qm_defaults(self.params, self.logger)
         self._print(self.get_program_phil_str())
         model_file_name = self.data_manager.get_model_names()[0]
-        model_names = self.data_manager.get_model_names()
         self.model = self.data_manager.get_model(filename=model_file_name)
         self.params.refine.mode = "gtest"
-        run_g_test(params=self.params, model=self.model, weights=None, start_fmodel=None, log=self.logger)
+        run_g_test(params=self.params, model=self.model, log=self.logger)

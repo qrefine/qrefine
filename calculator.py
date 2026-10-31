@@ -13,15 +13,8 @@ from libtbx import adopt_init_args
 from scitbx.array_family import flex
 import cctbx.maptbx.real_space_refinement_simple
 import scitbx.lbfgs
-from libtbx import group_args
 from . import refine
-from mmtbx.validation.ramalyze import ramalyze
-from mmtbx.validation.cbetadev import cbetadev
-from mmtbx.validation.rotalyze import rotalyze
-from mmtbx.validation.clashscore import clashscore
-from libtbx.utils import null_out
 from cctbx import maptbx
-from libtbx.test_utils import approx_equal
 
 def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None,
                    exclude_selection=None):
@@ -45,9 +38,6 @@ def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None,
     sites_cart = sites_cart.select(~exclude_selection)
 
   tc, gc = restraints_manager.target_and_gradients(sites_cart=sites_cart)
-
-  x = gc.norm()
-  y = gx.norm()
   # filter out large contributions
   gx_d = flex.sqrt(gx.dot())
   sel = gx_d>flex.mean(gx_d)*6
@@ -260,8 +250,6 @@ class sites(object):
     self.n                = self.x.size()
     self.x_target_functor = self.fmodel.target_functor()
     self.r_works          = flex.double()
-    self.mean_shifts      = flex.double()
-    self.n_converged      = 0 # ??????
     self.n_tg_calls       = 0
 
   def reset_fmodel(self, fmodel):
@@ -293,20 +281,12 @@ class sites(object):
       update_f_calc  = True)
     self.target_and_gradients(x=x)
     # This is to monitor convergence
-    r_work = self.fmodel.r_work()
-    r_free = self.fmodel.r_free()
-    self.r_works.append(r_work)
-    diff = flex.sqrt((self.sites_plus_x - self.sites_cart_start).dot())
-    shift_me = flex.mean(diff)
-    shift_ma = flex.max(diff)
-    fmt = "r_work: %7.5f r_work: %7.5f shift mean: %7.3f max: %7.3f t: %10.6f"
-    #print(fmt%(r_work, r_free, shift_me, shift_ma, self.f), self.r_works.size())
+    self.r_works.append(self.fmodel.r_work())
     assert self.n_tg_calls == self.r_works.size()
     self.sites_cart_start = self.sites_plus_x.deep_copy()
 
   def converged(self):
-    if self.n_converged >= 3: return True
-    else:                     return False
+    return False
 
   def target(self): return self.f
 
@@ -315,35 +295,16 @@ class sites(object):
   def apply_x(self):
     self.update(x = self.x)
 
-  #def _get_bond_rmsd(self):
-  #  b_mean = None
-  #  if(self.geometry_rmsd_manager is not None):
-  #    b_mean = self.geometry_rmsd_manager.bond_rmsd(
-  #      sites_cart = self.fmodel.xray_structure.sites_cart())
-  #  return b_mean
-  #
   def callback_after_step(self, minimizer=None):
-    # Early stop
+    # Early stop: r_work did not change over the last three steps
     if(self.r_works.size()>3):
       rs = self.r_works[-3:]
       rs = list(set([round(_, 5) for _ in rs]))
       if len(rs)==1: return True
-  #  print("CALLING BACK")
-  #  if(self.geometry_rmsd_manager is not None):
-  #    assert self.max_bond_rmsd is not None
-  #    b_mean = self._get_bond_rmsd()
-  #    print("    self.max_bond_rmsd", self.max_bond_rmsd, b_mean,
-  #       self.number_of_target_and_gradients_calls)
-  #    if(b_mean>self.max_bond_rmsd and
-  #       self.number_of_target_and_gradients_calls-3>20):
-  #      return True
-  #  if(self.converged()): return True
+    return False
 
   def target_and_gradients(self, x):
     self.n_tg_calls+=1
-
-    if self.hdm is not None: # XXX perhaps now broken
-      x = self.hdm.average(array = flex.vec3_double(x)).as_double()
 
     XG = self.sites_plus_x
     if self.hdm is not None:
@@ -376,10 +337,13 @@ class sites(object):
 
     if(self.dump_gradients is not None):
       from libtbx import easy_pickle
+      import sys
       easy_pickle.dump(self.dump_gradients+"_dg", dg.as_double())
       easy_pickle.dump(self.dump_gradients+"_rg", rg.as_double())
       easy_pickle.dump(self.dump_gradients+"_g", g.as_double())
-      STOP()
+      print("dump_gradients: gradients dumped to %s_{dg,rg,g}, stopping." %
+        self.dump_gradients)
+      sys.exit(0)
     self.f = t
     self.g = g.as_double()
     return self.f, self.g
@@ -431,14 +395,8 @@ class sites_real_space(object):
     s2 = other.sites_cart()
     return flex.mean(flex.sqrt((s1 - s2).dot()))
 
-  def get_shift2(self, m1, m2):
-    s1 = m1.get_sites_cart()
-    s2 = m2.get_sites_cart()
-    return flex.mean(flex.sqrt((s1 - s2).dot()))
-
   def geometry_is_good(self, stats):
     b, a = stats.bond().mean, stats.angle().mean
-    #return round(b, 3) <= self.max_bond_rmsd and round(a, 2) <= 1.5
     return b <= self.max_bond_rmsd and a <= 1.7
 
   def macro_cycle(self, weight):
@@ -497,19 +455,11 @@ class sites_real_space(object):
       print("Using last weight to continue:", weight)
       previous_good = weight
     ####
-    for it in [1,2,3, 4,5]:
-      stats = self.show(model = self.model, weight = previous_good, prefix="  start:")
+    for it in range(self.refine_cycles):
+      self.show(model = self.model, weight = previous_good, prefix="  start:")
       model = self.run_one(weight = previous_good)
-      stats = self.show(model = model, weight = previous_good, prefix="  final:")
-      if 1:# if(self.geometry_is_good(stats)):
-        shift = self.get_shift2(model, self.model)
-        self.model.set_sites_cart(sites_cart = model.get_sites_cart())
-        #if(shift<0.01):
-        #  print("<<<<< shift fell below 0.01: quitting >>>>>", shift)
-        #  break
-      #else:
-      #  print("<<<<< geometry got worse: quitting >>>>>")
-      #  break
+      self.show(model = model, weight = previous_good, prefix="  final:")
+      self.model.set_sites_cart(sites_cart = model.get_sites_cart())
 
   def show(self, model, weight, prefix=""):
     stats = model.geometry_statistics(use_hydrogens=False)
@@ -547,17 +497,13 @@ class sites_real_space(object):
     sel = g_geo_d>flex.mean(g_geo_d)*3
     x = g_geo.select(~sel).norm()
     #
-    #y = g_map.norm()
-    #
-    #x = g_geo.norm()
-    ################
     if(y != 0.0): return x/y
     else:         return 1.0 # ad hoc default fallback
 
   def run(self):
     if self.weight is None:
       self.weight = self.get_weight()
-      print("Initial weight estimate from ratio of grad norms:", weight)
+      print("Initial weight estimate from ratio of grad norms:", self.weight)
     else:
       print(f"Initial weight by user input: {self.weight}")
     self.macro_cycle(weight = self.weight)

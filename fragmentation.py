@@ -1,15 +1,10 @@
 from __future__ import division
 from __future__ import print_function
 import sys
-import time
-import os.path
-import libtbx
-import iotbx.pdb
 
 from qrefine import qr
 from qrefine.fragment import fragments
 from qrefine.fragment import get_qm_file_name_and_pdb_hierarchy
-from qrefine.fragment import charge
 from qrefine.fragment import write_mm_charge_file
 from libtbx.program_template import ProgramTemplate
 

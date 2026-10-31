@@ -8,7 +8,6 @@ from libtbx.utils import Sorry
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
-from .fragment import write_cluster_and_fragments_pdbs
 from .restraints import from_qm
 from libtbx import group_args
 
@@ -31,24 +30,12 @@ class from_cluster(object):
     self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
       file_name=self.restraints_manager.file_name,
       crystal_symmetry=self.fragment_manager.expansion.cs_box)
-    fragment_extracts_obj = self.fragment_manager.get_fragment_extracts()
-    # super_sphere_geometry_restraints_manager will cause qusb submits
-    # a single job instead of batch jobs
-    if(isinstance(self.restraints_manager, from_qm)):
-      fragment_extracts_obj.super_sphere_geometry_restraints_manager=None
+    # The cctbx restraints of the super sphere are needed by from_cctbx only;
+    # from_qm must not carry them (pickled with every parallel_map job).
+    fragment_extracts_obj = self.fragment_manager.get_fragment_extracts(
+      with_super_sphere_grm = not isinstance(self.restraints_manager, from_qm))
     self.restraints_manager.fragment_extracts = fragment_extracts_obj
     selection_and_sites_cart=[]
-
-    #
-    # This call is for debugging purposes. It used to be fast but at some point
-    # became very slow. BEWARE: enabling this call makes a simple optimization
-    # of a tiny molecule uisng CCTBX restraints about 110 times slower.
-    # This function re-caps every fragment (fragment_capping.capper) and many other
-    # specialized functions -- perhaps something became slower around there.
-    #
-    #write_cluster_and_fragments_pdbs(fragments=fragment_extracts_obj,directory='frag_pdbs')
-    #
-
     for index, selection_fragment in enumerate(
                        self.fragment_manager.fragment_selections):
       selection_and_sites_cart.append([selection_fragment, sites_cart,index])
@@ -73,12 +60,8 @@ class from_cluster(object):
           shutil.rmtree('ase_error')
         try:
           shutil.copytree('ase', 'ase_error')
-        # Directories are the same
-        except shutil.Error as e:
-          print('Directory not copied. Error: %s' % e)
-        # Any error saying that the directory doesn't exist
-        except OSError as e:
-          print('Directory not copied. Error: %s' % e)
+        except (shutil.Error, OSError) as copy_error:
+          print('Directory not copied. Error: %s' % copy_error)
         ncount=ncount+1
         energy_gradients=None
         print("check independent QM jobs")
@@ -113,17 +96,4 @@ class from_cluster(object):
       gradients_i = gradients_i.set_selected(selection_buffer,[0,0,0])
       gradients += gradients_i
       target += t
-    ### for debugging parallel_map, remove later.
-    if(0):
-      for selection_fragment, selection_buffer in zip(
-                                      self.fragment_manager.fragment_selections,
-                                      self.fragment_manager.buffer_selections):
-        t, g =  self.restraints_manager.target_and_gradients(
-                           sites_cart=sites_cart, selection=selection_fragment)
-        # XXX INEFFICIENT, MOVE TO C++
-        gradients_i = flex.vec3_double(system_size)
-        gradients_i = gradients_i.set_selected(selection_fragment, g)
-        gradients_i = gradients_i.set_selected(selection_buffer,[0,0,0])
-        gradients += gradients_i
-        target += t
     return target, gradients

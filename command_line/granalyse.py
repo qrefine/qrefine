@@ -1,6 +1,5 @@
 from __future__ import division
 from __future__ import print_function
-from tokenize import Floatnumber
 
 # LIBTBX_SET_DISPATCHER_NAME qr.granalyse
 import numpy as np
@@ -158,7 +157,7 @@ def set_ph_field(ph, val, field):
             a.set_b(val[count])
             count += 1
     else:
-        assert mode > 0, "wrong value in set_ph_field function"
+        raise RuntimeError("wrong field in set_ph_field: %s" % field)
 
 
 def atomic_mean_deviation(x):

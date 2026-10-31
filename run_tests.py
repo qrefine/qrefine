@@ -50,6 +50,7 @@ tst_list = [
   "$D/tests/unit/tst_44.py",
   "$D/tests/unit/tst_45.py",
   "$D/tests/unit/tst_46.py",
+  "$D/tests/unit/tst_47.py",
   ]
 
 def run():

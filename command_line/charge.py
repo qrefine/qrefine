@@ -3,9 +3,9 @@ from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME qr.charges
 import sys, time
 from qrefine import charges
-import iotbx
-import mmtbx
-from mmtbx import utils
+import iotbx.phil
+import mmtbx.utils
+from libtbx.utils import Sorry
 
 log = sys.stdout
 
@@ -32,12 +32,6 @@ ligand_cif_file_name = None
 list_charges = False
   .type = bool
   .help = Print a list of all the atoms with non-zero charge.
-electrons = True
-  .type = bool
-  .help = debug option - do not change.
-assert_correct_chain_terminii = True
-  .type = bool
-  .help = Tests for hydrogens on the N terminii.
 verbose = False
   .type = bool
 """
@@ -86,13 +80,9 @@ def run(args, log):
   cc = charges.charges_class(
     pdb_filename = params.model_file_name,
     ligand_cif_file_names=params.ligand_cif_file_name,
-    electrons=params.electrons,
     verbose=params.verbose,
   )
-  rc = cc.get_total_charge(
-    list_charges=params.list_charges,
-    assert_correct_chain_terminii=params.assert_correct_chain_terminii,
-  )
+  rc = cc.get_total_charge(list_charges=params.list_charges)
   if(params.verbose):
     print('Charge: %s' % rc, file=log)
     print("Time: %6.4f" % (time.time() - t0), file=log)

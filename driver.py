@@ -1,69 +1,38 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
-import os
-import pickle
 import scitbx.lbfgs
 from libtbx import easy_pickle
-from libtbx import adopt_init_args
-from cctbx import xray
 from scitbx.array_family import flex
 from . import calculator as calculator_module
 from libtbx import group_args
-import numpy
 from libtbx.test_utils import approx_equal
 from scitbx import minimizers
-import sys, math
-from libtbx.utils import Sorry
+import sys
 
 log = sys.stdout
 
 class clustering_update(object):
+  """
+  Re-clusters (fragment_manager.set_up_cluster_qm) once the model moved by
+  more than rmsd_tolerance from the coordinates of the last clustering.
+  """
   def __init__(self, pre_sites_cart, log, rmsd_tolerance):
     self.pre_sites_cart = pre_sites_cart
     self.log = log
     self.rmsd_tolerance = rmsd_tolerance
 
-  def re_clustering_check(self, sites_cart):
-    rmsd_diff = pre_sites_cart.rms_difference(sites_cart)
-    if(rmsd_diff < self.rmsd_tolerance):
-      self.redo_clustering = False
-    else:
-      print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
-      self.redo_clustering = True
-      self.pre_sites_cart = sites_cart
-
-  def re_clustering(self, calculator):
-    try:    sites_cart = calculator.fmodel.xray_structure.sites_cart()
-    except: sites_cart = calculator.model.get_sites_cart()
+  def re_clustering(self, calculator, sites_cart):
     rmsd_diff = self.pre_sites_cart.rms_difference(sites_cart)
-    #print(rmsd_diff, self.rmsd_tolerance)
     if(rmsd_diff > self.rmsd_tolerance):
       print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
       self.pre_sites_cart = sites_cart
 
-def run_collect(n_fev, results, fmodel, geometry_rmsd_manager, calculator):
-  cctbx_rm_bonds_rmsd = calculator_module.get_bonds_rmsd(
-    restraints_manager = geometry_rmsd_manager.geometry,
-    xrs                = fmodel.xray_structure)
-  results.update(
-    r_work                  = fmodel.r_work(),
-    r_free                  = fmodel.r_free(),
-    b                       = cctbx_rm_bonds_rmsd,
-    xrs                     = fmodel.xray_structure,
-    restraints_weight_scale = calculator.restraints_weight_scale,
-    n_fev                   = n_fev)
-
 def run_minimize(calculator, params, mode=None):
   max_iterations = params.refine.max_iterations_refine
-  if mode is not None:
-    if(mode == "weight"):
-      max_iterations = params.refine.max_iterations_weight
-      max_bond_rmsd  = params.refine.max_bond_rmsd
-    elif(mode == "refine"):
-      max_iterations = params.refine.max_iterations_refine
-      max_bond_rmsd  = None
+  if(mode == "weight"):
+    max_iterations = params.refine.max_iterations_weight
   assert params.refine.minimizer in ["lbfgs", "lbfgsb"]
   if(params.refine.minimizer == "lbfgs"):
       core_params = scitbx.lbfgs.core_parameters(
@@ -88,18 +57,14 @@ def refine(fmodel,
            params,
            monitor,
            calculator,
-           geometry_rmsd_manager,
-           STOP_ONCE_REACHED=True):
+           geometry_rmsd_manager):
   if(not params.refine.refine_sites): return
-  # Ugly!
-  try:    clustering = calculator.restraints_manager.clustering
-  except: clustering = False
+  clustering = params.cluster.clustering
   if(clustering):
     cluster_qm_update = clustering_update(
       pre_sites_cart = calculator.fmodel.xray_structure.sites_cart(),
       log            = log,
-      rmsd_tolerance = params.refine.rmsd_tolerance * 100,
-      verbose        = params.debug)
+      rmsd_tolerance = params.cluster.re_calculate_rmsd_tolerance)
   print("Start:", file=log)
   monitor.show(prefix="  ")
 
@@ -131,9 +96,10 @@ def refine(fmodel,
       fmodel = fmodel_copy.deep_copy() # Always use initial unchanged fmodel
       calculator.reset_fmodel(fmodel = fmodel)
       if(clustering):
-        cluster_qm_update.re_clustering(calculator)
+        cluster_qm_update.re_clustering(calculator,
+          sites_cart = fmodel.xray_structure.sites_cart())
       # Run minimization with given weight
-      minimized = run_minimize(
+      run_minimize(
         calculator = calculator,
         params     = params,
         mode       = "weight")
@@ -211,8 +177,9 @@ def refine(fmodel,
   assert not calculator.converged()
   for refine_cycle in range(params.refine.number_of_refine_cycles):
     if(clustering):
-      cluster_qm_update.re_clustering(calculator)
-    minimized = run_minimize(
+      cluster_qm_update.re_clustering(calculator,
+        sites_cart = fmodel.xray_structure.sites_cart())
+    run_minimize(
       calculator = calculator,
       params     = params,
       mode       = "refine")
@@ -247,8 +214,9 @@ def opt(params, monitor, calculator):
   for micro_cycle in range(params.refine.number_of_micro_cycles):
     assert monitor.model == calculator.model
     if(params.cluster.clustering):
-      cluster_qm_update.re_clustering(calculator)
-    minimized = run_minimize(calculator = calculator, params = params)
+      cluster_qm_update.re_clustering(calculator,
+        sites_cart = calculator.model.get_sites_cart())
+    run_minimize(calculator = calculator, params = params)
     monitor.update(model = calculator.model)
     monitor.show(prefix="cycle %3d: f=%.9g nfev: %3d | "%(
       micro_cycle, calculator.f, calculator.number_of_target_and_gradients_calls))
@@ -258,9 +226,10 @@ def opt(params, monitor, calculator):
     if(calculator.converged()):
       print("Convergence reached. Stopping now.", file=log)
       break
-  print("calculator(opt), total_time (target_and_gradients)", calculator.total_time)
+  print("calculator(opt), total_time (target_and_gradients)",
+    calculator.total_time, file=log)
   print("calculator(opt), number_of_target_and_gradients_calls (target_and_gradients)",
-    calculator.number_of_target_and_gradients_calls)
+    calculator.number_of_target_and_gradients_calls, file=log)
   if calculator.debug:
     o = group_args(
       targets   = calculator.all_targets,
