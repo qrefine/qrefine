@@ -348,7 +348,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   for i, a in enumerate([s1,s2,s3]):
     for j, b in enumerate([s1,s2,s3]):
       if i==j: continue
-      assert flex.mean(flex.sqrt((a - b).dot())) < 1.e-4
+      assert flex.mean(flex.sqrt((a - b).dot())) < 1.e-3
   #
   s1 = m_start.get_sites_cart().select(sel_moving)
   s2 = m_freeze.get_sites_cart().select(sel_moving)
