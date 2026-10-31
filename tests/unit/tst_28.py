@@ -330,6 +330,13 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   m_start = mmtbx.model.manager(
     model_input = iotbx.pdb.input(file_name = pdb_in),
     log         = null_out())
+  # qr.refine writes the refined model in PDB format (3 decimals), while the
+  # mmCIF input above carries 5. Take the start model through the same PDB
+  # round trip so that the comparison below is not dominated by rounding.
+  m_start = mmtbx.model.manager(
+    model_input = iotbx.pdb.input(
+      source_info = None, lines = m_start.model_as_pdb()),
+    log         = null_out())
   sel_moving = m_start.selection(string="resname ZZY")
   #
   r_freeze = run_qrefine_in(prefix = prefix, args=[pdb_in,
