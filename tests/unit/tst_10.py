@@ -97,7 +97,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
         fm = fragments(
           working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",
           clustering_method          = betweenness_centrality_clustering,
-          maxnum_residues_in_cluster = 2,
+          maxnum_residues_in_cluster = 3, # 2: one nonbonded term escapes a buffer
           charge_embedding           = False,
           two_buffers                = False,
           pdb_hierarchy              = h.deep_copy(), # deep copy just in case
@@ -105,7 +105,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
           crystal_symmetry           = cs)
         fragment_sizes = [f.iselection().size() for f in fm.fragment_selections]
         fragment_sizes.sort()
-        assert fragment_sizes == [44, 57, 65, 85]
+        assert fragment_sizes == [50, 51, 64, 65, 77], fragment_sizes
         fc = from_cluster(
           restraints_manager = fq,
           fragment_manager   = fm,

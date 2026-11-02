@@ -45,6 +45,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - tst_47: the auxiliary command lines qr.cluster, qr.charges, qr.restraint
      and qr.gtest run (cctbx restraints).
 ### Fixed
+   - Fragments were keyed by atom serial numbers converted with int():
+     serial numbers above 99999 are hybrid-36 strings, so a super sphere of
+     more than 99999 atoms stopped qr.refine. Clusters and fragments are now
+     atom positions in the super sphere (fragment.py).
+   - Clusters larger than cluster.maxnum_residues_in_cluster that betweenness
+     centrality clustering cannot split (dense blocks of residues) were cut
+     in half by residue index: twice the maximum was still too large, and a
+     half could be residues with no interaction between them. They are now
+     split by clustering.split_cluster: the pieces of a cluster that is not
+     connected, otherwise a bisection along the Fiedler vector of the
+     interaction graph cutting the fewest covalent bonds (residue pairs
+     bonded by distance, fragment.bonded_residue_pairs, any residue type)
+     and then the fewest interactions per pair of residues separated,
+     repeated until every cluster has at most the maximum (tst_48).
+   - refine.hd_mapper.expand no longer asserts that every atom has a
+     non-zero gradient (a legitimately zero gradient stopped the run).
    - Re-clustering during refinement (cluster.re_calculate_rmsd_tolerance)
      never happened in mode=refine: the check looked for an attribute the
      clustered restraints manager does not have, and the call it guarded
@@ -69,6 +85,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      list is gone, bonded residues are found by the interaction analysis.
 ### Changed
    - updating documentation.
+   - Fragmentation setup time (mmtbx.pair_interaction, outside this
+     repository; results are identical): the grid search for interacting
+     residue pairs keeps atoms in a cell list instead of scanning all atoms
+     per grid point, evaluates the density only for pairs with a cluster
+     residue (the others were never used) and only over the grid points
+     around the cluster, and the wave functions are extracted from Python
+     once per call; the 15 Bohr core neighbourhood is a flex selection
+     instead of a Python double loop. Fragment setup on 1i07 (1942 atoms,
+     15 clusters) went from 49 s to 17 s, the whole-model interaction search
+     scales with the number of atoms instead of its square.
+   - One monomer library server for all fragment models
+     (utils.hierarchy_utils.get_mon_lib_srv; mmtbx.model.manager.set_mon_lib_srv
+     and process() reusing it, outside this repository): the library was
+     read again for every fragment capper.
    - The cluster/fragment integrity check (fragment.check_residue_integrity)
      asserts that every residue group is taken whole, for any residue type,
      instead of looking for CA/CB atom names.
@@ -119,6 +149,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      per-altloc fragment code. Old .eff files that set the removed parameters
      now fail with an unknown-parameter error.
 ### Known limitations
+   - The buffer of a cluster is the residues it has a density interaction
+     with (one layer). A cctbx nonbonded term between residues without
+     such an interaction (an N...C contact at the van der Waals distance
+     two residues apart on a helix) is then missing from the fragment,
+     and the clustering-route gradient of that atom is off by ~1e-4 for
+     very small clusters (maxnum_residues_in_cluster of 2 on helix.pdb).
+     tst_10 uses 3.
    - Altloc labels that differ only by case (e.g. a and A) share one
      ase/<label>/ scratch folder on case-insensitive file systems.
 

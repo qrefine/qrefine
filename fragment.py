@@ -28,6 +28,28 @@ def check_residue_integrity(pdb_hierarchy, selection):
         rg.id_str(), n_selected, n)
     offset += n
 
+def bonded_residue_pairs(pdb_hierarchy):
+  """
+  Pairs (i, j), i < j, of 1-based residue group indices of pdb_hierarchy
+  with a covalent bond between the two residues, found by distance
+  (cctbx.crystal.distance_based_connectivity: any residue type).
+  """
+  from cctbx.crystal import distance_based_connectivity
+  atoms = pdb_hierarchy.atoms()
+  bond_sets = distance_based_connectivity.build_simple_two_way_bond_sets(
+    sites_cart = atoms.extract_xyz(),
+    elements   = atoms.extract_element())
+  residue_of = []
+  for i, rg in enumerate(pdb_hierarchy.residue_groups()):
+    residue_of.extend([i+1]*rg.atoms_size())
+  result = set()
+  for i, bonded in enumerate(bond_sets):
+    for j in bonded:
+      if(residue_of[i] != residue_of[j]):
+        result.add((min(residue_of[i], residue_of[j]),
+                    max(residue_of[i], residue_of[j])))
+  return sorted(result)
+
 def residues_within_radius(pdb_hierarchy, selection, radius):
   """
   Return positional indices (into pdb_hierarchy.atoms()) of all atoms of the
@@ -149,45 +171,35 @@ class fragments(object):
       self.interaction_list,
       size = n_residues,
       maxnum_residues_in_cluster = self.maxnum_residues_in_cluster,
-      bcc_threshold = self.bcc_threshold).get_clusters()
+      bcc_threshold = self.bcc_threshold,
+      bonded_pairs = bonded_residue_pairs(self.pdb_hierarchy)).get_clusters()
     self.clusters = sorted(clusters, key=len, reverse=True)
 
   def get_fragments(self):
-
-    def selected_atom_indices_in_entire_ph(selected_atom_indices_in_sub_ph, sub_ph):
-      selected = set(selected_atom_indices_in_sub_ph)
-      selected_atom_indices_in_entire_ph = []
-      for index, number in enumerate(sub_ph.atoms().extract_serial()):
-        if(index+1 in selected):
-          selected_atom_indices_in_entire_ph.append(int(number))
-      return selected_atom_indices_in_entire_ph
-
-    self.pdb_hierarchy_super.atoms_reset_serial()
+    """
+    Cluster atoms, fragment (cluster plus buffer) atoms and fragment
+    residues of every cluster, from pair_interaction.run on the super sphere.
+    Atoms are 1-based positions in pdb_hierarchy_super (the master copy is
+    its first block, so the cluster atoms are positions in pdb_hierarchy too);
+    residues are 1-based residue group indices.
+    """
+    self.pdb_hierarchy_super.atoms_reset_serial() # for the written PDB files
     ph = self.pdb_hierarchy_super
-    clusters = self.clusters##from graph clustring, molecular indices
-    ##loop over each cluster to define buffer region
-    ##fragment consists of cluster and buffer
+    clusters = self.clusters
     cluster_atoms_in_ph = []
     fragment_super_atoms_in_ph = []
     molecules_in_fragments = []
-    for i in range(len(clusters)):
+    for cluster in clusters:
       # pair_interaction.run changes the coordinates of the hierarchy it gets
       atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
-        pair_interaction.run(ph.deep_copy(), clusters[i])
-      atoms_in_one_cluster = selected_atom_indices_in_entire_ph(
-                                                  atoms_in_one_cluster, ph)
+        pair_interaction.run(ph.deep_copy(), cluster)
       cluster_atoms_in_ph.append(atoms_in_one_cluster)
-
-      atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
-                                                   atoms_in_one_fragment, ph)
       fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
       molecules_in_fragments.append(molecules_in_one_fragment)
-    if(self.two_buffers):## define a second buffer layer
+    if(self.two_buffers): # a second buffer layer around the first
       fragment_super_atoms_in_ph = []
       for molecules in molecules_in_fragments:
-        junk1,atoms_in_one_fragment,junk2 = pair_interaction.run(ph.deep_copy(),molecules)
-        atoms_in_one_fragment = selected_atom_indices_in_entire_ph(
-                                                   atoms_in_one_fragment, ph)
+        atoms_in_one_fragment = pair_interaction.run(ph.deep_copy(), molecules)[1]
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
     if(self.distance_buffer):
       fragment_super_atoms_in_ph = self.add_distance_buffer(
@@ -205,21 +217,19 @@ class fragments(object):
                           fragment_super_atoms_in_ph):
     """
     Extend each fragment with all residues of ph (the super-sphere hierarchy)
-    having an atom within self.distance_buffer_radius of the cluster. Atom
-    indices in the input and output lists are serial numbers in ph.
+    having an atom within self.distance_buffer_radius of the cluster. Atoms
+    in the input and output lists are 1-based positions in ph.
     """
-    serials = [int(sn) for sn in ph.atoms().extract_serial()]
-    serial_to_pos = dict((sn, i) for i, sn in enumerate(serials))
     result = []
     for cluster, fragment in zip(cluster_atoms_in_ph, fragment_super_atoms_in_ph):
-      selection = flex.bool(len(serials), False)
+      selection = flex.bool(ph.atoms_size(), False)
       selection = selection.set_selected(
-        flex.size_t([serial_to_pos[sn] for sn in cluster]), True)
+        flex.size_t([i-1 for i in cluster]), True)
       positions = residues_within_radius(
         pdb_hierarchy = ph,
         selection     = selection,
         radius        = self.distance_buffer_radius)
-      extra = [serials[i] for i in positions]
+      extra = [i+1 for i in positions]
       result.append(sorted(set(fragment) | set(extra)))
     return result
 

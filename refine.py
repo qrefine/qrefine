@@ -178,6 +178,7 @@ class hd_mapper(object):
         if(ag.atoms_size() == 0): rg.remove_atom_group(ag)
     self.order = flex.size_t(h.atoms().extract_tmp_as_size_t())
     assert self.order.size() == keep.count(True)
+    assert kept_h.issubset(set(self.order))
     self.n_keep = self.order.size()
     h = h.deep_copy()
     h.atoms().reset_i_seq()
@@ -218,12 +219,8 @@ class hd_mapper(object):
     g_all = flex.vec3_double(self.size, (0,0,0))
     g_all = g_all.set_selected(self.order, g_short)
     for i, j in self.pairs:
-      assert g_all[i] != (0,0,0), i
-      assert g_all[j] == (0,0,0), j
-    for i, j in self.pairs:
+      assert g_all[j] == (0,0,0), j # the dropped D has no gradient yet
       g_all[j] = g_all[i]
-    for g in g_all:
-      assert g != (0,0,0)
     return g_all
 
 def create_restraints_manager(params, model, working_folder="ase", log=None):

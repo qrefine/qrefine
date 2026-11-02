@@ -1,6 +1,19 @@
 from __future__ import print_function
 import mmtbx.model
+import mmtbx.monomer_library.server
 from libtbx.utils import null_out
+
+_mon_lib_srv = None
+
+def get_mon_lib_srv():
+  """
+  The one monomer library server of qrefine: reading the library takes a
+  few tenths of a second, and every fragment has its own model.
+  """
+  global _mon_lib_srv
+  if _mon_lib_srv is None:
+    _mon_lib_srv = mmtbx.monomer_library.server.server()
+  return _mon_lib_srv
 
 def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=None):
   """
@@ -21,6 +34,7 @@ def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None, log=
     crystal_symmetry  = crystal_symmetry,
     restraint_objects = cif_objects,
     log               = log)
+  model.set_mon_lib_srv(get_mon_lib_srv())
   model.process(make_restraints=True, grm_normalization=False,
     pdb_interpretation_params = params,)
   return model

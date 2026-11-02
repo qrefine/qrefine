@@ -1,6 +1,7 @@
 from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
+import numpy as np
 from qrefine import qr
 from boost_adaptbx import graph
 from boost_adaptbx.graph import clustering_algorithm
@@ -8,9 +9,104 @@ from boost_adaptbx.graph import connected_component_algorithm as cca
 from libtbx.program_template import ProgramTemplate
 from qrefine.fragment import fragments
 
+def connected_pieces(residues, neighbors):
+  """
+  The connected components of the residues (a list) in the graph given by
+  neighbors (residue -> set of residues), each sorted, in order of their
+  smallest residue.
+  """
+  left = set(residues)
+  pieces = []
+  while(left):
+    stack = [min(left)]
+    piece = set()
+    while(stack):
+      r = stack.pop()
+      if(r in piece): continue
+      piece.add(r)
+      stack.extend((neighbors[r] & left) - piece)
+    pieces.append(sorted(piece))
+    left -= piece
+  return pieces
+
+BOND_WEIGHT = 10 # a covalent bond versus one interaction, ordering only
+
+def bisect(residues, neighbors, bonded):
+  """
+  Cut the connected cluster residues (a list) in two parts, each of at least
+  a third of the residues, cutting the fewest covalent bonds (bonded:
+  residue -> set of residues it is bonded to) and, among those cuts, the
+  fewest interactions (edges of neighbors) per pair of residues separated
+  (the ratio cut: a cut through a dense block is balanced, a cut of a chain
+  is at its weakest link); ties go to the more balanced cut. The candidate
+  cuts are the prefixes of the residues ordered along the Fiedler vector
+  (the eigenvector of the second smallest eigenvalue of the graph Laplacian,
+  bonds weighing BOND_WEIGHT), which orders a chain along the chain and a
+  compact blob along its longest extent. Residue indices break ties in the
+  order, and the sign of the vector (arbitrary from the eigensolver) is
+  fixed by its first non-zero component.
+  """
+  n = len(residues)
+  index = dict((r, i) for i, r in enumerate(residues))
+  laplacian = np.zeros((n, n))
+  for r in residues:
+    for s in neighbors[r] | bonded[r]:
+      if(s in index):
+        w = BOND_WEIGHT if s in bonded[r] else 1
+        laplacian[index[r], index[s]] -= w
+        laplacian[index[r], index[r]] += w
+  fiedler = np.linalg.eigh(laplacian)[1][:, 1]
+  first = fiedler[np.abs(fiedler) > 1.e-9][0]
+  if(first < 0): fiedler = -fiedler
+  order = sorted(range(n), key=lambda i: (fiedler[i], residues[i]))
+  position = dict((residues[i], p) for p, i in enumerate(order))
+  def crossing(pairs, k): # pairs of positions separated by a cut after k
+    return sum(1 for p, q in pairs if p < k <= q)
+  edges = [(position[r], position[s]) for r in residues for s in neighbors[r]
+           if s in index and position[r] < position[s]]
+  bonds = [(position[r], position[s]) for r in residues for s in bonded[r]
+           if s in index and position[r] < position[s]]
+  smallest_part = max(1, (n+2)//3)
+  best = None # (bonds cut, ratio cut, imbalance, size of the first part)
+  for k in range(smallest_part, n-smallest_part+1):
+    candidate = (crossing(bonds, k), crossing(edges, k)/(k*(n-k)),
+                 abs(2*k-n), k)
+    if(best is None or candidate < best): best = candidate
+  k = best[3]
+  return [sorted(residues[i] for i in order[:k]),
+          sorted(residues[i] for i in order[k:])]
+
+def split_cluster(residues, neighbors, bonded, maxnum):
+  """
+  Split the cluster residues (a list) into connected clusters of at most
+  maxnum residues: a cluster that is not connected falls apart into its
+  pieces, a connected one too large is bisected, and the parts are split
+  again as needed.
+  """
+  assert maxnum >= 1
+  pieces = connected_pieces(residues, neighbors)
+  if(len(pieces) == 1 and len(residues) <= maxnum): return [sorted(residues)]
+  if(len(pieces) == 1): pieces = bisect(residues, neighbors, bonded)
+  result = []
+  for piece in pieces:
+    result.extend(split_cluster(piece, neighbors, bonded, maxnum))
+  return result
+
 class betweenness_centrality_clustering(object):
-  def __init__(self, interaction_list,maxnum_residues_in_cluster=20,bcc_threshold=9,size=None):
+  """
+  Clusters (lists of 1-based residue indices) of a system of size residues
+  from its interaction_list (pairs of residue indices): betweenness
+  centrality clustering of the interaction graph, with the threshold
+  lowered from bcc_threshold (down to 4) until no cluster has more than
+  maxnum_residues_in_cluster residues; clusters still too large (a dense
+  block of residues has no edge of high centrality) are split by
+  split_cluster, which cuts as few of the bonded_pairs (covalently bonded
+  residue pairs, optional) as it can.
+  """
+  def __init__(self, interaction_list,maxnum_residues_in_cluster=20,bcc_threshold=9,size=None,
+               bonded_pairs=None):
     self.interaction_list = interaction_list
+    self.bonded_pairs = bonded_pairs or []
     self.g = graph.adjacency_list(
       graph_type="undirected",
       vertex_type="vector",
@@ -32,16 +128,21 @@ class betweenness_centrality_clustering(object):
         clustering = False
       else:
         threshold -= 1
+    neighbors = dict((r, set()) for r in range(1, self.size+1))
+    for i, j in self.interaction_list:
+      neighbors[i].add(j)
+      neighbors[j].add(i)
+    bonded = dict((r, set()) for r in range(1, self.size+1))
+    for i, j in self.bonded_pairs:
+      bonded[i].add(j)
+      bonded[j].add(i)
     final_components = []
     for component in components:
-      component[:] = [x + 1 for x in component]
-      if len(component) > self.maxnum_residues_in_cluster:
-        component.sort()
-        index = int(len(component)/2)
-        final_components.append(component[:index])
-        final_components.append(component[index:])
-      else:
-        final_components.append(component)
+      final_components.extend(split_cluster(
+        residues  = sorted(x + 1 for x in component),
+        neighbors = neighbors,
+        bonded    = bonded,
+        maxnum    = self.maxnum_residues_in_cluster))
     return final_components
 
   def build_graph(self):
