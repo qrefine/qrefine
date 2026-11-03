@@ -3,26 +3,38 @@ Conformer models of a model with alternative conformations (altlocs).
 
 Conformer labels are the altloc labels that have at least one non-hydrogen
 atom; hydrogen-only labels (neutron H/D exchange sites) are not conformers.
-Conformer X is the set of atoms with blank altloc, with label X, or with a
-hydrogen-only label, in model order. split() returns each conformer as a
-genuine single-conformer model: every atom group relabeled to blank and
-merged into one atom group per residue group, atom order preserved, so no
-downstream code (fragments, capper, charges, QM engines) sees an altloc.
+The own labels of a residue group are the conformer labels present in it.
+Conformer X takes, from every residue group: all its atoms if it has no own
+labels; its blank atoms, X atoms and hydrogen-only-label atoms if X is one
+of its own labels; otherwise (fallback) its blank atoms, hydrogen-only-label
+atoms and the atoms of its parent label, the first of its sorted own labels.
+Atoms are in model order. split() returns each conformer as a genuine
+single-conformer model: every atom group relabeled to blank and merged into
+one atom group per residue group, atom order preserved, so no downstream
+code (fragments, capper, charges, QM engines) sees an altloc.
 
-Every residue group that has conformer labels must have all of the model's
-conformer labels, otherwise conformer models would lack atoms (Sorry).
+The fallback could break a peptide bond: a residue group lacking X whose
+parent link atom (C, or N) is labelled, next to a residue group with X whose
+link atom (N, or C) under X is labelled too. split() then requires the two
+link atoms to be bonded (iotbx.pdb.altloc_completion.bonded), otherwise
+Sorry. Pairs of residue groups without any bonded C-N pair (chain breaks,
+ligands) are not checked.
 
-The multiplicity of an atom is the number of conformers it belongs to: 1 for
-atoms with a conformer label, the number of conformers (at least 1) for all
-others.
-Occupancies are not used.
+The multiplicity of an atom is the number of conformer models it belongs to
+(membership): blank atoms belong to all, an atom with a conformer label to
+its own conformer plus every conformer its residue group takes it into by
+the fallback. Occupancies are not used.
 
 from_conformers combines the gradients of one restraints manager per
 conformer: g_i = (1/m_i) * sum over conformers c containing atom i of g_c,i.
+
+check_completed() requires the model to be completed already
+(iotbx.pdb.altloc_completion, done by mmtbx.reduce2 qmready=true).
 """
 from __future__ import absolute_import, division, print_function
 import os
 import mmtbx.model
+from iotbx.pdb import altloc_completion
 from libtbx import group_args
 from libtbx.utils import Sorry, null_out
 from scitbx.array_family import flex
@@ -46,32 +58,136 @@ def conformer_labels(pdb_hierarchy):
 def n_conformers(pdb_hierarchy):
   return len(conformer_labels(pdb_hierarchy))
 
+def _own_labels(residue_group, labels):
+  """
+  Sorted conformer labels (labels: set of the model's) of a residue group.
+  """
+  return sorted(set([ag.altloc for ag in residue_group.atom_groups()]) &
+    labels)
+
+def _selections(pdb_hierarchy):
+  """
+  Per conformer label: (group_args(label, iselection, n_fallback), parents)
+  with parents mapping residue group memory_id to the parent label of every
+  residue group lacking this label.
+  """
+  labels = conformer_labels(pdb_hierarchy)
+  label_set = set(labels)
+  rgs = [(rg, _own_labels(rg, label_set))
+    for rg in pdb_hierarchy.residue_groups()]
+  result = []
+  for label in labels:
+    parents = {}
+    keep = flex.bool()
+    for rg, own in rgs:
+      take = label
+      if(len(own) > 0 and label not in own):
+        take = own[0]
+        parents[rg.memory_id()] = take
+      for ag in rg.atom_groups():
+        keep.extend(flex.bool(ag.atoms_size(),
+          ag.altloc not in label_set or ag.altloc == take))
+    assert keep.size() == pdb_hierarchy.atoms_size()
+    result.append((group_args(
+      label      = label,
+      iselection = keep.iselection(),
+      n_fallback = len(parents)), parents))
+  return result
+
+def conformer_selections(pdb_hierarchy):
+  """
+  One group_args(label, iselection, n_fallback) per conformer label, in
+  conformer_labels order: iselection (ascending) selects the atoms of
+  conformer label (module docstring), n_fallback is the number of residue
+  groups lacking label that take their parent label.
+  """
+  return [s for s, parents in _selections(pdb_hierarchy)]
+
 def multiplicity(pdb_hierarchy):
   """
-  Per atom number of conformers it belongs to: 1 for atoms with a conformer
-  label, max(n_conformers, 1) for blank and hydrogen-only-label atoms. Never
-  0: a model without conformer labels gives 1 for every atom.
+  Per atom number of conformer models it belongs to (conformer_selections).
+  Never 0: a model without conformer labels gives 1 for every atom.
   """
-  labels = set(conformer_labels(pdb_hierarchy))
-  n = float(max(len(labels), 1))
-  return flex.double(
-    [1.0 if a.parent().altloc in labels else n for a in pdb_hierarchy.atoms()])
+  selections = conformer_selections(pdb_hierarchy)
+  if(len(selections) == 0):
+    return flex.double(pdb_hierarchy.atoms_size(), 1.0)
+  result = flex.double(pdb_hierarchy.atoms_size(), 0.0)
+  for s in selections:
+    result.set_selected(s.iselection, result.select(s.iselection) + 1.0)
+  return result
 
-def _check_complete(pdb_hierarchy, all_labels):
-  all_labels = set(all_labels)
-  for rg in pdb_hierarchy.residue_groups():
-    labels = set([ag.altloc for ag in rg.atom_groups()]) & all_labels
-    if(len(labels) > 0 and labels != all_labels):
-      raise Sorry("Residue %s has altlocs %s but model has %s: conformers "
-        "would be incomplete." % (rg.id_str(), sorted(labels),
-        sorted(all_labels)))
+def _atom(residue_group, altloc, name):
+  for ag in residue_group.atom_groups():
+    if(ag.altloc != altloc): continue
+    for a in ag.atoms():
+      if(a.name.strip() == name): return a
+  return None
 
-def _single_conformer_hierarchy(pdb_hierarchy, iselection, label):
+def _peptide_linked(rg_1, rg_2):
+  """
+  True if some atom C of rg_1 (any label) is bonded to some N of rg_2.
+  """
+  cs = [a for a in rg_1.atoms() if a.name.strip() == "C"]
+  ns = [a for a in rg_2.atoms() if a.name.strip() == "N"]
+  for c in cs:
+    for n in ns:
+      if(altloc_completion.bonded(c, n)): return True
+  return False
+
+def _residue_id(atom):
+  """Residue id with a blank altloc position, e.g. ' TYR A  94 '"""
+  return " " + atom.parent().id_str()[1:]
+
+def check_links(pdb_hierarchy, label, parents):
+  """
+  Sorry if conformer label breaks a peptide bond by the fallback. parents
+  maps residue group memory_id to the parent label of every residue group
+  lacking label. For consecutive residue groups of a chain, one lacking
+  label (parent P) and the other having it, the link atom of the lacking one
+  under P (C if it comes first, N otherwise) and the link atom of the other
+  under label must be bonded when both exist. Not checked when no C-N pair
+  of the two residue groups is bonded (chain break, ligand).
+  """
+  for chain in pdb_hierarchy.chains():
+    rgs = chain.residue_groups()
+    for rg_1, rg_2 in zip(rgs[:-1], rgs[1:]):
+      lacks_1 = rg_1.memory_id() in parents
+      lacks_2 = rg_2.memory_id() in parents
+      if(lacks_1 == lacks_2): continue
+      if(lacks_1): lacking, other, name_l, name_o = rg_1, rg_2, "C", "N"
+      else:        lacking, other, name_l, name_o = rg_2, rg_1, "N", "C"
+      parent = parents[lacking.memory_id()]
+      a = _atom(lacking, parent, name_l)
+      b = _atom(other, label, name_o)
+      if(a is None or b is None): continue
+      if(altloc_completion.bonded(a, b)): continue
+      if(not _peptide_linked(rg_1, rg_2)): continue
+      raise Sorry("conformer %s: residue %s takes its first label %s, but "
+        "its %s is not bonded to %s of residue %s (%.2f A)" % (label,
+        _residue_id(a), parent, name_l, name_o, _residue_id(b),
+        a.distance(b)))
+
+def check_completed(pdb_hierarchy):
+  """
+  Sorry if iotbx.pdb.altloc_completion would share or copy atoms, i.e. the
+  model was not completed by mmtbx.reduce2 qmready=true.
+  """
+  r = altloc_completion.run(pdb_hierarchy, check_only=True)
+  if(len(r.shared) + len(r.copied) == 0): return
+  atoms = ["%s %s" % (e[0], e[1]) for e in list(r.shared) + list(r.copied)]
+  listing = ", ".join(atoms[:5])
+  if(len(atoms) > 5): listing += ", ..."
+  raise Sorry("Altloc completion needed: %d atoms to share and %d to copy "
+    "(%s): run mmtbx.reduce2 qmready=true on the model first" % (
+    len(r.shared), len(r.copied), listing))
+
+def _single_conformer_hierarchy(pdb_hierarchy, iselection, label, labels):
   """
   pdb_hierarchy.select(iselection) with all atom groups of a residue group
   relabeled to blank and merged into the first one (atom order preserved).
   The merged atom group takes the resname of the atom group with this label,
-  if any (microheterogeneity).
+  if any, else that of the atom group with another conformer label (the
+  parent label, the only one selected), else the first (microheterogeneity).
   """
   ph = pdb_hierarchy.deep_copy()
   for i, a in enumerate(ph.atoms()):
@@ -81,8 +197,9 @@ def _single_conformer_hierarchy(pdb_hierarchy, iselection, label):
   h = ph.select(iselection)
   for rg in h.residue_groups():
     ags = rg.atom_groups()
-    resnames = [ag.resname for ag in ags if ag.altloc == label]
-    resname = resnames[0] if len(resnames) > 0 else ags[0].resname
+    resnames = [ag.resname for ag in ags if ag.altloc == label] + \
+      [ag.resname for ag in ags if ag.altloc in labels] + [ags[0].resname]
+    resname = resnames[0]
     for ag in ags:
       ag.altloc = ""
       # merge_atom_groups asserts equal resname
@@ -98,31 +215,31 @@ def _single_conformer_hierarchy(pdb_hierarchy, iselection, label):
 
 def split(model):
   """
-  One group_args(label, iselection, model) per conformer label, in
-  conformer_labels order. iselection (ascending) selects blank atoms, atoms
-  with this label and atoms with hydrogen-only labels; model is the
-  unprocessed single-conformer mmtbx.model.manager of these atoms, in
-  iselection order.
+  One group_args(label, iselection, model, n_fallback) per conformer label,
+  in conformer_labels order. iselection is that of conformer_selections;
+  model is the unprocessed single-conformer mmtbx.model.manager of these
+  atoms, in iselection order. Runs check_links for every label first.
   Microheterogeneity (atom groups of a residue group with different resnames)
   is supported: in conformer X's model the residue takes the resname of the
-  atom group with label X; blank and hydrogen-only-label atoms adopt it.
+  atom group with label X (or of its parent label); blank and
+  hydrogen-only-label atoms adopt it.
   """
   ph = model.get_hierarchy()
-  labels = conformer_labels(ph)
-  _check_complete(ph, labels)
-  altlocs = [a.parent().altloc for a in ph.atoms()]
+  labels = set(conformer_labels(ph))
+  selections = _selections(ph)
+  for s, parents in selections:
+    check_links(pdb_hierarchy=ph, label=s.label, parents=parents)
   result = []
-  for label in labels:
-    iselection = flex.bool(
-      [not (al in labels and al != label) for al in altlocs]).iselection()
-    h = _single_conformer_hierarchy(ph, iselection, label)
+  for s, parents in selections:
+    h = _single_conformer_hierarchy(ph, s.iselection, s.label, labels)
     m = mmtbx.model.manager(
       model_input       = None,
       pdb_hierarchy     = h,
       crystal_symmetry  = model.crystal_symmetry(),
       restraint_objects = model.get_restraint_objects(),
       log               = null_out())
-    result.append(group_args(label = label, iselection = iselection, model = m))
+    result.append(group_args(label = s.label, iselection = s.iselection,
+      model = m, n_fallback = s.n_fallback))
   return result
 
 class fragment_manager_proxy(object):
@@ -160,6 +277,9 @@ class from_conformers(object):
       folder = os.path.join(working_folder, c.label)
       print("Conformer %s: %d atoms, folder %s" % (
         c.label, c.iselection.size(), folder), file=log)
+      if(c.n_fallback > 0):
+        print("  %d residue groups without label %s take their first own "
+          "label" % (c.n_fallback, c.label), file=log)
       c.restraints_manager = build(c.model, folder)
       fm = getattr(c.restraints_manager, "fragment_manager", None)
       if(fm is not None): fragment_managers.append(fm)

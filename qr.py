@@ -456,6 +456,12 @@ and quantum.engine_name=aimnet2:
         print("  WARNING: altlocs of %d groups of residues cannot be made "
           "consistent; refinement continues with the labels as they are." %
           len(r.unresolved), file=self.logger)
+    # Completion is the job of mmtbx.reduce2 qmready=true: stop if needed.
+    # Native handling gives the model to cctbx restraints, which accept
+    # partial altlocs.
+    if(conformers.n_conformers(self.model.get_hierarchy()) > 1 and
+       self.params.altlocs.handling == "conformers"):
+      conformers.check_completed(self.model.get_hierarchy())
     if(self.params.scattering_table == "electron"):
       self.model.neutralize_scatterers()
     params = mmtbx.model.manager.get_default_pdb_interpretation_params()

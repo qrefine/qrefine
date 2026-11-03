@@ -203,25 +203,153 @@ def exercise_microheterogeneity():
         n_blank = rg.atom_groups()[0].atoms_size()
         assert len(rg_atoms) == n_blank + 1
 
-def exercise_incomplete_conformers():
+def _model_with_tyr94_c(file_name="h_altconf_complete.pdb"):
   """
-  Residue with A/B/C in a model where other residues have only A/B: conformer
-  C would lack atoms, which QM cannot handle.
+  file_name with a C atom group on TYR 94 only (copy of its B group);
+  occupancies of TYR 94: A 0.4, B 0.35, C 0.25.
   """
-  pi = iotbx.pdb.input(
-    file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb"))
-  model = mmtbx.model.manager(model_input=pi, log=null_out())
-  ph = model.get_hierarchy()
-  rgs = [rg for rg in ph.residue_groups() if rg.atom_groups_size() > 1]
-  assert len(rgs) > 1
-  ag_c = rgs[0].atom_groups()[-1].detached_copy()
+  pi = iotbx.pdb.input(file_name = os.path.join(qr_unit_tests_data,file_name))
+  ph = pi.construct_hierarchy()
+  rg = [rg for rg in ph.residue_groups() if rg.resseq_as_int() == 94][0]
+  assert [ag.altloc for ag in rg.atom_groups()] == ["A", "B"]
+  ag_c = rg.atom_groups()[-1].detached_copy()
   ag_c.altloc = "C"
-  rgs[0].append_atom_group(ag_c)
+  rg.append_atom_group(ag_c)
+  for ag, occ in zip(rg.atom_groups(), [0.4, 0.35, 0.25]):
+    ag.atoms().set_occ(flex.double(ag.atoms_size(), occ))
+  ph.atoms().reset_i_seq()
+  ph.atoms_reset_serial()
+  return mmtbx.model.manager(model_input=None, pdb_hierarchy=ph,
+    crystal_symmetry=pi.crystal_symmetry(), log=null_out())
+
+def exercise_fallback():
+  """
+  Residue group lacking a conformer label X takes the atoms of its first own
+  label into conformer X: TYR 94 has A/B/C, GLY 95 only A/B (H atoms), so
+  conformer C takes GLY 95's A atoms. Multiplicity is membership.
+  """
+  model = _model_with_tyr94_c()
+  ph = model.get_hierarchy()
+  sel = conformers.conformer_selections(ph)
+  assert [s.label for s in sel] == ["A", "B", "C"]
+  assert [s.n_fallback for s in sel] == [0, 0, 1]
+  def i_seqs(resseq, altloc):
+    return flex.size_t([a.i_seq for a in ph.atoms()
+      if a.parent().parent().resseq_as_int() == resseq and
+         a.parent().altloc == altloc])
+  gly95_a, gly95_b = i_seqs(95, "A"), i_seqs(95, "B")
+  assert gly95_a.size() == gly95_b.size() == 1
+  tyr94 = flex.size_t([a.i_seq for a in ph.atoms()
+    if a.parent().parent().resseq_as_int() == 94])
+  blank = flex.size_t([a.i_seq for a in ph.atoms() if a.parent().altloc == ""])
+  isel_c = set(sel[2].iselection)
+  assert all(i in isel_c for i in gly95_a)
+  assert not any(i in isel_c for i in gly95_b)
+  for s in sel:
+    assert list(s.iselection) == sorted(s.iselection)
+  m = conformers.multiplicity(ph)
+  assert m.size() == ph.atoms_size()
+  assert m.select(gly95_a).all_eq(2.0) and m.select(gly95_b).all_eq(1.0)
+  assert m.select(tyr94).all_eq(1.0) and m.select(blank).all_eq(3.0)
+  # the old Sorry ("conformers would be incomplete") is gone
+  parts = conformers.split(model)
+  assert len(parts) == 3
+  assert [p.label for p in parts] == ["A", "B", "C"]
+  for p, s in zip(parts, sel):
+    assert list(p.iselection) == list(s.iselection)
+    assert p.model.get_hierarchy().atoms_size() == s.iselection.size()
+  # from_conformers reports the fallback
+  from six.moves import cStringIO as StringIO
+  log = StringIO()
+  conformers.from_conformers(model=model, log=log,
+    build=lambda conformer_model, working_folder: _dummy_manager(False))
+  text = log.getvalue()
+  assert text.find("1 residue groups without label C take their first own "
+    "label") > -1, text
+  assert text.find("without label A") == -1 and \
+    text.find("without label B") == -1
+
+pdb_str_link_guard = """
+CRYST1   30.000   30.000   30.000  90.00  90.00  90.00 P 1
+ATOM      1  N  AALA A   1      -1.521   3.898   0.713  0.40 20.00           N
+ATOM      2  CA AALA A   1      -1.879   2.678   1.370  0.40 20.00           C
+ATOM      3  CB AALA A   1      -3.346   2.715   1.747  0.40 20.00           C
+ATOM      4  C  AALA A   1      -1.551   1.486   0.458  0.40 20.00           C
+ATOM      5  O  AALA A   1      -2.007   1.439  -0.662  0.40 20.00           O
+ATOM      6  N  BALA A   1      -1.521   3.898   4.713  0.40 20.00           N
+ATOM      7  CA BALA A   1      -1.879   2.678   5.370  0.40 20.00           C
+ATOM      8  CB BALA A   1      -3.346   2.715   5.747  0.40 20.00           C
+ATOM      9  C  BALA A   1      -1.551   1.486   4.458  0.40 20.00           C
+ATOM     10  O  BALA A   1      -2.007   1.439   3.338  0.40 20.00           O
+ATOM     11  N  CALA A   1      -1.521   3.898   4.713  0.20 20.00           N
+ATOM     12  CA CALA A   1      -1.879   2.678   5.370  0.20 20.00           C
+ATOM     13  CB CALA A   1      -3.346   2.715   5.747  0.20 20.00           C
+ATOM     14  C  CALA A   1      -1.551   1.486   4.458  0.20 20.00           C
+ATOM     15  O  CALA A   1      -2.007   1.439   3.338  0.20 20.00           O
+ATOM     16  N  %sALA A   2      -0.744   0.404   0.952  0.50 20.00           N
+ATOM     17  CA %sALA A   2      -0.493  -0.749   0.119  0.50 20.00           C
+ATOM     18  CB %sALA A   2      -1.476  -1.885   0.331  0.50 20.00           C
+ATOM     19  C  %sALA A   2       0.972  -1.193   0.100  0.50 20.00           C
+ATOM     20  O  %sALA A   2       1.603  -1.231   1.129  0.50 20.00           O
+ATOM     21  N  %sALA A   2      -0.744   0.404   4.952  0.50 20.00           N
+ATOM     22  CA %sALA A   2      -0.493  -0.749   4.119  0.50 20.00           C
+ATOM     23  CB %sALA A   2      -1.476  -1.885   4.331  0.50 20.00           C
+ATOM     24  C  %sALA A   2       0.972  -1.193   4.100  0.50 20.00           C
+ATOM     25  O  %sALA A   2       1.603  -1.231   5.129  0.50 20.00           O
+END
+"""
+
+def exercise_link_guard():
+  """
+  ALA-ALA dipeptide (as tst_41.pdb_str_swapped): residue 1 under A/B/C with
+  B and C the A conformer shifted 4 A along z; residue 2 under A/B only.
+  With residue 2's B shifted, conformer C of residue 1 bonds to residue 2's
+  B, but residue 2 takes its first label A into conformer C: the peptide
+  bond would be broken (Sorry). With residue 2's A shifted: no Sorry.
+  """
+  for unshifted, shifted, fails in [("A", "B", True), ("B", "A", False)]:
+    pdb_str = pdb_str_link_guard % tuple([unshifted]*5 + [shifted]*5)
+    pi = iotbx.pdb.input(source_info=None, lines=pdb_str)
+    model = mmtbx.model.manager(model_input=pi, log=null_out())
+    sel = conformers.conformer_selections(model.get_hierarchy())
+    assert [s.n_fallback for s in sel] == [0, 0, 1]
+    try:
+      parts = conformers.split(model)
+    except Sorry as e:
+      assert fails
+      e = str(e)
+      assert e.find("conformer C") > -1, e
+      assert e.find("residue") > -1 and e.find("not bonded") > -1, e
+      assert e.find(" ALA A   1 ") > -1 and e.find(" ALA A   2 ") > -1, e
+      assert e.find(" C ") > -1 and e.find(" N ") > -1, e
+    else:
+      assert not fails
+      assert len(parts) == 3
+
+def exercise_check_completed():
+  """
+  check_completed: Sorry naming the atoms reduce2 qmready would complete.
+  TYR 94 B made identical to A, then its OH removed: OH of A is bonded to
+  CZ of B, so it would be shared.
+  """
+  file_name = os.path.join(qr_unit_tests_data, "h_altconf_complete.pdb")
+  ph = iotbx.pdb.input(file_name = file_name).construct_hierarchy()
+  conformers.check_completed(ph) # complete model: no exception
+  rg = [rg for rg in ph.residue_groups() if rg.resseq_as_int() == 94][0]
+  ag_a, ag_b = rg.atom_groups()
+  xyz_a = dict([(a.name, a.xyz) for a in ag_a.atoms()])
+  for a in ag_b.atoms():
+    a.xyz = xyz_a[a.name]
+  ag_b.remove_atom([a for a in ag_b.atoms() if a.name.strip() == "OH"][0])
   ph.atoms().reset_i_seq()
   try:
-    conformers.split(model)
+    conformers.check_completed(ph)
   except Sorry as e:
-    assert str(e).find("conformers would be incomplete") > -1
+    e = str(e)
+    assert e.find("mmtbx.reduce2 qmready=true") > -1, e
+    assert e.find("OH") > -1, e
+    assert e.find("Altloc completion needed: 1 atoms to share and 0 to "
+      "copy ( TYR A  94  OH)") > -1, e
   else: raise AssertionError("Expected Sorry for incomplete conformers")
 
 def exercise_split():
@@ -283,7 +411,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   for labels in [["A","B"], ["A","B","C"], ["A","B","C","D"]]:
     exercise_duplicate(labels=labels)
   exercise_proxy()
-  exercise_incomplete_conformers()
+  exercise_fallback()
+  exercise_link_guard()
+  exercise_check_completed()
   exercise_microheterogeneity()
 
 if(__name__ == '__main__'):
