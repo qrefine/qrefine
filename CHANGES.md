@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      to a few percent; in vacuum they agree to 0.2 %.
    - tst_47: the auxiliary command lines qr.cluster, qr.charges, qr.restraint
      and qr.gtest run (cctbx restraints).
+   - tst_53: qr.refine refines a model capped by mmtbx.reduce2 capping=True
+     (cctbx restraints and MOPAC); the caps keep occupancy 0 and
+     phenix.pdbtools remove=capping_h strips exactly the caps.
 ### Fixed
    - Fragments were keyed by atom serial numbers converted with int():
      serial numbers above 99999 are hybrid-36 strings, so a super sphere of
