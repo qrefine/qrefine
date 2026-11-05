@@ -36,6 +36,7 @@ from qrefine import restraints
 from qrefine import cluster_restraints
 from qrefine import conformers
 from qrefine import results
+from mmtbx.hydrogens import xh_mapper
 
 from libtbx import Auto
 from cctbx import maptbx
@@ -267,7 +268,8 @@ def create_calculator(params,
                       geometry_rmsd_manager,
                       fmodel=None,
                       hdm=None,
-                      exclude_selection=None):
+                      exclude_selection=None,
+                      mapper=None):
   # Define freeze selection
   fr = params.refine.freeze
   freeze_selection = None
@@ -290,7 +292,9 @@ def create_calculator(params,
         exclude_selection     = exclude_selection,
         restraints_manager    = restraints_manager,
         dump_gradients        = params.dump_gradients,
-        max_shift             = params.refine.stpmax)
+        max_shift             = params.refine.stpmax,
+        sites_cart            = model.get_sites_cart(),
+        mapper                = mapper)
     else:
       # XXX
       # XXX hdm are not used XXX
@@ -381,6 +385,24 @@ def check_qm_sees_crystal_neighbours(model, params, map_data):
     "(fragments built with neighbours), or reduce select_within_radius if the "
     "neighbours are known to be negligible." % radius)
 
+def check_model_fmodel_order(model, fmodel, tolerance=1.e-3):
+  """
+  Stop if the atoms of model and the scatterers of fmodel are not in the
+  same order, which is the case when the input atoms are not in the order the
+  data manager sorts them into (fmodel comes from the model built with
+  sort_atoms=True, model is processed with sort_atoms=False). Call while both
+  hold the input sites.
+  """
+  sites_model = model.get_sites_cart()
+  sites_fmodel = fmodel.xray_structure.sites_cart()
+  if(sites_model.size() == sites_fmodel.size() and
+     sites_fmodel.rms_difference(sites_model) <= tolerance):
+    return
+  raise Sorry("Model and fmodel atom order differ: the input atoms are not "
+    "in the order the data manager sorts them into (scatterer k of fmodel "
+    "is not atom k of the model). Reorder the input atoms into sorted order "
+    "and rerun.")
+
 def run(model, fmodel, map_data, params, rst_file, prefix, log):
   set_qm_defaults(params,log)
   n_conf = conformers.n_conformers(model.get_hierarchy())
@@ -405,10 +427,31 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
   #
   if(params.refine.dry_run): return
   #
+  if(fmodel is not None):
+    check_model_fmodel_order(model = model, fmodel = fmodel)
+  #
+  # X-H mapper: the model holds nuclear sites, fmodel their scattering view
+  # (X-ray X-H lengths with an X-ray table). Not used without fmodel, in
+  # real-space or in opt mode.
+  mapper = None
+  if(fmodel is not None and map_data is None and
+     params.refine.mode == "refine"):
+    mapper = xh_mapper.mapper(model)
+    if(calculator.mapper_is_active(mapper)):
+      print("X-H mapper: active, %d H mapped (fmodel sees X-ray X-H lengths)"%
+        mapper.i_h.size(), file=log)
+      model.set_sites_cart(mapper.expand(model.get_sites_cart()))
+    else:
+      print("X-H mapper: identity (%s scattering table)"%
+        model.get_scattering_table(), file=log)
+  #
+  output_mapper = mapper
+  if(params.write_nuclear_h_positions): output_mapper = None
   monitor = results.manager(
     model                 = model,
     geometry_rmsd_manager = geometry_rmsd_manager,
-    log                   = log)
+    log                   = log,
+    output_mapper         = output_mapper)
   monitor.update(fmodel = fmodel, model = model)
   if(params.rst_file is None):
     if(params.output_file_name_prefix is None):
@@ -487,7 +530,22 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       params                = params,
       restraints_manager    = restraints_manager,
       hdm                   = hdm,
-      exclude_selection     = exclude_selection)
+      exclude_selection     = exclude_selection,
+      mapper                = mapper)
+    if(calculator.mapper_is_active(mapper)):
+      # The calculator gave fmodel the shrunk sites (no calculator with
+      # refine_sites=False: set them here); rescale.
+      if(calculator_manager is None):
+        fmodel.xray_structure.set_sites_cart(
+          mapper.shrink(model.get_sites_cart()))
+        fmodel.update_xray_structure(update_f_calc = True)
+      fmodel.update_all_scales(remove_outliers=False,
+        refine_hd_scattering=False)
+      if(calculator_manager is not None):
+        calculator_manager.reset_fmodel(fmodel = fmodel)
+      print("Starting r-factors (H at X-ray positions): r_work=%6.4f "
+        "r_free=%6.4f"%(fmodel.r_work(), fmodel.r_free()), file=log)
+      monitor.update(fmodel = fmodel, model = model)
     if(params.refine.mode == "refine"):
       #
       # Optimize H
@@ -497,7 +555,12 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
         print("Optimize H with d.o.f.", file=log)
         print("  start: r_work=%6.4f r_free=%6.4f"%(
           fmodel.r_work(), fmodel.r_free()), file=log)
-        mmtbx.hydrogens.fit_rotatable2(model=model, fmodel=fmodel)
+        mmtbx.hydrogens.fit_rotatable2(model=model, fmodel=fmodel,
+          reset_h=False, mapper=mapper)
+        print("  rotatable H fitted on the nuclear model (no X-H length "
+          "reset, no riding idealization)", file=log)
+        if(calculator_manager is not None):
+          calculator_manager.set_sites(model.get_sites_cart())
         print("  final: r_work=%6.4f r_free=%6.4f"%(
           fmodel.r_work(), fmodel.r_free()), file=log)
         monitor.update(fmodel = fmodel, model = model)
@@ -527,9 +590,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
             params     = params,
             calculator = calculator_sites_opt_pre,
             monitor    = monitor)
-          fmodel.xray_structure.set_sites_cart(
-            sites_cart = monitor.model.get_sites_cart())
-          fmodel.update_xray_structure(update_f_calc  = True)
+          calculator_manager.set_sites(monitor.model.get_sites_cart())
           print("  r_work: %6.4f r_free: %6.4f"%(
             fmodel.r_work(), fmodel.r_free()), file=log)
         # PRE-OPTIMIZATION (CODITIONAL) END

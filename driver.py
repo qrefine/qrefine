@@ -27,7 +27,7 @@ class clustering_update(object):
     if(rmsd_diff > self.rmsd_tolerance):
       print(" rmsd_diff: ", rmsd_diff, "--> need to redo clustering", file=self.log)
       calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
-      self.pre_sites_cart = sites_cart
+      self.pre_sites_cart = sites_cart.deep_copy()
 
 def run_minimize(calculator, params, mode=None):
   max_iterations = params.refine.max_iterations_refine
@@ -62,7 +62,7 @@ def refine(fmodel,
   clustering = params.cluster.clustering
   if(clustering):
     cluster_qm_update = clustering_update(
-      pre_sites_cart = calculator.fmodel.xray_structure.sites_cart(),
+      pre_sites_cart = calculator.sites_cart_nuclear.deep_copy(),
       log            = log,
       rmsd_tolerance = params.cluster.re_calculate_rmsd_tolerance)
   print("Start:", file=log)
@@ -75,7 +75,9 @@ def refine(fmodel,
       fmodel             = fmodel_copy,
       hdm                = calculator.hdm,
       exclude_selection  = calculator.exclude_selection,
-      restraints_manager = calculator.restraints_manager)
+      restraints_manager = calculator.restraints_manager,
+      sites_cart         = calculator.sites_cart_nuclear,
+      mapper             = calculator.mapper)
     calculator.setw(
       data_weight             = data_weight,
       restraints_weight_scale = 1.,
@@ -90,20 +92,22 @@ def refine(fmodel,
     sites_cart = []
     restraints_weight_scale = flex.double()
     print("Data weight (initial):", data_weight, file=log)
+    # Nuclear start sites: fmodel_copy holds their scattering view
+    sites_cart_start = calculator.sites_cart_nuclear.deep_copy()
     #
     # Loop over weight search cycles
     for weight_cycle in range(params.refine.number_of_weight_search_cycles):
       fmodel = fmodel_copy.deep_copy() # Always use initial unchanged fmodel
-      calculator.reset_fmodel(fmodel = fmodel)
+      calculator.reset_fmodel(fmodel = fmodel, sites_cart = sites_cart_start)
       if(clustering):
         cluster_qm_update.re_clustering(calculator,
-          sites_cart = fmodel.xray_structure.sites_cart())
+          sites_cart = calculator.sites_cart_nuclear)
       # Run minimization with given weight
       run_minimize(
         calculator = calculator,
         params     = params,
         mode       = "weight")
-      monitor.update(fmodel = fmodel)
+      monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
       b_rmsds.append(round(monitor.b_rmsd,3))
       a_rmsds.append(round(monitor.a_rmsd,2))
       rws = calculator.restraints_weight_scale
@@ -156,17 +160,15 @@ def refine(fmodel,
       calculator.setw(restraints_weight_scale = restraints_weight_scale[index])
       print("Best Rfree from above: %6.4f"%r_frees[index], file=log)
       print("Best restraints scale:", round(restraints_weight_scale[index],3), file=log)
-      xrs = fmodel.xray_structure
-      xrs.set_sites_cart(sites_cart[index])
+      calculator.set_sites(sites_cart[index])
       fmodel.update_xray_structure(
-        xray_structure = xrs,
         update_f_calc  = True,
         update_f_mask  = True
         )
     fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
-    monitor.update(fmodel = fmodel)
+    monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
     print("At refinement start", file = log)
     monitor.show()
   #
@@ -178,7 +180,7 @@ def refine(fmodel,
   for refine_cycle in range(params.refine.number_of_refine_cycles):
     if(clustering):
       cluster_qm_update.re_clustering(calculator,
-        sites_cart = fmodel.xray_structure.sites_cart())
+        sites_cart = calculator.sites_cart_nuclear)
     run_minimize(
       calculator = calculator,
       params     = params,
@@ -186,7 +188,7 @@ def refine(fmodel,
     n_fev = calculator.n_tg_calls
     fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
     calculator.reset_fmodel(fmodel = fmodel)
-    monitor.update(fmodel = fmodel)
+    monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
     msg = "rws: %6.3f n_fev: %d"%(
       calculator.restraints_weight_scale, n_fev)
     monitor.show(prefix="%d:"%refine_cycle, suffix=msg)

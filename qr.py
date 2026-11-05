@@ -5,6 +5,7 @@ import os
 from libtbx.utils import Sorry, null_out
 from cctbx.array_family import flex
 import mmtbx.model
+from cctbx import maptbx
 
 from qrefine import refine, conformers
 
@@ -20,7 +21,7 @@ max_atoms = 50000
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
-scattering_table = *wk1995  it1992  n_gaussian electron neutron
+scattering_table = wk1995  it1992  *n_gaussian electron neutron
   .type = choice
   .help = Choices of scattering table for structure factors calculations
 cluster{
@@ -263,6 +264,11 @@ output_file_name_prefix = None
 output_folder_name = "pdb"
   .type = str
   .help = Output folder name
+write_nuclear_h_positions = False
+  .type = bool
+  .help = Write the refined nuclear H positions. Default: H positions follow \
+          the scattering-table convention, X-ray X-H lengths for X-ray \
+          tables, nuclear for neutron and electron.
 rst_file = None
   .type = str
   .help = Restart file to use for determining location in run. Loads previous \
@@ -470,9 +476,17 @@ and quantum.engine_name=aimnet2:
     params.pdb_interpretation.sort_atoms = False
     self.model.process(make_restraints=True, grm_normalization=False,
       pdb_interpretation_params = params)
+    # Resolution of the dictionaries as in phenix.refine: of the data, of the
+    # map, else 1 A.
+    d_min = 1.0
+    if(self.fmodel is not None):
+      d_min = self.fmodel.f_obs().d_min()
+    elif(self.map_data is not None):
+      d_min = maptbx.d99(map = self.map_data,
+        crystal_symmetry = self.model.crystal_symmetry()).result.d99
     self.model.setup_scattering_dictionaries(
       scattering_table  = self.params.scattering_table,
-      d_min             = 1.0,
+      d_min             = d_min,
       log               = self.logger)
     # Auto-cust (set) parameters
     #

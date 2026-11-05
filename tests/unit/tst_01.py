@@ -4,6 +4,8 @@ from __future__ import absolute_import
 import os
 import iotbx.pdb
 import mmtbx.f_model
+import mmtbx.model
+from libtbx.utils import null_out
 from qrefine.tests.unit import run_qrefine_in, run_fmodel
 
 pdb_str_good = """
@@ -260,8 +262,17 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.chdir(prefix)
   #
   pdb_good = "%s_good.pdb"%prefix
+  # re-baselined 2026-11: X-H mapper. qr.refine writes H at X-ray X-H lengths
+  # (X-ray table), so the synthetic data are computed from the good model with
+  # its H moved to X-ray lengths (nuclear-length data give r_work 0.008).
+  model_good = mmtbx.model.manager(
+    model_input = iotbx.pdb.input(source_info=None, lines=pdb_str_good),
+    log         = null_out())
+  model_good.process(make_restraints=True)
+  model_good.set_hydrogen_bond_length(use_neutron_distances=False,
+    show=False, log=null_out())
   with open(pdb_good, "w") as fo:
-    fo.write(pdb_str_good)
+    fo.write(model_good.model_as_pdb())
   #
   pdb_poor = "%s_poor.pdb"%prefix
   with open(pdb_poor, "w") as fo:

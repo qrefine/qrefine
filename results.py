@@ -7,8 +7,17 @@ import os
 from scitbx.array_family import flex
 
 class manager(object):
-  def __init__(self, model, geometry_rmsd_manager, log):
+  def __init__(self, model, geometry_rmsd_manager, log, output_mapper=None):
+    """
+    model holds the nuclear sites. output_mapper (None or an
+    mmtbx.hydrogens.xh_mapper.mapper) is applied (shrink) to them when
+    writing a PDB file (an identity mapper is not used); the model itself
+    stays nuclear.
+    """
     self.log = log
+    self.output_mapper = output_mapper
+    if(output_mapper is not None and output_mapper.is_identity):
+      self.output_mapper = None
     self.geometry_rmsd_manager = geometry_rmsd_manager
     self.model = model#.deep_copy()
     self.sites_cart_start = self.model.get_sites_cart().deep_copy()
@@ -28,16 +37,24 @@ class manager(object):
   def _get_a_rmsd(self):
     return self.geometry_rmsd_manager.angle_rmsd(sites_cart = self.sites_cart)
 
-  def update(self, fmodel=None, model=None):
+  def update(self, fmodel=None, model=None, sites_cart=None):
+    """
+    Sites (nuclear) from sites_cart when given, else from model, else from
+    fmodel; r_work and r_free from fmodel when given.
+    """
     def _(x,y): return flex.mean(flex.sqrt((x - y).dot()))
-    if fmodel is not None:
-      self.sites_cart = fmodel.xray_structure.sites_cart()
-      self.r_work = fmodel.r_work()
-      self.r_free = fmodel.r_free()
-    elif model is not None:
+    assert [fmodel, model, sites_cart].count(None) < 3
+    if(sites_cart is not None):
+      self.sites_cart = sites_cart.deep_copy()
+    elif(model is not None):
       self.sites_cart = model.get_sites_cart()
     else:
-      assert [fmodel, model].count(None) == 1
+      assert self.output_mapper is None, ("nuclear sites must be passed "
+        "explicitly when an X-H mapper is active")
+      self.sites_cart = fmodel.xray_structure.sites_cart()
+    if(fmodel is not None):
+      self.r_work = fmodel.r_work()
+      self.r_free = fmodel.r_free()
     self.model.set_sites_cart(sites_cart = self.sites_cart)
     self.b_rmsd = self._get_b_rmsd()
     self.a_rmsd = self._get_a_rmsd()
@@ -75,8 +92,15 @@ class manager(object):
 
   def write_pdb_file(self, output_file_name, output_folder_name):
     file_name = "%s" % os.path.join(output_folder_name, output_file_name)
-    with open(file_name,"w") as fo:
-      fo.write(self.model.model_as_pdb())
+    sites_cart = self.model.get_sites_cart()
+    if(self.output_mapper is not None):
+      self.model.set_sites_cart(self.output_mapper.shrink(sites_cart))
+    try:
+      with open(file_name,"w") as fo:
+        fo.write(self.model.model_as_pdb())
+    finally:
+      if(self.output_mapper is not None):
+        self.model.set_sites_cart(sites_cart)
 
   def finalize(self,
                input_file_name_prefix,

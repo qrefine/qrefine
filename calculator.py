@@ -16,22 +16,56 @@ import scitbx.lbfgs
 from . import refine
 from cctbx import maptbx
 
+def mapper_is_active(mapper):
+  """True when mapper (None or an mmtbx.hydrogens.xh_mapper.mapper) maps."""
+  return mapper is not None and not mapper.is_identity
+
+def assert_same_sites(sites_cart, xray_structure):
+  """
+  Without an active mapper the nuclear sites are those of the xray
+  structure. They are taken from it, which keeps results bit-identical to
+  the code before the mapper (setting the same Cartesian sites again changes
+  the fractional ones by round-off); the given sites must agree with them.
+  """
+  if(sites_cart is None): return
+  assert sites_cart.size() == xray_structure.scatterers().size()
+  assert xray_structure.sites_cart().rms_difference(sites_cart) < 1.e-6
+
 def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None,
-                   exclude_selection=None):
+                   exclude_selection=None, sites_cart=None, mapper=None):
+  """
+  Data weight: ratio of the filtered norms of the restraint and the data
+  gradients. sites_cart are the nuclear sites, required with an active
+  mapper; without one they must agree with those of fmodel, which are used
+  (None: those of fmodel). Shaking applies to the nuclear sites. With an
+  active mapper the data gradient is computed at the shrunk sites and mapped
+  back to the nuclear sites; the restraints see the nuclear sites. fmodel is
+  not changed.
+  """
+  active = mapper_is_active(mapper)
+  assert sites_cart is not None or not active
   if(shake_sites):
     random.seed(1)
     flex.set_random_seed(1)
   fmodel_dc = fmodel.deep_copy()
   xrs = fmodel_dc.xray_structure.deep_copy_scatterers()
+  if(active):
+    xrs.set_sites_cart(sites_cart)
+  else:
+    assert_same_sites(sites_cart, xrs)
   if(shake_sites):
     xrs.shake_sites_in_place(mean_distance=0.2)
+  sites_cart = xrs.sites_cart()
+  if(active):
+    xrs.set_sites_cart(mapper.shrink(sites_cart))
   fmodel_dc.update_xray_structure(xray_structure=xrs, update_f_calc=True)
   x_target_functor = fmodel_dc.target_functor()
   tgx = x_target_functor(compute_gradients=True)
   gx = flex.vec3_double(tgx.\
     gradients_wrt_atomic_parameters(site=True).packed())
+  if(active):
+    gx = mapper.gradients(sites_cart, gx)
 
-  sites_cart = xrs.sites_cart()
   if hdm is not None:
     sites_cart = hdm.shrink(array=sites_cart)
   if exclude_selection is not None:
@@ -201,18 +235,30 @@ class sites_opt(object):
     return self.x, f, g
 
 class sites(object):
+  """
+  Reciprocal-space target and gradients with respect to the nuclear sites.
+
+  The calculator owns the nuclear sites (sites_cart, sites_plus_x);
+  fmodel.xray_structure always holds _for_fmodel(sites_plus_x), the sites
+  shrunk by the X-H mapper when it is active. With an active mapper the
+  nuclear sites are never read back from fmodel. Without one (mapper None
+  or identity) they are fmodel's sites at start and reset, as before the
+  mapper existed; given sites_cart must then agree with them.
+  """
   def __init__(self,
                fmodel,
                geometry_rmsd_manager,
                max_bond_rmsd,
                max_shift,
+               sites_cart=None,
+               mapper=None,
                hdm=None,
                exclude_selection=None,
                restraints_manager=None,
                dump_gradients=None):
     adopt_init_args(self, locals())
     #
-    self._initialize(fmodel = self.fmodel)
+    self._initialize(fmodel = self.fmodel, sites_cart = sites_cart)
     #
     self.f                = None
     self.g                = None
@@ -234,16 +280,53 @@ class sites(object):
     self.sites_plus_x = self.sites_cart+flex.vec3_double(self.x)
     return self.sites_plus_x
 
-  def _initialize(self, fmodel):
+  @property
+  def sites_cart_nuclear(self):
+    """Current nuclear sites."""
+    return self.sites_plus_x
+
+  def _for_fmodel(self, sites_cart):
+    """The sites fmodel sees for the nuclear sites sites_cart."""
+    if(mapper_is_active(self.mapper)):
+      return self.mapper.shrink(sites_cart)
+    return sites_cart
+
+  def _initialize(self, fmodel, sites_cart=None):
+    """
+    Use fmodel. With an active mapper sites_cart (required) are the nuclear
+    sites; those on special positions are symmetrized
+    (apply_symmetry_sites), the others used as given, and fmodel receives
+    _for_fmodel of them. Without one the nuclear sites are fmodel's after
+    apply_symmetry_sites; sites_cart, if given, must agree with fmodel's
+    before it.
+    """
+    active = mapper_is_active(self.mapper)
+    assert sites_cart is not None or not active
     self.fmodel = fmodel
+    if(not active):
+      assert_same_sites(sites_cart, self.fmodel.xray_structure)
     self.fmodel.xray_structure.tidy_us()
     self.fmodel.xray_structure.apply_symmetry_sites()
+    if(active):
+      # Atoms on special positions are snapped back on them, as fmodel's
+      # sites are in the inactive branch; the others are kept as given (no
+      # Cartesian-fractional round-off).
+      xrs = self.fmodel.xray_structure.deep_copy_scatterers()
+      xrs.set_sites_cart(sites_cart)
+      xrs.apply_symmetry_sites()
+      special = xrs.site_symmetry_table().special_position_indices()
+      sites_cart = sites_cart.deep_copy()
+      sites_cart.set_selected(special, xrs.sites_cart().select(special))
+      self.fmodel.xray_structure.set_sites_cart(
+        sites_cart = self._for_fmodel(sites_cart))
+    else:
+      sites_cart = self.fmodel.xray_structure.sites_cart()
     self.fmodel.update_xray_structure(update_f_calc = True)
     self.fmodel.xray_structure.scatterers().flags_set_grads(state=False)
     xray.set_scatterer_grad_flags(
       scatterers = self.fmodel.xray_structure.scatterers(),
       site       = True)
-    self.sites_cart       = self.fmodel.xray_structure.sites_cart()
+    self.sites_cart       = sites_cart
     self.sites_cart_start = self.sites_cart.deep_copy()
     self.x                = flex.double(self.sites_cart.size()*3, 0)
     self.sites_plus_x     = self.set_sites_plus_x()
@@ -252,8 +335,32 @@ class sites(object):
     self.r_works          = flex.double()
     self.n_tg_calls       = 0
 
-  def reset_fmodel(self, fmodel):
-    self._initialize(fmodel=fmodel)
+  def reset_fmodel(self, fmodel, sites_cart=None):
+    """
+    Use the new fmodel. sites_cart are the nuclear sites; None keeps the
+    current ones when the mapper is active (fmodel must then hold
+    _for_fmodel of them, rms difference < 1e-6) and, without an active
+    mapper, takes those of fmodel as before (see _initialize).
+    """
+    if(sites_cart is None and mapper_is_active(self.mapper)):
+      sites_cart = self.sites_cart_nuclear.deep_copy()
+      assert fmodel.xray_structure.sites_cart().rms_difference(
+        self._for_fmodel(sites_cart)) < 1.e-6
+    self._initialize(fmodel=fmodel, sites_cart=sites_cart)
+
+  def set_sites(self, sites_cart):
+    """
+    Set the nuclear sites sites_cart as the start point (x = 0) and give
+    fmodel _for_fmodel of them, with f_calc updated.
+    """
+    self.sites_cart       = sites_cart.deep_copy()
+    self.x                = flex.double(self.sites_cart.size()*3, 0)
+    self.set_sites_plus_x()
+    self.fmodel.xray_structure.set_sites_cart(
+      sites_cart = self._for_fmodel(self.sites_plus_x))
+    self.fmodel.update_xray_structure(
+      xray_structure = self.fmodel.xray_structure,
+      update_f_calc  = True)
 
   def setw(self,
            data_weight = None,
@@ -275,7 +382,8 @@ class sites(object):
   def update(self, x):
     self.x = flex.vec3_double(x)
     self.set_sites_plus_x()
-    self.fmodel.xray_structure.set_sites_cart(sites_cart = self.sites_plus_x)
+    self.fmodel.xray_structure.set_sites_cart(
+      sites_cart = self._for_fmodel(self.sites_plus_x))
     self.fmodel.update_xray_structure(
       xray_structure = self.fmodel.xray_structure,
       update_f_calc  = True)
@@ -321,6 +429,9 @@ class sites(object):
     dt = tgx.target_work()
     dg = flex.vec3_double(tgx.\
       gradients_wrt_atomic_parameters(site=True).packed())
+    # Map to the nuclear sites before any selection or averaging.
+    if mapper_is_active(self.mapper):
+      dg = self.mapper.gradients(self.sites_plus_x, dg)
 
     if self.keep_selection is not None:
       dg = dg.set_selected(self.exclude_selection, [0,0,0])
