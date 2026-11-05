@@ -7,7 +7,7 @@ import shutil
 import iotbx.pdb
 from libtbx.test_utils import approx_equal
 from libtbx.utils import null_out
-from qrefine import qr, refine, conformers
+from qrefine import qr, refine, conformers, api
 from qrefine.tests.unit.tst_31 import duplicate
 from qrefine.tests.unit.tst_11 import get_model, process, qr_unit_tests
 from qrefine.tests.unit import run_qrefine_in
@@ -16,7 +16,7 @@ def get_params(expansion, clustering):
   params = qr.get_default_params()
   params.restraints = "qm"
   params.quantum.engine_name = "mopac"
-  refine.set_qm_defaults(params, log=null_out())
+  api.set_qm_defaults(params, log=null_out())
   params.expansion = expansion
   params.cluster.clustering = clustering
   params.cluster.maxnum_residues_in_cluster = 2

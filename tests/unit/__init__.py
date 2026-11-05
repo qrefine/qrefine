@@ -61,7 +61,9 @@ class run_qrefine_in(object):
         assert rc == 0, self.std_out_text
         assert self.std_out_text.find("Sorry") == -1, self.std_out_text
       # No refined model for a dry run or a Sorry.
-      self.pdb = next(pathlib.Path('pdb').glob('*_refined.pdb'), None)
+      # pdb/<prefix>_refined.pdb, or .cif when the model does not fit PDB
+      self.pdb = next(pathlib.Path('pdb').glob('*_refined.pdb'),
+        next(pathlib.Path('pdb').glob('*_refined.cif'), None))
       self.model = None
       if(self.pdb is not None):
         self.pdb = os.path.abspath(str(self.pdb))

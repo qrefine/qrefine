@@ -8,9 +8,7 @@ from . import calculator as calculator_module
 from libtbx import group_args
 from libtbx.test_utils import approx_equal
 from scitbx import minimizers
-import sys
-
-log = sys.stdout
+import os
 
 class clustering_update(object):
   """
@@ -57,8 +55,19 @@ def refine(fmodel,
            params,
            monitor,
            calculator,
-           geometry_rmsd_manager):
-  if(not params.refine.refine_sites): return
+           geometry_rmsd_manager,
+           log,
+           intermediate_folder=None,
+           bulk_solvent_params=None):
+  """
+  Weight search and refinement cycles. Every print goes to log; the model of
+  each refinement cycle is written into intermediate_folder unless it is
+  None; bulk_solvent_params goes to every update_all_scales call. Returns
+  group_args(n_cycles, n_fev): refinement cycles run and the target and
+  gradient evaluations in them (the weight search not counted).
+  """
+  if(not params.refine.refine_sites):
+    return group_args(n_cycles = 0, n_fev = 0)
   clustering = params.cluster.clustering
   if(clustering):
     cluster_qm_update = clustering_update(
@@ -165,7 +174,8 @@ def refine(fmodel,
         update_f_calc  = True,
         update_f_mask  = True
         )
-    fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
+    fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False,
+      params=bulk_solvent_params)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
     monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
@@ -177,6 +187,7 @@ def refine(fmodel,
   print("Refinement:", file=log)
   calculator.reset_fmodel(fmodel = fmodel)
   assert not calculator.converged()
+  n_cycles, n_fev_total = 0, 0
   for refine_cycle in range(params.refine.number_of_refine_cycles):
     if(clustering):
       cluster_qm_update.re_clustering(calculator,
@@ -186,15 +197,19 @@ def refine(fmodel,
       params     = params,
       mode       = "refine")
     n_fev = calculator.n_tg_calls
-    fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False)
+    n_cycles += 1
+    n_fev_total += n_fev
+    fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False,
+      params=bulk_solvent_params)
     calculator.reset_fmodel(fmodel = fmodel)
     monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
     msg = "rws: %6.3f n_fev: %d"%(
       calculator.restraints_weight_scale, n_fev)
     monitor.show(prefix="%d:"%refine_cycle, suffix=msg)
-    monitor.write_pdb_file(
-      output_folder_name = params.output_folder_name,
-      output_file_name   = str(refine_cycle)+"_refine_cycle.pdb")
+    if(intermediate_folder is not None):
+      monitor.write_pdb_file(
+        output_folder_name = intermediate_folder,
+        output_file_name   = str(refine_cycle)+"_refine_cycle")
     if(calculator.converged()):
       print("Refinement converged. Stopping now.", file=log)
       break
@@ -203,8 +218,17 @@ def refine(fmodel,
   assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
   print("Best Rwork, Rfree (after refinement): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
+  return group_args(n_cycles = n_cycles, n_fev = n_fev_total)
 
-def opt(params, monitor, calculator):
+def opt(params, monitor, calculator, log, working_folder,
+        intermediate_folder=None):
+  """
+  Geometry optimization cycles. Every print goes to log; the model of each
+  cycle is written into intermediate_folder unless it is None; with
+  calculator.debug the targets and gradients are pickled into
+  working_folder (not with working_folder None). Returns group_args(n_cycles,
+  n_fev): optimization cycles run and target and gradient evaluations.
+  """
   assert monitor.model == calculator.model
   monitor.show(prefix="start:")
   if(params.cluster.clustering):
@@ -213,7 +237,9 @@ def opt(params, monitor, calculator):
       params.cluster.re_calculate_rmsd_tolerance)
     print("\ninteracting pairs number:  ",\
       len(calculator.restraints_manager.fragment_manager.interaction_list), file=log)
+  n_cycles = 0
   for micro_cycle in range(params.refine.number_of_micro_cycles):
+    n_cycles += 1
     assert monitor.model == calculator.model
     if(params.cluster.clustering):
       cluster_qm_update.re_clustering(calculator,
@@ -222,9 +248,10 @@ def opt(params, monitor, calculator):
     monitor.update(model = calculator.model)
     monitor.show(prefix="cycle %3d: f=%.9g nfev: %3d | "%(
       micro_cycle, calculator.f, calculator.number_of_target_and_gradients_calls))
-    monitor.write_pdb_file(
-      output_folder_name = params.output_folder_name,
-      output_file_name   = str(micro_cycle)+"_opt_cycle.pdb")
+    if(intermediate_folder is not None):
+      monitor.write_pdb_file(
+        output_folder_name = intermediate_folder,
+        output_file_name   = str(micro_cycle)+"_opt_cycle")
     if(calculator.converged()):
       print("Convergence reached. Stopping now.", file=log)
       break
@@ -232,9 +259,12 @@ def opt(params, monitor, calculator):
     calculator.total_time, file=log)
   print("calculator(opt), number_of_target_and_gradients_calls (target_and_gradients)",
     calculator.number_of_target_and_gradients_calls, file=log)
-  if calculator.debug:
+  if(calculator.debug and working_folder is not None):
     o = group_args(
       targets   = calculator.all_targets,
       gradients = calculator.all_gradients)
-    easy_pickle.dump(
-      "debug_optimization_clustering%s.pkl"%str(params.cluster.clustering), o)
+    os.makedirs(working_folder, exist_ok=True)
+    easy_pickle.dump(os.path.join(working_folder,
+      "debug_optimization_clustering%s.pkl"%str(params.cluster.clustering)), o)
+  return group_args(n_cycles = n_cycles,
+    n_fev = calculator.number_of_target_and_gradients_calls)

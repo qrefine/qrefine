@@ -22,8 +22,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import os
-
 from libtbx.utils import Sorry, null_out
 import iotbx.pdb.hierarchy
 import mmtbx.model
@@ -38,7 +36,7 @@ from qrefine import conformers
 from qrefine import results
 from mmtbx.hydrogens import xh_mapper
 
-from libtbx import Auto
+from libtbx import group_args
 from cctbx import maptbx
 from scitbx.array_family import flex
 
@@ -66,10 +64,12 @@ def create_fragment_manager(
       model,
       params,
       working_folder = "ase"):
+  """Fragments of model (clustering); working_folder None: no files."""
   if(not params.cluster.clustering): return None
   return fragments(
     cif_objects                = model._restraint_objects,
-    working_folder             = working_folder + "/",
+    working_folder             = working_folder,
+    make_working_folder        = working_folder is not None,
     clustering_method          = params.cluster.clustering_method,
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
@@ -224,7 +224,14 @@ class hd_mapper(object):
       g_all[j] = g_all[i]
     return g_all
 
-def create_restraints_manager(params, model, working_folder="ase", log=None):
+def create_restraints_manager(params, model, working_folder="ase", log=None,
+                              keep_error_copy=True):
+  """
+  Restraints manager for model. keep_error_copy: on a failure of the
+  clustered restraints, copy the working folder into <folder>/error (a
+  command-line convenience; api.refine with its own temporary folder passes
+  False).
+  """
   #
   # Conformers: one restraints manager per single-conformer model (built by
   # the routes below), gradients combined; scratch folder working_folder/<X>.
@@ -233,7 +240,8 @@ def create_restraints_manager(params, model, working_folder="ase", log=None):
      params.altlocs.handling == "conformers"):
     return conformers.from_conformers(
       model          = model,
-      build          = lambda m, f: create_restraints_manager(params, m, f, log),
+      build          = lambda m, f: create_restraints_manager(params, m, f, log,
+        keep_error_copy),
       working_folder = working_folder,
       log            = log)
   restraints_source = restraints.restraints(params = params, model = model,
@@ -257,7 +265,8 @@ def create_restraints_manager(params, model, working_folder="ase", log=None):
       return cluster_restraints.from_cluster(
         restraints_manager = restraints_source.restraints_manager,
         fragment_manager   = fragment_manager,
-        parallel_params    = params.parallel)
+        parallel_params    = params.parallel,
+        keep_error_copy    = keep_error_copy)
     else:
       # restraints=cctbx clustering=false expansion=false
       return restraints_source.restraints_manager
@@ -269,7 +278,8 @@ def create_calculator(params,
                       fmodel=None,
                       hdm=None,
                       exclude_selection=None,
-                      mapper=None):
+                      mapper=None,
+                      working_folder="ase"):
   # Define freeze selection
   fr = params.refine.freeze
   freeze_selection = None
@@ -292,6 +302,7 @@ def create_calculator(params,
         exclude_selection     = exclude_selection,
         restraints_manager    = restraints_manager,
         dump_gradients        = params.dump_gradients,
+        working_folder        = working_folder,
         max_shift             = params.refine.stpmax,
         sites_cart            = model.get_sites_cart(),
         mapper                = mapper)
@@ -308,69 +319,18 @@ def create_calculator(params,
         freeze_selection   = freeze_selection,
         debug              = params.debug)
 
-def set_qm_defaults(params, log):
-  outl = ''
-  if params.quantum.engine_name=='mopac':
-    if params.quantum.method==Auto:
-      params.quantum.method='PM7'
-      outl += '  Setting QM method to PM7 (mopac)\n'
-    if params.quantum.basis==Auto:
-      params.quantum.basis=''
-  if params.quantum.engine_name=='xtb':
-    if params.quantum.method==Auto:
-      params.quantum.method=' --gfn 2 --etemp 500 --acc 0.1 --gbsa h2o'
-      print(' Default method for xtb is %s' % (
-          params.quantum.method,
-          ), file=log)
-      params.quantum.basis = ''
-  if params.quantum.engine_name=='aimnet2':
-    print(file=log)
-    print("Setting aimnet2 specific defaults:", file=log)
-    if params.quantum.method==Auto:
-      params.quantum.method="aimnet2-qr"
-      print(f"  Default Aimnet2 model: {params.quantum.method}", file=log)
-      try:
-        import warnings
-        warnings.filterwarnings('ignore', module='aimnet2calc')
-        from aimnet2calc import AIMNet2ASE # import dependency
-      except ModuleNotFoundError as e:
-        print(str(e), file=log)
-        if not params.debug:
-          raise Sorry("AIMNet2 does not seem to be installed or available.")
-  else:
-    if params.quantum.method==Auto:
-      params.quantum.method='HF'
-      outl += '  Setting QM method to HF\n'
-    if params.quantum.basis==Auto:
-      params.quantum.basis='6-31g'
-      outl += '  Setting QM basis to 6-31g\n'
-  if outl:
-    print(' Setting QM defaults', file=log)
-    print(outl, file=log)
-
-  if params.quantum.engine_name=='mopac':
-    if params.quantum.basis:
-      print('  Because engine is %s basis set %s ignored' % (
-        params.quantum.engine_name,
-        params.quantum.basis,
-        ), file=log)
-      params.quantum.basis = ''
-    if params.quantum.method=='hf': # default
-      print(' Default method set as PM7 (mopac)', file=log)
-      params.quantum.method='PM7'
-
-
-def check_qm_sees_crystal_neighbours(model, params, map_data):
+def check_qm_sees_crystal_neighbours(model, params, has_map):
   """
   With restraints=qm the QM engine only sees the asymmetric unit unless the
   model is expanded (expansion=True) or fragments are built from the expansion
   (cluster.clustering=True). Refuse to silently ignore crystal neighbours that
   are within cluster.select_within_radius. Real-space refinement is exempt: the
-  map box is not a physical lattice.
+  map box is not a physical lattice (has_map: a map is refined against).
+  Called by api.check_model.
   """
   if(params.restraints != "qm"): return
   if(params.cluster.clustering or params.expansion): return
-  if(map_data is not None): return
+  if(has_map): return
   radius = params.cluster.select_within_radius
   siiu, ops = get_siiu(
     pdb_hierarchy        = model.get_hierarchy(),
@@ -403,29 +363,68 @@ def check_model_fmodel_order(model, fmodel, tolerance=1.e-3):
     "is not atom k of the model). Reorder the input atoms into sorted order "
     "and rerun.")
 
-def run(model, fmodel, map_data, params, rst_file, prefix, log):
-  set_qm_defaults(params,log)
-  n_conf = conformers.n_conformers(model.get_hierarchy())
-  if(n_conf > 1 and params.altlocs.handling == "native" and
-     params.restraints == "qm"):
-    raise Sorry("altlocs.handling=native needs restraints=cctbx: a QM engine cannot handle alternative conformations. Use altlocs.handling=conformers.")
-  if(n_conf > 1 and params.altlocs.handling == "conformers"):
-    params.refine.minimizer = "lbfgs"
-    params.refine.gradient_only = True
-    print("  alternative conformations require minimizer=lbfgs and gradient_only=True", file=log)
-  check_qm_sees_crystal_neighbours(
-    model = model, params = params, map_data = map_data)
-  if(params.cluster.clustering):
-    params.refine.gradient_only = True
-    print(" params.gradient_only", params.refine.gradient_only, file=log)
-  if (model.size() > params.max_atoms):
-    print("WARNING: %d atoms (max_atoms=%d). Can take forever or crash." % (
-      model.size(), params.max_atoms), file=log)
+def _result(mode, model, mapper, monitor, r_work=None, r_free=None,
+            data_weight=None, restraints_weight_scale=None, n_fev=None,
+            n_cycles=0, cc_mask=None):
+  """The result of run (see there)."""
+  nuclear = monitor.model.get_sites_cart().deep_copy()
+  sites_cart = nuclear
+  if(calculator.mapper_is_active(mapper)):
+    sites_cart = mapper.shrink(nuclear)
+  return group_args(
+    sites_cart              = sites_cart,
+    sites_cart_nuclear      = nuclear,
+    r_work                  = r_work,
+    r_free                  = r_free,
+    data_weight             = data_weight,
+    restraints_weight_scale = restraints_weight_scale,
+    b_rmsd                  = monitor.b_rmsd,
+    a_rmsd                  = monitor.a_rmsd,
+    n_fev                   = n_fev,
+    n_cycles                = n_cycles,
+    cc_mask                 = cc_mask,
+    mode                    = mode,
+    model                   = model)
 
+def run(model, fmodel, map_data, params, log, working_folder,
+        intermediate_folder, bulk_solvent_params=None, keep_error_copy=True):
+  """
+  Refine (or optimize) model in place; the implementation behind
+  api.refine, which passes its own copies of model and fmodel. Engine
+  scratch, fragments, the expansion file, conformer sub-folders and debug
+  output go into working_folder (created by the writer that needs it; None:
+  nothing is written); per-cycle models into intermediate_folder unless it
+  is None. bulk_solvent_params goes to every update_all_scales call.
+  keep_error_copy: see create_restraints_manager. No final model file is
+  written.
+
+  Returns None with refine.dry_run, else group_args:
+    mode                    "refine" (fmodel), "real_space" (map_data) or
+                            "opt" (neither)
+    sites_cart              final sites as fmodel sees them (the X-H
+                            mapper's shrink of the nuclear sites when it is
+                            active), else the nuclear ones
+    sites_cart_nuclear      final nuclear sites (those of model)
+    r_work, r_free          of the final fmodel (None without fmodel)
+    data_weight             data weight of the calculator (real space: the
+                            final map weight; None in opt mode)
+    restraints_weight_scale of the calculator (None in opt and real space)
+    b_rmsd, a_rmsd          bond and angle rmsd of the final nuclear model
+    n_fev                   target and gradient evaluations: of the
+                            refinement cycles (refine), of the optimizer
+                            (opt); None in real space
+    n_cycles                refinement (refine, real space) or optimization
+                            (opt) cycles run
+    cc_mask                 final map-model CC (real space only, else None)
+    model                   model (nuclear sites)
+  """
+  assert getattr(params, "finalized", False), "call api.finalize_params first"
+  assert conformers.n_conformers(model.get_hierarchy()) == params.n_conformers, \
+    "finalize_params was given a different conformer count than the model has"
   geometry_rmsd_manager = calculator.cctbx_geometry(model=model)
 
   #
-  if(params.refine.dry_run): return
+  if(params.refine.dry_run): return None
   #
   if(fmodel is not None):
     check_model_fmodel_order(model = model, fmodel = fmodel)
@@ -453,16 +452,6 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     log                   = log,
     output_mapper         = output_mapper)
   monitor.update(fmodel = fmodel, model = model)
-  if(params.rst_file is None):
-    if(params.output_file_name_prefix is None):
-      params.output_file_name_prefix = prefix
-    if(os.path.exists(params.output_folder_name) is False):
-      os.mkdir(params.output_folder_name)
-    params.output_file_name_prefix = os.path.basename(params.output_file_name_prefix)
-    params.rst_file = os.path.abspath(params.output_folder_name + "/" + \
-      params.output_file_name_prefix + ".rst.pickle")
-  if os.path.isfile(params.rst_file):
-    os.remove(params.rst_file)
   start_fmodel = fmodel
 
   hdm = None
@@ -489,12 +478,13 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
     model_for_restraints = model
 
   restraints_manager = create_restraints_manager(
-    params=params, model=model_for_restraints, log=log)
+    params=params, model=model_for_restraints, working_folder=working_folder,
+    log=log, keep_error_copy=keep_error_copy)
 
   # XXX This needs to be consolidated !
 
   if(map_data is not None and params.refine.mode == "refine"):
-    model.geometry_statistics(use_hydrogens=False).show()
+    model.geometry_statistics(use_hydrogens=False).show(log=log)
     show_cc(
       map_data        = map_data,
       xray_structure  = model.get_xray_structure(),
@@ -514,14 +504,15 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       max_iterations        = params.refine.max_iterations_refine,
       log                   = log)
     model = O.run()
-    with open("real_space_refined.pdb", "w") as of:
-      print(model.model_as_pdb(output_cs=True), file=of)
-    model.geometry_statistics(use_hydrogens=False).show()
-    show_cc(
+    model.geometry_statistics(use_hydrogens=False).show(log=log)
+    cc_mask = show_cc(
       map_data=map_data,
       xray_structure=model.get_xray_structure(),
       log=log)
-    return
+    monitor.update(model = model)
+    return _result(mode = "real_space", model = model, mapper = None,
+      monitor = monitor, data_weight = O.final_weight,
+      n_cycles = params.refine.number_of_refine_cycles, cc_mask = cc_mask)
   else:
     calculator_manager = create_calculator(
       fmodel                = start_fmodel,
@@ -531,7 +522,8 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
       restraints_manager    = restraints_manager,
       hdm                   = hdm,
       exclude_selection     = exclude_selection,
-      mapper                = mapper)
+      mapper                = mapper,
+      working_folder        = working_folder)
     if(calculator.mapper_is_active(mapper)):
       # The calculator gave fmodel the shrunk sites (no calculator with
       # refine_sites=False: set them here); rescale.
@@ -540,7 +532,7 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
           mapper.shrink(model.get_sites_cart()))
         fmodel.update_xray_structure(update_f_calc = True)
       fmodel.update_all_scales(remove_outliers=False,
-        refine_hd_scattering=False)
+        refine_hd_scattering=False, params=bulk_solvent_params)
       if(calculator_manager is not None):
         calculator_manager.reset_fmodel(fmodel = fmodel)
       print("Starting r-factors (H at X-ray positions): r_work=%6.4f "
@@ -587,25 +579,44 @@ def run(model, fmodel, map_data, params, rst_file, prefix, log):
             use_callback_after_step = True,
             convergence_threshold   = 0.3)
           driver.opt(
-            params     = params,
-            calculator = calculator_sites_opt_pre,
-            monitor    = monitor)
+            params              = params,
+            calculator          = calculator_sites_opt_pre,
+            monitor             = monitor,
+            log                 = log,
+            working_folder      = working_folder,
+            intermediate_folder = intermediate_folder)
           calculator_manager.set_sites(monitor.model.get_sites_cart())
           print("  r_work: %6.4f r_free: %6.4f"%(
             fmodel.r_work(), fmodel.r_free()), file=log)
         # PRE-OPTIMIZATION (CODITIONAL) END
-      driver.refine(
+      r = driver.refine(
         params                = params,
         fmodel                = fmodel,
         geometry_rmsd_manager = geometry_rmsd_manager,
         calculator            = calculator_manager,
-        monitor               = monitor)
+        monitor               = monitor,
+        log                   = log,
+        intermediate_folder   = intermediate_folder,
+        bulk_solvent_params   = bulk_solvent_params)
+      # driver.refine leaves the final fmodel with the calculator
+      final_fmodel = fmodel
+      data_weight, restraints_weight_scale = None, None
+      if(calculator_manager is not None):
+        final_fmodel = calculator_manager.fmodel
+        data_weight = calculator_manager.data_weight
+        restraints_weight_scale = calculator_manager.restraints_weight_scale
+      return _result(mode = "refine", model = model, mapper = mapper,
+        monitor = monitor, r_work = final_fmodel.r_work(),
+        r_free = final_fmodel.r_free(), data_weight = data_weight,
+        restraints_weight_scale = restraints_weight_scale, n_fev = r.n_fev,
+        n_cycles = r.n_cycles)
     else:
-      driver.opt(
-        params     = params,
-        calculator = calculator_manager,
-        monitor    = monitor)
-    monitor.finalize(
-      input_file_name_prefix  = prefix,
-      output_file_name_prefix = params.output_file_name_prefix,
-      output_folder_name      = params.output_folder_name)
+      r = driver.opt(
+        params              = params,
+        calculator          = calculator_manager,
+        monitor             = monitor,
+        log                 = log,
+        working_folder      = working_folder,
+        intermediate_folder = intermediate_folder)
+      return _result(mode = "opt", model = model, mapper = None,
+        monitor = monitor, n_fev = r.n_fev, n_cycles = r.n_cycles)

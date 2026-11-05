@@ -116,7 +116,8 @@ def generate_restraints(cs, ph, clustering=False):
     pdb_hierarchy=ph,
     qm_engine_name="mopac",
     crystal_symmetry=cs,
-    clustering=clustering)
+    clustering=clustering,
+    file_name="./ase/tmp_ase.pdb")
   if(clustering):
     fm = fragments(
      working_folder             = os.path.split("./ase/tmp_ase.pdb")[0]+ "/",

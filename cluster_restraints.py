@@ -9,10 +9,17 @@ from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
 from .restraints import from_qm
+from qrefine.utils.hierarchy_utils import write_hierarchy
 from libtbx import group_args
 
 class from_cluster(object):
-  def __init__(self, restraints_manager, fragment_manager, parallel_params):
+  """
+  Restraints from fragments. keep_error_copy: when the fragment jobs fail,
+  copy the working folder (that of restraints_manager.file_name) into its
+  sub-folder error (replacing an earlier one) before the Sorry.
+  """
+  def __init__(self, restraints_manager, fragment_manager, parallel_params,
+               keep_error_copy=False):
     adopt_init_args(self, locals())
 
   def energies_sites(self, sites_cart, compute_gradients=True):
@@ -27,9 +34,10 @@ class from_cluster(object):
     self.fragment_manager.update_xyz(sites_cart)
     sites_cart = self.fragment_manager.pdb_hierarchy_super.atoms().extract_xyz()
     #
-    self.fragment_manager.pdb_hierarchy_super.write_pdb_file(
-      file_name=self.restraints_manager.file_name,
-      crystal_symmetry=self.fragment_manager.expansion.cs_box)
+    file_name = getattr(self.restraints_manager, "file_name", None)
+    if(file_name is not None):
+      write_hierarchy(self.fragment_manager.pdb_hierarchy_super, file_name,
+        crystal_symmetry=self.fragment_manager.expansion.cs_box)
     # The cctbx restraints of the super sphere are needed by from_cctbx only;
     # from_qm must not carry them (pickled with every parallel_map job).
     fragment_extracts_obj = self.fragment_manager.get_fragment_extracts(
@@ -56,12 +64,19 @@ class from_cluster(object):
       except Exception as e:
         import sys, traceback
         import shutil
-        if os.path.exists('ase_error'):
-          shutil.rmtree('ase_error')
-        try:
-          shutil.copytree('ase', 'ase_error')
-        except (shutil.Error, OSError) as copy_error:
-          print('Directory not copied. Error: %s' % copy_error)
+        # Keep a copy of the working folder (<folder>/error) for inspection
+        error_folder = None
+        if(self.keep_error_copy and file_name is not None):
+          folder = os.path.dirname(file_name) or "."
+          error_folder = os.path.join(folder, "error")
+          if os.path.exists(error_folder):
+            shutil.rmtree(error_folder)
+          try:
+            shutil.copytree(folder, error_folder,
+              ignore=shutil.ignore_patterns("error"))
+          except (shutil.Error, OSError) as copy_error:
+            print('Directory not copied. Error: %s' % copy_error)
+            error_folder = None
         ncount=ncount+1
         energy_gradients=None
         print("check independent QM jobs")
@@ -82,7 +97,10 @@ class from_cluster(object):
         del(exc_type, exc_value, exc_traceback)
         print(traceback.format_exc())
         print(traceback_template % traceback_details)
-        raise Sorry('process finished with error: %s' % e)
+        msg = 'process finished with error: %s' % e
+        if(error_folder is not None):
+          msg += ' (working folder copied to %s)' % error_folder
+        raise Sorry(msg)
     target=0
     gradients=flex.vec3_double(system_size)
 

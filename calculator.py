@@ -255,7 +255,14 @@ class sites(object):
                hdm=None,
                exclude_selection=None,
                restraints_manager=None,
-               dump_gradients=None):
+               dump_gradients=None,
+               working_folder=None):
+    """
+    dump_gradients (debugging): file name prefix; the first
+    target_and_gradients call pickles the data, restraints and total
+    gradients into <working_folder>/<dump_gradients>_{dg,rg,g} and raises a
+    Sorry.
+    """
     adopt_init_args(self, locals())
     #
     self._initialize(fmodel = self.fmodel, sites_cart = sites_cart)
@@ -448,13 +455,17 @@ class sites(object):
 
     if(self.dump_gradients is not None):
       from libtbx import easy_pickle
-      import sys
-      easy_pickle.dump(self.dump_gradients+"_dg", dg.as_double())
-      easy_pickle.dump(self.dump_gradients+"_rg", rg.as_double())
-      easy_pickle.dump(self.dump_gradients+"_g", g.as_double())
-      print("dump_gradients: gradients dumped to %s_{dg,rg,g}, stopping." %
-        self.dump_gradients)
-      sys.exit(0)
+      from libtbx.utils import Sorry
+      import os
+      if(self.working_folder is None):
+        raise Sorry("dump_gradients needs a working folder")
+      os.makedirs(self.working_folder, exist_ok=True)
+      path = os.path.join(self.working_folder, self.dump_gradients)
+      easy_pickle.dump(path+"_dg", dg.as_double())
+      easy_pickle.dump(path+"_rg", rg.as_double())
+      easy_pickle.dump(path+"_g", g.as_double())
+      raise Sorry(
+        "dump_gradients: gradients dumped to %s_{dg,rg,g}, stopping." % path)
     self.f = t
     self.g = g.as_double()
     return self.f, self.g
@@ -500,6 +511,7 @@ class sites_real_space(object):
         ignore_line_search_failed_step_at_upper_bound = False,
         ignore_line_search_failed_maxfev              = False)
     self.sites_cart_refined = None
+    self.final_weight = None # the weight of the refinement cycles
 
   def get_shift(self, other):
     s1 = self.sites_cart_start
@@ -525,7 +537,7 @@ class sites_real_space(object):
     sites_cart_start = self.model.get_sites_cart().deep_copy()
     while True: # Termination at the bottom of the loop
       self.model.set_sites_cart(sites_cart = sites_cart_start.deep_copy())
-      print("cycle:", cntr)
+      print("cycle:", cntr, file=self.log)
       cntr+=1
       self.show(model = self.model, weight = weight, prefix="  start:")
       model = self.run_one(weight = weight)
@@ -533,7 +545,7 @@ class sites_real_space(object):
       b = stats.bond().mean
       bond_rmsds.append(round(b,3))
       if(stalled(bond_rmsds)):
-        print("<<<<< weight optimization stalled: quitting >>>>>")
+        print("<<<<< weight optimization stalled: quitting >>>>>", file=self.log)
         break
       if(self.geometry_is_good(stats)):
         up += 1
@@ -555,16 +567,17 @@ class sites_real_space(object):
             weight = weight/2
             slow_down = 0
       if(up>0 and down>0):
-        print("<<<<< weight optimization oscillates: quitting >>>>>")
+        print("<<<<< weight optimization oscillates: quitting >>>>>", file=self.log)
         break
       if cntr > self.number_of_weight_search_cycles:
-        print("number_of_weight_search_cycles exceeded, stopping now")
+        print("number_of_weight_search_cycles exceeded, stopping now", file=self.log)
         break
     ####
-    print()
+    print(file=self.log)
     if(previous_good is None):
-      print("Using last weight to continue:", weight)
+      print("Using last weight to continue:", weight, file=self.log)
       previous_good = weight
+    self.final_weight = previous_good
     ####
     for it in range(self.refine_cycles):
       self.show(model = self.model, weight = previous_good, prefix="  start:")
@@ -583,7 +596,7 @@ class sites_real_space(object):
     cc_mask = refine.show_cc(
       map_data=self.map_data, xray_structure=model.get_xray_structure())
     print(prefix, "weight=%s"%w, s, "shift=%6.4f"%dist, \
-      "cc_mask=%6.4f"%cc_mask)
+      "cc_mask=%6.4f"%cc_mask, file=self.log)
     return stats
 
   def get_weight(self):
@@ -614,9 +627,9 @@ class sites_real_space(object):
   def run(self):
     if self.weight is None:
       self.weight = self.get_weight()
-      print("Initial weight estimate from ratio of grad norms:", self.weight)
+      print("Initial weight estimate from ratio of grad norms:", self.weight, file=self.log)
     else:
-      print(f"Initial weight by user input: {self.weight}")
+      print(f"Initial weight by user input: {self.weight}", file=self.log)
     self.macro_cycle(weight = self.weight)
     return self.model
 

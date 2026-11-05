@@ -1,6 +1,6 @@
 from qrefine import qr
 from libtbx.program_template import ProgramTemplate
-from .refine import set_qm_defaults
+from .api import set_qm_defaults, check_engine
 
 local_phil = """
     gtest{
@@ -130,6 +130,7 @@ class Program(ProgramTemplate):
 
     def run(self):
         set_qm_defaults(self.params, self.logger)
+        check_engine(self.params)
         self._print(self.get_program_phil_str())
         model_file_name = self.data_manager.get_model_names()[0]
         self.model = self.data_manager.get_model(filename=model_file_name)

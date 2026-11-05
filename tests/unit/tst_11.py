@@ -102,7 +102,8 @@ def exercise_duplicate_routes():
 def exercise_folders():
   """
   Conformer scratch folders ase/A and ase/B are created for clustering; a
-  model without altlocs keeps ase/ (no conformer subfolders).
+  model without altlocs keeps ase/ (no conformer subfolders: only the
+  expansion and scratch models).
   """
   cwd = os.getcwd()
   for name in ["folders_altlocs", "folders_no_altlocs"]:
@@ -125,7 +126,7 @@ def exercise_folders():
       assert not isinstance(rm, conformers.from_conformers)
       rm.target_and_gradients(sites_cart=model.get_sites_cart())
       assert os.path.isfile(os.path.join("ase", "tmp_ase.pdb"))
-      assert sorted(os.listdir("ase")) == ["tmp_ase.pdb"]
+      assert sorted(os.listdir("ase")) == ["expansion.pdb", "tmp_ase.pdb"]
     os.chdir(cwd)
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):

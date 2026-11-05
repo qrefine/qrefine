@@ -264,7 +264,8 @@ class from_conformers(object):
   """
   Restraints manager for a model with conformer labels: one manager per
   conformer, built by build(conformer_model, working_folder) in
-  os.path.join(working_folder, label). Energy is undefined (0).
+  os.path.join(working_folder, label) (None when working_folder is None:
+  no files). Energy is undefined (0).
   """
   def __init__(self, model, build, working_folder="ase", log=None):
     if(log is None): log = null_out()
@@ -274,7 +275,9 @@ class from_conformers(object):
     self.conformers = split(model)
     fragment_managers = []
     for c in self.conformers:
-      folder = os.path.join(working_folder, c.label)
+      folder = None
+      if(working_folder is not None):
+        folder = os.path.join(working_folder, c.label)
       print("Conformer %s: %d atoms, folder %s" % (
         c.label, c.iselection.size(), folder), file=log)
       if(c.n_fallback > 0):

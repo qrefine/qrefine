@@ -106,9 +106,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   print(mmm)
   assert mmm[2] < 0.03
   #
-  cf = easy_pickle.load(os.path.join(r_qr.folder,
+  cf = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringFalse.pkl"))
-  ct = easy_pickle.load(os.path.join(r_qr.folder,
+  ct = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringTrue.pkl"))
   if 0:
     for i, (gt, gf) in enumerate(zip(cf.gradients, ct.gradients)):

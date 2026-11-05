@@ -3,6 +3,7 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from cctbx.crystal import super_cell as cctbx_super_cell
+from qrefine.utils.hierarchy_utils import write_hierarchy
 
 class expand(object):
   """
@@ -68,7 +69,12 @@ class expand(object):
       plain_pairs_radius           = 5.0)
     return mmtbx.restraints.manager(geometry = geometry, normalization = False)
 
-  def write_super_cell_selected_in_sphere(self, file_name="super_sphere.pdb"):
-    self.ph_super_sphere.write_pdb_file(file_name = file_name,
-      crystal_symmetry = self.cs_box) # box around super-sphere, not original cs
-                                      # or cs in p1.
+  def write_super_cell_selected_in_sphere(self, file_name):
+    """
+    Write the super sphere into file_name (.cif instead of .pdb when it does
+    not fit PDB format); nothing if it is None. Returns the name written.
+    """
+    if(file_name is None): return None
+    # box around super-sphere, not original cs or cs in p1.
+    return write_hierarchy(self.ph_super_sphere, file_name,
+      crystal_symmetry = self.cs_box)

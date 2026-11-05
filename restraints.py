@@ -19,10 +19,17 @@ from libtbx import group_args
 from qrefine.super_cell import expand
 from qrefine import fragment_capping
 from qrefine.utils.hierarchy_utils import model_from_hierarchy
+from qrefine.utils.hierarchy_utils import write_hierarchy
+
+def scratch_file_name(working_folder):
+  """The scratch model file in working_folder; None without a folder."""
+  if(working_folder is None): return None
+  return os.path.join(working_folder, "tmp_ase.pdb")
 
 class restraints(object):
   """
-  Create CCTBX or QM restraints manager.
+  Create CCTBX or QM restraints manager. working_folder None: the managers
+  write no file.
   """
   def __init__(self, params, model, working_folder="ase"):
     self.params = params
@@ -64,7 +71,7 @@ class restraints(object):
           cif_objects      = self.cif_objects)
         self.restraints_manager = from_cctbx(
           restraints_manager = model.get_restraints_manager(),
-          file_name          = os.path.join(self.working_folder, "tmp_ase.pdb"))
+          file_name          = scratch_file_name(self.working_folder))
       else:
         assert self.source_of_restraints_qm()
         self.restraints_manager = from_qm(
@@ -82,7 +89,7 @@ class restraints(object):
           url              = self.params.quantum.server_url,
           crystal_symmetry = crystal_symmetry,
           clustering       = self.params.cluster.clustering,
-          file_name        = os.path.join(self.working_folder, "tmp_ase.pdb"))
+          file_name        = scratch_file_name(self.working_folder))
     return self.restraints_manager
 
 class from_expansion(object):
@@ -181,8 +188,12 @@ def get_cctbx_gradients(ph, cs):
 #-------------------------------------------------------------------------------
 
 class from_cctbx(object):
+  """
+  cctbx restraints. file_name: where the clustering writes the super
+  sphere (cluster_restraints); None: not written.
+  """
   def __init__(self, restraints_manager, fragment_extracts=None,
-              file_name="./ase/tmp_ase.pdb"):
+              file_name=None):
     self.geometry_restraints_manager = restraints_manager
     self.file_name = file_name
     self.fragment_extracts = fragment_extracts
@@ -197,7 +208,7 @@ class from_cctbx(object):
 
   def select(self, selection):
     grm = self.geometry_restraints_manager.select(selection = selection)
-    return from_cctbx(restraints_manager = grm)
+    return from_cctbx(restraints_manager = grm, file_name = self.file_name)
 
   def energies_sites(self, sites_cart, compute_gradients=True):
     tg = self.target_and_gradients(sites_cart=sites_cart)
@@ -222,6 +233,12 @@ class from_cctbx(object):
     return es.target, es.gradients
 
 class from_qm(object):
+  """
+  QM restraints. file_name: the scratch model written before each
+  evaluation without clustering (its name without extension is the
+  engine's label); None: no file is written and the engine gets the label
+  "qrefine" (only engines that run in this process may get None).
+  """
   def __init__(self,
       fragment_extracts          = None,
       pdb_hierarchy              = None,
@@ -229,7 +246,7 @@ class from_qm(object):
       qm_engine_name             = None,
       qm_addon                   = None,
       qm_addon_method            = None,
-      file_name                  = "./ase/tmp_ase.pdb",
+      file_name                  = None,
       crystal_symmetry           = None,
       clustering                 = False,
       cif_objects                = None,
@@ -253,8 +270,10 @@ class from_qm(object):
     self.pdb_hierarchy = pdb_hierarchy
     self.qm_engine_name = qm_engine_name
     self.file_name = file_name
-    self.working_folder = os.path.split(self.file_name)[0]+ "/"
-    os.makedirs(self.working_folder, exist_ok=True)
+    self.working_folder = None
+    if(self.file_name is not None):
+      self.working_folder = os.path.split(self.file_name)[0]+ "/"
+      os.makedirs(self.working_folder, exist_ok=True)
     if(charge is None and clustering is False):
       charge_service = charges_class(
         pdb_hierarchy = self.pdb_hierarchy.deep_copy(), # XXX Something bad happens otherwise!
@@ -351,16 +370,21 @@ class from_qm(object):
                                       index=index)
     else:
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-      self.pdb_hierarchy.write_pdb_file(file_name=self.file_name)
+      qm_pdb_file = None
+      if(self.file_name is not None):
+        # .cif instead of .pdb when the identifiers do not fit PDB format
+        qm_pdb_file = write_hierarchy(self.pdb_hierarchy, self.file_name)
       ph = self.pdb_hierarchy## return pdb_hierarchy
-      qm_pdb_file = self.file_name
       qm_charge = self.charge
       charge_file = None
       selection = flex.bool(self.system_size, True)
       fragment_selection = selection
     atoms = ase_atoms_from_pdb_hierarchy(ph, self.crystal_symmetry, self.qm_engine_name)
     unit_convert = ase_units.mol/ase_units.kcal # ~ 23.06
-    label = os.path.splitext(qm_pdb_file)[0]
+    if(qm_pdb_file is None):
+      label = "qrefine" # no folder: the in-process engines ignore it
+    else:
+      label = os.path.splitext(qm_pdb_file)[0]
     self.qm_engine.set_label(label)
     cwd = os.getcwd()
     self.qm_engine.run_qr(atoms,

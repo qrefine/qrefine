@@ -8,6 +8,7 @@ from cctbx import crystal
 from .utils import fragment_utils
 from libtbx import group_args
 from qrefine.super_cell import expand
+from qrefine.utils.hierarchy_utils import write_hierarchy
 from . import fragment_capping
 from .charges import charges_class
 from mmtbx.pair_interaction import pair_interaction
@@ -107,7 +108,10 @@ class fragments(object):
     self.distance_buffer_radius = distance_buffer_radius
     self.crystal_symmetry = crystal_symmetry
     self.cif_objects = cif_objects
-    self.working_folder = os.path.abspath(working_folder)
+    # working_folder None: no file is written (expansion, fragments)
+    self.working_folder = None
+    if(working_folder is not None):
+      self.working_folder = os.path.abspath(working_folder)
     self.pdb_hierarchy = pdb_hierarchy
     self.charge_cutoff = charge_cutoff
     self.qm_engine_name = qm_engine_name
@@ -135,7 +139,7 @@ class fragments(object):
         crystal_symmetry = crystal_symmetry,
         cif_objects      = cif_objects)
     #
-    if(make_working_folder):
+    if(make_working_folder and self.working_folder is not None):
       os.makedirs(self.working_folder, exist_ok=True)
     self._expand()
     self.set_up_cluster_qm()
@@ -146,9 +150,10 @@ class fragments(object):
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = self.select_within_radius)
     self.pdb_hierarchy_super = self.expansion.ph_super_sphere
-    self.expansion_file = "expansion.pdb"
-    self.expansion.write_super_cell_selected_in_sphere(
-      file_name=self.expansion_file)
+    if(self.working_folder is None): return
+    # .cif instead of .pdb when the super sphere does not fit PDB format
+    self.expansion_file = self.expansion.write_super_cell_selected_in_sphere(
+      file_name=os.path.join(self.working_folder, "expansion.pdb"))
 
   def update_xyz(self, sites_cart):
     self.pdb_hierarchy.atoms().set_xyz(sites_cart)
@@ -343,22 +348,27 @@ def get_qm_file_name_and_pdb_hierarchy(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   fragment_hierarchy = fragment_extracts.pdb_hierarchy_super.select(
     fragment_selection)
+  if(fragment_extracts.working_folder is None):
+    # no files: the capped fragment only (file name None)
+    r = fragment_extracts.fragment_cappers[index].cap(
+      sites_cart = fragment_hierarchy.atoms().extract_xyz())
+    return None, r.pdb_hierarchy, r.fragment_selection
   sub_working_folder = fragment_extracts.working_folder + "/"+ str(index) + "/"
   if (not os.path.isdir(sub_working_folder)):
     os.mkdir(sub_working_folder)
   qm_pdb_file = sub_working_folder + str(index) + ".pdb"
-  complete_qm_pdb_file = qm_pdb_file[:-4] + "_capping.pdb"
+  complete_qm_pdb_file = sub_working_folder + str(index) + "_capping.pdb"
   # The fragment (user information) and the capped fragment (user
   # information; its name is the QM engine's label) are written at every
-  # call; the QM engine gets the capped hierarchy, not the file.
-  fragment_hierarchy.write_pdb_file(
-    file_name=qm_pdb_file,
+  # call, as .cif when they do not fit PDB format; the QM engine gets the
+  # capped hierarchy, not the file.
+  write_hierarchy(fragment_hierarchy, qm_pdb_file,
     crystal_symmetry=fragment_extracts.expansion_cs)
   # re-capping because geometry of the fragment has changed.
   r = fragment_extracts.fragment_cappers[index].cap(
     sites_cart = fragment_hierarchy.atoms().extract_xyz())
-  r.pdb_hierarchy.write_pdb_file(file_name=complete_qm_pdb_file,
-                    crystal_symmetry=fragment_extracts.expansion_cs)
+  complete_qm_pdb_file = write_hierarchy(r.pdb_hierarchy,
+    complete_qm_pdb_file, crystal_symmetry=fragment_extracts.expansion_cs)
   return os.path.abspath(complete_qm_pdb_file), r.pdb_hierarchy, \
     r.fragment_selection
 
@@ -369,6 +379,9 @@ def write_mm_charge_file(fragment_extracts, index):
   fragment_selection = fragment_extracts.fragment_super_selections[index]
   file_name = None
   if (fragment_extracts.charge_embedding is True):
+    if(fragment_extracts.working_folder is None):
+      raise Sorry("cluster.charge_embedding needs a working folder (the "
+        "point charges are passed to the QM engine in a file).")
     if(fragment_extracts.charge_cutoff is not None):
       if(fragment_extracts.debug):
         print("charge_cutoff: ",fragment_extracts.charge_cutoff)
@@ -389,8 +402,7 @@ def write_mm_charge_file(fragment_extracts, index):
       os.mkdir(sub_working_folder)
     if(fragment_extracts.debug): print("write mm pdb file:", index)
     non_fragment_pdb_file = sub_working_folder + str(index) + "_mm.pdb"
-    non_fragment_hierarchy.write_pdb_file(
-      file_name=non_fragment_pdb_file,
+    write_hierarchy(non_fragment_hierarchy, non_fragment_pdb_file,
       crystal_symmetry=fragment_extracts.expansion_cs)
     charge_scaling_positions = fragment_utils.get_edge_atom_positions(
       ph, non_fragment_hierarchy, charge_embed=True)
@@ -436,18 +448,16 @@ def write_cluster_and_fragments_pdbs(fragments,directory):
     filename_cluster = "%s_cluster.pdb" %(index)
     filename_frag = "%s_frag.pdb" %(index)
     filename_capped = "%s_capped0.pdb" %(index)
-    index_cluster.write_pdb_file(
-    file_name        = filename_cluster,
-    crystal_symmetry = F.expansion_cs)
-    index_frag.write_pdb_file(
-    file_name        = filename_frag,
-    crystal_symmetry = F.expansion_cs)
+    write_hierarchy(index_cluster, filename_cluster,
+      crystal_symmetry = F.expansion_cs)
+    write_hierarchy(index_frag, filename_frag,
+      crystal_symmetry = F.expansion_cs)
     capper = F.fragment_cappers[index]
     if capper is not None: # cctbx restraints: no caps (cap_fragments=False)
       capped_hierarchy = capper.cap(
         sites_cart = index_frag.atoms().extract_xyz()).pdb_hierarchy
-      capped_hierarchy.write_pdb_file(file_name=filename_capped,
-                crystal_symmetry=F.expansion_cs)
+      write_hierarchy(capped_hierarchy, filename_capped,
+        crystal_symmetry=F.expansion_cs)
 
   log=open('fragment_info.txt','w')
   print('~  # clusters  : ',len(F.cluster_atoms), file=log)

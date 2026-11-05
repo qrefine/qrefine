@@ -2,9 +2,7 @@ import os
 import iotbx.pdb
 from scitbx.array_family import flex
 from libtbx import easy_pickle
-import time, sys
 import libtbx.load_env
-from libtbx.test_utils import approx_equal
 from qrefine.command_line import granalyse
 from qrefine.tests.unit import run_qrefine_in
 
@@ -108,20 +106,20 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
         "dump_gradients=cluster_%s.pkl"%clustering,
         "restraints=qm",
         "quantum.engine_name=mopac",
-        
+
         #"distance_buffer=True","distance_buffer_radius=6",
-        
+
         #"restraints=cctbx",
-         
+
         "debug=True",
         "number_of_micro_cycles=1",
         "max_iterations_refine=1",
         "two_buffers=%s"%str(two_buffers),
         ]
       r_qr = run_qrefine_in(prefix = prefix, args=args)
-  g1 = easy_pickle.load(os.path.join(r_qr.folder,
+  g1 = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringFalse.pkl")).gradients
-  g2 = easy_pickle.load(os.path.join(r_qr.folder,
+  g2 = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringTrue.pkl")).gradients
   assert len(g1) == len(g2)
   for g1i, g2i in zip(g1, g2):

@@ -2,12 +2,12 @@ from __future__ import absolute_import, division, print_function
 from libtbx.program_template import ProgramTemplate
 import iotbx.phil
 import os
-from libtbx.utils import Sorry, null_out
+from libtbx.utils import null_out
 from cctbx.array_family import flex
 import mmtbx.model
-from cctbx import maptbx
+from libtbx import group_args
 
-from qrefine import refine, conformers
+from qrefine import conformers, api
 
 
 master_phil_str = """
@@ -15,9 +15,6 @@ auto_cust = True
   .type = bool
   .help = Allow to overwrite parameters inside the program: some user-defined \
           parameters will be ignored.
-max_atoms = 50000
-  .type = int
-  .help = maximum number of atoms
 debug = False
   .type = bool
   .help = flag to control verbosity of output for debugging problematic code.
@@ -127,9 +124,10 @@ refine {
   sf_algorithm = *direct fft
     .type = choice(multi=False)
     .help = algorithm used to compute structure factors, either the direct method or fast fourier transform.
-  refinement_target_name = *ml ls_wunit_k1
+  refinement_target_name = *Auto ml mlhl ls_wunit_k1
     .type = choice
-    .help = Data target type: least-squares or maximum-likelihood.
+    .help = Data target type: least-squares or maximum-likelihood. Auto: ml, \
+            or mlhl when the data carry experimental phases.
   mode = opt *refine gtest
     .type = choice(multi=False)
     .help = choose between refinement, geometry optimization or gradient test
@@ -269,10 +267,6 @@ write_nuclear_h_positions = False
   .help = Write the refined nuclear H positions. Default: H positions follow \
           the scattering-table convention, X-ray X-H lengths for X-ray \
           tables, nuclear for neutron and electron.
-rst_file = None
-  .type = str
-  .help = Restart file to use for determining location in run. Loads previous \
-          results of weight calculations.
 dump_gradients=None
   .type = str
   .help = used for debugging gradients when clustering.
@@ -283,6 +277,165 @@ def get_default_params():
     input_string = master_phil_str,
     process_includes = True
   ).extract()
+
+def _header(log, text):
+  """The section header of ProgramTemplate.header, printed into log."""
+  print("-"*79, file=log)
+  print(text, file=log)
+  print("*"*len(text), file=log)
+
+def prepare_inputs(data_manager, params, log):
+  """
+  The objects qr.refine refines, from the inputs of data_manager (one
+  model; at most one reflection file or one map): the fmodel (scaled, its
+  structure a copy of the model's, in the model's atom order), the
+  normalized map, the model (altlocs reconciled, electron table
+  neutralised, processed with neutron distances, CDL off, input atom order,
+  scattering dictionaries at the data or map resolution). Prints into log.
+  Returns group_args(model, fmodel, map_data, d_min, prefix): fmodel and
+  map_data None when absent; d_min the resolution of the reflection data
+  (None without them), as api.finalize_params takes it; prefix the model
+  file name without extension.
+  """
+  has_ma = data_manager.has_miller_arrays(
+    expected_n=1,
+    exact_count=True,
+    raise_sorry=False)
+  has_map = data_manager.has_real_maps(
+    expected_n=1,
+    exact_count=True,
+    raise_sorry=False)
+  _header(log, "Refinement start")
+  data_manager.update_all_defaults(
+    data_type = params.scattering_table)
+  # fmodel stuff
+  fmodel=None
+  if(has_ma):
+    _header(log, "Extracting fmodel")
+    fmodel = data_manager.get_fmodel(
+      scattering_table = params.scattering_table)
+  # real map
+  map_data = None
+  if(has_map):
+    map_data = data_manager.get_real_map().map_data()
+    map_data = map_data - flex.mean(map_data)
+    sd = map_data.sample_standard_deviation()
+    if sd is not None and sd != 0:
+      map_data = map_data/sd
+  #
+  # model stuff
+  _header(log, "Extracting model")
+  model_file_name = data_manager.get_model_names()[0]
+  model = data_manager.get_model(filename = model_file_name)
+  if(params.altlocs.reconcile and
+     conformers.n_conformers(model.get_hierarchy()) > 1):
+    _header(log, "Reconciling altlocs")
+    # Relabel a fresh hierarchy in input-file order: the hierarchy of
+    # model is built with sort_atoms=True, and process() below rebuilds
+    # the hierarchy from the input (sort_atoms=False) anyway.
+    model_input = model.get_model_input()
+    if(model_input is not None):
+      hierarchy = model_input.construct_hierarchy(
+        sort_atoms=False).deep_copy()
+    else:
+      hierarchy = model.get_hierarchy().deep_copy()
+    r = hierarchy.reconcile_altlocs(
+      crystal_symmetry = model.crystal_symmetry(), log = log)
+    print("  %d residues relabeled" % len(r.swaps), file=log)
+    if(len(r.swaps) > 0):
+      # Model without input: process() would rebuild the hierarchy from the
+      # input, undoing the relabel. The HELIX/SHEET annotation is carried
+      # over; links are found automatically by pdb_interpretation (it never
+      # reads the file's LINK/SSBOND records); TER positions are lost.
+      hierarchy.atoms().reset_i_seq()
+      hierarchy.atoms_reset_serial()
+      ss_annotation = model.get_ss_annotation()
+      model = mmtbx.model.manager(
+        model_input       = None,
+        pdb_hierarchy     = hierarchy,
+        crystal_symmetry  = model.crystal_symmetry(),
+        restraint_objects = model.get_restraint_objects(),
+        log               = null_out())
+      if(ss_annotation is not None):
+        model.set_ss_annotation(ann = ss_annotation)
+      print("  model rebuilt from its hierarchy (secondary structure "
+        "annotation carried over, links found automatically)", file=log)
+    if(r.unresolved):
+      print("  WARNING: altlocs of %d groups of residues cannot be made "
+        "consistent; refinement continues with the labels as they are." %
+        len(r.unresolved), file=log)
+  if(params.scattering_table == "electron"):
+    model.neutralize_scatterers()
+  pi_params = api.pdb_interpretation_params()
+  model.process(make_restraints=True, grm_normalization=False,
+    pdb_interpretation_params = pi_params)
+  # Resolution of the dictionaries as in phenix.refine: of the data, of the
+  # map, else 1 A.
+  d_min = api.dictionaries_d_min(model=model, fmodel=fmodel,
+    map_data=map_data)
+  model.setup_scattering_dictionaries(
+    scattering_table  = params.scattering_table,
+    d_min             = d_min,
+    log               = log)
+  # fmodel holds the structure of the data manager's (sorted) model; the
+  # refined model may differ in atom order (altloc reconciliation rebuilds
+  # it from the input-order hierarchy). Give fmodel a copy of the model's
+  # structure (never the same object: the X-H mapper keeps nuclear and
+  # scattering sites apart), then scale.
+  if(fmodel is not None):
+    fmodel.update_xray_structure(
+      xray_structure = model.get_xray_structure().deep_copy_scatterers(),
+      update_f_calc  = True,
+      update_f_mask  = True)
+    fmodel.update_all_scales(log=log, refine_hd_scattering=False)
+    fmodel.show(log=log, show_header=False)
+    _header(log, "Starting r-factors:")
+    print("r_work=%6.4f r_free=%6.4f"%(
+      fmodel.r_work(), fmodel.r_free()), file=log)
+  return group_args(
+    model    = model,
+    fmodel   = fmodel,
+    map_data = map_data,
+    d_min    = d_min if fmodel is not None else None,
+    prefix   = os.path.splitext(model_file_name)[0])
+
+def write_output(result, params, prefix, log):
+  """
+  Write the refined model of result (api.refine) and return the file name:
+  pdb/<prefix>_refined.<ext> (folder params.output_folder_name, prefix
+  params.output_file_name_prefix if set; directory part dropped) with the
+  sites result.sites_cart, or result.sites_cart_nuclear with
+  write_nuclear_h_positions=True; real-space mode writes
+  real_space_refined.<ext> into the current directory. <ext> is .pdb, or
+  .cif when the identifiers do not fit the PDB format. result.model is
+  left with its (nuclear) sites.
+  """
+  model = result.model
+  ext = ".pdb" if model.can_be_output_as_pdb() else ".cif"
+  if(result.mode == "real_space"):
+    file_name = "real_space_refined" + ext
+    with open(file_name, "w") as of:
+      print(model.as_pdb_or_mmcif_string(target_format="pdb"), file=of)
+    return file_name
+  output_file_name_prefix = os.path.basename(
+    prefix if params.output_file_name_prefix is None
+    else params.output_file_name_prefix)
+  base_name = "%s_refined%s" % (output_file_name_prefix, ext)
+  folder = params.output_folder_name
+  os.makedirs(folder, exist_ok=True)
+  file_name = os.path.join(folder, base_name)
+  sites_cart = result.sites_cart
+  if(params.write_nuclear_h_positions):
+    sites_cart = result.sites_cart_nuclear
+  nuclear = model.get_sites_cart()
+  model.set_sites_cart(sites_cart)
+  try:
+    with open(file_name, "w") as fo:
+      fo.write(model.as_pdb_or_mmcif_string(target_format="pdb"))
+  finally:
+    model.set_sites_cart(nuclear)
+  print("See %s in %s folder." % (base_name, folder), file=log)
+  return file_name
 
 class Program(ProgramTemplate):
 
@@ -313,191 +466,41 @@ qr.refine model.pdb model.mtz [<param_name>=<param_value>] ...
       exact_count=True,
       raise_sorry=False)
     self.has_data = self.has_ma or self.has_map
-    #
-    assert [self.params.expansion,
-            self.params.cluster.clustering].count(True) != 2
-    #
-    if self.params.refine.minimizer == "lbfgsb":
-      if self.params.refine.gradient_only:
-        raise Sorry("gradient_only must be False for lbfgsb.")
-    #
-    if self.params.expansion or self.params.cluster.clustering:
-      self.params.refine.minimizer="lbfgs"
-      self.params.refine.gradient_only=True
-      print("\n  expansion/clustering require minimizer=lbfgs and gradient_only=True \n",
-        file=self.logger)
-
-  def auto_cust(self):
-    #
-    # XXX Temporary work-around. Future: use the same machinery as phenix.refine
-    #
-    if(not self.params.auto_cust): return
-    #
-    # AIMNet2 specific settings (as used in tests for the paper).
-    #
-    if(self.params.quantum.engine_name=="aimnet2"):
-      msg="""
-The following settings have been auto-set to match refine.mode=refine
-and quantum.engine_name=aimnet2:
-"""
-      if self.params.debug: self.params.restraints="cctbx"
-      else:                 self.params.restraints="qm"
-      self.params.cluster.clustering=False
-      self.params.refine.number_of_weight_search_cycles=10
-      self.params.refine.number_of_refine_cycles=5
-      self.params.cluster.select_within_radius=7
-      self.params.refine.max_iterations_weight=100
-      if self.fmodel is not None:
-        self.params.expansion=True
-        self.params.refine.minimizer="lbfgs"
-        self.params.refine.gradient_only=True
-        d_min = self.fmodel.f_obs().d_min()
-        if(d_min<1.2):
-          self.params.refine.max_bond_rmsd=0.025
-          self.params.refine.max_angle_rmsd=2.5
-        elif(d_min>=1.2 and d_min<3):
-          self.params.refine.max_bond_rmsd=0.02
-          self.params.refine.max_angle_rmsd=2.0
-        else:
-          self.params.refine.max_bond_rmsd=0.01
-          self.params.refine.max_angle_rmsd=1.7
-      elif self.map_data is not None:
-        self.params.refine.max_bond_rmsd=0.009
-        self.params.expansion=False
-        self.params.refine.minimizer="lbfgsb"
-        self.params.refine.gradient_only=False
-      else: # Optimization
-        assert self.params.refine.mode=="opt"
-        self.params.expansion=True
-
-      self.params.refine.stop_one_found_first_good_weight=False
-      print(msg, file=self.logger)
-      print("  restraints                              ", self.params.restraints, file=self.logger)
-      print("  cluster.clustering                      ", self.params.cluster.clustering, file=self.logger)
-      print("  refine.minimizer                        ", self.params.refine.minimizer, file=self.logger)
-      print("  refine.number_of_weight_search_cycles   ", self.params.refine.number_of_weight_search_cycles, file=self.logger)
-      print("  refine.number_of_refine_cycles          ", self.params.refine.number_of_refine_cycles, file=self.logger)
-      print("  expansion                               ", self.params.expansion, file=self.logger)
-      print("  cluster.select_within_radius            ", self.params.cluster.select_within_radius, file=self.logger)
-      print("  refine.max_iterations_weight            ", self.params.refine.max_iterations_weight, file=self.logger)
-      print("  refine.max_bond_rmsd                    ", self.params.refine.max_bond_rmsd, file=self.logger)
-      print("  refine.max_angle_rmsd                   ", self.params.refine.max_angle_rmsd, file=self.logger)
-      print("  refine.stop_one_found_first_good_weight ", self.params.refine.stop_one_found_first_good_weight, file=self.logger)
-      print("  refine.gradient_only                    ", self.params.refine.gradient_only, file=self.logger)
-      #
-      print("\n***", file=self.logger)
-      print("To disable auto-custing of parameters use auto_cust=False", file=self.logger)
-      print("***\n", file=self.logger)
 
   def run(self):
-    self.header("Refinement start")
-    self.data_manager.update_all_defaults(
-      data_type = self.params.scattering_table)
-    # fmodel stuff
-    self.fmodel=None
-    if(self.has_ma):
-      self.header("Extracting fmodel")
-      self.fmodel = self.data_manager.get_fmodel(
-        scattering_table = self.params.scattering_table)
-      self.fmodel.update_all_scales(log=self.logger, refine_hd_scattering=False)
-      self.fmodel.show(log=self.logger, show_header=False)
-      self.header("Starting r-factors:")
-      print("r_work=%6.4f r_free=%6.4f"%(
-        self.fmodel.r_work(), self.fmodel.r_free()), file=self.logger)
-      self.header("Setting refinement target")
-      print(self.params.refine.refinement_target_name, file=self.logger)
-      self.fmodel.set_target_name(
-        target_name=self.params.refine.refinement_target_name)
-    # real map
-    self.map_data = None
-    if(self.has_map):
-      self.map_data = self.data_manager.get_real_map().map_data()
-      self.map_data = self.map_data - flex.mean(self.map_data)
-      sd = self.map_data.sample_standard_deviation()
-      if sd is not None and sd != 0:
-        self.map_data = self.map_data/sd
-      if(self.map_data is not None):
-        self.params.refine.mode="refine"
-    #
-    if(not self.has_data):
-      self.params.refine.mode="opt"
-    # model stuff
+    inputs = prepare_inputs(data_manager = self.data_manager,
+      params = self.params, log = self.logger)
+    has_map = inputs.map_data is not None
+    # All parameter rules, once.
+    api.finalize_params(
+      params           = self.params,
+      d_min            = inputs.d_min,
+      scattering_table = self.params.scattering_table,
+      has_map          = has_map,
+      has_data         = inputs.fmodel is not None or has_map,
+      log              = self.logger,
+      n_conformers     = conformers.n_conformers(inputs.model.get_hierarchy()))
+    # Fail fast: engine availability; model readiness (altloc completion,
+    # which is the job of mmtbx.reduce2 qmready=true; caps, H, elements,
+    # crystal neighbours with restraints=qm).
+    api.check_engine(self.params)
+    api.check_model(inputs.model, self.params, has_map = has_map)
     self._print(self.get_program_phil_str())
-    self.header("Extracting model")
-    model_file_name = self.data_manager.get_model_names()[0]
-    self.model = self.data_manager.get_model(filename = model_file_name)
-    if(self.params.altlocs.reconcile and
-       conformers.n_conformers(self.model.get_hierarchy()) > 1):
-      self.header("Reconciling altlocs")
-      # Relabel a fresh hierarchy in input-file order: the hierarchy of
-      # self.model is built with sort_atoms=True, and process() below rebuilds
-      # the hierarchy from the input (sort_atoms=False) anyway.
-      model_input = self.model.get_model_input()
-      if(model_input is not None):
-        hierarchy = model_input.construct_hierarchy(
-          sort_atoms=False).deep_copy()
-      else:
-        hierarchy = self.model.get_hierarchy().deep_copy()
-      r = hierarchy.reconcile_altlocs(
-        crystal_symmetry = self.model.crystal_symmetry(), log = self.logger)
-      print("  %d residues relabeled" % len(r.swaps), file=self.logger)
-      if(len(r.swaps) > 0):
-        # Model without input: process() would rebuild the hierarchy from the
-        # input, undoing the relabel. The HELIX/SHEET annotation is carried
-        # over; input-file LINK/SSBOND records and TER positions are lost.
-        hierarchy.atoms().reset_i_seq()
-        hierarchy.atoms_reset_serial()
-        ss_annotation = self.model.get_ss_annotation()
-        self.model = mmtbx.model.manager(
-          model_input       = None,
-          pdb_hierarchy     = hierarchy,
-          crystal_symmetry  = self.model.crystal_symmetry(),
-          restraint_objects = self.model.get_restraint_objects(),
-          log               = null_out())
-        if(ss_annotation is not None):
-          self.model.set_ss_annotation(ann = ss_annotation)
-        print("  model rebuilt from its hierarchy (input-file LINK/SSBOND "
-          "records not used)", file=self.logger)
-      if(r.unresolved):
-        print("  WARNING: altlocs of %d groups of residues cannot be made "
-          "consistent; refinement continues with the labels as they are." %
-          len(r.unresolved), file=self.logger)
-    # Completion is the job of mmtbx.reduce2 qmready=true: stop if needed.
-    # Native handling gives the model to cctbx restraints, which accept
-    # partial altlocs.
-    if(conformers.n_conformers(self.model.get_hierarchy()) > 1 and
-       self.params.altlocs.handling == "conformers"):
-      conformers.check_completed(self.model.get_hierarchy())
-    if(self.params.scattering_table == "electron"):
-      self.model.neutralize_scatterers()
-    params = mmtbx.model.manager.get_default_pdb_interpretation_params()
-    params.pdb_interpretation.use_neutron_distances = True
-    params.pdb_interpretation.restraints_library.cdl = False
-    params.pdb_interpretation.sort_atoms = False
-    self.model.process(make_restraints=True, grm_normalization=False,
-      pdb_interpretation_params = params)
-    # Resolution of the dictionaries as in phenix.refine: of the data, of the
-    # map, else 1 A.
-    d_min = 1.0
-    if(self.fmodel is not None):
-      d_min = self.fmodel.f_obs().d_min()
-    elif(self.map_data is not None):
-      d_min = maptbx.d99(map = self.map_data,
-        crystal_symmetry = self.model.crystal_symmetry()).result.d99
-    self.model.setup_scattering_dictionaries(
-      scattering_table  = self.params.scattering_table,
-      d_min             = d_min,
-      log               = self.logger)
-    # Auto-cust (set) parameters
-    #
-    self.auto_cust()
+    if(inputs.fmodel is not None):
+      self.header("Setting refinement target")
+      target_name = api.resolve_target_name(self.params, inputs.fmodel)
+      print(target_name, file=self.logger)
+      inputs.fmodel.set_target_name(target_name=target_name)
     #
     # run qrefine
-    refine.run(
-      model    = self.model,
-      fmodel   = self.fmodel,
-      map_data = self.map_data,
-      params   = self.params,
-      rst_file = self.params.rst_file,
-      prefix   = os.path.splitext(model_file_name)[0],
-      log      = self.logger)
+    result = api.refine(
+      model               = inputs.model,
+      params              = self.params,
+      fmodel              = inputs.fmodel,
+      map_data            = inputs.map_data,
+      working_folder      = "ase",
+      intermediate_folder = self.params.output_folder_name,
+      log                 = self.logger)
+    if(result is None): return # refine.dry_run
+    write_output(result = result, params = self.params,
+      prefix = inputs.prefix, log = self.logger)

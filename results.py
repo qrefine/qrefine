@@ -83,34 +83,25 @@ class manager(object):
     print(s, file = self.log)
     self.log.flush()
 
-  def write_final_pdb_files(self, output_file_name, output_folder_name):
-    if(os.path.exists(output_folder_name) is False):
-      os.mkdir(output_folder_name)
-    output_file_name = os.path.basename(output_file_name)
-    self.write_pdb_file(output_file_name = output_file_name,
-      output_folder_name = output_folder_name)
-
   def write_pdb_file(self, output_file_name, output_folder_name):
-    file_name = "%s" % os.path.join(output_folder_name, output_file_name)
+    """
+    Write the model into output_folder_name (created if missing) as
+    <stem>.pdb, or <stem>.cif when it does not fit PDB format, where stem is
+    output_file_name without its extension. Returns the file name written;
+    nothing written and None returned when output_folder_name is None.
+    """
+    if(output_folder_name is None): return None
+    os.makedirs(output_folder_name, exist_ok=True)
+    ext = ".pdb" if self.model.can_be_output_as_pdb() else ".cif"
+    file_name = os.path.join(output_folder_name,
+      os.path.splitext(output_file_name)[0] + ext)
     sites_cart = self.model.get_sites_cart()
     if(self.output_mapper is not None):
       self.model.set_sites_cart(self.output_mapper.shrink(sites_cart))
     try:
       with open(file_name,"w") as fo:
-        fo.write(self.model.model_as_pdb())
+        fo.write(self.model.as_pdb_or_mmcif_string(target_format="pdb"))
     finally:
       if(self.output_mapper is not None):
         self.model.set_sites_cart(sites_cart)
-
-  def finalize(self,
-               input_file_name_prefix,
-               output_file_name_prefix,
-               output_folder_name):
-    if(output_file_name_prefix is not None):
-      file_name = "%s_refined.pdb"%output_file_name_prefix
-    else:
-      file_name = "%s_refined.pdb"%input_file_name_prefix
-    self.write_final_pdb_files(
-      output_file_name   = file_name,
-      output_folder_name = output_folder_name)
-    print("See %s in %s folder."%(file_name, output_folder_name), file=self.log)
+    return file_name

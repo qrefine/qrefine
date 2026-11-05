@@ -100,18 +100,18 @@ def exercise_check(pdb_file):
     refine.check_qm_sees_crystal_neighbours(
       model    = model,
       params   = get_params(clustering=False, expansion=False),
-      map_data = None)
+      has_map  = False)
   except Sorry as e:
     assert str(e).find("expansion=True") > -1, str(e)
   else: raise AssertionError("Expected Sorry")
-  for params, map_data in [
-      (get_params(clustering=True,  expansion=False), None),
-      (get_params(clustering=False, expansion=True),  None),
-      (get_params(clustering=False, expansion=False), 1), # real-space
-      (get_params(clustering=False, expansion=False, radius=1.0), None),
-      (get_params(clustering=False, expansion=False, restraints="cctbx"), None)]:
+  for params, has_map in [
+      (get_params(clustering=True,  expansion=False), False),
+      (get_params(clustering=False, expansion=True),  False),
+      (get_params(clustering=False, expansion=False), True), # real-space
+      (get_params(clustering=False, expansion=False, radius=1.0), False),
+      (get_params(clustering=False, expansion=False, restraints="cctbx"), False)]:
     refine.check_qm_sees_crystal_neighbours(
-      model = model, params = params, map_data = map_data)
+      model = model, params = params, has_map = has_map)
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """

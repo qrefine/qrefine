@@ -35,10 +35,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     "restraints=qm",
     "quantum.engine_name=mopac",
     "debug=True",
-    
+
     #"distance_buffer=true",    # This makes d less than 2
     #"distance_buffer_radius=7",# This makes d less than 2
-    
+
     "number_of_micro_cycles=1",
     "max_iterations_refine=1",
     "parallel.nproc=4"]
@@ -65,9 +65,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   # Gradients at the starting coordinates match. Later gradients are not
   # comparable: the two optimizations diverge after the first step.
   #
-  g1 = easy_pickle.load(os.path.join(r_qr.folder,
+  g1 = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringFalse.pkl")).gradients[0]
-  g2 = easy_pickle.load(os.path.join(r_qr.folder,
+  g2 = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringTrue.pkl")).gradients[0]
   assert g1.size() == n_atoms and g2.size() == n_atoms
   d = max(granalyse.get_grad_wdelta(ref = g1, g = g2))

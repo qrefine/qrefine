@@ -90,7 +90,8 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
           qm_engine_name   = "mopac",
           method           = "PM3",
           crystal_symmetry = cs,
-          clustering       = clustering)
+          clustering       = clustering,
+          file_name        = "./ase/tmp_ase.pdb")
       else:
         fq = from_cctbx(restraints_manager = rm)
       if(clustering):

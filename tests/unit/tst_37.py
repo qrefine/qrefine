@@ -34,9 +34,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   # Gradients at the starting coordinates match. Later gradients are not
   # comparable: the two optimizations diverge after the first step.
   #
-  g1 = easy_pickle.load(os.path.join(r_qr.folder,
+  g1 = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringFalse.pkl")).gradients[0]
-  g2 = easy_pickle.load(os.path.join(r_qr.folder,
+  g2 = easy_pickle.load(os.path.join(r_qr.folder, "ase",
     "debug_optimization_clusteringTrue.pkl")).gradients[0]
   assert g1.size() == g2.size()
   diff = flex.sqrt((g1-g2).dot())
