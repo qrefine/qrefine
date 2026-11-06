@@ -269,3 +269,85 @@ instead of Sorry; the no-GOOD-trial fallback refines at the last scale (the
 old loop stepped up once more); tst_05 leaves its temp folder; tst_fit_rotatable2
 takes ~90 s with unseeded free flags. number_of_weight_search_cycles (now 8)
 also caps the real-space weight search (documented in its help).
+
+## 7. Fragment buffer study (2026-11-06)
+
+Question: is cluster.select_within_radius = 10 (the super-sphere radius)
+optimal or excessive for the QM cluster route, and what sets the fragment
+size? MOPAC PM7/COSMO gradients, one evaluation per setting, on two small
+crystals where every atom is near the fragment surface (the worst case):
+6uf7 (half a cyclic peptide, two conformers of 92 atoms, closed through a
+symmetry mate) and 1yjp (GNNQQNY, 128 atoms with H, three clusters).
+Scripts and raw numbers: scratchpad buffer/ (buffer_study.py,
+buffer_study2.py, buffer_sizes.py, run_6uf7, run_1yjp, run_1pwm).
+
+### 7a. The super-sphere radius does not set the buffer
+
+The fragment is cluster + interaction buffer: pair_interaction.run_prepared
+looks at atoms within 15 Bohr (7.9 A) of the core, adds the residues bound
+to the core (SEDD) and the residues in non-covalent contact with those
+(DORI), whole residues. The super sphere keeps whole residues with any atom
+inside the radius, so any residue the interaction search can reach is in
+the sphere once the radius is at least 8 A. Fragments are identical for
+radius 7-15 (6uf7: 737 atoms at every radius 4-15; 1yjp: 414/299/305 for
+7-15, 3 atoms fewer at 6); gradients differ only by MOPAC noise (max
+0.03-0.09 kcal/mol/A, relative rms 3-8e-4). Setup time hardly moves (1PWM
+conformer A: super sphere 18588 -> 15776 atoms at radius 8, fragment setup
+120 -> 117 s, and 3 fragment atoms differ from the 1 A mask grid). Keep 10;
+two_buffers would need twice the interaction window (16 A) and is served by
+10 only partly today.
+
+### 7b. The interaction buffer is a 4 A distance buffer
+
+Fragment atoms per buffer definition (distance R: every residue of the super
+sphere with an atom within R of the cluster, interaction search off):
+
+| buffer | 6uf7 (per conformer) | 1yjp (three clusters) |
+|---|---|---|
+| interaction (default) | 737 | 414 / 299 / 305 |
+| interaction + distance 3 | 737 | 414 / 299 / 305 |
+| distance 3.5 | 718 | 387 / 276 / 310 |
+| distance 4 (= interaction + distance 4) | 752 | 420 / 319 / 342 |
+| distance 5 | 891 | 548 / 454 / 448 |
+| distance 6 | 1155 | 775 / 714 / 647 |
+| distance 8 | 1946 | 1325 / 1057 / 1005 |
+
+Gradient error of the core atoms against the 5 A buffer (the largest MOPAC
+COSMO accepts: 925 atoms ran, 1193 and 1361 were refused as "too large to
+run using COSMO") and MOPAC time per evaluation:
+
+| buffer | 6uf7 rms / max error (kcal/mol/A), rel. rms, time | 1yjp |
+|---|---|---|
+| distance 2.5 | 5.35 / 29.5, 24%, 23 s | 3.54 / 11.8, 12%, 9 s |
+| distance 3 | 3.29 / 15.7, 15%, 42 s | 2.55 / 9.7, 9%, 14 s |
+| distance 3.5 | 1.67 / 11.1, 7.5%, 70 s | 2.17 / 7.6, 7.6%, 21 s |
+| interaction (default) | 0.96 / 3.7, 4.3%, 71 s | 1.99 / 7.3, 6.9%, 19 s |
+| distance 4 | 0.89 / 3.9, 4.0%, 76 s | 1.82 / 6.2, 6.3%, 25 s |
+| distance 5 (reference) | 0, 343 s | 0, 1239 s |
+
+(gradient rms 22 and 29 kcal/mol/A; 6uf7 times are for two conformers.)
+The largest 6uf7 errors sit on the charged D-Glu carboxylate (3.7, 3.2, 2.0
+kcal/mol/A on CD, OE2, OE1): long-range electrostatics with the second
+shell. For scale, the cctbx and QM gradients of the same model differ by
+~100 kcal/mol/A rms.
+
+### 7c. Conclusions
+
+- The default buffer is the knee of the curve: a 3 A buffer saves 25-40% of
+  the MOPAC time for 2-3x the gradient error; 3.5 A costs the same as the
+  default for a larger error; 5 A costs 5-60x more for a 4-7% change.
+  Keep the interaction buffer and select_within_radius = 10 as they are.
+- MOPAC cost above ~700 atoms is steep and erratic: 6uf7 520 / 773 / 925
+  atoms take 11 / 35 / 180 s; 1yjp's 559-atom 5 A fragment took 1217 s
+  because the default SCF convergers failed ("ALL CONVERGERS ARE NOW
+  FORCED ON") while its 472 and 468-atom siblings took 10 s; the 798-atom
+  6 A fragment did not finish in 40 min. The cap on fragment size, not the
+  buffer, is what bounds the run time; restarting from the previous density
+  (OLDENS) saves only 5% on a converging 773-atom fragment (scratchpad
+  buffer/dens).
+- 1PWM conformer A at the defaults (maxnum_residues_in_cluster 15): 148
+  fragments, core 3-210 atoms (median 33), fragment 28-1151 atoms (median
+  283, buffer/core median 8.9); 26 fragments above 500 atoms, 7 above 800, 2
+  above 1000 (which MOPAC COSMO would refuse). The clusters are small (the
+  cap is in residues, the buffer in atoms), so a fragment-size cap in atoms
+  (splitting the largest clusters) would be the next lever for MOPAC.

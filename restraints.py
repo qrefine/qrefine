@@ -18,7 +18,8 @@ from .plugin.tools import qr_tools
 from libtbx import group_args
 from qrefine.super_cell import expand
 from qrefine import fragment_capping
-from qrefine.utils.hierarchy_utils import model_from_hierarchy
+from qrefine.utils.hierarchy_utils import model_from_hierarchy, \
+  peptide_closures
 from qrefine.utils.hierarchy_utils import write_hierarchy
 
 def scratch_file_name(working_folder):
@@ -46,9 +47,11 @@ class restraints(object):
   def source_of_restraints_qm(self):
     return self.params.restraints == "qm"
 
-  def update(self, pdb_hierarchy, crystal_symmetry, charge=None):
+  def update(self, pdb_hierarchy, crystal_symmetry, charge=None, bonds=None):
     # charge: the total charge of pdb_hierarchy when the caller knows it (a
-    # capped expansion); quantum.charge set by the user wins.
+    # capped expansion); quantum.charge set by the user wins. bonds: extra
+    # bonds of the cctbx restraints (model_from_hierarchy), the peptide
+    # closures between the chains of a super sphere.
     #
     if self.restraints_manager is not None:
       if(not self.source_of_restraints_qm()):
@@ -68,7 +71,8 @@ class restraints(object):
         model = model_from_hierarchy(
           pdb_hierarchy    = pdb_hierarchy,
           crystal_symmetry = crystal_symmetry,
-          cif_objects      = self.cif_objects)
+          cif_objects      = self.cif_objects,
+          bonds            = bonds)
         self.restraints_manager = from_cctbx(
           restraints_manager = model.get_restraints_manager(),
           file_name          = scratch_file_name(self.working_folder))
@@ -143,7 +147,9 @@ class from_expansion(object):
     self.restraints_manager = self.restraints_source.update(
         pdb_hierarchy    = self.pdb_hierarchy_super_completed,
         crystal_symmetry = self.expansion.cs_box,
-        charge           = self.capper.charge if self.capper else None)
+        charge           = self.capper.charge if self.capper else None,
+        bonds            = peptide_closures(
+          self.pdb_hierarchy_super_completed))
 
   def target_and_gradients(self, sites_cart):
     self._update(sites_cart = sites_cart)

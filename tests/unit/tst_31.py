@@ -384,7 +384,10 @@ def exercise_split():
   model_h = mmtbx.model.manager(model_input=None, pdb_hierarchy=h,
     crystal_symmetry=model.crystal_symmetry(), log=null_out())
   assert conformers.split(model_h) == []
-  # hydrogen-only labels are not conformers
+  # A hydrogen-only label is a conformer like any other (a methyl in two
+  # orientations, 6uf7 ILE 4), unless its atoms are H/D exchange sites: an
+  # H and a D of equal name.strip()[1:] in atom groups with different
+  # altlocs (iotbx exchangeable_hd_selections).
   rg = list(ph.residue_groups())[1] # GLY 88: first residue with atom H
   ag = rg.only_atom_group()
   h_atom = [a for a in ag.atoms() if a.name.strip() == "H"][0]
@@ -393,10 +396,31 @@ def exercise_split():
   ag.remove_atom(h_atom)
   rg.append_atom_group(ag_h)
   ph.atoms().reset_i_seq()
+  assert conformers.conformer_labels(ph) == ["A", "B", "C"]
+  # the H/D partner under label D makes C and D exchange sites, no conformers
+  ag_d = iotbx.pdb.hierarchy.atom_group(altloc="D", resname=ag.resname)
+  d_atom = h_atom.detached_copy()
+  d_atom.name = " D  "
+  d_atom.element = " D"
+  ag_d.append_atom(d_atom)
+  rg.append_atom_group(ag_d)
+  ph.atoms().reset_i_seq()
   assert conformers.conformer_labels(ph) == ["A", "B"]
   assert conformers.multiplicity(ph)[ag_h.atoms()[0].i_seq] == 2.0
   for p in conformers.split(model):
     assert ag_h.atoms()[0].i_seq in p.iselection
+  # two H orientations of one methyl under A and B (both H): conformers
+  rg.remove_atom_group(ag_d)
+  ag_h.altloc = "A"
+  h2 = h_atom.detached_copy()
+  h2.xyz = (h2.xyz[0] + 0.5, h2.xyz[1], h2.xyz[2])
+  ag_b = iotbx.pdb.hierarchy.atom_group(altloc="B", resname=ag.resname)
+  ag_b.append_atom(h2)
+  rg.append_atom_group(ag_b)
+  ph.atoms().reset_i_seq()
+  assert conformers.conformer_labels(ph) == ["A", "B"]
+  assert conformers.multiplicity(ph)[ag_h.atoms()[0].i_seq] == 1.0
+  assert conformers.multiplicity(ph)[ag_b.atoms()[0].i_seq] == 1.0
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """

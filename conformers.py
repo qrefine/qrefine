@@ -2,7 +2,9 @@
 Conformer models of a model with alternative conformations (altlocs).
 
 Conformer labels are the altloc labels that have at least one non-hydrogen
-atom; hydrogen-only labels (neutron H/D exchange sites) are not conformers.
+atom or a hydrogen that is not an H/D exchange site; the labels of neutron
+H/D exchange sites (an H and a D of the same name) are not conformers, a
+methyl in two H orientations is.
 The own labels of a residue group are the conformer labels present in it.
 Conformer X takes, from every residue group: all its atoms if it has no own
 labels; its blank atoms, X atoms and hydrogen-only-label atoms if X is one
@@ -42,17 +44,52 @@ from scitbx.array_family import flex
 def _is_hydrogen(atom):
   return atom.element.strip().upper() in ("H", "D")
 
+def _hd_names_by_label(residue_group):
+  """
+  {altloc: {name.strip()[1:]: set of elements}} of the H and D atoms of
+  residue_group (the name rule of iotbx exchangeable_hd_selections).
+  """
+  result = {}
+  for ag in residue_group.atom_groups():
+    d = result.setdefault(ag.altloc, {})
+    for a in ag.atoms():
+      e = a.element.strip()
+      if(e in ("H", "D")):
+        d.setdefault(a.name.strip()[1:], set()).add(e)
+  return result
+
+def _is_exchange_site(atom, altloc, hd_names_by_label):
+  """
+  True if atom (H or D, in the atom group with altloc) has its other
+  isotope of equal name.strip()[1:] in an atom group with another altloc.
+  """
+  other = "D" if atom.element.strip() == "H" else "H"
+  key = atom.name.strip()[1:]
+  for label, names in hd_names_by_label.items():
+    if(label == altloc): continue
+    if(other in names.get(key, ())): return True
+  return False
+
 def conformer_labels(pdb_hierarchy):
   """
-  Sorted altloc labels that have at least one non-hydrogen atom.
+  Sorted altloc labels that are conformers: labels with at least one
+  non-hydrogen atom, or with an H or D atom that is not an H/D exchange
+  site (_is_exchange_site). A methyl in two H orientations under A and B
+  makes A and B conformers; the H and D of a neutron exchange site do not.
   """
   labels = set()
-  for ag in pdb_hierarchy.atom_groups():
-    if(ag.altloc in labels or ag.altloc.strip() == ""): continue
-    for a in ag.atoms():
-      if(not _is_hydrogen(a)):
-        labels.add(ag.altloc)
-        break
+  for rg in pdb_hierarchy.residue_groups():
+    hd_names = None
+    for ag in rg.atom_groups():
+      if(ag.altloc in labels or ag.altloc.strip() == ""): continue
+      for a in ag.atoms():
+        if(not _is_hydrogen(a)):
+          labels.add(ag.altloc)
+          break
+        if(hd_names is None): hd_names = _hd_names_by_label(rg)
+        if(not _is_exchange_site(a, ag.altloc, hd_names)):
+          labels.add(ag.altloc)
+          break
   return sorted(labels)
 
 def n_conformers(pdb_hierarchy):

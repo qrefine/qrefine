@@ -24,8 +24,10 @@ import iotbx.pdb
 import mmtbx.model
 from libtbx import group_args
 from libtbx.utils import Sorry, null_out
+from scitbx.array_family import flex
 from mmtbx.hydrogens import capping
-from qrefine.utils.hierarchy_utils import model_from_hierarchy
+from qrefine.utils.hierarchy_utils import model_from_hierarchy, \
+  peptide_closures
 
 AMINO_ACID_CLASSES = ('common_amino_acid', 'modified_amino_acid',
                       'd_amino_acid')
@@ -59,11 +61,18 @@ class capper(object):
       raise Sorry('Capping: the fragment has alternate conformations (%s); '
         'QM fragments must be single-conformer' % ', '.join(sorted(altlocs)))
     cut = capping.cut_bonds_by_distance(parent_hierarchy, selection)
+    # peptide bonds between chains (the super sphere gives every symmetry
+    # copy its own chain id: a macrocycle closed through a symmetry mate
+    # closes between the master chain and a copy), which pdb_interpretation
+    # does not link
+    self.closures = peptide_closures(self.fragment_hierarchy)
+    self.n_closures = len(self.closures)
     self._model = model_from_hierarchy(
       pdb_hierarchy    = self.fragment_hierarchy.deep_copy(),
       crystal_symmetry = crystal_symmetry,
       cif_objects      = cif_objects,
-      log              = log)
+      log              = log,
+      bonds            = self.closures)
     self.dangling = capping.find_dangling_atoms(self._model, cut_bonds=cut,
                                                 log=log)
     if self.dangling.unknown_residues:

@@ -3,7 +3,8 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from cctbx.crystal import super_cell as cctbx_super_cell
-from qrefine.utils.hierarchy_utils import write_hierarchy
+from qrefine.utils.hierarchy_utils import write_hierarchy, \
+  peptide_closures, bond_edits_params
 
 class expand(object):
   """
@@ -63,10 +64,18 @@ class expand(object):
     xrs = processed_pdb_file.xray_structure()
     sctr_keys = xrs.scattering_type_registry().type_count_dict().keys()
     has_hd = "H" in sctr_keys or "D" in sctr_keys
+    # peptide bonds between the master and a copy or between copies (a
+    # macrocycle closed through a symmetry mate): pdb_interpretation does
+    # not link two chains
+    closures = peptide_closures(self.ph_super_sphere)
+    params_edits = None
+    if(len(closures) > 0):
+      params_edits = bond_edits_params(closures).geometry_restraints.edits
     geometry = processed_pdb_file.geometry_restraints_manager(
       show_energies                = False,
       assume_hydrogens_all_missing = not has_hd,
-      plain_pairs_radius           = 5.0)
+      plain_pairs_radius           = 5.0,
+      params_edits                 = params_edits)
     return mmtbx.restraints.manager(geometry = geometry, normalization = False)
 
   def write_super_cell_selected_in_sphere(self, file_name):

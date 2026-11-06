@@ -55,7 +55,11 @@ cluster{
     .help = threshold value for bcc clustering
   select_within_radius = 10
     .type = int
-    .help = supersphere expansion radius
+    .help = Radius (Angstrom) of the symmetry environment (super sphere) \
+            around the model. The QM fragment buffer of the cluster route \
+            is set by the interaction search (about 4 A), not by this \
+            value, which must be at least 8 for that search to see every \
+            neighbour. With expansion=True the whole sphere is the fragment.
   clustering_method = *bcc
     .type = choice(multi=False)
     .help = clustering algorithm (betweenness centrality clustering)
