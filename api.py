@@ -63,7 +63,6 @@ and quantum.engine_name=aimnet2:
   else: # Optimization
     assert params.refine.mode == "opt"
     params.expansion = True
-  params.refine.stop_one_found_first_good_weight = False
   if(log is None): return
   p = params
   print(msg, file=log)
@@ -77,7 +76,6 @@ and quantum.engine_name=aimnet2:
   print("  refine.max_iterations_weight            ", p.refine.max_iterations_weight, file=log)
   print("  refine.max_bond_rmsd                    ", p.refine.max_bond_rmsd, file=log)
   print("  refine.max_angle_rmsd                   ", p.refine.max_angle_rmsd, file=log)
-  print("  refine.stop_one_found_first_good_weight ", p.refine.stop_one_found_first_good_weight, file=log)
   print("  refine.gradient_only                    ", p.refine.gradient_only, file=log)
   print("\n***", file=log)
   print("To disable auto-custing of parameters use auto_cust=False", file=log)

@@ -3,9 +3,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
 from qrefine import qr
-from boost_adaptbx import graph
-from boost_adaptbx.graph import clustering_algorithm
-from boost_adaptbx.graph import connected_component_algorithm as cca
+import itertools
 from libtbx.program_template import ProgramTemplate
 from qrefine.fragment import fragments
 
@@ -107,55 +105,58 @@ class betweenness_centrality_clustering(object):
                bonded_pairs=None):
     self.interaction_list = interaction_list
     self.bonded_pairs = bonded_pairs or []
-    self.g = graph.adjacency_list(
-      graph_type="undirected",
-      vertex_type="vector",
-      edge_type="set")
     self.maxnum_residues_in_cluster=maxnum_residues_in_cluster
     self.bcc_threshold=bcc_threshold
     self.size = size
 
   def get_clusters(self):
-    self.build_graph()
+    """
+    The clusters (lists of 1-based residue indices), in order of their
+    smallest residue, each of at most maxnum_residues_in_cluster residues.
+    """
+    from mmtbx.pair_interaction import ext
+    from scitbx.array_family import flex
+    if self.size is None:
+      merged = list(itertools.chain.from_iterable( self.interaction_list))
+      self.size = max(merged)
+    edges = flex.int()
+    for i, j in self.interaction_list:
+      edges.append(i - 1)
+      edges.append(j - 1)
+    residues = list(range(1, self.size + 1))
     threshold = self.bcc_threshold
-    clustering = True
-    while (clustering and threshold >=4):
-      edge_centrality_map = clustering_algorithm.\
-        betweenness_centrality_clustering(graph=self.g, threshold=threshold)
-      components = cca.connected_components(graph=self.g)
-      components_size = [ len(component) for component in components]
-      if max(components_size) <= self.maxnum_residues_in_cluster:
-        clustering = False
-      else:
-        threshold -= 1
-    neighbors = dict((r, set()) for r in range(1, self.size+1))
+    while True:
+      # Girvan-Newman (mmtbx.pair_interaction.ext.girvan_newman, the boost
+      # betweenness_centrality_clustering with component-local recompute)
+      # continues on the edges the previous threshold left
+      edges = ext.girvan_newman(n_vertices=self.size, edges=edges,
+        threshold=threshold)
+      remaining = dict((r, set()) for r in residues)
+      for k in range(edges.size() // 2):
+        a, b = edges[2*k] + 1, edges[2*k+1] + 1
+        remaining[a].add(b)
+        remaining[b].add(a)
+      components = connected_pieces(residues, remaining)
+      if max(len(c) for c in components) <= self.maxnum_residues_in_cluster:
+        break
+      if threshold <= 4: break
+      threshold -= 1
+    neighbors = dict((r, set()) for r in residues)
     for i, j in self.interaction_list:
       neighbors[i].add(j)
       neighbors[j].add(i)
-    bonded = dict((r, set()) for r in range(1, self.size+1))
+    bonded = dict((r, set()) for r in residues)
     for i, j in self.bonded_pairs:
       bonded[i].add(j)
       bonded[j].add(i)
     final_components = []
     for component in components:
       final_components.extend(split_cluster(
-        residues  = sorted(x + 1 for x in component),
+        residues  = component,
         neighbors = neighbors,
         bonded    = bonded,
         maxnum    = self.maxnum_residues_in_cluster))
     return final_components
-
-  def build_graph(self):
-    import itertools
-    vertices = []
-    if self.size is None:
-      merged = list(itertools.chain.from_iterable( self.interaction_list))
-      self.size = max(merged)
-    for i in range(self.size):
-      vertices.append(self.g.add_vertex())
-    for pair in self.interaction_list:
-      self.g.add_edge(vertex1 = vertices[pair[0]-1],
-        vertex2 = vertices[pair[1]-1], weight = 1)
 
 class Program(ProgramTemplate):
 

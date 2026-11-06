@@ -134,9 +134,11 @@ refine {
   number_of_macro_cycles=1
     .type = int
     .help = number of macro cycles used in the refinement procedure
-  number_of_weight_search_cycles=50
+  number_of_weight_search_cycles=12
     .type = int
-    .help = Number of attempts to find optimal weight
+    .help = Maximum number of weight search trials. In reciprocal space the \
+            search usually stops earlier, at the R-free plateau or the \
+            flip. The real-space weight search uses the same cap.
   number_of_refine_cycles=5
     .type = int
     .help = maximum number of refinement cycles
@@ -151,6 +153,8 @@ refine {
     .help = Calculate weight based on gradient norms (skip weight optimization)
   adjust_restraints_weight_scale_value = 2
     .type = float
+    .help = Factor by which the restraints weight scale changes between \
+            weight search trials
   max_iterations_weight = 50
     .type = int
     .help = Max number of trial refinement iterations for weight search
@@ -190,15 +194,13 @@ refine {
   max_angle_rmsd = 1.7
     .type = float
     .help = Max angle RMSD to accept optimized weight
-  stop_one_found_first_good_weight = True
-    .type = bool
-    .help = Set True for low-res (or if use regularization), and False for high-res
   max_r_work_r_free_gap = 5.0
     .type = float
     .help = Max difference between Rfree and Rwork to accept optimized weight
   r_tolerance = 0.001
     .type = float
-    .help = R factor delta beteen refinement cycles to determine convergence
+    .help = R factor delta between refinement cycles to determine convergence, \
+            in the weight search, R-free changes within it count as a plateau
   rmsd_tolerance = 0.01
     .type = float
     .help = maximum acceptable tolerance for the rmsd.

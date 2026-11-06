@@ -189,8 +189,9 @@ def get_cctbx_gradients(ph, cs):
 
 class from_cctbx(object):
   """
-  cctbx restraints. file_name: where the clustering writes the super
-  sphere (cluster_restraints); None: not written.
+  cctbx restraints. file_name: the scratch model name of the working folder
+  (restraints.scratch_file_name); the cctbx route never writes it (the
+  clustering writes expansion.pdb once, for inspection); None: no folder.
   """
   def __init__(self, restraints_manager, fragment_extracts=None,
               file_name=None):
@@ -199,6 +200,11 @@ class from_cctbx(object):
     self.fragment_extracts = fragment_extracts
     self.total_time = 0
     self.number_of_target_and_gradients_calls = 0
+    # Selected restraints of the fragments (clustering), by fragment index,
+    # kept while the fragment selections are the list _grm_cache_selections
+    # (a re-clustering makes new selection lists).
+    self._grm_cache = {}
+    self._grm_cache_selections = None
 
   def __call__(self, selection_and_sites_cart):
     return self.target_and_gradients(
@@ -216,6 +222,23 @@ class from_cctbx(object):
       target    = tg[0],
       gradients = tg[1])
 
+  def _fragment_grm(self, index):
+    """
+    The restraints manager of fragment index, selected once from the super
+    sphere's (atoms do not change between evaluations; its pair proxies are
+    kept and updated as in any refinement).
+    """
+    selections = self.fragment_extracts.fragment_super_selections
+    if(selections is not self._grm_cache_selections):
+      self._grm_cache = {}
+      self._grm_cache_selections = selections
+    grm = self._grm_cache.get(index)
+    if(grm is None):
+      grm = self.fragment_extracts.super_sphere_geometry_restraints_manager.\
+        select(selections[index])
+      self._grm_cache[index] = grm
+    return grm
+
   def target_and_gradients(self, sites_cart, selection=None, index=None):
 
     if(selection is not None): ### clustering
@@ -223,8 +246,7 @@ class from_cctbx(object):
       # atoms outside the fragment are dropped); the fragment's master atoms
       # come first (the super sphere starts with the master copy).
       super_selection = self.fragment_extracts.fragment_super_selections[index]
-      grm = self.fragment_extracts.super_sphere_geometry_restraints_manager
-      es = grm.select(super_selection).energies_sites(
+      es = self._fragment_grm(index).energies_sites(
         sites_cart=sites_cart.select(super_selection), compute_gradients=True)
       es.gradients = es.gradients[:selection.count(True)]
     else:

@@ -3,8 +3,8 @@ from __future__ import print_function
 from __future__ import absolute_import
 import scitbx.lbfgs
 from libtbx import easy_pickle
-from scitbx.array_family import flex
 from . import calculator as calculator_module
+from . import weights
 from libtbx import group_args
 from libtbx.test_utils import approx_equal
 from scitbx import minimizers
@@ -91,23 +91,22 @@ def refine(fmodel,
       data_weight             = data_weight,
       restraints_weight_scale = 1.,
       restraints_weight       = 1.)
-    # Weight control stuff
-    r_free_best = fmodel_copy.r_free()
-    up   = 0
-    down = 0
-    r_frees    = flex.double()
-    b_rmsds    = flex.double()
-    a_rmsds    = flex.double()
-    sites_cart = []
-    restraints_weight_scale = flex.double()
+    c = weights.controller(
+      start_scale = 1.0,
+      factor      = params.refine.adjust_restraints_weight_scale_value,
+      max_trials  = params.refine.number_of_weight_search_cycles,
+      r_tolerance = params.refine.r_tolerance)
     print("Data weight (initial):", data_weight, file=log)
     # Nuclear start sites: fmodel_copy holds their scattering view
     sites_cart_start = calculator.sites_cart_nuclear.deep_copy()
     #
-    # Loop over weight search cycles
-    for weight_cycle in range(params.refine.number_of_weight_search_cycles):
+    # Loop over weight search trials (qrefine.weights: next scale, stop,
+    # choice)
+    while(not c.done()):
+      rws = c.scale()
       fmodel = fmodel_copy.deep_copy() # Always use initial unchanged fmodel
       calculator.reset_fmodel(fmodel = fmodel, sites_cart = sites_cart_start)
+      calculator.setw(restraints_weight_scale = rws)
       if(clustering):
         cluster_qm_update.re_clustering(calculator,
           sites_cart = calculator.sites_cart_nuclear)
@@ -117,63 +116,36 @@ def refine(fmodel,
         params     = params,
         mode       = "weight")
       monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
-      b_rmsds.append(round(monitor.b_rmsd,3))
-      a_rmsds.append(round(monitor.a_rmsd,2))
-      rws = calculator.restraints_weight_scale
       # Show
-      msg = "rws: %6.3f n_fev: %d"%(rws, calculator.n_tg_calls)
-      monitor.show(prefix="%d:"%weight_cycle, suffix = msg)
+      msg = "rws: %.3g n_fev: %d"%(rws, calculator.n_tg_calls)
+      monitor.show(prefix="%d:"%len(c.trials), suffix = msg)
       # Sanity check:
       assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
-      #
-      # DEFINE STOPPING RULE
-      GOOD = monitor.b_rmsd <= params.refine.max_bond_rmsd #and \
-             #monitor.a_rmsd <= params.refine.max_angle_rmsd
-      #
-      if(GOOD):
-        down += 1
-        restraints_weight_scale.append(rws)
-        calculator.scale_restraints_weight_down(scale=1.5)
-        r_frees   .append(monitor.r_free)
-        sites_cart.append(monitor.sites_cart)
-        #if(params.refine.stop_one_found_first_good_weight):
-        #  print("Optimal weight found. Stopping weight search.", file=log)
-        #  break
-      else:
-        up += 1
-        calculator.scale_restraints_weight_up(scale=1.5)
-      # Show
-      msg = "rws: %6.3f n_fev: %d (NEXT)"%(
-        calculator.restraints_weight_scale, 0)
-      monitor.show(prefix="%d:"%weight_cycle, suffix = msg)
-      #
-      # Ready to stop?
-      if(up>0 and down>0):
-        print("Flip happened. Stopping weight search.", file=log)
-        break
-
-      if(b_rmsds.size()>3):
-        v1 = list(set(b_rmsds[-2:]))
-        v2 = list(set(a_rmsds[-2:]))
-        if(len(v1)==1 and len(v2)==1): # XXX See if this tighter!
-          print("Bond rmsd stalled. Stopping weight search.", file=log)
-          break
+      c.record(
+        scale      = rws,
+        good       = monitor.b_rmsd <= params.refine.max_bond_rmsd,
+        r_free     = monitor.r_free,
+        sites_cart = monitor.sites_cart)
     # Ok, done with weights.
-    if(r_frees.size()==0): # Fallback
+    ch = c.choice()
+    print("Weight search: %d trials, chosen rws %.3f (%s)"%(
+      len(c.trials), ch.scale, ch.reason), file=log)
+    if(c.stopped_by_cap()):
+      print("Weight search stopped by number_of_weight_search_cycles=%d "
+        "before a stopping rule applied (R-free may still improve): "
+        "consider raising it." % params.refine.number_of_weight_search_cycles,
+        file=log)
+    if(ch.reason == "fallback"):
       print("Weight search yields no result. Using last result.", file=log)
-      print("Taking result with Rwork, Rfree: %6.4f %6.4f"%(
-        fmodel.r_work(), fmodel.r_free()), file=log)
-    else: # Choose best result
-      s = flex.sort_permutation(r_frees)
-      index = s[0]
-      calculator.setw(restraints_weight_scale = restraints_weight_scale[index])
-      print("Best Rfree from above: %6.4f"%r_frees[index], file=log)
-      print("Best restraints scale:", round(restraints_weight_scale[index],3), file=log)
-      calculator.set_sites(sites_cart[index])
-      fmodel.update_xray_structure(
-        update_f_calc  = True,
-        update_f_mask  = True
-        )
+    else:
+      print("Best Rfree from above: %6.4f"%ch.r_free, file=log)
+      print("Best restraints scale:", round(ch.scale, 3), file=log)
+    calculator.setw(restraints_weight_scale = ch.scale)
+    calculator.set_sites(ch.sites_cart)
+    fmodel.update_xray_structure(
+      update_f_calc  = True,
+      update_f_mask  = True
+      )
     fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False,
       params=bulk_solvent_params)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
@@ -203,7 +175,7 @@ def refine(fmodel,
       params=bulk_solvent_params)
     calculator.reset_fmodel(fmodel = fmodel)
     monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
-    msg = "rws: %6.3f n_fev: %d"%(
+    msg = "rws: %.3g n_fev: %d"%(
       calculator.restraints_weight_scale, n_fev)
     monitor.show(prefix="%d:"%refine_cycle, suffix=msg)
     if(intermediate_folder is not None):

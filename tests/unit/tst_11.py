@@ -103,7 +103,8 @@ def exercise_folders():
   """
   Conformer scratch folders ase/A and ase/B are created for clustering; a
   model without altlocs keeps ase/ (no conformer subfolders: only the
-  expansion and scratch models).
+  expansion). The scratch super sphere (tmp_ase.pdb) is written for QM
+  restraints only, not on the cctbx route.
   """
   cwd = os.getcwd()
   for name in ["folders_altlocs", "folders_no_altlocs"]:
@@ -118,15 +119,15 @@ def exercise_folders():
       rm.target_and_gradients(sites_cart=model.get_sites_cart())
       for label in ["A", "B"]:
         assert os.path.isdir(os.path.join("ase", label))
-        assert os.path.isfile(os.path.join("ase", label, "tmp_ase.pdb"))
+        assert os.path.isfile(os.path.join("ase", label, "expansion.pdb"))
+        assert not os.path.exists(os.path.join("ase", label, "tmp_ase.pdb"))
       assert not os.path.exists(os.path.join("ase", "tmp_ase.pdb"))
     else:
       rm, model = get_restraints_manager("m00_good.pdb",
         expansion=False, clustering=True, handling="conformers")
       assert not isinstance(rm, conformers.from_conformers)
       rm.target_and_gradients(sites_cart=model.get_sites_cart())
-      assert os.path.isfile(os.path.join("ase", "tmp_ase.pdb"))
-      assert sorted(os.listdir("ase")) == ["expansion.pdb", "tmp_ase.pdb"]
+      assert sorted(os.listdir("ase")) == ["expansion.pdb"]
     os.chdir(cwd)
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):

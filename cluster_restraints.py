@@ -35,7 +35,8 @@ class from_cluster(object):
     sites_cart = self.fragment_manager.pdb_hierarchy_super.atoms().extract_xyz()
     #
     file_name = getattr(self.restraints_manager, "file_name", None)
-    if(file_name is not None):
+    if(file_name is not None and isinstance(self.restraints_manager, from_qm)):
+      # the current super sphere, for inspection next to the fragments
       write_hierarchy(self.fragment_manager.pdb_hierarchy_super, file_name,
         crystal_symmetry=self.fragment_manager.expansion.cs_box)
     # The cctbx restraints of the super sphere are needed by from_cctbx only;

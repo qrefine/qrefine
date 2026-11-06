@@ -168,9 +168,7 @@ class fragments(object):
 
   def get_clusters(self):
     n_residues=len(list(self.pdb_hierarchy.residue_groups()))
-    # pair_interaction.run changes the coordinates of the hierarchy it gets
-    # (Angstrom to Bohr): give it a copy.
-    self.interaction_list = pair_interaction.run(self.pdb_hierarchy.deep_copy())
+    self.interaction_list = pair_interaction.run(self.pdb_hierarchy)
     from . import clustering
     clusters = clustering.betweenness_centrality_clustering(
       self.interaction_list,
@@ -194,17 +192,19 @@ class fragments(object):
     cluster_atoms_in_ph = []
     fragment_super_atoms_in_ph = []
     molecules_in_fragments = []
+    # The super sphere is the same for every cluster: prepared once.
+    prepared = pair_interaction.prepare(ph)
     for cluster in clusters:
-      # pair_interaction.run changes the coordinates of the hierarchy it gets
       atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
-        pair_interaction.run(ph.deep_copy(), cluster)
+        pair_interaction.run_prepared(prepared, cluster)
       cluster_atoms_in_ph.append(atoms_in_one_cluster)
       fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
       molecules_in_fragments.append(molecules_in_one_fragment)
     if(self.two_buffers): # a second buffer layer around the first
       fragment_super_atoms_in_ph = []
       for molecules in molecules_in_fragments:
-        atoms_in_one_fragment = pair_interaction.run(ph.deep_copy(), molecules)[1]
+        atoms_in_one_fragment = pair_interaction.run_prepared(prepared,
+          molecules)[1]
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
     if(self.distance_buffer):
       fragment_super_atoms_in_ph = self.add_distance_buffer(

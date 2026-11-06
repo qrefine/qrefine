@@ -3,7 +3,7 @@
 """
 from __future__ import division
 from __future__ import print_function
-import os
+import os, time
 from scitbx.array_family import flex
 
 class manager(object):
@@ -15,6 +15,8 @@ class manager(object):
     stays nuclear.
     """
     self.log = log
+    self._t0 = time.time()
+    self._stats = None # geometry statistics of self.sites_cart (get_stats)
     self.output_mapper = output_mapper
     if(output_mapper is not None and output_mapper.is_identity):
       self.output_mapper = None
@@ -56,6 +58,7 @@ class manager(object):
       self.r_work = fmodel.r_work()
       self.r_free = fmodel.r_free()
     self.model.set_sites_cart(sites_cart = self.sites_cart)
+    self._stats = None
     self.b_rmsd = self._get_b_rmsd()
     self.a_rmsd = self._get_a_rmsd()
     self.shift_start = _(self.sites_cart_start, self.sites_cart)
@@ -63,7 +66,10 @@ class manager(object):
     self.sites_cart_prev = self.sites_cart.deep_copy()
 
   def get_stats(self):
-    return self.model.geometry_statistics(use_hydrogens=False)
+    """Geometry statistics of the current sites, computed once per update."""
+    if(self._stats is None):
+      self._stats = self.model.geometry_statistics(use_hydrogens=False)
+    return self._stats
 
   def g_info(self):
     stats = self.get_stats()
@@ -80,6 +86,7 @@ class manager(object):
 
   def show(self, prefix="", suffix=""):
     s = prefix + " " + self.r_info() + " " + self.g_info() + " " + suffix
+    s += " time: %d s" % (time.time() - self._t0)
     print(s, file = self.log)
     self.log.flush()
 
