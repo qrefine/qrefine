@@ -97,18 +97,19 @@ def test_r_factors_consistent(out, nuc, r):
   """
   R-factors of the written model (X-ray H positions) equal the last ones
   qr.refine reports: the output is what fmodel saw. The tolerance covers
-  the PDB rounding of coordinates and B (2.5e-4 here), the f_mask that
-  driver.refine does not update after the weight search (1.5e-4) and the
-  printed precision (5e-5). The nuclear output of the same refinement
-  (write_nuclear_h_positions=True) is not what fmodel saw and fails the
-  same check.
+  the PDB rounding of coordinates and B (2.5e-4 here) and the printed
+  precision (5e-5). The nuclear output of the same refinement
+  (write_nuclear_h_positions=True) is not what fmodel saw: its R factors
+  differ from the reported ones by several times more than the X-ray
+  output's do.
   """
   eps = 6.e-4
-  for rb, rp in zip(rebuilt_r_factors(out, r), reported_r_factors(out)):
-    assert abs(rb - rp) < eps, (rb, rp)
-  diffs = [abs(rb - rp) for rb, rp in
+  diffs_xray = [abs(rb - rp) for rb, rp in
+    zip(rebuilt_r_factors(out, r), reported_r_factors(out))]
+  assert max(diffs_xray) < eps, diffs_xray
+  diffs_nuclear = [abs(rb - rp) for rb, rp in
     zip(rebuilt_r_factors(nuc, r), reported_r_factors(nuc))]
-  assert min(diffs) > eps, diffs
+  assert min(diffs_nuclear) > 3 * max(diffs_xray), (diffs_xray, diffs_nuclear)
 
 def test_default_table():
   """The default scattering table is n_gaussian, as in phenix.refine."""
