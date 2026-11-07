@@ -173,7 +173,9 @@ refine {
     .help = flag to use a line search in minimizer.
   stpmax = 0.2
     .type = float
-    .help = maximum step length, empirically we find 3 for cctbx, but 0.2 is better for QM methods.
+    .help = Largest shift of any atom in one minimizer step (A) with the \
+            lbfgs minimizer, with lbfgsb the bound on the total shift of \
+            each coordinate during one minimization.
   gradient_only = False
     .type = bool
     .help = use the gradient only line search according to JA Snyman 2005.
@@ -203,8 +205,8 @@ refine {
     .help = Max difference between Rfree and Rwork to accept optimized weight
   r_tolerance = 0.001
     .type = float
-    .help = R factor delta between refinement cycles to determine convergence, \
-            in the weight search, R-free changes within it count as a plateau
+    .help = R-free changes within this value count as a plateau in the \
+            weight search (see weights.controller).
   rmsd_tolerance = 0.01
     .type = float
     .help = maximum acceptable tolerance for the rmsd.

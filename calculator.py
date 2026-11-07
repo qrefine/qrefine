@@ -85,6 +85,11 @@ def compute_weight(fmodel, restraints_manager, shake_sites=False, hdm=None,
   else:         data_weight = 1.0 # ad hoc default fallback
   return data_weight
 
+# Largest atom shift (A) of the first trial step of every lbfgs
+# minimization; the later steps start at the BFGS unit step. The cap on
+# every step is refine.stpmax (scitbx.lbfgs max_shift).
+FIRST_STEP_MAX_SHIFT = 0.05
+
 class cctbx_geometry(object):
   def __init__(self, model):
     restraints_manager = model.get_restraints_manager()
@@ -339,7 +344,6 @@ class sites(object):
     self.sites_plus_x     = self.set_sites_plus_x()
     self.n                = self.x.size()
     self.x_target_functor = self.fmodel.target_functor()
-    self.r_works          = flex.double()
     self.n_tg_calls       = 0
 
   def reset_fmodel(self, fmodel, sites_cart=None):
@@ -395,9 +399,6 @@ class sites(object):
       xray_structure = self.fmodel.xray_structure,
       update_f_calc  = True)
     self.target_and_gradients(x=x)
-    # This is to monitor convergence
-    self.r_works.append(self.fmodel.r_work())
-    assert self.n_tg_calls == self.r_works.size()
     self.sites_cart_start = self.sites_plus_x.deep_copy()
 
   def converged(self):
@@ -409,14 +410,6 @@ class sites(object):
 
   def apply_x(self):
     self.update(x = self.x)
-
-  def callback_after_step(self, minimizer=None):
-    # Early stop: r_work did not change over the last three steps
-    if(self.r_works.size()>3):
-      rs = self.r_works[-3:]
-      rs = list(set([round(_, 5) for _ in rs]))
-      if len(rs)==1: return True
-    return False
 
   def target_and_gradients(self, x):
     self.n_tg_calls+=1
@@ -503,8 +496,8 @@ class sites_real_space(object):
     self.lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
       max_iterations = self.max_iterations)
     self.lbfgs_core_params = scitbx.lbfgs.core_parameters(
-      stpmin = 1.e-9,
-      stpmax = stpmax)
+      max_shift            = stpmax,
+      first_step_max_shift = FIRST_STEP_MAX_SHIFT)
     self.lbfgs_exception_handling_params = scitbx.lbfgs.\
       exception_handling_parameters(
         ignore_line_search_failed_step_at_lower_bound = False,

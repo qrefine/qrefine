@@ -34,8 +34,8 @@ def run_minimize(calculator, params, mode=None):
   assert params.refine.minimizer in ["lbfgs", "lbfgsb"]
   if(params.refine.minimizer == "lbfgs"):
       core_params = scitbx.lbfgs.core_parameters(
-        stpmin = 1.e-9,
-        stpmax = params.refine.stpmax)
+        max_shift            = params.refine.stpmax,
+        first_step_max_shift = calculator_module.FIRST_STEP_MAX_SHIFT)
       minimized = minimizers.lbfgs(
         calculator     = calculator,
         mode           = "lbfgs",
@@ -49,7 +49,15 @@ def run_minimize(calculator, params, mode=None):
       calculator     = calculator,
       max_iterations = max_iterations)
   calculator.apply_x()
-  return minimized
+  # Why the minimizer stopped: the iteration budget (cap) or its own
+  # convergence test (conv). There is no other early stop: every trial of
+  # the weight search gets the same budget.
+  if(params.refine.minimizer == "lbfgs"):
+    n_iterations = minimized.minimizer.iter()
+  else:
+    n_iterations = minimized.minimizer.n_calls
+  stop_reason = "cap" if n_iterations >= max_iterations else "conv"
+  return group_args(minimized = minimized, stop_reason = stop_reason)
 
 def refine(fmodel,
            params,
@@ -111,13 +119,14 @@ def refine(fmodel,
         cluster_qm_update.re_clustering(calculator,
           sites_cart = calculator.sites_cart_nuclear)
       # Run minimization with given weight
-      run_minimize(
+      m = run_minimize(
         calculator = calculator,
         params     = params,
         mode       = "weight")
       monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
       # Show
-      msg = "rws: %.3g n_fev: %d"%(rws, calculator.n_tg_calls)
+      msg = "rws: %.3g n_fev: %d stop: %s"%(
+        rws, calculator.n_tg_calls, m.stop_reason)
       monitor.show(prefix="%d:"%len(c.trials), suffix = msg)
       # Sanity check:
       assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
@@ -164,19 +173,26 @@ def refine(fmodel,
     if(clustering):
       cluster_qm_update.re_clustering(calculator,
         sites_cart = calculator.sites_cart_nuclear)
-    run_minimize(
+    m = run_minimize(
       calculator = calculator,
       params     = params,
       mode       = "refine")
     n_fev = calculator.n_tg_calls
     n_cycles += 1
     n_fev_total += n_fev
+    # The bulk-solvent mask of the moved model, so that the R factors of
+    # this cycle are those of the model as written (the minimizer updates
+    # f_calc only).
+    fmodel.update_xray_structure(
+      update_f_calc       = True,
+      update_f_mask       = True,
+      force_update_f_mask = True)
     fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False,
       params=bulk_solvent_params)
     calculator.reset_fmodel(fmodel = fmodel)
     monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
-    msg = "rws: %.3g n_fev: %d"%(
-      calculator.restraints_weight_scale, n_fev)
+    msg = "rws: %.3g n_fev: %d stop: %s"%(
+      calculator.restraints_weight_scale, n_fev, m.stop_reason)
     monitor.show(prefix="%d:"%refine_cycle, suffix=msg)
     if(intermediate_folder is not None):
       monitor.write_pdb_file(
