@@ -74,6 +74,15 @@ def exercise_trial_line_has_stop_reason():
   assert len(lines) == 2, lines
   assert all(" stop: cap" in l for l in lines), lines
 
+def exercise_stop_reason_values():
+  """driver.stop_reason: 'error' when the minimizer swallowed a line-search
+  error, else 'cap' at the iteration budget, else 'conv'."""
+  from libtbx import group_args
+  assert driver.stop_reason(group_args(error=None), 50, 50) == "cap"
+  assert driver.stop_reason(group_args(error=None), 12, 50) == "conv"
+  assert driver.stop_reason(group_args(error="Rounding errors"), 50, 50) \
+    == "error"
+
 def exercise_real_space_cap():
   """The real-space calculator bounds the largest atom shift of a
   minimizer step by refine.stpmax (gradient-only mode)."""
@@ -112,7 +121,9 @@ def parse_trials(text):
     if(l.startswith("Optimal weight search:")): inside = True
     if(l.startswith("Weight search:")): inside = False
     if(not inside): continue
-    m = re.match(r"^\d+: Rw: [\d.]+ Rf: ([\d.]+).* rws: (\S+) n_fev: (\d+) stop: (\w+)", l)
+    m = re.match(
+      r"^\d+: Rw: [\d.]+ Rf: ([\d.]+).* rws: (\S+) n_fev: (\d+) stop: (\w+)",
+      l)
     if(m is not None):
       trials.append((float(m.group(2)), float(m.group(1)), int(m.group(3)),
         m.group(4)))
@@ -135,7 +146,7 @@ def exercise_6uf7_series():
     "restraints=cctbx", "r_tolerance=0.0001", "number_of_refine_cycles=1"])
   trials = parse_trials(r_qr.std_out_text)
   assert len(trials) >= 3, trials
-  assert all(t[3] in ("shift", "cap") for t in trials), trials
+  assert all(t[3] == "cap" for t in trials), trials
   assert_unimodal([t[1] for t in trials])
 
 def exercise_6uf7_function_path():
@@ -151,7 +162,9 @@ def exercise_6uf7_function_path():
     "number_of_refine_cycles=1"])
   trials = parse_trials(r_qr.std_out_text)
   assert len(trials) >= 3, trials
-  assert all(t[3] in ("shift", "cap", "conv") for t in trials), trials
+  # "error": the Moré-Thuente search stopped on a swallowed rounding-error
+  # failure (the minimizer keeps its best point), usual at this resolution.
+  assert all(t[3] in ("cap", "conv", "error") for t in trials), trials
 
 def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   os.makedirs(prefix, exist_ok=True)
@@ -162,6 +175,7 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   exercise_function_mode_cap(r)
   exercise_no_early_stop(r)
   exercise_real_space_cap()
+  exercise_stop_reason_values()
   exercise_trial_line_has_stop_reason()
   exercise_6uf7_series()
   exercise_6uf7_function_path()

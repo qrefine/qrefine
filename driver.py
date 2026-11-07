@@ -27,6 +27,16 @@ class clustering_update(object):
       calculator.restraints_manager.fragment_manager.set_up_cluster_qm()
       self.pre_sites_cart = sites_cart.deep_copy()
 
+def stop_reason(minimizer, n_iterations, max_iterations):
+  """
+  Why a minimization ended: "error" when the minimizer swallowed a
+  line-search error (its error attribute is set), "cap" when it used its
+  iteration budget, "conv" when its own convergence test stopped it.
+  """
+  if(getattr(minimizer, "error", None) is not None): return "error"
+  if(n_iterations >= max_iterations): return "cap"
+  return "conv"
+
 def run_minimize(calculator, params, mode=None):
   max_iterations = params.refine.max_iterations_refine
   if(mode == "weight"):
@@ -49,15 +59,16 @@ def run_minimize(calculator, params, mode=None):
       calculator     = calculator,
       max_iterations = max_iterations)
   calculator.apply_x()
-  # Why the minimizer stopped: the iteration budget (cap) or its own
-  # convergence test (conv). There is no other early stop: every trial of
-  # the weight search gets the same budget.
+  # There is no early stop in the calculator: every trial of the weight
+  # search gets the same budget.
   if(params.refine.minimizer == "lbfgs"):
     n_iterations = minimized.minimizer.iter()
   else:
     n_iterations = minimized.minimizer.n_calls
-  stop_reason = "cap" if n_iterations >= max_iterations else "conv"
-  return group_args(minimized = minimized, stop_reason = stop_reason)
+  return group_args(
+    minimized   = minimized,
+    stop_reason = stop_reason(minimized.minimizer, n_iterations,
+      max_iterations))
 
 def refine(fmodel,
            params,
@@ -152,9 +163,9 @@ def refine(fmodel,
     calculator.setw(restraints_weight_scale = ch.scale)
     calculator.set_sites(ch.sites_cart)
     fmodel.update_xray_structure(
-      update_f_calc  = True,
-      update_f_mask  = True
-      )
+      update_f_calc       = True,
+      update_f_mask       = True,
+      force_update_f_mask = True)
     fmodel.update_all_scales(remove_outliers=False, refine_hd_scattering=False,
       params=bulk_solvent_params)
     print("Best Rwork, Rfree (at refinement start): %6.4f %6.4f"%(
