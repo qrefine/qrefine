@@ -8,11 +8,13 @@ import qrefine.qr as qr
 import mmtbx.hydrogens.xh_mapper
 from libtbx.test_utils import approx_equal
 from mmtbx.hydrogens.tst_xh_mapper import pdb_str, get_model, xh_lengths, dist
-from qrefine.tests.unit import run_qrefine_in, run_fmodel
+from qrefine.tests.unit import run_qrefine_in, run_fmodel, fast_args
 
+# fast_args, with 20 refinement iterations: H must reach their nuclear X-H
+# lengths (write_nuclear_h_positions, neutron table)
 common_args = ["in.pdb", "data.mtz", "restraints=cctbx", "expansion=False",
-  "clustering=False", "number_of_macro_cycles=1", "max_iterations_refine=20",
-  "number_of_refine_cycles=2", "number_of_weight_search_cycles=2"]
+  "clustering=False"] + [a for a in fast_args
+  if not a.startswith("max_iterations_refine=")] + ["max_iterations_refine=20"]
 
 def atom_id(atom):
   """Identifier of an atom that does not depend on the atom order."""
@@ -146,8 +148,13 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
+  # The fixture in a 25 A box instead of 50 A: 1.5 A data (H positions
+  # visible in R, test_r_factors_consistent) with 8x fewer reflections.
+  cryst1 = "CRYST1   50.000   50.000   50.000  90.00  90.00  90.00 P 1"
+  assert pdb_str.count(cryst1) == 1
   with open("in.pdb", "w") as fo:
-    fo.write(pdb_str)
+    fo.write(pdb_str.replace(cryst1,
+      "CRYST1   25.000   25.000   25.000  90.00  90.00  90.00 P 1"))
   r = run_fmodel(args=["in.pdb", "high_res=1.5"], prefix="data")
   out = run_xray()
   nuc = run_nuclear()

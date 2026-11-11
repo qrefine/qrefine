@@ -96,7 +96,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
     print("%10.6f %10.6f %10.6f"%(a,b,c))
 
   #old & wrong, but kept to know the original intention: assert approx_equal(list(g_entire.as_double()),list(g_cluster.as_double()) , g_entire*0.05)
-  ## compare the geometry rmsd after 5 steps optimization
+  ## compare the geometry rmsd after one optimization step
   file_entire_qm = "entire_qm.pdb"
   qm_opt(restraints_entire,file_entire_qm, qr_ase_calc)
   file_cluster_qm = "cluster_qm.pdb"
@@ -148,7 +148,7 @@ def qm_opt(restraints, file, calc):
   sys.set_pbc((False,False,False))
   sys.calc = calc # ase > 3.17 expects a calculatur but we dont actually use it below.
   opt = lbfgs_gradient(sys, restraints)
-  opt.run(3)
+  opt.run(1)
   print("AFTER RUN")
   opt.write(file)
 

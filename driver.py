@@ -94,7 +94,7 @@ def refine(fmodel,
       log            = log,
       rmsd_tolerance = params.cluster.re_calculate_rmsd_tolerance)
   print("Start:", file=log)
-  monitor.show(prefix="  ")
+  monitor.show(prefix="  ", full=True)
 
   if(not params.refine.skip_weight_search):
     print("Optimal weight search:", file=log)
@@ -172,7 +172,7 @@ def refine(fmodel,
       fmodel.r_work(), fmodel.r_free()), file=log)
     monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
     print("At refinement start", file = log)
-    monitor.show()
+    monitor.show(full=True)
   #
   # Done with weights. Now let's refine!
   #
@@ -213,7 +213,7 @@ def refine(fmodel,
       print("Refinement converged. Stopping now.", file=log)
       break
   print("At refinement end:", file = log)
-  monitor.show()
+  monitor.show(full=True)
   assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)
   print("Best Rwork, Rfree (after refinement): %6.4f %6.4f"%(
       fmodel.r_work(), fmodel.r_free()), file=log)
@@ -229,7 +229,7 @@ def opt(params, monitor, calculator, log, working_folder,
   n_fev): optimization cycles run and target and gradient evaluations.
   """
   assert monitor.model == calculator.model
-  monitor.show(prefix="start:")
+  monitor.show(prefix="start:", full=True)
   if(params.cluster.clustering):
     cluster_qm_update = clustering_update(
       calculator.model.get_sites_cart(), log,

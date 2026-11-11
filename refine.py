@@ -559,12 +559,16 @@ def run(model, fmodel, map_data, params, log, working_folder,
       #
       # PRE-OPTIMIZATION (CODITIONAL)
       #
-      stats = monitor.get_stats()
+      # d_min first: the statistics cost seconds
       if(params.refine.refine_sites is True and
-         stats.rama_z_score().whole.value is not None and (
-         stats.rama_z_score().whole.value<-2.5 or
-         stats.clash().score>10) and
          fmodel.f_obs().d_min()>3):
+        stats = monitor.get_stats()
+        rama_z = stats.rama_z_score().whole.value
+        preopt = rama_z is not None and (
+          rama_z < -2.5 or (monitor.clash_score() or 0) > 10)
+      else:
+        preopt = False
+      if(preopt):
         if params.refine.exclude is not None:
           print("Initial geometry regularization skipped because of exclude_selection.", file=log)
         else:

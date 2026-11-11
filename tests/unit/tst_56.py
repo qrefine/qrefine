@@ -6,7 +6,7 @@ import os, tempfile
 from six.moves import cStringIO as StringIO
 from libtbx.utils import Sorry, null_out
 from qrefine import qr, api, refine, conformers
-from qrefine.tests.unit import run_qrefine_in, run_fmodel
+from qrefine.tests.unit import run_qrefine_in, run_fmodel, fast_args
 
 def test_finalize_auto_cust():
   for d_min, b, a in [(1.0, 0.025, 2.5), (2.0, 0.02, 2.0), (3.5, 0.01, 1.7)]:
@@ -135,11 +135,11 @@ def test_n_conformers_required_and_checked():
 # api.refine (fixture in.pdb, data.mtz written by run())
 # ---------------------------------------------------------------------------
 
-common_args = ["number_of_macro_cycles=1", "max_iterations_refine=20",
-  "number_of_refine_cycles=2", "number_of_weight_search_cycles=2"]
+common_args = fast_args
 cctbx_args = ["restraints=cctbx", "expansion=False", "clustering=False"]
+# MOPAC: no weight search (each MOPAC evaluation costs seconds)
 mopac_args = ["restraints=qm", "quantum.engine_name=mopac", "expansion=False",
-  "clustering=False"]
+  "clustering=False", "skip_weight_search=True"]
 
 _root = [None] # the test folder (run() sets it)
 
@@ -417,7 +417,8 @@ def test_mopac_tempdir_removed():
   """
   with in_folder("mopac_tmp") as folder:
     o = objects_like_cli(inputs() + common_args + ["restraints=qm",
-      "quantum.engine_name=mopac", "clustering=False", "expansion=True"])
+      "quantum.engine_name=mopac", "clustering=False", "expansion=True",
+      "skip_weight_search=True"])
     before = listing(folder)
     log = StringIO()
     r = api.refine(o.model, o.params, fmodel=o.fmodel, working_folder=None,
@@ -518,14 +519,22 @@ def test_auto_target_mlhl():
       log=null_out())
     assert r.mode == "refine" and r.r_work is not None
 
+def setup_fixture():
+  """The fixture in.pdb and data.mtz in the current folder, which becomes
+  the folder inputs() reads them from (tst_56, tst_72, tst_73)."""
+  from mmtbx.hydrogens.tst_xh_mapper import pdb_str
+  with open("in.pdb", "w") as fo:
+    fo.write(pdb_str)
+  run_fmodel(args=["in.pdb", "high_res=2.5"], prefix="data")
+  _root[0] = os.getcwd()
+
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Parameter rules in api.finalize_params; Auto target; removed params;
-  api.refine: same result as qr.refine, inputs untouched, where it writes
-  (working folder only; nothing with working_folder=None; a removed
-  temporary folder for MOPAC), opt and real-space modes, mlhl target.
+  api.refine: same result as qr.refine, inputs untouched. Where api.refine
+  writes: tst_72; no files, temporary folders, opt and real-space modes,
+  mlhl target: tst_73.
   """
-  from mmtbx.hydrogens.tst_xh_mapper import pdb_str
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
   test_finalize_auto_cust()
@@ -536,24 +545,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   test_refine_refuses_twin()
   test_refine_run_needs_finalized()
   test_n_conformers_required_and_checked()
-  with open("in.pdb", "w") as fo:
-    fo.write(pdb_str)
-  run_fmodel(args=["in.pdb", "high_res=1.5"], prefix="data")
-  _root[0] = os.getcwd()
+  setup_fixture()
   test_api_equals_cli_cctbx()
   test_api_equals_cli_mopac()
   test_inputs_untouched()
-  test_no_writes_outside()
-  test_intermediate_folder()
-  test_called_twice()
-  test_cluster_error_copy()
-  test_no_files_at_all()
-  test_no_files_at_all_clustering()
-  test_mopac_tempdir_removed()
-  test_opt_mode()
-  test_real_space_mode()
-  test_raw_params_refused()
-  test_auto_target_mlhl()
 
 if(__name__ == "__main__"):
   run()

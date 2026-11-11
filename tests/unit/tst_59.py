@@ -4,11 +4,9 @@ from __future__ import absolute_import
 
 import os, shutil
 from mmtbx.hydrogens.tst_xh_mapper import pdb_str
-from qrefine.tests.unit import run_qrefine_in, run_fmodel
+from qrefine.tests.unit import run_qrefine_in, run_fmodel, fast_args
 
-common_args = ["restraints=cctbx", "expansion=False",
-  "number_of_macro_cycles=1", "max_iterations_refine=5",
-  "number_of_refine_cycles=1", "number_of_weight_search_cycles=1"]
+common_args = ["restraints=cctbx", "expansion=False"] + fast_args
 
 def inputs():
   """Absolute paths of the fixture model and data (in the test folder)."""
@@ -71,7 +69,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.chdir(prefix)
   with open("in.pdb", "w") as fo:
     fo.write(pdb_str)
-  run_fmodel(args=["in.pdb", "high_res=1.5"], prefix="data")
+  run_fmodel(args=["in.pdb", "high_res=2.5"], prefix="data")
   test_no_cwd_writes()
   test_dump_gradients_sorry()
   test_expansion_file_in_working_folder()

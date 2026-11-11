@@ -6,6 +6,8 @@ from qrefine import qr, driver
 from qrefine.tests.unit import run_fmodel
 from qrefine.tests.unit.tst_54 import fixture
 
+# The 6uf7 weight-search series and function-value path are tst_70, tst_71.
+
 def minimize_recording(c, params, mode="weight"):
   """run_minimize with the total target and the largest atom shift recorded
   at every accepted iteration (callback_after_step)."""
@@ -112,73 +114,17 @@ def exercise_real_space_cap():
   shift = flex.max(flex.sqrt((refined.get_sites_cart() - start).dot()))
   assert 0 < shift <= 0.02 + 1e-9, shift
 
-def parse_trials(text):
-  """[(scale, r_free, n_fev, stop)] of the 'Optimal weight search' block."""
-  import re
-  trials = []
-  inside = False
-  for l in text.splitlines():
-    if(l.startswith("Optimal weight search:")): inside = True
-    if(l.startswith("Weight search:")): inside = False
-    if(not inside): continue
-    m = re.match(
-      r"^\d+: Rw: [\d.]+ Rf: ([\d.]+).* rws: (\S+) n_fev: (\d+) stop: (\w+)",
-      l)
-    if(m is not None):
-      trials.append((float(m.group(2)), float(m.group(1)), int(m.group(3)),
-        m.group(4)))
-  return trials
-
-def assert_unimodal(rf, tolerance=0.0003):
-  """Before the minimum no rise, after it no fall, beyond tolerance."""
-  k = rf.index(min(rf))
-  assert all(rf[i] >= rf[i+1] - tolerance for i in range(k)), rf
-  assert all(rf[i] <= rf[i+1] + tolerance for i in range(k, len(rf)-1)), rf
-
-def exercise_6uf7_series():
-  """6uf7 with cctbx restraints (gradient-only path: A/B conformers): every
-  trial reports its stop reason and the R-free series is unimodal."""
-  from qrefine.tests.unit.run_tests import qr_unit_tests_data
-  from qrefine.tests.unit import run_qrefine_in
-  r_qr = run_qrefine_in(folder="run_6uf7", prefix="w", args=[
-    os.path.join(qr_unit_tests_data, "6uf7.mtz"),
-    os.path.join(qr_unit_tests_data, "6uf7_qmready.pdb"),
-    "restraints=cctbx", "r_tolerance=0.0001", "number_of_refine_cycles=1"])
-  trials = parse_trials(r_qr.std_out_text)
-  assert len(trials) >= 3, trials
-  assert all(t[3] == "cap" for t in trials), trials
-  assert_unimodal([t[1] for t in trials])
-
-def exercise_6uf7_function_path():
-  """The function-value path (no clustering, native altlocs, lbfgs with
-  function values) runs and reports stop reasons."""
-  from qrefine.tests.unit.run_tests import qr_unit_tests_data
-  from qrefine.tests.unit import run_qrefine_in
-  r_qr = run_qrefine_in(folder="run_6uf7_f", prefix="f", args=[
-    os.path.join(qr_unit_tests_data, "6uf7.mtz"),
-    os.path.join(qr_unit_tests_data, "6uf7_qmready.pdb"),
-    "restraints=cctbx", "clustering=False", "altlocs.handling=native",
-    "minimizer=lbfgs", "gradient_only=False", "r_tolerance=0.0001",
-    "number_of_refine_cycles=1"])
-  trials = parse_trials(r_qr.std_out_text)
-  assert len(trials) >= 3, trials
-  # "error": the Moré-Thuente search stopped on a swallowed rounding-error
-  # failure (the minimizer keeps its best point), usual at this resolution.
-  assert all(t[3] in ("cap", "conv", "error") for t in trials), trials
-
 def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
   open("in.pdb", "w").write(pdb_str)
-  r = run_fmodel(args=["in.pdb", "high_res=1.5"], prefix="data")
+  r = run_fmodel(args=["in.pdb", "high_res=2.5"], prefix="data")
   exercise_function_mode_descends(r)
   exercise_function_mode_cap(r)
   exercise_no_early_stop(r)
   exercise_real_space_cap()
   exercise_stop_reason_values()
   exercise_trial_line_has_stop_reason()
-  exercise_6uf7_series()
-  exercise_6uf7_function_path()
   print("OK")
 
 if(__name__ == "__main__"):

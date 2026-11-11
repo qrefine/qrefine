@@ -8,6 +8,7 @@ import mmtbx.model
 from libtbx import easy_run
 from libtbx.utils import null_out
 from qrefine.tests.unit import run_qrefine_in, run_fmodel
+from qrefine.tests.unit import fast_args, fast_args_no_weight_search
 
 # mmtbx/hydrogens/tst_capping.py, pdb_arg: ARG 3 truncated at CB
 pdb_str = """\
@@ -63,13 +64,13 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   print("capped model:", capped, "total charge:", charge)
   caps_before = capping_atoms(capped)
   assert caps_before == [("3", "HCG")], caps_before
-  r = run_fmodel(args=[capped, "high_res=1.5"], prefix="data")
+  r = run_fmodel(args=[capped, "high_res=2.5"], prefix="data")
   for folder, engine_args in [
-      ("cctbx", ["restraints=cctbx"]),
+      ("cctbx", ["restraints=cctbx"] + fast_args),
       ("mopac", ["restraints=qm", "quantum.engine_name=mopac",
-                 "clustering=False"])]:
-    out = run_qrefine_in(args=[capped, r.mtz, "number_of_macro_cycles=1",
-      "max_iterations_refine=5"] + engine_args, prefix=prefix, folder=folder)
+                 "clustering=False"] + fast_args_no_weight_search)]:
+    out = run_qrefine_in(args=[capped, r.mtz] + engine_args, prefix=prefix,
+      folder=folder)
     assert out.pdb is not None, folder
     caps = capping_atoms(out.pdb)
     assert caps == caps_before, (folder, caps)

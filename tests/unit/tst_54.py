@@ -146,6 +146,34 @@ def check_fd(c, mp, nuclear, h_indices):
   c.update(x=x0)
   return g
 
+# H of different kinds, each with its own parent: N-terminal NH3 H (chain
+# start), backbone HA, the capping H (occupancy 0) and side-chain CH2 H on
+# the residue truncated at CB, the peptide D, the altloc hydroxyl H and a
+# water H (separate molecule, end of the model).
+diverse_h_labels = [("ARG", "H1"), ("ARG", "HA"), ("ARG", "HCG"),
+  ("SER", "D"), ("SER", "HB2"), ("SER", "HG"), ("HOH", "H1")]
+
+def diverse_h(f, labels=diverse_h_labels, excluded=()):
+  """
+  Indices of mapped H matching labels (resname, name), in that order, each
+  with a parent not used by an earlier one (check_fd needs distinct
+  parents); of an altloc pair only the first. All labels must be found.
+  """
+  atoms = f.model.get_hierarchy().atoms()
+  parent = dict(zip(f.mp.i_h, f.mp.i_x))
+  result, parents = [], set()
+  for resname, name in labels:
+    for i_h in f.mp.i_h:
+      a = atoms[i_h]
+      if((a.parent().resname, a.name.strip()) != (resname, name)): continue
+      if(i_h in excluded or parent[i_h] in parents): continue
+      result.append(i_h)
+      parents.add(parent[i_h])
+      break
+    else:
+      raise AssertionError("no mapped H %s %s" % (resname, name))
+  return result
+
 def check_invariant(c, mp):
   assert approx_equal(c.fmodel.xray_structure.sites_cart(),
     mp.shrink(c.sites_cart_nuclear), 1.e-9)
@@ -162,10 +190,7 @@ def test_fd_xray(r):
   # The given nuclear sites are kept as they are.
   assert c.sites_cart_nuclear.rms_difference(f.nuclear) == 0
   check_invariant(c, f.mp)
-  # Three H: first, middle and last mapped (water H2).
-  n = f.mp.i_h.size()
-  h_indices = [f.mp.i_h[0], f.mp.i_h[n//2], f.mp.i_h[n-1]]
-  check_fd(c, f.mp, f.nuclear, h_indices)
+  check_fd(c, f.mp, f.nuclear, diverse_h(f))
   check_invariant(c, f.mp)
   # Required nuclear sites with an active mapper.
   try:
@@ -234,7 +259,8 @@ def test_set_sites_round_trip(r):
 
 def test_exclude(r):
   """
-  Water excluded: its gradient is zero; FD on two non-excluded H and their
+  Water excluded: its gradient is zero; FD on three non-excluded H of
+  different kinds (chain start, peptide D, altloc hydroxyl) and their
   parents.
   """
   model = get_model("n_gaussian", d_min=r.f_obs.d_min())
@@ -249,8 +275,8 @@ def test_exclude(r):
   # The mapped water H and their parent O are excluded.
   excluded = set(exclude_selection.iselection())
   assert len([i for i in f.mp.i_h if i in excluded]) == 2
-  h_indices = [i for i in f.mp.i_h if i not in excluded]
-  h_indices = [h_indices[0], h_indices[-1]]
+  h_indices = diverse_h(f, excluded=excluded,
+    labels=[("ARG", "H1"), ("SER", "D"), ("SER", "HG")])
   check_fd(c, f.mp, f.nuclear, h_indices)
   check_invariant(c, f.mp)
 
@@ -478,7 +504,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   os.chdir(prefix)
   with open("in.pdb", "w") as fo:
     fo.write(pdb_str)
-  r = run_fmodel(args=["in.pdb", "high_res=1.5"], prefix="data")
+  r = run_fmodel(args=["in.pdb", "high_res=2.5"], prefix="data")
   test_fd_xray(r)
   test_set_sites_round_trip(r)
   test_exclude(r)

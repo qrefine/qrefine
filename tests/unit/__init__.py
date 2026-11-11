@@ -7,6 +7,15 @@ import iotbx.pdb
 from libtbx.utils import null_out
 from qrefine import qr
 
+# Short qr.refine runs for tests that check plumbing and file output, not
+# refinement results: every minimization uses its whole iteration budget
+# (no early stop), so the budgets are what sets the run time.
+fast_args = ["number_of_weight_search_cycles=2", "max_iterations_weight=5",
+             "number_of_refine_cycles=1", "max_iterations_refine=5"]
+# The same without the weight search (data weight 1): for MOPAC runs.
+fast_args_no_weight_search = ["skip_weight_search=True",
+             "number_of_refine_cycles=1", "max_iterations_refine=5"]
+
 class run_fmodel(object):
   def __init__(self, args, prefix):
     self.mtz     = "%s.mtz"%prefix

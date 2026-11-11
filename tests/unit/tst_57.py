@@ -12,6 +12,7 @@ from scitbx import matrix
 from libtbx.utils import null_out
 from mmtbx.hydrogens.tst_xh_mapper import pdb_str
 from qrefine.tests.unit import run_qrefine_in, run_fmodel
+from qrefine.tests.unit import fast_args, fast_args_no_weight_search
 
 # Identifiers that do not fit the PDB format: four-character residue name
 # ETHA (ethanol; restraints: chem_data geostd EOH renamed), plus
@@ -20,7 +21,6 @@ chain_renames = {"A": "AA", "S": "SW"}
 ligand_chain  = "LG"
 ligand_resname = "ETHA"
 
-common_args = ["number_of_macro_cycles=1", "max_iterations_refine=5"]
 
 def etha_cif(file_name):
   """
@@ -174,24 +174,25 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   #
   ligand_atoms = etha_cif("etha.cif")
   model_file, n_atoms = make_model("model.pdb", ligand_atoms)
-  r = run_fmodel(args=[model_file, "etha.cif", "high_res=1.5"],
+  r = run_fmodel(args=[model_file, "etha.cif", "high_res=2.5"],
     prefix="data")
-  inputs = [model_file, r.mtz, "etha.cif"] + common_args
+  inputs = [model_file, r.mtz, "etha.cif"]
   # cctbx
-  out = run_qrefine_in(args=inputs + ["restraints=cctbx", "expansion=False",
-    "clustering=False"], prefix=prefix, folder="cctbx")
+  out = run_qrefine_in(args=inputs + fast_args + ["restraints=cctbx",
+    "expansion=False", "clustering=False"], prefix=prefix, folder="cctbx")
   check_output(out, n_atoms)
   # MOPAC, no clustering: the scratch model ase/.../tmp_ase.cif
-  out = run_qrefine_in(args=inputs + ["restraints=qm",
-    "quantum.engine_name=mopac", "clustering=False", "expansion=True"],
-    prefix=prefix, folder="mopac")
+  out = run_qrefine_in(args=inputs + fast_args_no_weight_search + [
+    "restraints=qm", "quantum.engine_name=mopac", "clustering=False",
+    "expansion=True"], prefix=prefix, folder="mopac")
   check_output(out, n_atoms)
   names = check_scratch(out, label="tmp_ase")
   assert "tmp_ase.cif" in names, names
   # MOPAC, clustering: fragment, capped fragment, expansion files
-  out = run_qrefine_in(args=inputs + ["restraints=qm",
-    "quantum.engine_name=mopac", "clustering=True", "expansion=False",
-    "maxnum_residues_in_cluster=2"], prefix=prefix, folder="mopac_cluster")
+  out = run_qrefine_in(args=inputs + fast_args_no_weight_search + [
+    "restraints=qm", "quantum.engine_name=mopac", "clustering=True",
+    "expansion=False", "maxnum_residues_in_cluster=2"], prefix=prefix,
+    folder="mopac_cluster")
   check_output(out, n_atoms)
   names = check_scratch(out, label="*_capping")
   assert "expansion.cif" in names, names
