@@ -94,7 +94,7 @@ def test_check_model_capped_ok():
 def test_check_model_uncapped():
   m = get_model(pdbtools("remove=capping_h", "uncapped.pdb"))
   assert_sorry(api.check_model, m, finalized(engine="mopac"),
-    has=["A ARG 3", "capping=true"])
+    has=["A ARG 3", "without caps", "reduce2 qmready=true"])
 
 def test_check_model_missing_h():
   m = get_model(pdbtools('remove="element H"', "no_h.pdb"))
@@ -104,7 +104,7 @@ def test_check_model_missing_h():
   m = get_model(pdbtools('remove="element H and resseq 4"', "no_h_4.pdb"))
   e = assert_sorry(api.check_model, m, finalized(engine="mopac"),
     has=["A SER 4", "missing hydrogen", "reduce2 qmready=true"])
-  assert e.find("capping=true") < 0 and e.find("ARG") < 0, e
+  assert e.find("without caps") < 0 and e.find("ARG") < 0, e
 
 def test_water_no_h():
   f = variant([

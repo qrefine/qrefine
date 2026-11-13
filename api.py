@@ -403,7 +403,7 @@ def check_model(model, params, has_map=False):
       must be completed (conformers.check_completed);
     - with restraints=qm:
       a. no residue with missing heavy atoms unless it carries a capping H
-         (mmtbx.reduce2 qmready=true capping=true);
+         (mmtbx.reduce2 qmready=true; its default capping=Auto caps them);
       b. no missing H, every water with two H (mmtbx.reduce2 qmready=true);
       c. only elements the engine supports (aimnet2, torchani);
       d. without a map and without expansion or clustering: no symmetry
@@ -444,8 +444,8 @@ def check_model(model, params, has_map=False):
   if(len(uncapped) > 0):
     l = labels(uncapped)
     raise Sorry("Truncated residues without caps (%d): %s. With "
-      "restraints=qm run mmtbx.reduce2 qmready=true capping=true on the "
-      "model first." % (len(l), _listing(l)))
+      "restraints=qm run mmtbx.reduce2 qmready=true on the model first "
+      "(its default capping=Auto caps them)." % (len(l), _listing(l)))
   # b. missing H; water with fewer than two H
   missing_all = model.missing_atoms_by_residue(include_hydrogens=True)
   missing_h = [k for k, names in missing_all.items()

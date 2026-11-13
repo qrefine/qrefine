@@ -10,8 +10,9 @@ options (action, calculate_charge, reduce, options.neutron,
 hydrogen_atom_occupancies, append_to_end_of_model, skip_validation,
 stop_if_poor_model) are gone: the total charge is always calculated and put
 into the output file name (<prefix>H_charge<q>.pdb). All other arguments are
-passed to mmtbx.reduce2 (for example capping=True); run mmtbx.reduce2
-directly for its full option list.
+passed to mmtbx.reduce2 (for example capping=False, to stop on a truncated
+residue instead of capping it); run mmtbx.reduce2 directly for its full
+option list.
 """
 
 def run(args):
