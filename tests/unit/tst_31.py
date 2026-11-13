@@ -189,15 +189,19 @@ def _model_with_tyr94_c(file_name="h_altconf_complete.pdb"):
 
 def exercise_fallback():
   """
-  Residue group lacking a conformer label X takes the atoms of its first own
-  label into conformer X: TYR 94 has A/B/C, GLY 95 only A/B (H atoms), so
-  conformer C takes GLY 95's A atoms. Multiplicity is membership.
+  H-only atom groups are not conformers of their residue (the rule of
+  _own_labels since the 1pq7 CYS 57 case): TYR 94 has A/B/C, GLY 95 has its
+  amide H under A and B on blank heavy atoms, so GLY 95 has no own labels,
+  nothing falls back, conformer C takes GLY 95's blank atoms without an
+  amide H (a model completed by reduce2 qmready=true with a C conformer
+  would carry one), and H A / H B stay with their conformers. Multiplicity
+  is membership.
   """
   model = _model_with_tyr94_c()
   ph = model.get_hierarchy()
   sel = conformers.conformer_selections(ph)
   assert [s.label for s in sel] == ["A", "B", "C"]
-  assert [s.n_fallback for s in sel] == [0, 0, 1]
+  assert [s.n_fallback for s in sel] == [0, 0, 0]
   def i_seqs(resseq, altloc):
     return flex.size_t([a.i_seq for a in ph.atoms()
       if a.parent().parent().resseq_as_int() == resseq and
@@ -207,14 +211,18 @@ def exercise_fallback():
   tyr94 = flex.size_t([a.i_seq for a in ph.atoms()
     if a.parent().parent().resseq_as_int() == 94])
   blank = flex.size_t([a.i_seq for a in ph.atoms() if a.parent().altloc == ""])
-  isel_c = set(sel[2].iselection)
-  assert all(i in isel_c for i in gly95_a)
-  assert not any(i in isel_c for i in gly95_b)
+  isel_a, isel_b, isel_c = [set(s.iselection) for s in sel]
+  assert all(i in isel_a for i in gly95_a) and \
+    not any(i in isel_a for i in gly95_b)
+  assert all(i in isel_b for i in gly95_b) and \
+    not any(i in isel_b for i in gly95_a)
+  assert not any(i in isel_c for i in gly95_a) and \
+    not any(i in isel_c for i in gly95_b)
   for s in sel:
     assert list(s.iselection) == sorted(s.iselection)
   m = conformers.multiplicity(ph)
   assert m.size() == ph.atoms_size()
-  assert m.select(gly95_a).all_eq(2.0) and m.select(gly95_b).all_eq(1.0)
+  assert m.select(gly95_a).all_eq(1.0) and m.select(gly95_b).all_eq(1.0)
   assert m.select(tyr94).all_eq(1.0) and m.select(blank).all_eq(3.0)
   # the old Sorry ("conformers would be incomplete") is gone
   parts = conformers.split(model)
@@ -223,16 +231,14 @@ def exercise_fallback():
   for p, s in zip(parts, sel):
     assert list(p.iselection) == list(s.iselection)
     assert p.model.get_hierarchy().atoms_size() == s.iselection.size()
-  # from_conformers reports the fallback
+  # from_conformers reports no fallback
   from six.moves import cStringIO as StringIO
   log = StringIO()
   conformers.from_conformers(model=model, log=log,
     build=lambda conformer_model, working_folder: None)
   text = log.getvalue()
-  assert text.find("1 residue groups without label C take their first own "
-    "label") > -1, text
-  assert text.find("without label A") == -1 and \
-    text.find("without label B") == -1
+  for label in "ABC":
+    assert text.find("without label %s" % label) == -1, text
 
 def _water_rg(resseq, labels, o_xyz):
   """
@@ -396,12 +402,12 @@ def exercise_single_conformer_only_water():
   assert all(i in set(sel[0].iselection) for i in w_b)
   assert conformers.multiplicity(ph).select(w_b).all_eq(2.0)
   # three labels (TYR 94 A/B/C), water with B and C: absent from A only;
-  # GLY 95 (A/B, bonded) keeps its fallback in C
+  # GLY 95's amide H A/B are H-only atom groups, no own labels, no fallback
   model = model_with_b_only_water(labels=["B", "C"], tyr94_c=True)
   ph = model.get_hierarchy()
   sel = conformers.conformer_selections(ph)
   assert [s.label for s in sel] == ["A", "B", "C"]
-  assert [s.n_fallback for s in sel] == [0, 0, 1]
+  assert [s.n_fallback for s in sel] == [0, 0, 0]
   assert [s.n_absent for s in sel] == [1, 0, 0]
   w_b, w_c = _residue_i_seqs(ph, 100, "B"), _residue_i_seqs(ph, 100, "C")
   for s, has_b, has_c in zip(sel, [False, True, False], [False, False, True]):
