@@ -5,11 +5,21 @@ Conformer labels are the altloc labels that have at least one non-hydrogen
 atom or a hydrogen that is not an H/D exchange site; the labels of neutron
 H/D exchange sites (an H and a D of the same name) are not conformers, a
 methyl in two H orientations is.
-The own labels of a residue group are the conformer labels present in it.
+The own labels of a residue group are the conformer labels of its atom
+groups with a non-hydrogen atom.
 Conformer X takes, from every residue group: all its atoms if it has no own
-labels; its blank atoms, X atoms and hydrogen-only-label atoms if X is one
-of its own labels; otherwise (fallback) its blank atoms, hydrogen-only-label
-atoms and the atoms of its parent label, the first of its sorted own labels.
+labels and no hydrogen-only-label atoms; its blank atoms, X atoms and
+hydrogen-only-label atoms if X is one of its own labels; otherwise
+(fallback) its blank atoms, hydrogen-only-label atoms and the atoms of its
+parent label, the first of its sorted own labels. A residue group without
+own labels but with hydrogen-only-label atoms holds the copies of an H
+split by the labels of a bonded partner (mmtbx.reduce2: the amide H of a
+blank residue after a residue in A and B; HG of 1pq7 CYS A 57, whose SG
+bonds SG A 41): conformer X takes its blank atoms and its X copies; lacking
+X copies, the copies of the first label if the partner (the atoms bonded by
+distance to the parents of the first copies) has no X, since X takes the
+partner's first label too (conformer C: H A), and no copy if the partner
+has X (that copy was removed on purpose: HG A of CYS 57).
 Exception to the fallback (absent residue groups): a residue group with no
 blank or hydrogen-only-label atoms, whose own labels are a proper subset of
 the model's conformer labels and which is covalently bonded to no other
@@ -134,6 +144,40 @@ def _own_labels(residue_group, labels):
   """
   return sorted(set([ag.altloc for ag in residue_group.atom_groups()
     if any([not a.element_is_hydrogen() for a in ag.atoms()])]) & labels)
+
+def _h_copies(pdb_hierarchy, rgs, label_set):
+  """
+  {residue group memory_id: (first label, labels)} of the residue groups
+  without own labels that have hydrogen-only-label atoms (module docstring):
+  first label the first of their sorted labels, labels their labels plus
+  those of the partner, the atoms bonded (cctbx.crystal
+  distance_based_connectivity) to the parents of the first-label copies.
+  rgs: (residue group, own labels) of every residue group.
+  """
+  result = {}
+  bond_sets = None
+  atoms = None
+  for rg, own in rgs:
+    if(len(own) > 0): continue
+    copies = sorted(set([ag.altloc for ag in rg.atom_groups()
+      if ag.altloc in label_set]))
+    if(len(copies) == 0): continue
+    if(bond_sets is None):
+      from cctbx.crystal import distance_based_connectivity
+      atoms = pdb_hierarchy.atoms()
+      bond_sets = distance_based_connectivity.build_simple_two_way_bond_sets(
+        sites_cart = atoms.extract_xyz(),
+        elements   = atoms.extract_element())
+    labels = set(copies)
+    for ag in rg.atom_groups():
+      if(ag.altloc != copies[0]): continue
+      for h in ag.atoms():
+        for p in bond_sets[h.i_seq]:
+          for q in bond_sets[p]:
+            label = atoms[q].parent().altloc
+            if(label in label_set): labels.add(label)
+    result[rg.memory_id()] = (copies[0], labels)
+  return result
 
 def _residue_key(residue_group):
   """
@@ -280,6 +324,7 @@ def _selections(pdb_hierarchy):
   absent = set()
   if(len(labels) > 1): absent = _absent_residue_groups(pdb_hierarchy, rgs,
     labels)
+  h_copies = _h_copies(pdb_hierarchy, rgs, label_set)
   result = []
   for label in labels:
     parents = {}
@@ -294,6 +339,9 @@ def _selections(pdb_hierarchy):
       if(len(own) > 0 and label not in own):
         take = own[0]
         parents[rg.memory_id()] = take
+      elif(len(own) == 0 and rg.memory_id() in h_copies):
+        first, copy_labels = h_copies[rg.memory_id()]
+        if(label not in copy_labels): take = first
       for ag in rg.atom_groups():
         keep.extend(flex.bool(ag.atoms_size(),
           ag.altloc not in label_set or ag.altloc == take))
