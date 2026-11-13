@@ -97,20 +97,39 @@ def n_conformers(pdb_hierarchy):
 
 def _own_labels(residue_group, labels):
   """
-  Sorted conformer labels (labels: set of the model's) of a residue group.
+  Sorted conformer labels (labels: set of the model's) of a residue group:
+  those of its atom groups with a non-hydrogen atom. An H-only atom group on
+  a blank parent (1pq7 CYS A 57: HG B only, the disulfide to CYS A 41 SG A
+  takes HG A) is that conformer's H, not a conformer of the residue, as in
+  iotbx.pdb.altloc_completion.
   """
-  return sorted(set([ag.altloc for ag in residue_group.atom_groups()]) &
-    labels)
+  return sorted(set([ag.altloc for ag in residue_group.atom_groups()
+    if any([not a.element_is_hydrogen() for a in ag.atoms()])]) & labels)
+
+def _residue_key(residue_group):
+  """
+  (model id, chain id, resseq, icode) of a residue group: the residue.
+  """
+  chain = residue_group.parent()
+  return (chain.parent().id, chain.id, residue_group.resseq,
+    residue_group.icode)
 
 def _selections(pdb_hierarchy):
   """
   Per conformer label: (group_args(label, iselection, n_fallback), parents)
   with parents mapping residue group memory_id to the parent label of every
-  residue group lacking this label.
+  residue group lacking this label. The residue groups of one residue share
+  their labels: a residue with two residue names (1ejg PRO A / SER B, C 22)
+  is read as two residue groups, and the second must not fall back to its
+  own first label (SER B next to PRO A in conformer A).
   """
   labels = conformer_labels(pdb_hierarchy)
   label_set = set(labels)
-  rgs = [(rg, _own_labels(rg, label_set))
+  own_of_residue = {}
+  for rg in pdb_hierarchy.residue_groups():
+    own_of_residue.setdefault(_residue_key(rg), set()).update(
+      _own_labels(rg, label_set))
+  rgs = [(rg, sorted(own_of_residue[_residue_key(rg)]))
     for rg in pdb_hierarchy.residue_groups()]
   result = []
   for label in labels:
