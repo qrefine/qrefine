@@ -20,8 +20,11 @@ class run_fmodel(object):
   def __init__(self, args, prefix):
     self.mtz     = "%s.mtz"%prefix
     self.std_out = "%s.log"%prefix
+    args = list(args)
+    if(not [a for a in args if a.startswith("r_free=")]):
+      args.append("r_free=0.01")
     args += ["output.file_name=%s.mtz"%prefix, "type=real", "label=F-obs",
-             "r_free=0.01", "random_seed=2679941"]
+             "random_seed=2679941"]
     self.cmd = " ".join(
       ["mmtbx.python", "-m", "mmtbx.command_line.fmodel"] +
       args + [">%s"%self.std_out])

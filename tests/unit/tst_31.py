@@ -128,41 +128,6 @@ def exercise_duplicate(labels):
   assert approx_equal(g, g_single.select(original))
   assert flex.max(conformers.multiplicity(ph)) == len(labels)
 
-class _dummy_fragment_manager(object):
-  def __init__(self):
-    self.n_calls = 0
-    self.interaction_list = [(1,2)]
-  def set_up_cluster_qm(self):
-    self.n_calls += 1
-
-class _dummy_manager(object):
-  def __init__(self, with_fragment_manager):
-    if(with_fragment_manager):
-      self.fragment_manager = _dummy_fragment_manager()
-  def target_and_gradients(self, sites_cart):
-    return 0, flex.vec3_double(sites_cart.size(), (0,0,0))
-
-def exercise_proxy():
-  """
-  fragment_manager of from_conformers forwards set_up_cluster_qm to every
-  conformer and concatenates their interaction lists.
-  """
-  pi = iotbx.pdb.input(
-    file_name = os.path.join(qr_unit_tests_data,"h_altconf_complete.pdb"))
-  model = mmtbx.model.manager(model_input=pi, log=null_out())
-  managers = []
-  def build(conformer_model, working_folder):
-    managers.append(_dummy_manager(with_fragment_manager=True))
-    return managers[-1]
-  fc = conformers.from_conformers(model=model, build=build)
-  assert len(managers) == 2
-  fc.fragment_manager.set_up_cluster_qm()
-  assert [m.fragment_manager.n_calls for m in managers] == [1, 1]
-  assert fc.fragment_manager.interaction_list == [(1,2),(1,2)]
-  fc = conformers.from_conformers(model=model,
-    build=lambda conformer_model, working_folder: _dummy_manager(False))
-  assert fc.fragment_manager is None
-
 def exercise_microheterogeneity():
   """
   Conformers with different residue names (microheterogeneity): in conformer
@@ -262,12 +227,274 @@ def exercise_fallback():
   from six.moves import cStringIO as StringIO
   log = StringIO()
   conformers.from_conformers(model=model, log=log,
-    build=lambda conformer_model, working_folder: _dummy_manager(False))
+    build=lambda conformer_model, working_folder: None)
   text = log.getvalue()
   assert text.find("1 residue groups without label C take their first own "
     "label") > -1, text
   assert text.find("without label A") == -1 and \
     text.find("without label B") == -1
+
+def _water_rg(resseq, labels, o_xyz):
+  """
+  HOH residue group: one atom group (O, H1, H2) per label, all at the same
+  place (a blank label "" gives an ordinary water).
+  """
+  rg = iotbx.pdb.hierarchy.residue_group(resseq="%4d" % resseq, icode=" ")
+  x, y, z = o_xyz
+  for label in labels:
+    ag = iotbx.pdb.hierarchy.atom_group(altloc=label, resname="HOH")
+    for name, element, xyz in [
+        (" O  ", " O", (x, y, z)),
+        (" H1 ", " H", (x-0.96, y, z)),
+        (" H2 ", " H", (x+0.24, y-0.93, z))]:
+      a = iotbx.pdb.hierarchy.atom()
+      a.name = name
+      a.element = element
+      a.xyz = xyz
+      a.occ = 1.0 if label == "" else 1.0/len(labels)
+      a.b = 30.0
+      a.hetero = True
+      ag.append_atom(a)
+    rg.append_atom_group(ag)
+  return rg
+
+def model_with_b_only_water(labels=["B"], bonded=False, tyr94_c=False):
+  """
+  h_altconf_complete (with tyr94_c: plus a C conformer of TYR 94 as in
+  _model_with_tyr94_c) and a chain W of two waters: HOH 100 with only the
+  given labels, overlapping TYR 94 A (O 0.9 A from CD1 A, 3.4 A from CD1
+  B; H2 0.6 A from CE1 A), as the B-only waters of 1PWM; with bonded its
+  O is 1.3 A from CA of GLY 99 (blank) instead. HOH 101 blank, more than
+  4 A from any atom. Unprocessed model, crystal symmetry of the file.
+  """
+  if(tyr94_c):
+    model = _model_with_tyr94_c()
+    ph = model.get_hierarchy()
+    cs = model.crystal_symmetry()
+  else:
+    pi = iotbx.pdb.input(file_name = os.path.join(qr_unit_tests_data,
+      "h_altconf_complete.pdb"))
+    ph = pi.construct_hierarchy()
+    cs = pi.crystal_symmetry()
+  o_xyz = (7.697, 5.715, 13.492)
+  if(bonded): o_xyz = (12.354+1.3, 8.727, 24.053)
+  chain = iotbx.pdb.hierarchy.chain(id="W")
+  chain.append_residue_group(_water_rg(100, labels, o_xyz))
+  chain.append_residue_group(_water_rg(101, [""], (15.5, 12.0, 20.0)))
+  ph.only_model().append_chain(chain)
+  ph.atoms().reset_i_seq()
+  ph.atoms_reset_serial()
+  return mmtbx.model.manager(model_input=None, pdb_hierarchy=ph,
+    crystal_symmetry=cs, log=null_out())
+
+def _residue_i_seqs(ph, resseq, altloc=None):
+  return flex.size_t([a.i_seq for a in ph.atoms()
+    if a.parent().parent().resseq_as_int() == resseq and
+       (altloc is None or a.parent().altloc == altloc)])
+
+def _hand_conformer(ph, label):
+  """
+  Independent single-conformer hierarchy of conformer label: atom groups
+  with another conformer label removed (empty residue groups too), then
+  iotbx remove_alt_confs. No fallback needed in the models used here.
+  """
+  h = ph.deep_copy()
+  for rg in h.residue_groups():
+    for ag in rg.atom_groups():
+      if(ag.altloc not in ("", label)): rg.remove_atom_group(ag)
+    if(rg.atom_groups_size() == 0): rg.parent().remove_residue_group(rg)
+  h.remove_alt_confs(always_keep_one_conformer=True)
+  h.atoms().reset_i_seq()
+  return h
+
+def _key(atom):
+  return (atom.parent().parent().parent().id,
+    atom.parent().parent().resseq_as_int(), atom.name.strip())
+
+def exercise_single_conformer_only_water():
+  """
+  A residue group without blank atoms, with a proper subset of the model's
+  conformer labels and no bonded partner (a water labelled B only, 1PWM)
+  exists only in the conformers of its own labels: no fallback.
+  """
+  model = model_with_b_only_water()
+  ph = model.get_hierarchy()
+  cs = model.crystal_symmetry()
+  w_b, w_0 = _residue_i_seqs(ph, 100), _residue_i_seqs(ph, 101)
+  assert w_b.size() == w_0.size() == 3
+  sel = conformers.conformer_selections(ph)
+  assert [s.label for s in sel] == ["A", "B"]
+  assert [s.n_fallback for s in sel] == [0, 0]
+  assert [s.n_absent for s in sel] == [1, 0]
+  isel_a, isel_b = set(sel[0].iselection), set(sel[1].iselection)
+  assert not any(i in isel_a for i in w_b)
+  assert all(i in isel_b for i in w_b)
+  assert all(i in isel_a and i in isel_b for i in w_0)
+  m = conformers.multiplicity(ph)
+  assert m.select(w_b).all_eq(1.0) and m.select(w_0).all_eq(2.0)
+  # split: A without HOH 100, B with it, HOH 101 in both
+  parts = conformers.split(model)
+  assert [p.n_absent for p in parts] == [1, 0]
+  for p, s in zip(parts, sel):
+    h = p.model.get_hierarchy()
+    assert list(p.iselection) == list(s.iselection)
+    resseqs = set([rg.resseq_as_int() for rg in h.residue_groups()])
+    assert (100 in resseqs) == (p.label == "B")
+    assert 101 in resseqs
+    assert list(h.altloc_indices().keys()) == [""]
+    assert h.atoms_size() == s.iselection.size()
+    assert h.is_similar_hierarchy(_hand_conformer(ph, p.label))
+  # gradients against cctbx on independent single-conformer hierarchies:
+  # A atoms get conformer A's gradient (no water term), the B-only water
+  # and B atoms conformer B's, blank atoms the mean
+  g = gradients_from_conformers(model)
+  refs = {}
+  for label in ["A", "B"]:
+    h = _hand_conformer(ph, label)
+    g_h = cctbx_calculator(h, cs)
+    refs[label] = dict([(_key(a), g_h[a.i_seq]) for a in h.atoms()])
+  n_checked = 0
+  for a in ph.atoms():
+    k, altloc = _key(a), a.parent().altloc
+    if(altloc == ""):
+      expected = [(x+y)/2 for x, y in zip(refs["A"][k], refs["B"][k])]
+    else:
+      expected = refs[altloc][k]
+    assert approx_equal(g[a.i_seq], expected, eps=1.e-6), (a.id_str())
+    n_checked += 1
+  assert n_checked == ph.atoms_size()
+  assert ("W", 100, "O") in refs["B"] and ("W", 100, "O") not in refs["A"]
+  # the water does touch TYR 94 A: with it in conformer A (the old
+  # fallback) the A atoms would differ from the reference
+  tyr_a = _residue_i_seqs(ph, 94, "A")
+  h_old = _hand_conformer(ph, "A")
+  rg_w = [rg for rg in ph.residue_groups() if rg.resseq_as_int() == 100][0]
+  chain = [c for c in h_old.chains() if c.id == "W"][0]
+  rg_copy = rg_w.detached_copy()
+  rg_copy.only_atom_group().altloc = ""
+  chain.insert_residue_group(0, rg_copy)
+  h_old.atoms().reset_i_seq()
+  g_old = cctbx_calculator(h_old, cs)
+  old = dict([(_key(a), g_old[a.i_seq]) for a in h_old.atoms()])
+  assert not approx_equal([old[_key(ph.atoms()[i])] for i in tyr_a],
+    [g[i] for i in tyr_a], out=None)
+  # from_conformers reports it
+  from six.moves import cStringIO as StringIO
+  log = StringIO()
+  conformers.from_conformers(model=model, log=log,
+    build=lambda conformer_model, working_folder: None)
+  text = log.getvalue()
+  assert text.find("1 residue groups absent from conformer A") > -1, text
+  assert text.find("absent from conformer B") == -1, text
+  # bonded to a blank atom (O 1.3 A from CA of GLY 99): the fallback stays
+  model = model_with_b_only_water(bonded=True)
+  ph = model.get_hierarchy()
+  w_b = _residue_i_seqs(ph, 100)
+  sel = conformers.conformer_selections(ph)
+  assert [s.n_fallback for s in sel] == [1, 0]
+  assert [s.n_absent for s in sel] == [0, 0]
+  assert all(i in set(sel[0].iselection) for i in w_b)
+  assert conformers.multiplicity(ph).select(w_b).all_eq(2.0)
+  # three labels (TYR 94 A/B/C), water with B and C: absent from A only;
+  # GLY 95 (A/B, bonded) keeps its fallback in C
+  model = model_with_b_only_water(labels=["B", "C"], tyr94_c=True)
+  ph = model.get_hierarchy()
+  sel = conformers.conformer_selections(ph)
+  assert [s.label for s in sel] == ["A", "B", "C"]
+  assert [s.n_fallback for s in sel] == [0, 0, 1]
+  assert [s.n_absent for s in sel] == [1, 0, 0]
+  w_b, w_c = _residue_i_seqs(ph, 100, "B"), _residue_i_seqs(ph, 100, "C")
+  for s, has_b, has_c in zip(sel, [False, True, False], [False, False, True]):
+    isel = set(s.iselection)
+    assert all((i in isel) == has_b for i in w_b)
+    assert all((i in isel) == has_c for i in w_c)
+  m = conformers.multiplicity(ph)
+  assert m.select(w_b).all_eq(1.0) and m.select(w_c).all_eq(1.0)
+  # a water labelled B 1.0 A from a chloride labelled A (1PWM HOH 1322,
+  # CL 1321), away from the protein: each absent from the other conformer
+  model = model_with_b_only_water()
+  ph = model.get_hierarchy()
+  rg_w = [rg for rg in ph.residue_groups() if rg.resseq_as_int() == 100][0]
+  for a in rg_w.atoms():
+    a.xyz = (a.xyz[0] + 15.5 - 7.697, a.xyz[1] + 12.0 - 5.715,
+      a.xyz[2] + 4.0 - 13.492)
+  rg_w.parent().remove_residue_group(
+    [rg for rg in ph.residue_groups() if rg.resseq_as_int() == 101][0])
+  rg_cl = iotbx.pdb.hierarchy.residue_group(resseq=" 102", icode=" ")
+  ag = iotbx.pdb.hierarchy.atom_group(altloc="A", resname=" CL")
+  a = iotbx.pdb.hierarchy.atom()
+  a.name, a.element, a.xyz, a.occ, a.b = "CL  ", "CL", (15.5, 12.0, 5.0), \
+    0.8, 30.
+  ag.append_atom(a)
+  rg_cl.append_atom_group(ag)
+  rg_w.parent().append_residue_group(rg_cl)
+  # a blank water H 2.1 A from the chloride (1PWM: HIS 110 HD1): the
+  # distance test calls it a bond, but bonds of hydrogens do not count
+  rg_w.parent().append_residue_group(_water_rg(103, [""], (15.5, 15.05, 5.0)))
+  ph.atoms().reset_i_seq()
+  h2 = [a for a in ph.atoms() if a.parent().parent().resseq_as_int() == 103
+    and a.name.strip() == "H2"][0]
+  assert abs(h2.distance(ag.atoms()[0]) - 2.13) < 0.01
+  sel = conformers.conformer_selections(ph)
+  assert [s.n_absent for s in sel] == [1, 1]
+  assert [s.n_fallback for s in sel] == [0, 0]
+  cl, w_b = _residue_i_seqs(ph, 102), _residue_i_seqs(ph, 100)
+  assert ph.atoms()[cl[0]].distance(ph.atoms()[w_b[0]]) < 1.01
+  assert set(cl).issubset(set(sel[0].iselection))
+  assert not set(cl) & set(sel[1].iselection)
+  assert set(w_b).issubset(set(sel[1].iselection))
+  assert not set(w_b) & set(sel[0].iselection)
+  # the same chloride blank: the water is bonded to it, the fallback stays
+  ag.altloc = ""
+  sel = conformers.conformer_selections(ph)
+  assert [s.n_absent for s in sel] == [0, 0]
+  assert [s.n_fallback for s in sel] == [1, 0]
+  # a water with every model label (A and B, no blank atoms) is in both
+  model = model_with_b_only_water(labels=["A", "B"])
+  sel = conformers.conformer_selections(model.get_hierarchy())
+  assert [s.n_absent for s in sel] == [0, 0]
+  assert [s.n_fallback for s in sel] == [0, 0]
+
+def _one_atom_rg(resseq, label, xyz):
+  """LIG residue group of one C atom in one atom group (altloc label)."""
+  rg = iotbx.pdb.hierarchy.residue_group(resseq="%4d" % resseq, icode=" ")
+  ag = iotbx.pdb.hierarchy.atom_group(altloc=label, resname="LIG")
+  a = iotbx.pdb.hierarchy.atom()
+  a.name, a.element, a.xyz, a.occ, a.b = " C1 ", " C", xyz, 0.5, 30.
+  a.hetero = True
+  ag.append_atom(a)
+  rg.append_atom_group(ag)
+  return rg
+
+def exercise_single_conformer_only_pair():
+  """
+  Two residue groups labelled B only, bonded to each other (1.5 A) and to
+  nothing else (a B-only two-residue ligand or glycan chain): the pair is
+  absent from A as a whole. Control: one member also bonded to a blank
+  residue group, the whole pair falls back.
+  """
+  model = model_with_b_only_water()
+  ph = model.get_hierarchy()
+  chain = [c for c in ph.chains() if c.id == "W"][0]
+  chain.remove_residue_group(
+    [rg for rg in chain.residue_groups() if rg.resseq_as_int() == 100][0])
+  chain.append_residue_group(_one_atom_rg(104, "B", (15.5, 12.0, 5.0)))
+  chain.append_residue_group(_one_atom_rg(105, "B", (17.0, 12.0, 5.0)))
+  ph.atoms().reset_i_seq()
+  sel = conformers.conformer_selections(ph)
+  assert [s.n_absent for s in sel] == [2, 0], [s.n_absent for s in sel]
+  assert [s.n_fallback for s in sel] == [0, 0]
+  pair = _residue_i_seqs(ph, 104).concatenate(_residue_i_seqs(ph, 105))
+  assert not set(pair) & set(sel[0].iselection)
+  assert set(pair).issubset(set(sel[1].iselection))
+  assert conformers.multiplicity(ph).select(pair).all_eq(1.0)
+  # control: residue 105 bonded (1.5 A) to a blank residue group
+  chain.append_residue_group(_one_atom_rg(106, "", (18.5, 12.0, 5.0)))
+  ph.atoms().reset_i_seq()
+  sel = conformers.conformer_selections(ph)
+  assert [s.n_absent for s in sel] == [0, 0], [s.n_absent for s in sel]
+  assert [s.n_fallback for s in sel] == [2, 0]
+  assert set(pair).issubset(set(sel[0].iselection))
 
 pdb_str_link_guard = """
 CRYST1   30.000   30.000   30.000  90.00  90.00  90.00 P 1
@@ -306,6 +533,7 @@ def exercise_link_guard():
   With residue 2's B shifted, conformer C of residue 1 bonds to residue 2's
   B, but residue 2 takes its first label A into conformer C: the peptide
   bond would be broken (Sorry). With residue 2's A shifted: no Sorry.
+  check_all_links (the clustering route's check) raises the same Sorry.
   """
   for unshifted, shifted, fails in [("A", "B", True), ("B", "A", False)]:
     pdb_str = pdb_str_link_guard % tuple([unshifted]*5 + [shifted]*5)
@@ -313,11 +541,18 @@ def exercise_link_guard():
     model = mmtbx.model.manager(model_input=pi, log=null_out())
     sel = conformers.conformer_selections(model.get_hierarchy())
     assert [s.n_fallback for s in sel] == [0, 0, 1]
+    message = None
+    try:
+      conformers.check_all_links(model.get_hierarchy())
+    except Sorry as e:
+      message = str(e)
+    assert (message is not None) == fails
     try:
       parts = conformers.split(model)
     except Sorry as e:
       assert fails
       e = str(e)
+      assert e == message, (e, message)
       assert e.find("conformer C") > -1, e
       assert e.find("residue") > -1 and e.find("not bonded") > -1, e
       assert e.find(" ALA A   1 ") > -1 and e.find(" ALA A   2 ") > -1, e
@@ -422,6 +657,43 @@ def exercise_split():
   assert conformers.multiplicity(ph)[ag_h.atoms()[0].i_seq] == 1.0
   assert conformers.multiplicity(ph)[ag_b.atoms()[0].i_seq] == 1.0
 
+def exercise_super_selections():
+  # h_altconf_complete.pdb in the small box of tst_46.get_model(fn, 2.0)
+  # (several images in the sphere); for every label the tiled sphere
+  # selection equals the per-residue rule applied directly to the sphere
+  # hierarchy (same label set, conformer_selections on the sphere)
+  from cctbx.crystal import super_cell
+  # tst_46 imports tst_11, which imports tst_31: import it here
+  from qrefine.tests.unit import tst_46
+  model = tst_46.get_model("h_altconf_complete.pdb", contact=2.0)
+  ph = model.get_hierarchy()
+  scm = super_cell.manager(pdb_hierarchy=ph,
+    crystal_symmetry=model.crystal_symmetry(), select_within_radius=10)
+  sels = conformers.conformer_selections(ph)
+  ss = conformers.super_selections(sels, ph.atoms_size(), scm)
+  direct = dict([(s.label, s.iselection) for s in
+    conformers.conformer_selections(scm.super_sphere_hierarchy)])
+  assert sorted(ss.keys()) == ["A", "B"]
+  for label in ss:
+    assert ss[label].sphere.size() == scm.super_sphere_hierarchy.atoms_size()
+    assert list(ss[label].sphere.iselection()) == list(direct[label])
+    assert ss[label].cell.size() == scm.super_cell_hierarchy.atoms_size()
+    # master block first
+    assert list(ss[label].cell[:ph.atoms_size()].iselection()) == \
+      list([s for s in sels if s.label == label][0].iselection)
+
+def exercise_single_conformer_hierarchy():
+  # public helper: same result as split() for every conformer
+  pi = iotbx.pdb.input(os.path.join(qr_unit_tests_data,
+    "h_altconf_complete.pdb"))
+  model = mmtbx.model.manager(model_input=pi, log=null_out())
+  ph = model.get_hierarchy()
+  labels = set(conformers.conformer_labels(ph))
+  for c, s in zip(conformers.split(model), conformers.conformer_selections(ph)):
+    h = conformers.single_conformer_hierarchy(ph, s.iselection, s.label, labels)
+    assert h.is_similar_hierarchy(c.model.get_hierarchy())
+    assert list(h.altloc_indices().keys()) == [""]
+
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   """
   Combine gradients from single-conformer calculations (the QM route) for
@@ -434,11 +706,14 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   exercise_no_altlocs()
   for labels in [["A","B"], ["A","B","C"], ["A","B","C","D"]]:
     exercise_duplicate(labels=labels)
-  exercise_proxy()
   exercise_fallback()
+  exercise_single_conformer_only_water()
+  exercise_single_conformer_only_pair()
   exercise_link_guard()
   exercise_check_completed()
   exercise_microheterogeneity()
+  exercise_single_conformer_hierarchy()
+  exercise_super_selections()
 
 if(__name__ == '__main__'):
   run()

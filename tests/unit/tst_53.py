@@ -64,7 +64,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   print("capped model:", capped, "total charge:", charge)
   caps_before = capping_atoms(capped)
   assert caps_before == [("3", "HCG")], caps_before
-  r = run_fmodel(args=[capped, "high_res=2.5"], prefix="data")
+  r = run_fmodel(args=[capped, "high_res=2.5", "r_free=0.05"], prefix="data")
   for folder, engine_args in [
       ("cctbx", ["restraints=cctbx"] + fast_args),
       ("mopac", ["restraints=qm", "quantum.engine_name=mopac",

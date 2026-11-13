@@ -174,7 +174,7 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   #
   ligand_atoms = etha_cif("etha.cif")
   model_file, n_atoms = make_model("model.pdb", ligand_atoms)
-  r = run_fmodel(args=[model_file, "etha.cif", "high_res=2.5"],
+  r = run_fmodel(args=[model_file, "etha.cif", "high_res=2.5", "r_free=0.05"],
     prefix="data")
   inputs = [model_file, r.mtz, "etha.cif"]
   # cctbx

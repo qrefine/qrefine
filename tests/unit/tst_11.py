@@ -10,7 +10,7 @@ import mmtbx.model
 from libtbx.test_utils import approx_equal
 from libtbx.utils import null_out
 from scitbx.array_family import flex
-from qrefine import qr, refine, conformers
+from qrefine import qr, refine, conformers, cluster_restraints
 from qrefine.tests.unit.tst_31 import duplicate
 
 qrefine = libtbx.env.find_in_repositories("qrefine")
@@ -60,7 +60,10 @@ def exercise_routes_agree():
       rm2, _ = get_restraints_manager(fn, expansion=True,
         clustering=False, handling=handling)
       assert conformers.n_conformers(model.get_hierarchy()) == 2
-      assert isinstance(rm1, conformers.from_conformers) == \
+      # clustering, both handlings: from_cluster (conformers: per-fragment
+      # variants; native: the altloc model as is)
+      assert isinstance(rm1, cluster_restraints.from_cluster)
+      assert isinstance(rm2, conformers.from_conformers) == \
         (handling == "conformers")
       sites_cart = model.get_sites_cart()
       g1 = rm1.target_and_gradients(sites_cart=sites_cart)[1]
@@ -92,8 +95,11 @@ def exercise_duplicate_routes():
       rm_dup, _ = get_restraints_manager(None, expansion=expansion,
         clustering=clustering, handling="conformers", model=dup)
       assert not isinstance(rm_single, conformers.from_conformers)
-      assert isinstance(rm_dup, conformers.from_conformers)
-      assert len(rm_dup.conformers) == len(labels)
+      if(clustering): # conformers as per-fragment variants
+        assert isinstance(rm_dup, cluster_restraints.from_cluster)
+      else:
+        assert isinstance(rm_dup, conformers.from_conformers)
+        assert len(rm_dup.conformers) == len(labels)
       g_single = rm_single.target_and_gradients(
         sites_cart=single.get_sites_cart())[1]
       g_dup = rm_dup.target_and_gradients(sites_cart=dup.get_sites_cart())[1]
@@ -101,10 +107,11 @@ def exercise_duplicate_routes():
 
 def exercise_folders():
   """
-  Conformer scratch folders ase/A and ase/B are created for clustering; a
-  model without altlocs keeps ase/ (no conformer subfolders: only the
-  expansion). The scratch super sphere (tmp_ase.pdb) is written for QM
-  restraints only, not on the cctbx route.
+  Clustering of a model with altlocs: the altloc model is clustered (per
+  fragment conformer variants), no conformer scratch folders ase/A, ase/B;
+  with or without altlocs ase/ holds only the expansion (cctbx fragments
+  write no job folders). The scratch super sphere (tmp_ase.pdb) is written
+  for QM restraints only, not on the cctbx route.
   """
   cwd = os.getcwd()
   for name in ["folders_altlocs", "folders_no_altlocs"]:
@@ -114,14 +121,10 @@ def exercise_folders():
     if(name == "folders_altlocs"):
       rm, model = get_restraints_manager("h_altconf_complete.pdb",
         expansion=False, clustering=True, handling="conformers")
-      assert isinstance(rm, conformers.from_conformers)
-      assert rm.fragment_manager is not None
+      assert isinstance(rm, cluster_restraints.from_cluster)
+      assert rm.fragment_manager.conformer_selections is not None
       rm.target_and_gradients(sites_cart=model.get_sites_cart())
-      for label in ["A", "B"]:
-        assert os.path.isdir(os.path.join("ase", label))
-        assert os.path.isfile(os.path.join("ase", label, "expansion.pdb"))
-        assert not os.path.exists(os.path.join("ase", label, "tmp_ase.pdb"))
-      assert not os.path.exists(os.path.join("ase", "tmp_ase.pdb"))
+      assert sorted(os.listdir("ase")) == ["expansion.pdb"]
     else:
       rm, model = get_restraints_manager("m00_good.pdb",
         expansion=False, clustering=True, handling="conformers")

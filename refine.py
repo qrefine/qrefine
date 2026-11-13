@@ -63,8 +63,13 @@ def show_cc(map_data, xray_structure, log=None):
 def create_fragment_manager(
       model,
       params,
-      working_folder = "ase"):
-  """Fragments of model (clustering); working_folder None: no files."""
+      working_folder       = "ase",
+      conformer_selections = None):
+  """
+  Fragments of model (clustering); working_folder None: no files.
+  conformer_selections (conformers.conformer_selections of the model): one
+  job per conformer variant of every fragment; None: one job per fragment.
+  """
   if(not params.cluster.clustering): return None
   return fragments(
     cif_objects                = model._restraint_objects,
@@ -83,7 +88,8 @@ def create_fragment_manager(
     charge_cutoff              = params.cluster.charge_cutoff,
     save_clusters              = params.cluster.save_clusters,
     select_within_radius       = params.cluster.select_within_radius,
-    cap_fragments              = params.restraints == "qm")
+    cap_fragments              = params.restraints == "qm",
+    conformer_selections       = conformer_selections)
 
 def exchangeable_hd_pairs(pdb_hierarchy, tolerance=0.01):
   """
@@ -233,17 +239,34 @@ def create_restraints_manager(params, model, working_folder="ase", log=None,
   False).
   """
   #
-  # Conformers: one restraints manager per single-conformer model (built by
-  # the routes below), gradients combined; scratch folder working_folder/<X>.
+  # Conformers (altlocs.handling=conformers). Clustering: the altloc model is
+  # clustered as is, every fragment evaluated per conformer variant
+  # (cluster_restraints.from_cluster combines them). Plain and expansion:
+  # one restraints manager per single-conformer model (built by the routes
+  # below), gradients combined; scratch folder working_folder/<X>.
   #
-  if(conformers.n_conformers(model.get_hierarchy()) > 1 and
-     params.altlocs.handling == "conformers"):
-    return conformers.from_conformers(
-      model          = model,
-      build          = lambda m, f: create_restraints_manager(params, m, f, log,
-        keep_error_copy),
-      working_folder = working_folder,
-      log            = log)
+  ph = model.get_hierarchy()
+  n_conformers = conformers.n_conformers(ph)
+  conformer_selections = None
+  if(n_conformers > 1 and params.altlocs.handling == "conformers"):
+    if(params.cluster.clustering):
+      assert not params.expansion
+      conformers.check_all_links(ph)
+      conformer_selections = conformers.conformer_selections(ph)
+      print("Clustering with %d conformers: per-fragment variants" %
+        n_conformers, file=log)
+      for s in conformer_selections:
+        if(s.n_fallback + s.n_absent == 0): continue
+        print("  conformer %s: %d residue groups take their first own label, "
+          "%d absent (single-label, unbonded)" % (s.label, s.n_fallback,
+          s.n_absent), file=log)
+    else:
+      return conformers.from_conformers(
+        model          = model,
+        build          = lambda m, f: create_restraints_manager(params, m, f,
+          log, keep_error_copy),
+        working_folder = working_folder,
+        log            = log)
   restraints_source = restraints.restraints(params = params, model = model,
     working_folder = working_folder)
   #
@@ -260,8 +283,12 @@ def create_restraints_manager(params, model, working_folder="ase", log=None,
   #
   else:
     if(params.cluster.clustering):
+      if(params.restraints == "cctbx"):
+        print("cctbx fragment restraints are evaluated in process "
+          "(parallel.nproc ignored)", file=log)
       fragment_manager = create_fragment_manager(params = params, model = model,
-        working_folder = working_folder)
+        working_folder = working_folder,
+        conformer_selections = conformer_selections)
       return cluster_restraints.from_cluster(
         restraints_manager = restraints_source.restraints_manager,
         fragment_manager   = fragment_manager,

@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import os
 import time
 from scitbx.array_family import flex
-from qrefine import conformers
+from qrefine import conformers, cluster_restraints
 from qrefine.tests.unit import run_fmodel
 from qrefine.tests.unit import run_qrefine_in
 from qrefine.tests.unit.tst_06 import r_work_of, refine_fast
@@ -42,17 +42,21 @@ END
 def exercise_routes(pdb_file):
   """
   Plain, expansion and clustering routes on a labels-only model give a
-  from_conformers manager (multiplicity 1 for every atom) and the same
+  from_conformers manager (clustering: a from_cluster manager with
+  conformer variants), multiplicity 1 for every atom, and the same
   gradients.
   """
   gradients = []
   for expansion, clustering in [(False, False), (True, False), (False, True)]:
     rm, model = get_restraints_manager(pdb_file, expansion=expansion,
       clustering=clustering, handling="conformers")
-    assert isinstance(rm, conformers.from_conformers)
-    assert rm.multiplicity.all_eq(1.0)
+    if(clustering):
+      assert isinstance(rm, cluster_restraints.from_cluster)
+    else:
+      assert isinstance(rm, conformers.from_conformers)
     sites_cart = model.get_sites_cart()
     g = rm.target_and_gradients(sites_cart=sites_cart)[1]
+    assert rm.multiplicity.all_eq(1.0) # from_cluster: set by the call
     assert g.size() == sites_cart.size()
     gradients.append(g)
   for g in gradients[1:]:

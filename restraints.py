@@ -35,7 +35,9 @@ class restraints(object):
   def __init__(self, params, model, working_folder="ase"):
     self.params = params
     self.working_folder = working_folder
-    self.model = model.deep_copy()
+    # a copy for from_expansion, which moves its atoms
+    self.model = None
+    if(params.expansion): self.model = model.deep_copy()
     self.cif_objects      = model.get_restraint_objects()
     self.pdb_hierarchy    = model.get_hierarchy()
     self.crystal_symmetry = model.crystal_symmetry()

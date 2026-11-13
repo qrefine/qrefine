@@ -227,6 +227,30 @@
 <td>Finite-difference check of the gradients used with altlocs on the expansion and clustering routes (frozen-environment energies), cctbx (both handlings) and MOPAC (conformers); cctbx routes also against an explicit 2x2x2 supercell.</td>
 <td>103</td>
 </tr>
+<tr><td>tst_64</td>
+<td>Conformer variants of fragments (clustering with altlocs): variant atom sets, weights, labels, capper parents, job folder names, residue groups present in some conformers only, interactions between altloc residues.</td>
+<td>72</td>
+</tr>
+<tr><td>tst_65</td>
+<td>Clustered conformers route with cctbx restraints: weighted combination of the variant gradients, one-cluster limit against the expansion route, relation to the standard gradients per atom, clustering vs expansion.</td>
+<td>50</td>
+</tr>
+<tr><td>tst_66</td>
+<td>Duplicate-conformer identity: a residue copied into identical conformers gives the single-conformer clustered gradients, the same clusters and the expected number of jobs (two and three labels).</td>
+<td>11</td>
+</tr>
+<tr><td>tst_67</td>
+<td>Clustered conformers route with MOPAC on a peptide with one residue in two conformers: one-cluster limit, duplicate identity, qr.refine mode=opt.</td>
+<td>58</td>
+</tr>
+<tr><td>tst_68</td>
+<td>qr.refine (cctbx) on a model with altlocs: native, conformers and clustered conformers agree; forced re-clustering; H/D exchange sites with heavy-atom altlocs.</td>
+<td>78</td>
+</tr>
+<tr><td>tst_69</td>
+<td>qr.refine on 6uf7 (real data, ILE 4 A/B, macrocycle closed through symmetry): native, conformers and clustered conformers (cctbx only; MOPAC with altlocs and clustering is tst_67).</td>
+<td>42</td>
+</tr>
 </tbody>
 </table>
 </div>

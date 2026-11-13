@@ -22,14 +22,20 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   r_fm = run_fmodel(prefix=prefix, args=[pdb_good, "high_res=2"])
   mtz = os.path.abspath(r_fm.mtz)
   r_start = r_work_of(pdb_poor, r_fm)
-  # Conformers with clustering: one scratch folder per conformer
+  # Conformers with clustering: the altloc model is clustered, fragments
+  # evaluated per conformer variant
   r_qr = run_qrefine_in(folder="clustering", prefix=prefix+"_clustering",
     args=[pdb_poor, mtz, "restraints=cctbx", "clustering=True",
       "maxnum_residues_in_cluster=999", "parallel.nproc=1"] + refine_fast)
   check_refined(r_qr=r_qr, pdb_poor=pdb_poor, r_fm=r_fm, r_start=r_start)
   assert r_qr.std_out_text.find(
     "alternative conformations require minimizer=lbfgs") > -1
-  assert os.path.isdir(os.path.join(r_qr.folder, "ase", "A"))
+  assert r_qr.std_out_text.find(
+    "Clustering with 2 conformers: per-fragment variants") > -1
+  # no per-conformer scratch folders (from_conformers); cctbx fragments
+  # write no job folders either (QM restraints only)
+  assert not os.path.exists(os.path.join(r_qr.folder, "ase", "A"))
+  assert not os.path.exists(os.path.join(r_qr.folder, "ase", "B"))
   # Native: cctbx's own altloc-aware restraints
   r_qr = run_qrefine_in(folder="native", prefix=prefix+"_native",
     args=[pdb_poor, mtz, "restraints=cctbx", "clustering=False",

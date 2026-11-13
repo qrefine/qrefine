@@ -32,6 +32,24 @@ from qrefine.utils.hierarchy_utils import model_from_hierarchy, \
 AMINO_ACID_CLASSES = ('common_amino_acid', 'modified_amino_acid',
                       'd_amino_acid')
 
+def near_selection(hierarchy, selection, cutoff):
+  """
+  flex.bool over the atoms of hierarchy: the selected atoms and every atom
+  in the box around them widened by cutoff (A), a superset of the atoms
+  within cutoff of a selected atom. Selected atoms keep their order, so
+  positions in selection.select(result).iselection() are those in
+  selection.iselection().
+  """
+  xyz = hierarchy.atoms().extract_xyz()
+  sites = xyz.select(selection)
+  result = flex.bool(xyz.size(), True)
+  if(sites.size() == 0): return selection.deep_copy()
+  lo = sites.min()
+  hi = sites.max()
+  for k, x in enumerate(xyz.parts()):
+    result &= (x >= lo[k] - cutoff) & (x <= hi[k] + cutoff)
+  return result | selection
+
 class capper(object):
   """
   Caps the QM fragment parent_hierarchy.select(selection).
@@ -39,7 +57,8 @@ class capper(object):
   Attributes: fragment_hierarchy (the uncapped fragment at the setup
   coordinates, i_seq reset, never changed), crystal_symmetry, charge (total
   charge of the capped fragment), n_caps, lines (one report line per capped
-  atom), dangling (the cached find_dangling_atoms result).
+  atom), dangling (the cached find_dangling_atoms result; its bond_table is
+  the fragment's bond table, i_seqs of fragment_hierarchy).
 
   Sorry: a fragment with two or more alternate conformations; a residue without a
   dictionary (supply its restraint CIF); a backbone N short of a bond that
@@ -60,7 +79,12 @@ class capper(object):
     if len(altlocs) > 1:
       raise Sorry('Capping: the fragment has alternate conformations (%s); '
         'QM fragments must be single-conformer' % ', '.join(sorted(altlocs)))
-    cut = capping.cut_bonds_by_distance(parent_hierarchy, selection)
+    # the parent atoms near the fragment only: the same cut bonds as on the
+    # whole parent (a super cell), at a fraction of the cost
+    near = near_selection(parent_hierarchy, selection,
+      capping.GUESS_BOND_CUTOFF)
+    cut = capping.cut_bonds_by_distance(parent_hierarchy.select(near),
+      selection.select(near))
     # peptide bonds between chains (the super sphere gives every symmetry
     # copy its own chain id: a macrocycle closed through a symmetry mate
     # closes between the master chain and a copy), which pdb_interpretation
@@ -85,6 +109,10 @@ class capper(object):
     self.n_caps = r.capped.n_added
     self.lines  = r.capped.lines
     self._mon_lib_srv = self._model.get_mon_lib_srv()
+    # cap() needs the records only: the processed fragment (restraints
+    # included, about 1.5 MB for a 280-atom fragment, one per QM job) is
+    # not kept
+    self._model = None
 
   def _check_backbone_n(self, cut):
     # An amino-acid backbone N with fewer than 3 bonds counting the cut: the

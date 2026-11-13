@@ -8,7 +8,7 @@ from libtbx.utils import Sorry
 from libtbx import adopt_init_args
 from libtbx.easy_mp import parallel_map
 from scitbx.array_family import flex
-from .restraints import from_qm
+from .restraints import from_qm, from_cctbx
 from qrefine.utils.hierarchy_utils import write_hierarchy
 from libtbx import group_args
 
@@ -52,6 +52,16 @@ class from_cluster(object):
       self.parallel_params.nproc = Auto
     ncount=0
     energy_gradients=None
+    if(isinstance(self.restraints_manager, from_cctbx)):
+      # cctbx restraints of the fragments: in this process. A process per
+      # fragment costs far more than the fragment's restraints (1PWM, 373
+      # jobs: about 19 s per evaluation with nproc=4, 0.2 s here), and the
+      # fragment restraints selected at the first evaluation are kept for
+      # the next ones only in this process (from_cctbx._fragment_grm).
+      # An exception propagates as it is (no Sorry wrapper, no keep_error_copy
+      # folder) and parallel.nproc is not used for cctbx fragments.
+      energy_gradients = [self.restraints_manager(item)
+        for item in selection_and_sites_cart]
     while(ncount<5 and energy_gradients is None):
       try:
         energy_gradients = parallel_map(
@@ -102,17 +112,54 @@ class from_cluster(object):
         if(error_folder is not None):
           msg += ' (working folder copied to %s)' % error_folder
         raise Sorry(msg)
-    target=0
-    gradients=flex.vec3_double(system_size)
+    return self._combine(energy_gradients, system_size)
 
+  def _combine(self, energy_gradients, system_size):
+    """
+    Weighted combination of the job (conformer variant) results: per atom,
+    num = sum of w_j*g_j and den = sum of w_j over the jobs having it as a
+    cluster atom (buffer atoms are zeroed per job), gradient num/den; den is
+    the conformer multiplicity of the atom (1 without conformers, where
+    num/den is the plain sum). Target: sum_j w_j*e_j / n_conformers, with
+    n_conformers the number of conformer labels (the weight sum of every
+    fragment, less for a fragment whose cluster is absent from some
+    conformers: fragment._variants): the mean over conformers of the sum of
+    fragment energies, not a model energy (gradient_only is forced with
+    clustering).
+    Sets self.n_jobs and self.multiplicity (den), available after the first
+    call.
+    """
+    fm = self.fragment_manager
+    weights = fm.variant_weights
+    self.n_jobs = len(weights)
+    assert len(energy_gradients) == self.n_jobs
+    target = 0
+    num = flex.vec3_double(system_size)
+    den = flex.double(system_size, 0)
     for index, item in enumerate(energy_gradients):
-      t = item[0]
-      g = item[1]
-      selection_fragment = self.fragment_manager.fragment_selections[index]
-      selection_buffer =  self.fragment_manager.buffer_selections[index]
+      t, g = item[0], item[1]
+      w = weights[index]
+      selection_fragment = fm.fragment_selections[index]
+      selection_buffer = fm.buffer_selections[index]
       gradients_i = flex.vec3_double(system_size)
       gradients_i = gradients_i.set_selected(selection_fragment, g)
-      gradients_i = gradients_i.set_selected(selection_buffer,[0,0,0])
-      gradients += gradients_i
-      target += t
-    return target, gradients
+      gradients_i = gradients_i.set_selected(selection_buffer, [0,0,0])
+      if(w != 1): gradients_i = gradients_i * float(w)
+      num += gradients_i
+      core = selection_fragment & ~selection_buffer
+      den.set_selected(core, den.select(core) + w)
+      target += w * t
+    cluster = flex.bool(system_size, False)
+    for s in fm.fragment_cluster_selections:
+      cluster = cluster | s
+    assert (den.select(cluster) > 0).all_eq(True)
+    den.set_selected(den == 0, 1)
+    self.multiplicity = den
+    weight_sums = [0] * fm.n_fragments
+    for index, i in enumerate(fm.variant_fragment_index):
+      weight_sums[i] += weights[index]
+    labels = getattr(fm, "labels", [])
+    if(len(labels) == 0): assert len(set(weight_sums)) <= 1, weight_sums
+    n_conformers = max([1, len(labels)] + weight_sums)
+    # division by 1 is exact: the single-conformer sum is unchanged
+    return target / n_conformers, num / den

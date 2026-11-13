@@ -17,6 +17,20 @@ def get_mon_lib_srv():
     _mon_lib_srv = mmtbx.monomer_library.server.server()
   return _mon_lib_srv
 
+_pdb_interpretation_scope = None
+
+def get_pdb_interpretation_scope():
+  """
+  The default pdb_interpretation scope of mmtbx.model.manager, parsed once
+  (~0.14 s per parse; every QM fragment builds a model). Never changed:
+  extract() and fetch() return new objects.
+  """
+  global _pdb_interpretation_scope
+  if _pdb_interpretation_scope is None:
+    _pdb_interpretation_scope = \
+      mmtbx.model.manager.get_default_pdb_interpretation_scope()
+  return _pdb_interpretation_scope
+
 def write_hierarchy(pdb_hierarchy, file_name, **kw):
   """
   Write pdb_hierarchy into file_name in PDB format, or in mmCIF with the
@@ -60,7 +74,7 @@ def bond_edits_params(bonds):
   bonds of bond_edits_phil in geometry_restraints.edits.
   """
   import iotbx.phil
-  scope = mmtbx.model.manager.get_default_pdb_interpretation_scope()
+  scope = get_pdb_interpretation_scope()
   return scope.fetch(iotbx.phil.parse(bond_edits_phil(bonds))).extract()
 
 _AMINO_ACID_CLASSES = ("common_amino_acid", "modified_amino_acid",
@@ -118,7 +132,7 @@ def model_from_hierarchy(pdb_hierarchy, crystal_symmetry, cif_objects=None,
   if(bonds):
     params = bond_edits_params(bonds)
   else:
-    params = mmtbx.model.manager.get_default_pdb_interpretation_params()
+    params = get_pdb_interpretation_scope().extract()
   params.pdb_interpretation.use_neutron_distances = True
   params.pdb_interpretation.restraints_library.cdl = False
   params.pdb_interpretation.sort_atoms = False

@@ -7,7 +7,7 @@ import shutil
 import iotbx.pdb
 from libtbx.test_utils import approx_equal
 from libtbx.utils import null_out
-from qrefine import qr, refine, conformers, api
+from qrefine import qr, refine, conformers, api, cluster_restraints
 from qrefine.tests.unit.tst_31 import duplicate
 from qrefine.tests.unit.tst_11 import get_model, process, qr_unit_tests
 from qrefine.tests.unit import run_qrefine_in
@@ -26,9 +26,10 @@ def get_params(expansion, clustering):
 def exercise_opt_reclustering():
   """
   qr.refine mode=opt restraints=qm (MOPAC) with clustering on gly2_1.pdb
-  (A/B conformers): re-clustering goes through the conformer fragment
-  manager proxy, scratch folders ase/A, ase/B are used, the output model keeps
-  its altlocs and atoms.
+  (A/B conformers): the altloc model is clustered (per-fragment conformer
+  variants) and re-clustered, job folders ase/<i>_A, ase/<i>_B are used
+  (no conformer folders ase/A, ase/B), the output model keeps its altlocs
+  and atoms.
   """
   pdb = os.path.join(qr_unit_tests, "data_files", "gly2_1.pdb")
   r_qr = run_qrefine_in(folder="qrefine_opt", prefix="opt", args=[pdb,
@@ -37,8 +38,11 @@ def exercise_opt_reclustering():
     "number_of_micro_cycles=2", "max_iterations_refine=3",
     "cluster.re_calculate_rmsd_tolerance=1e-5", "parallel.nproc=1"])
   assert r_qr.std_out_text.find("need to redo clustering") > -1
+  assert r_qr.std_out_text.find("per-fragment variants") > -1
+  names = os.listdir(os.path.join(r_qr.folder, "ase"))
   for label in ["A", "B"]:
-    assert os.path.isdir(os.path.join(r_qr.folder, "ase", label, "0"))
+    assert label not in names, names
+    assert len([n for n in names if n.endswith("_" + label)]) > 0, names
   assert r_qr.model is not None
   h_in = iotbx.pdb.input(file_name=pdb).construct_hierarchy()
   h = r_qr.model.get_hierarchy()
@@ -52,7 +56,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   Duplicate-conformer identity with MOPAC: a single-conformer model
   duplicated into identical conformers gives the single-conformer gradients
   through plain, expansion and clustering (three labels: plain only).
-  Conformer scratch folders ase/<label> are used.
+  Conformer scratch folders ase/<label> are used by plain and expansion;
+  clustering clusters the altloc model (the interaction search runs on its
+  single-conformer views, so the clusters are those of the single model)
+  and uses job folders ase/<i>_<label>.
   """
   os.makedirs(prefix, exist_ok=True)
   os.chdir(prefix)
@@ -73,8 +80,13 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
       rm_single = refine.create_restraints_manager(params=params, model=single)
       rm_dup = refine.create_restraints_manager(params=params, model=dup)
       assert not isinstance(rm_single, conformers.from_conformers)
-      assert isinstance(rm_dup, conformers.from_conformers)
-      assert len(rm_dup.conformers) == len(labels)
+      if(clustering): # conformers as per-fragment variants
+        assert isinstance(rm_dup, cluster_restraints.from_cluster)
+        assert rm_dup.fragment_manager.clusters == \
+          rm_single.fragment_manager.clusters
+      else:
+        assert isinstance(rm_dup, conformers.from_conformers)
+        assert len(rm_dup.conformers) == len(labels)
       g_single = rm_single.target_and_gradients(
         sites_cart=single.get_sites_cart())[1]
       g_dup = rm_dup.target_and_gradients(sites_cart=dup.get_sites_cart())[1]
@@ -82,7 +94,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
       assert approx_equal(g_dup, g_single.select(original), 1.e-4)
   #
   assert os.path.isfile(os.path.join("ase", "A", "tmp_ase.pdb"))
-  assert os.path.isdir(os.path.join("ase", "B", "0")) # clustering fragments
+  assert os.path.isfile(os.path.join("ase", "B", "tmp_ase.pdb"))
+  # clustering: job folders of the variants, no conformer folders' fragments
+  assert len([n for n in os.listdir("ase") if n.endswith("_B")]) > 0
+  assert not os.path.exists(os.path.join("ase", "B", "0"))
   assert os.path.isfile(os.path.join("ase", "C", "tmp_ase.pdb"))
   #
   exercise_opt_reclustering()

@@ -71,10 +71,11 @@ class expand(object):
     params_edits = None
     if(len(closures) > 0):
       params_edits = bond_edits_params(closures).geometry_restraints.edits
+    # no plain_pairs_radius: the plain pair table serves ADP restraints only,
+    # and was the largest part of every fragment's selected restraints
     geometry = processed_pdb_file.geometry_restraints_manager(
       show_energies                = False,
       assume_hydrogens_all_missing = not has_hd,
-      plain_pairs_radius           = 5.0,
       params_edits                 = params_edits)
     return mmtbx.restraints.manager(geometry = geometry, normalization = False)
 

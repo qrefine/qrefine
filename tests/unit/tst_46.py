@@ -150,7 +150,11 @@ class frozen_environment(object):
   last target_and_gradients() call of the manager put them. The gradient
   these routes return for an atom is the partial derivative of that energy:
   for expansion the energy of the completed super sphere, for clustering the
-  energy of the fragment the atom is a core atom of.
+  energy of the fragment the atom is a core atom of. With conformer
+  variants (clustering of an altloc model, altlocs.handling=conformers) the
+  energy is sum of w*e over the jobs (variants) having the atom as a core
+  atom, w the variant weight; refinement uses that sum's partial derivative
+  divided by the weight sum (from_cluster.multiplicity).
   The master copy is the first atoms of the super sphere (checked against
   sites_cart by the caller).
   """
@@ -171,19 +175,24 @@ class frozen_environment(object):
       # QM fragments take their coordinates from this hierarchy
       assert route.restraints_manager.fragment_extracts.pdb_hierarchy_super \
         is fm.pdb_hierarchy_super
-      # every model atom is a core atom of exactly one fragment
-      self.fragment_index = {}
-      for index, sel in enumerate(fm.fragment_selections):
-        core = sel & ~fm.buffer_selections[index]
+      # jobs (fragment variants) having a model atom as a core atom, with
+      # their weights: one job of weight 1 without conformer variants
+      self.jobs_of_atom = {}
+      for job, sel in enumerate(fm.fragment_selections):
+        core = sel & ~fm.buffer_selections[job]
         for j in core.iselection():
-          assert j not in self.fragment_index
-          self.fragment_index[j] = index
-      assert len(self.fragment_index) == n
-      self.n_fragments = len(fm.fragment_selections)
+          self.jobs_of_atom.setdefault(j, []).append(
+            (job, fm.variant_weights[job]))
+      assert len(self.jobs_of_atom) == n
+      self.n_jobs = len(fm.fragment_selections)
+      if(fm.conformer_selections is None):
+        for jobs in self.jobs_of_atom.values():
+          assert jobs[0][1] == 1 and len(jobs) == 1, jobs
+      self.n_fragments = fm.n_fragments
       self.qm = isinstance(route.restraints_manager, restraints.from_qm)
       if(self.qm):
         self.cap_sites = dict(
-          [(index, self._cap_sites(index)) for index in range(self.n_fragments)])
+          [(job, self._cap_sites(job)) for job in range(self.n_jobs)])
 
   def _cap_sites(self, index):
     fe = self.route.restraints_manager.fragment_extracts
@@ -202,23 +211,26 @@ class frozen_environment(object):
 
   def energy(self, j, k, delta):
     """
-    Energy with atom j of the model moved by delta along k. None if the
-    move re-places a capping hydrogen (QM clustering; the gradient does not
-    account for that).
+    Energy with atom j of the model moved by delta along k (clustering:
+    sum of w*e over the jobs of atom j). None if the move re-places a
+    capping hydrogen of any of these jobs (QM clustering; the gradient does
+    not account for that).
     """
     sites = moved(self.sites_super, self.master[j], k, delta)
     if(self.kind == "expansion"):
       return self.route.restraints_manager.target_and_gradients(
         sites_cart=sites)[0]
     fm = self.route.fragment_manager
-    index = self.fragment_index[j]
     fm.pdb_hierarchy_super.atoms().set_xyz(sites)
     try:
-      if(self.qm and self.cap_sites[index].size() > 0):
-        d = flex.max((self._cap_sites(index) - self.cap_sites[index]).norms())
-        if(d > 1.e-9): return None
-      return self.route.restraints_manager(
-        [fm.fragment_selections[index], sites, index])[0]
+      result = 0
+      for job, w in self.jobs_of_atom[j]:
+        if(self.qm and self.cap_sites[job].size() > 0):
+          d = flex.max((self._cap_sites(job) - self.cap_sites[job]).norms())
+          if(d > 1.e-9): return None
+        result += w * self.route.restraints_manager(
+          [fm.fragment_selections[job], sites, job])[0]
+      return result
     finally:
       fm.pdb_hierarchy_super.atoms().set_xyz(self.sites_super)
 
@@ -227,21 +239,28 @@ def exercise(rm, model, components, delta, rel_tol, abs_tol, label,
   """
   Finite differences of the frozen-environment energies versus the gradient
   rm.target_and_gradients() returns (the one refinement uses). For
-  altlocs.handling=conformers rm is a from_conformers manager: the test
-  function of atom i is the sum over the conformers containing i, and the
-  finite differences must equal multiplicity times the combined gradient.
+  altlocs.handling=conformers rm is a from_conformers manager (plain,
+  expansion) or a from_cluster manager with conformer variants
+  (clustering): the test function of atom i is the sum over the conformers
+  (the weighted sum over the variants) containing i, and the finite
+  differences must equal multiplicity (the weight sum) times the combined
+  gradient.
   """
   sites_cart = shaken(model.get_sites_cart())
   if(isinstance(rm, conformers.from_conformers)):
     routes = [(c.restraints_manager, c.iselection) for c in rm.conformers]
-    multiplicity = rm.multiplicity
   else:
     routes = [(rm, flex.size_t(range(sites_cart.size())))]
-    multiplicity = flex.double(sites_cart.size(), 1)
   for route, _ in routes:
     if(isinstance(route.restraints_manager, restraints.from_qm)):
       route.restraints_manager.qm_engine.set(EPS=eps)
   g = rm.target_and_gradients(sites_cart=sites_cart)[1]
+  if(isinstance(rm, conformers.from_conformers)):
+    multiplicity = rm.multiplicity
+  elif(isinstance(rm, cluster_restraints.from_cluster)):
+    multiplicity = rm.multiplicity # weight sums of the call above
+  else:
+    multiplicity = flex.double(sites_cart.size(), 1)
   envs = []
   for route, isel in routes:
     env = frozen_environment(route)
@@ -286,8 +305,13 @@ def exercise_cctbx():
         params = get_cctbx_params(expansion=expansion, clustering=clustering,
           handling=handling, maxnum=maxnum)
         rm = refine.create_restraints_manager(params=params, model=model)
-        assert isinstance(rm, conformers.from_conformers) == \
-          (handling == "conformers")
+        if(expansion):
+          assert isinstance(rm, conformers.from_conformers) == \
+            (handling == "conformers")
+        else:
+          # both handlings: from_cluster (conformers: per-fragment
+          # variants; native: the altloc model as is)
+          assert isinstance(rm, cluster_restraints.from_cluster)
         label = "cctbx %s %s %s" % (fn,
           "expansion" if expansion else "clustering", handling)
         envs, sites_cart = exercise(rm=rm, model=model,
@@ -304,7 +328,11 @@ def exercise_cctbx():
           (rm.target_and_gradients(sites_cart=sites_cart)[1] -
            rm_far.target_and_gradients(sites_cart=sites_cart)[1]).norms())
         assert diff > 1., diff
-        # independent reference: explicit supercell, per conformer
+        # independent reference: explicit supercell, per conformer. Not for
+        # the clustered conformers route (variants have no supercell model
+        # of their own): tst_65 checks its one-cluster limit against the
+        # expansion route, which is checked here.
+        if(clustering and handling == "conformers"): continue
         for env, _ in envs:
           route = env.route
           if(handling == "conformers"):
@@ -330,11 +358,13 @@ def exercise_mopac():
     # within 10 A: minutes per MOPAC energy)
     params.cluster.select_within_radius = 5
     rm = refine.create_restraints_manager(params=params, model=model)
-    assert isinstance(rm, conformers.from_conformers)
+    if(expansion): assert isinstance(rm, conformers.from_conformers)
+    else:          assert isinstance(rm, cluster_restraints.from_cluster)
     label = "mopac gly2_2.pdb %s" % (
       "expansion" if expansion else "clustering")
     envs, _ = exercise(rm=rm, model=model,
-      components=pick_components(model, rm.multiplicity),
+      components=pick_components(model,
+        conformers.multiplicity(model.get_hierarchy())),
       delta=2.e-3, rel_tol=5.e-3, abs_tol=1.e-1, label=label, eps=None)
     if(clustering):
       for env, _ in envs: assert env.n_fragments == 2, env.n_fragments

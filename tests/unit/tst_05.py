@@ -6,7 +6,7 @@ import os
 import time
 from libtbx.test_utils import approx_equal
 from scitbx.array_family import flex
-from qrefine import conformers, restraints
+from qrefine import conformers, restraints, cluster_restraints
 from qrefine.tests.unit.tst_11 import get_restraints_manager
 
 def cctbx_opt(model, restraints_manager, max_shift=0.2, max_iterations=25):
@@ -26,8 +26,11 @@ def cctbx_opt(model, restraints_manager, max_shift=0.2, max_iterations=25):
 def gradients(file_name, handling, expansion, clustering):
   rm, model = get_restraints_manager(file_name, expansion=expansion,
     clustering=clustering, handling=handling)
-  assert isinstance(rm, conformers.from_conformers) == \
-    (handling == "conformers")
+  if(clustering): # conformers as per-fragment variants
+    assert isinstance(rm, cluster_restraints.from_cluster)
+  else:
+    assert isinstance(rm, conformers.from_conformers) == \
+      (handling == "conformers")
   g = rm.target_and_gradients(sites_cart=model.get_sites_cart())[1]
   return g, model
 

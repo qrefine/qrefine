@@ -22,9 +22,12 @@ def n_bonds_in(hierarchy, geometry, chain, resseq, name):
     if(t.i_seq in table[i]): n += 1
   return n
 
-def n_bonds(model, chain, resseq, name):
-  return n_bonds_in(model.get_hierarchy(),
-    model.get_restraints_manager().geometry, chain, resseq, name)
+def n_bonds_capper(c, chain, resseq, name):
+  """Bonds of an atom of the capper's fragment, from its cached bond table."""
+  t = [a for a in c.fragment_hierarchy.atoms() if a.name.strip() == name and
+    a.parent().parent().resseq.strip() == resseq and
+    a.parent().parent().parent().id == chain][0]
+  return len(c.dangling.bond_table.get(t.i_seq, ()))
 
 def get_model():
   pdb_inp = iotbx.pdb.input(file_name=os.path.join(qr_unit_tests_data,
@@ -47,7 +50,7 @@ def exercise_symmetry_closure():
       crystal_symmetry=cs, select_within_radius=10, cap_fragments=True)
     assert len(fm.fragment_cappers) == 1
     c = fm.fragment_cappers[0]
-    assert n_bonds(c._model, "A", "1", "N") == 3
+    assert n_bonds_capper(c, "A", "1", "N") == 3
     assert c.n_closures >= 1, c.n_closures
     # no cap near PRO A 1 N
     capped = c.cap(sites_cart=fm.pdb_hierarchy_super.select(

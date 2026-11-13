@@ -291,7 +291,9 @@ def test_no_writes_outside():
     after = sorted(os.listdir(folder))
     assert after == sorted(before + ["wf"]), (before, after)
     files = listing("wf")
-    assert "A/expansion.pdb" in files, files
+    # altloc fixture clustered as is (per-fragment conformer variants)
+    assert "expansion.pdb" in files, files
+    assert "A/expansion.pdb" not in files, files
     assert [f for f in files if f.endswith("_cycle.pdb")] == []
 
 def test_intermediate_folder():
@@ -525,7 +527,7 @@ def setup_fixture():
   from mmtbx.hydrogens.tst_xh_mapper import pdb_str
   with open("in.pdb", "w") as fo:
     fo.write(pdb_str)
-  run_fmodel(args=["in.pdb", "high_res=2.5"], prefix="data")
+  run_fmodel(args=["in.pdb", "high_res=2.5", "r_free=0.05"], prefix="data")
   _root[0] = os.getcwd()
 
 def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
