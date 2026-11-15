@@ -399,44 +399,52 @@ class fragments(object):
 
   def _prepared_sphere_views(self):
     """
-    pair_interaction.prepare of the super sphere, or of each of its
-    single-conformer views (conformer_spheres, set_up_conformers), with
-    the view's iselection over the super sphere and its residues
-    (_view_residues: 1-based residue group indices of the super sphere).
+    group_args(prepared, iselection, residues) per search hierarchy:
+    pair_interaction.prepare of the super sphere (iselection and residues
+    None), or of each of its single-conformer views (conformer_spheres,
+    set_up_conformers) with the view's iselection over the super sphere
+    and its residues (_view_residues: 1-based residue group indices of the
+    super sphere). run_prepared_views searches the views of a core on one
+    grid (the box of the union of their searched atoms), reads the grid
+    points far from every altloc atom off the first view and searches the
+    others near the altloc atoms only.
     """
     if(self.conformer_selections is None):
-      return [(pair_interaction.prepare(self.pdb_hierarchy_super), None,
-        None)]
+      return [group_args(
+        prepared   = pair_interaction.prepare(self.pdb_hierarchy_super),
+        iselection = None,
+        residues   = None)]
     result = []
     for label in self.labels:
       h = self.conformer_spheres[label]
       isel = self._super_selections[label].sphere.iselection()
       residues = _view_residues(self.pdb_hierarchy_super, isel)
       assert len(list(h.residue_groups())) == len(residues)
-      result.append((pair_interaction.prepare(h), isel, residues))
+      result.append(group_args(
+        prepared   = pair_interaction.prepare(h),
+        iselection = isel,
+        residues   = residues))
     return result
 
   def _run_prepared(self, prepared, residues):
     """
     pair_interaction.run_prepared(core=residues) on the super sphere: core
     atoms, fragment atoms (1-based positions in the super sphere) and
-    fragment residues (1-based residue group indices). With views: the
-    union over the views, core atoms mapped back to the super sphere,
-    fragment atoms all atoms of the union of the fragment residues (whole
-    residues of the super sphere; variants cut them per conformer). A view
-    lacking every residue of the core (absent from that conformer) is
-    skipped.
+    fragment residues (1-based residue group indices). With views
+    (pair_interaction.run_prepared_views, exact per view on the shared
+    grid): the union over the views of the core atoms and the fragment
+    residues, fragment atoms all atoms of the union of the fragment
+    residues (whole residues of the super sphere; variants cut them per
+    conformer). A view lacking every residue of the core (absent from that
+    conformer) contributes nothing.
     """
-    if(len(prepared) == 1 and prepared[0][1] is None):
-      return pair_interaction.run_prepared(prepared[0][0], residues)
+    if(len(prepared) == 1 and prepared[0].iselection is None):
+      return pair_interaction.run_prepared(prepared[0].prepared, residues)
     core, molecules = set(), set()
-    for p, isel, view_residues in prepared:
-      in_view = dict([(r, k+1) for k, r in enumerate(view_residues)])
-      core_v = [in_view[r] for r in residues if r in in_view]
-      if(len(core_v) == 0): continue
-      c, f, m = pair_interaction.run_prepared(p, core_v)
-      core.update([isel[i-1]+1 for i in c])
-      molecules.update([view_residues[i-1] for i in m])
+    for r in pair_interaction.run_prepared_views(prepared, residues):
+      if(r is None): continue
+      core.update(r[0])
+      molecules.update(r[2])
     residue_atoms = self._sphere_residue_atoms()
     atoms = []
     for m in molecules:

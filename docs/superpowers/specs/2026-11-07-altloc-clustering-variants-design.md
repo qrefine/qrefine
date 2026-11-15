@@ -698,7 +698,15 @@ the repository in the session scratchpad and handed to the user on
   provides the grid, the other views search only the residues within the
   interaction cutoff of an altloc residue group, and the union is identical
   by construction (seconds instead of ~57 s per extra view). Running the
-  views on separate CPUs is the stop-gap. (2) Girvan-Newman clustering in
+  views on separate CPUs is the stop-gap. Done 2026-11-14
+  (`2026-11-14-pair-interaction-shared-grid-design.md`): exact, but the
+  grid search went from 113.8 s to 112.5 s on 1PWM, where 93 % of the atoms
+  lie within 10 Bohr of an altloc atom, so almost every point is near one;
+  the real redundancy is the per-cluster repetition of the search over
+  overlapping boxes (190 clusters, each point evaluated many times; one
+  whole-sphere search per pass and view would take an estimated 15 s), a
+  separate decision since it changes every clustered run's fragments.
+  (2) Girvan-Newman clustering in
   `clustering.py`, 37 s of pure-Python betweenness on the residue
   interaction graph. Follow-up: a C++ betweenness or a cheaper community
   algorithm (seconds); it changes nothing physical but may move cluster

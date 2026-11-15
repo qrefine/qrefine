@@ -90,6 +90,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      acid as an amino acid (waters numbered consecutively were "bonded"); the
      list is gone, bonded residues are found by the interaction analysis.
 ### Changed
+   - Clustering with altlocs (handling=conformers): the interaction search
+     of a cluster runs its single-conformer views on one grid (the box of
+     the union of their searched atoms) and searches the second and later
+     views only at the grid points within 10 Bohr of an atom that differs
+     between the views, reading the other points off the first view
+     (mmtbx.pair_interaction.run_prepared_views; points_and_pairs takes
+     region_sites and near_only and flags each pair near/far). Every
+     view's result equals its independent search on that grid; duplicate
+     conformers give the single-conformer fragments bit for bit (tst_64,
+     tst_67). The saving depends on how much of a cluster's box is near an
+     altloc atom: 1 % of the grid search on 1PWM (113.8 to 112.5 s; 93 % of
+     its atoms are within 10 Bohr of an altloc atom), expected to approach
+     the whole second view on models with one or two altloc residues (not
+     timed). Routes without altlocs are unchanged.
    - updating documentation.
    - Fragmentation setup time (mmtbx.pair_interaction, outside this
      repository; results are identical): the grid search for interacting
