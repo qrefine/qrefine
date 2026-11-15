@@ -360,10 +360,13 @@ class fragments(object):
   def get_fragments(self):
     """
     Cluster atoms, fragment (cluster plus buffer) atoms and fragment
-    residues of every cluster, from pair_interaction.run on the super sphere.
-    Atoms are 1-based positions in pdb_hierarchy_super (the master copy is
-    its first block, so the cluster atoms are positions in pdb_hierarchy too);
-    residues are 1-based residue group indices.
+    residues of every cluster, from the interacting residue pairs of the
+    whole super sphere (_sphere_pairs: one search per pass and view, not
+    one per cluster) by the rule of pair_interaction.run_prepared
+    (_fragment_from_pairs). Atoms are 1-based positions in
+    pdb_hierarchy_super (the master copy is its first block, so the cluster
+    atoms are positions in pdb_hierarchy too); residues are 1-based residue
+    group indices.
     """
     self.pdb_hierarchy_super.atoms_reset_serial() # for the written PDB files
     ph = self.pdb_hierarchy_super
@@ -372,18 +375,18 @@ class fragments(object):
     fragment_super_atoms_in_ph = []
     molecules_in_fragments = []
     # The super sphere (each of its single-conformer views) is the same for
-    # every cluster: prepared once.
-    prepared = self._prepared_sphere_views()
+    # every cluster: searched once
+    pairs = self._sphere_pairs(self._prepared_sphere_views())
     for cluster in clusters:
       atoms_in_one_cluster, atoms_in_one_fragment, molecules_in_one_fragment = \
-        self._run_prepared(prepared, cluster)
+        self._fragment_from_pairs(pairs, cluster)
       cluster_atoms_in_ph.append(atoms_in_one_cluster)
       fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
       molecules_in_fragments.append(molecules_in_one_fragment)
     if(self.two_buffers): # a second buffer layer around the first
       fragment_super_atoms_in_ph = []
       for molecules in molecules_in_fragments:
-        atoms_in_one_fragment = self._run_prepared(prepared, molecules)[1]
+        atoms_in_one_fragment = self._fragment_from_pairs(pairs, molecules)[1]
         fragment_super_atoms_in_ph.append(atoms_in_one_fragment)
     if(self.distance_buffer):
       fragment_super_atoms_in_ph = self.add_distance_buffer(
@@ -404,10 +407,9 @@ class fragments(object):
     None), or of each of its single-conformer views (conformer_spheres,
     set_up_conformers) with the view's iselection over the super sphere
     and its residues (_view_residues: 1-based residue group indices of the
-    super sphere). run_prepared_views searches the views of a core on one
-    grid (the box of the union of their searched atoms), reads the grid
-    points far from every altloc atom off the first view and searches the
-    others near the altloc atoms only.
+    super sphere). views_pairs searches the views on one grid (the box of
+    all their atoms), reads the grid points far from every altloc atom off
+    the first view and searches the others near the altloc atoms only.
     """
     if(self.conformer_selections is None):
       return [group_args(
@@ -426,29 +428,43 @@ class fragments(object):
         residues   = residues))
     return result
 
-  def _run_prepared(self, prepared, residues):
+  def _sphere_pairs(self, prepared):
     """
-    pair_interaction.run_prepared(core=residues) on the super sphere: core
-    atoms, fragment atoms (1-based positions in the super sphere) and
-    fragment residues (1-based residue group indices). With views
-    (pair_interaction.run_prepared_views, exact per view on the shared
-    grid): the union over the views of the core atoms and the fragment
-    residues, fragment atoms all atoms of the union of the fragment
-    residues (whole residues of the super sphere; variants cut them per
-    conformer). A view lacking every residue of the core (absent from that
-    conformer) contributes nothing.
+    group_args(sedd, dori, residue_atoms): the interacting residue pairs of
+    the super sphere as partner maps (pair_interaction.partner_map; 1-based
+    residue group indices) of the sedd and the dori pass, from
+    pair_interaction.interaction_pairs of the super sphere or
+    pair_interaction.views_pairs of its single-conformer views (the union
+    over the views, exact per view on one shared grid), and the atoms of
+    every residue group (_sphere_residue_atoms).
     """
-    if(len(prepared) == 1 and prepared[0].iselection is None):
-      return pair_interaction.run_prepared(prepared[0].prepared, residues)
-    core, molecules = set(), set()
-    for r in pair_interaction.run_prepared_views(prepared, residues):
-      if(r is None): continue
-      core.update(r[0])
-      molecules.update(r[2])
-    residue_atoms = self._sphere_residue_atoms()
-    atoms = []
-    for m in molecules:
-      atoms.extend(residue_atoms[m-1])
+    result = {}
+    for silva_type in ("sedd", "dori"):
+      if(len(prepared) == 1 and prepared[0].iselection is None):
+        pairs = pair_interaction.interaction_pairs(prepared[0].prepared,
+          silva_type)
+      else:
+        pairs = pair_interaction.views_pairs(prepared, silva_type)
+      result[silva_type] = pair_interaction.partner_map(pairs)
+    return group_args(sedd=result["sedd"], dori=result["dori"],
+      residue_atoms=self._sphere_residue_atoms())
+
+  def _fragment_from_pairs(self, pairs, residues):
+    """
+    Core atoms, fragment atoms (1-based positions in the super sphere) and
+    fragment residues (1-based residue group indices) of a core, by
+    pair_interaction.fragment_residues on the pairs of the super sphere
+    (_sphere_pairs): the rule of pair_interaction.run_prepared on one grid
+    for all clusters, without its 15 Bohr cut around the core (which also
+    set the grid origin). Fragment atoms are all atoms of the
+    fragment residues (whole residues of the super sphere; variants cut
+    them per conformer). Sorted lists.
+    """
+    _, molecules = pair_interaction.fragment_residues(residues,
+      pairs.sedd, pairs.dori)
+    core, atoms = [], []
+    for r in residues: core.extend(pairs.residue_atoms[r-1])
+    for m in molecules: atoms.extend(pairs.residue_atoms[m-1])
     return sorted(core), sorted(atoms), sorted(molecules)
 
   def _sphere_residue_atoms(self):

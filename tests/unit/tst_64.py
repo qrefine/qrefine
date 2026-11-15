@@ -592,6 +592,44 @@ def exercise_single_conformer_only_water():
       assert sum([w for l, w, nw in got]) == 2, got
   assert n_own == 1 and n_buffer > 0, (n_own, n_buffer)
 
+def exercise_whole_sphere_search():
+  """
+  get_fragments searches the super sphere once per pass and view
+  (pair_interaction.interaction_pairs, views_pairs), not once per cluster:
+  on the single-conformer peptide and on three_label_model the grid search
+  runs three times per view (the dori search of the model in get_clusters,
+  a sedd and a dori search of the super sphere in get_fragments); on the
+  peptide every cluster's atoms and fragment atoms are fragment_from_pairs
+  of the pairs of the whole super sphere (no 15 Bohr cut around a cluster).
+  """
+  from mmtbx.pair_interaction import pair_interaction
+  calls = []
+  original = pair_interaction._grid_search
+  def counting(*args, **kwds):
+    calls.append(1)
+    return original(*args, **kwds)
+  pair_interaction._grid_search = counting
+  try:
+    for model, with_conformers, n_views in [
+        (boxed(peptide().get_hierarchy()), False, 1),
+        (three_label_model(), True, 3)]:
+      del calls[:]
+      f = make_fragments(model, with_conformers=with_conformers,
+        cap_fragments=False)
+      assert len(calls) == 3*n_views, (len(calls), n_views)
+      assert f.n_fragments > 1
+      if(with_conformers): continue
+      p = pair_interaction.prepare(f.pdb_hierarchy_super)
+      sedd = pair_interaction.interaction_pairs(p, "sedd")
+      dori = pair_interaction.interaction_pairs(p, "dori")
+      for i, cluster in enumerate(f.clusters):
+        c, a, m = pair_interaction.fragment_from_pairs(p, cluster, sedd, dori)
+        assert sorted(f.cluster_atoms[i]) == c, i
+        assert sorted(f.fragment_super_atoms[i]) == a, i
+        assert len(a) > len(c), i
+  finally:
+    pair_interaction._grid_search = original
+
 def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   """
   Conformer variants of the fragments (fragment.fragments with
@@ -614,6 +652,7 @@ def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   exercise_sorry_prefix()
   exercise_interactions_match_single_conformer()
   exercise_single_conformer_only_water()
+  exercise_whole_sphere_search()
 
 if(__name__ == "__main__"):
   run()

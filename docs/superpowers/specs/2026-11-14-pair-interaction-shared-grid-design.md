@@ -262,10 +262,7 @@ or not, so it is a separate decision (section 6).
 ## 6. Out of scope and follow-up
 
 - One whole-super-sphere search per pass and view instead of one per
-  cluster (section 5): an estimated 110 s to 15 s on 1PWM, no edge
-  truncation, fragments of every clustered run change once. Needs the
-  user's decision; the near/far machinery of this project then applies
-  once per view instead of once per cluster.
+  cluster (section 5): done 2026-11-14 at the user's request, section 7.
 
 - The whole-model `run` calls in `get_clusters` (2.6 s).
 - The dedup matrix of `points_and_pairs` is dense over the residue count of
@@ -273,3 +270,109 @@ or not, so it is a separate decision (section 6).
   sub-hierarchy keeping the parent's residue indices). It is unchanged here
   and is a separate item for ribosome-scale super spheres.
 - Girvan-Newman speed (follow-up (2) of the 2026-11-07 spec).
+
+## 7. Whole-super-sphere search (2026-11-14, same day)
+
+Approved in chat as a bounded change after section 5; no separate spec.
+
+**Design.** `pair_interaction.interaction_pairs(prepared, silva_type,
+grid=None)` returns the interacting residue pairs of a whole prepared
+hierarchy (sedd at 0.3 A, dori at 0.5 A, the two passes of
+`run_prepared`). `views_pairs(views, silva_type)` is the same for the
+single-conformer views of one parent: the first view in full, the others
+near-only, on `views_grid(views)` (now also without a core: the box of all
+view atoms), united in parent residue indices; the near/far machinery of
+sections 2 and 3 applied once per pass instead of once per cluster.
+`partner_map(pairs)` indexes the pairs by residue and
+`fragment_residues(core, sedd, dori)` applies the rule of `run_prepared`:
+new core = core plus its sedd partners, fragment = new core plus the dori
+partners of the core (`run_prepared` searches its second pass around the
+new core but adds only pairs touching the original core, so this is its
+rule exactly). `fragment_from_pairs(prepared, core, sedd_pairs,
+dori_pairs)` returns the `run_prepared` triple from them. In qrefine,
+`fragments.get_fragments` calls `_sphere_pairs` once (the partner maps of
+both passes and the residue atoms of the super sphere) and
+`_fragment_from_pairs` per cluster; `_run_prepared` is gone,
+`run_prepared_views` stays in cctbx with its tests but has no caller in
+qrefine.
+
+**Why it is the same answer.** The C++ search decides a pair at points
+whose two nearest atoms lie in the pair's residues, and such a point lies
+within 10 Bohr of both residues, so the core-restricted search (points
+within the cutoff of the core atoms, pairs touching the core) finds
+exactly the pairs touching the core of the unrestricted search (mmtbx
+`tst_08.exercise_pairs` pins this on 2lvr for both passes and four
+cores). The old per-cluster search differed through its 15 Bohr cut: a
+point near the edge of the cut saw fewer atoms than it should (a point
+10 Bohr from the core legitimately sees atoms 20 Bohr from it), and the
+cut's bounding box set the grid origin, so the sample points of every
+cluster were its own. The whole-sphere search has no edge and one grid.
+The fragments therefore change slightly, once, in every clustered run, with
+or without altlocs; duplicate conformers still equal the single-conformer
+run bit for bit (`tst_64.exercise_interactions_match_single_conformer`,
+`tst_67.exercise_duplicate`, `tst_08.exercise_views_pairs`).
+
+**Tests.** mmtbx `tst_08`: `exercise_pairs` (the identity above, the
+fragment rule against a hand-written reference and against the two passes
+of `run_prepared` run on the whole hierarchy, the second around the new
+core) and `exercise_views_pairs` (the union of independent per-view
+searches on the shared grid with either view as the reference, HIS 26
+B-only present, one view equals its own-box search, a view without atoms
+contributes nothing, duplicates equal the single conformer); 19 to 33 s.
+Reviewed by a fresh reader (no critical or important findings in the
+change; the dense dedup matrix noted as the pre-existing scaling limit).
+qrefine `tst_64.exercise_whole_sphere_search`: on the peptide and
+on `three_label_model` the grid search runs three times per view (one
+dori search of the model in `get_clusters`, sedd and dori of the super
+sphere in `get_fragments`; 15 before on the peptide) and every cluster of
+the peptide equals `fragment_from_pairs` of the super sphere's pairs.
+mmtbx `tst_02` to `tst_07` unchanged. qrefine suite 74 of 75: `tst_70`
+fails identically with the committed `fragment.py` swapped in (the tree
+carries the uncommitted weight-search rework of another session, which
+edits `tst_70` itself); `tst_49` passes on this tree now.
+
+**Results, 1PWM** (same command as section 5, one CPU, machine otherwise
+idle: `get_clusters`, untouched, 45.6 s against 48.2 s):
+
+| | per cluster (section 5) | whole sphere |
+|---|---|---|
+| grid search (`_grid_search`, s) | 112.5 | 63.1 |
+| fragment manager (s) | 177.7 | 119.3 |
+| fragments / jobs | 190 / 373 | 190 / 373 |
+| fragment atoms (super sphere), sum / median | 65972 / 291 | 66219 / 297 |
+| qr.refine wall (s), tree cee88cb, load 2 | 660 | 612 |
+| R-work / R-free after refinement | 0.1265 / 0.1350 | 0.1265 / 0.1350 |
+| max RSS (GB) | 1.54 | 1.63 |
+
+The wall times are of the same evening on the same tree: the weight-search
+commit cee88cb of another session ("longer trials": 104 minimizer
+evaluations in the weight-search trial instead of 53) landed between the
+457 s run of section 5 and these, so the per-core search was re-timed in
+process with the committed `fragment.py` swapped in (`qr_before.py` in the
+scratchpad). The two runs agree in every evaluation count and in R-work
+and R-free to four digits: the fragments differ, the refinement does not
+measurably. The 48 s saved on the whole run is the 49 s saved in setup.
+
+Per pass and view on the super sphere (23030 atoms, 2440 residue groups,
+box 89 x 78 x 83 A; two views of 18618 and 18560 atoms): sedd 36.0 s for
+the reference in full, dori 2.7 s; `views_pairs` 52.9 s (sedd) and 5.5 s
+(dori) under a light external load, 61.1 s together when idle. Section 5
+estimated 15 s from the 1.3 s whole-model dori run of `get_clusters`; the
+estimate ignored that the sedd pass costs 13 times the dori pass (its
+pairs are few, 2162 against 11973, so the density is evaluated at nearly
+every point, while dori decides most pairs at their first points) and
+that the super sphere box has 2.7 times the atoms and 3.6 times the
+volume of the model. The gain is 49 s of 112.5, not 97.
+
+**Where the rest goes, and what is left.** The sedd pass of the reference
+view (36 s) is now one evaluation per grid point and cannot be cut
+without changing results, except by parallelism: the shared-grid
+machinery makes an exact split possible (slabs of the box along one axis,
+each a grid with the same origin and spacing restricted to the atoms
+within 10 Bohr of the slab, pairs united with the min-flag rule), so
+`parallel.nproc` could divide the 63 s. The near-only second view (about
+17 s for sedd) is bounded by how much of 1PWM is near an altloc atom
+(section 5). The dense dedup matrix of `points_and_pairs` (residue count
+squared bytes, 6 MB here) is allocated once per pass and view now instead
+of once per cluster; a hash map would make it independent of the residue
+count for ribosome-scale super spheres. Girvan-Newman (45 s) is unchanged.

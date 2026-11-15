@@ -104,6 +104,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      its atoms are within 10 Bohr of an altloc atom), expected to approach
      the whole second view on models with one or two altloc residues (not
      timed). Routes without altlocs are unchanged.
+   - Clustering: the interaction search runs once per pass over the whole
+     super sphere (mmtbx.pair_interaction.interaction_pairs; with altlocs
+     views_pairs: the first single-conformer view in full, the others at
+     the grid points near an atom that differs, all on one grid, pairs
+     united) instead of once per cluster on the atoms within 15 Bohr of
+     the cluster; a cluster's fragment is set algebra on the pairs
+     (fragment_residues: the cluster plus its sedd partners, plus the dori
+     partners of the cluster, the rule of run_prepared). On one grid the
+     two searches find the same pairs for a cluster; the per-cluster
+     search differed through its 15 Bohr cut, which truncated the
+     environment of a grid point near its edge and set the grid origin, so
+     the fragments of every clustered run change slightly, once (1PWM: the
+     fragment atoms sum to 66219 instead of 65972 over the same 190
+     fragments and 373 jobs); duplicate conformers still give the
+     single-conformer fragments bit for bit (tst_64, tst_67). 1PWM, cctbx,
+     conformers, one CPU: grid search 112.5 to 63.1 s, fragment manager
+     177.7 to 119.3 s, whole run 660 to 612 s on the same tree (R-work and
+     R-free identical to four digits, same minimizer evaluation counts).
+     The sedd pass dominates (36 s per view on the 23030
+     atom super sphere against 2.7 s for dori: few of its pairs interact,
+     so the density is evaluated at nearly every point); the remaining
+     redundancy is the near-only second view (about 17 s).
    - updating documentation.
    - Fragmentation setup time (mmtbx.pair_interaction, outside this
      repository; results are identical): the grid search for interacting

@@ -703,9 +703,12 @@ the repository in the session scratchpad and handed to the user on
   grid search went from 113.8 s to 112.5 s on 1PWM, where 93 % of the atoms
   lie within 10 Bohr of an altloc atom, so almost every point is near one;
   the real redundancy is the per-cluster repetition of the search over
-  overlapping boxes (190 clusters, each point evaluated many times; one
-  whole-sphere search per pass and view would take an estimated 15 s), a
-  separate decision since it changes every clustered run's fragments.
+  overlapping boxes (190 clusters, each point evaluated many times). Done
+  the same day (section 7 of that spec): one whole-super-sphere search per
+  pass and view, 112.5 to 63.1 s (the estimate of 15 s ignored the cost of
+  the sedd pass); the fragments of every clustered run changed slightly,
+  once (the 15 Bohr cut around a cluster, and the grid origin it set, are
+  gone: one grid for all clusters).
   (2) Girvan-Newman clustering in
   `clustering.py`, 37 s of pure-Python betweenness on the residue
   interaction graph. Follow-up: a C++ betweenness or a cheaper community
