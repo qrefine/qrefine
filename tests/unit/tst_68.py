@@ -11,6 +11,9 @@ from qrefine.tests.unit import run_qrefine_in
 from qrefine.tests.unit.tst_06 import write_inputs, r_work_of
 from qrefine.tests.unit.tst_06 import check_refined
 from qrefine.tests.unit.tst_06 import refine_fast
+# The routes are compared after the same short minimization the tolerances
+# below were measured with (the default trial length is 100 iterations).
+refine_fast = refine_fast + ["max_iterations_weight=50"]
 from qrefine.tests.unit.tst_06 import get_model
 from qrefine.tests.unit import tst_25
 from qrefine.fragment import fragments

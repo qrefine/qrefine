@@ -98,7 +98,10 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   m_poor = shaken(m)
   pdb_poor = "%s_poor.pdb"%prefix
   write(m_poor, pdb_poor)
-  r_fm = run_fmodel(prefix = prefix, args=[pdb_good, "high_res=1.2"])
+  # r_free=0.1: the weight search ranks its trials by R-free; the default
+  # test fraction (0.01) leaves 17 free reflections here.
+  r_fm = run_fmodel(prefix = prefix, args=[pdb_good, "high_res=1.2",
+    "r_free=0.1"])
   r_qr = run_qrefine_in(prefix = prefix, args=[pdb_poor, r_fm.mtz,
     "restraints=cctbx", "clustering=False", "stpmax=0.3"])
   line = "2 residue groups without label C take their first own label"
@@ -110,7 +113,9 @@ def run(prefix = "qrefine_"+os.path.basename(__file__).replace(".py","")):
   r_start = r_work(r_fm.f_obs, r_fm.flags, m_poor)
   r_final = r_work(r_fm.f_obs, r_fm.flags, r_qr.model)
   print("R-work: shaken %.4f refined %.4f" % (r_start, r_final))
-  assert r_final < 0.5 * r_start, (r_start, r_final)
+  # 0.324 -> 0.178 with the bond rmsd kept within max_bond_rmsd (it was
+  # 0.156 when the refinement cycles let the bond rmsd grow to 0.054).
+  assert r_final < 0.6 * r_start, (r_start, r_final)
 
 if(__name__ == "__main__"):
   run()

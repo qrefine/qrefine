@@ -138,6 +138,8 @@ def finalize_params(params, *, n_conformers, d_min=None,
     4. altlocs.handling=native with restraints=qm is a Sorry; more than one
        conformer (n_conformers, with altlocs.handling=conformers) forces
        minimizer=lbfgs and gradient_only=True;
+       cluster.distance_buffer=Auto becomes True with clustering and
+       restraints=cctbx, else False;
     5. (the Auto refinement target is resolved by resolve_target_name, once
        the fmodel exists);
     6. params.finalized = True and params.n_conformers = n_conformers
@@ -179,6 +181,14 @@ def finalize_params(params, *, n_conformers, d_min=None,
       "gradient_only=True")
   if(params.cluster.clustering):
     params.refine.gradient_only = True
+  # cluster.distance_buffer=Auto: True with cctbx restraints (the fragment
+  # gradients then equal the plain ones), False with QM.
+  if(params.cluster.distance_buffer is Auto):
+    params.cluster.distance_buffer = (params.cluster.clustering and
+      params.restraints == "cctbx")
+    if(params.cluster.distance_buffer):
+      _pr(log, "  clustering with restraints=cctbx: cluster.distance_buffer "
+        "set to True")
   # 6
   params.__inject__("finalized", True)
   params.__inject__("n_conformers", n_conformers)

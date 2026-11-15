@@ -35,13 +35,16 @@ cluster{
     .type = bool
     .help = two-buffers are used when gradients for the whole system do not match the joined gradients from fragments \
             when only as single buffer was used to surround each clusters.
-  distance_buffer = False
+  distance_buffer = Auto
     .type = bool
     .help = In addition to the interaction-based buffer, add to each fragment \
             every residue of the expanded system that has an atom within \
             distance_buffer_radius of the cluster. Captures neighbors that \
             are too far for the interaction criterion but still affect the \
-            gradients (e.g. charged or polar groups 4-6 A away).
+            gradients (e.g. charged or polar groups 4-6 A away). Auto: True \
+            with restraints=cctbx (the fragment gradients then equal those \
+            without clustering: every nonbonded contact of a cluster atom \
+            is in its fragment), False with restraints=qm.
   distance_buffer_radius = 5.0
     .type = float
     .help = Radius (Angstrom) for distance_buffer. Larger values improve \
@@ -141,8 +144,8 @@ refine {
   number_of_weight_search_cycles=12
     .type = int
     .help = Maximum number of weight search trials. In reciprocal space the \
-            search usually stops earlier, at the R-free plateau or the \
-            flip. The real-space weight search uses the same cap.
+            search usually stops earlier, when neither a tighter nor a \
+            looser scale than the best trial improves R-free. The real-space weight search uses the same cap.
   number_of_refine_cycles=5
     .type = int
     .help = maximum number of refinement cycles
@@ -151,17 +154,23 @@ refine {
     .help = maximum number of micro cycles used in refinement
   data_weight=None
     .type = float
-    .help = Allows to specify data/restraints weight (by-pass weight search)
+    .help = Data weight. Reciprocal space: used as given, without the weight \
+            search (the restraints weight scale is \
+            restraints_weight_scale). Real space: the start weight.
   skip_weight_search = False
     .type = bool
-    .help = Calculate weight based on gradient norms (skip weight optimization)
+    .help = No weight search: the data weight is data_weight when given, \
+            else the ratio of the restraints and data gradient norms. The \
+            restraints weight scale is restraints_weight_scale.
   adjust_restraints_weight_scale_value = 2
     .type = float
     .help = Factor by which the restraints weight scale changes between \
             weight search trials
-  max_iterations_weight = 50
+  max_iterations_weight = 100
     .type = int
-    .help = Max number of trial refinement iterations for weight search
+    .help = Max number of trial refinement iterations for weight search. \
+            Trials much shorter than the refinement that follows rank the \
+            weights wrongly (loose restraints fit the data first).
   max_iterations_refine = 50
     .type = int
     .help = Max number of actual refinement iterations
@@ -187,7 +196,8 @@ refine {
     .help = adp refinement are not currently supported.
   restraints_weight_scale = 1.0
     .type = float
-    .help = Scale factor for restraints term
+    .help = Scale factor for restraints term: the start value of the weight \
+            search, the value used without it.
   shake_sites = False
     .type = bool
     .help = Randomize coordinates prior weight calculation
@@ -196,7 +206,9 @@ refine {
     .help = Check if refinement converged (for earlier termination)
   max_bond_rmsd = 0.03
     .type = float
-    .help = Max bond RMSD to accept optimized weight
+    .help = Max bond RMSD to accept optimized weight. A refinement cycle \
+            that ends above it scales the restraints weight up for the \
+            next cycle.
   max_angle_rmsd = 1.7
     .type = float
     .help = Max angle RMSD to accept optimized weight

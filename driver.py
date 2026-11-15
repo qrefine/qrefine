@@ -70,6 +70,21 @@ def run_minimize(calculator, params, mode=None):
     stop_reason = stop_reason(minimized.minimizer, n_iterations,
       max_iterations))
 
+# Cycles added to refine.number_of_refine_cycles while the last cycle ends
+# with the bond rmsd above refine.max_bond_rmsd.
+MAX_EXTRA_CYCLES = 3
+
+def bond_rmsd_weight_factor(bond_rmsd, max_bond_rmsd):
+  """
+  The factor (> 1) for the restraints weight scale after a refinement cycle
+  that ended with bond_rmsd above max_bond_rmsd. The bond rmsd of a
+  minimized model falls roughly as scale**-0.8 (fixed-weight scans, 23
+  models at 3-4 A): the exponent 1.5 aims a little below the limit; the
+  factor is kept between 1.1 and 2 per cycle.
+  """
+  assert bond_rmsd > max_bond_rmsd > 0
+  return min(2.0, max(1.1, (bond_rmsd / max_bond_rmsd)**1.5))
+
 def refine(fmodel,
            params,
            monitor,
@@ -79,7 +94,8 @@ def refine(fmodel,
            intermediate_folder=None,
            bulk_solvent_params=None):
   """
-  Weight search and refinement cycles. Every print goes to log; the model of
+  Weight search (unless refine.skip_weight_search or refine.data_weight) and
+  refinement cycles. Every print goes to log; the model of
   each refinement cycle is written into intermediate_folder unless it is
   None; bulk_solvent_params goes to every update_all_scales call. Returns
   group_args(n_cycles, n_fev): refinement cycles run and the target and
@@ -96,22 +112,38 @@ def refine(fmodel,
   print("Start:", file=log)
   monitor.show(prefix="  ", full=True)
 
-  if(not params.refine.skip_weight_search):
-    print("Optimal weight search:", file=log)
-    fmodel_copy = calculator.fmodel.deep_copy()
+  #
+  # Weights. refine.data_weight (when given) is the data weight and by-passes
+  # the search, else the data weight is the ratio of the gradient norms;
+  # refine.restraints_weight_scale is the restraints weight scale without the
+  # search and its start value with it.
+  #
+  skip_weight_search = (params.refine.skip_weight_search or
+                        params.refine.data_weight is not None)
+  data_weight = params.refine.data_weight
+  if(data_weight is None):
     data_weight = calculator_module.compute_weight(
-      fmodel             = fmodel_copy,
+      fmodel             = calculator.fmodel.deep_copy(),
       hdm                = calculator.hdm,
       exclude_selection  = calculator.exclude_selection,
       restraints_manager = calculator.restraints_manager,
       sites_cart         = calculator.sites_cart_nuclear,
       mapper             = calculator.mapper)
-    calculator.setw(
-      data_weight             = data_weight,
-      restraints_weight_scale = 1.,
-      restraints_weight       = 1.)
+  calculator.setw(
+    data_weight             = data_weight,
+    restraints_weight_scale = params.refine.restraints_weight_scale,
+    restraints_weight       = 1.)
+  if(skip_weight_search):
+    print("No weight search: data weight %s (%s), restraints weight scale %s"%(
+      data_weight,
+      "refine.data_weight" if params.refine.data_weight is not None
+        else "gradient norms",
+      params.refine.restraints_weight_scale), file=log)
+  else:
+    print("Optimal weight search:", file=log)
+    fmodel_copy = calculator.fmodel.deep_copy()
     c = weights.controller(
-      start_scale = 1.0,
+      start_scale = params.refine.restraints_weight_scale,
       factor      = params.refine.adjust_restraints_weight_scale_value,
       max_trials  = params.refine.number_of_weight_search_cycles,
       r_tolerance = params.refine.r_tolerance)
@@ -134,6 +166,15 @@ def refine(fmodel,
         calculator = calculator,
         params     = params,
         mode       = "weight")
+      # The trial is scored like a refinement cycle: with the bulk-solvent
+      # mask and the scales of its own model (those of the start model
+      # shift R-free by more than the trials differ).
+      fmodel.update_xray_structure(
+        update_f_calc       = True,
+        update_f_mask       = True,
+        force_update_f_mask = True)
+      fmodel.update_all_scales(remove_outliers=False,
+        refine_hd_scattering=False, params=bulk_solvent_params)
       monitor.update(fmodel = fmodel, sites_cart = calculator.sites_cart_nuclear)
       # Show
       msg = "rws: %.3g n_fev: %d stop: %s"%(
@@ -180,7 +221,17 @@ def refine(fmodel,
   calculator.reset_fmodel(fmodel = fmodel)
   assert not calculator.converged()
   n_cycles, n_fev_total = 0, 0
-  for refine_cycle in range(params.refine.number_of_refine_cycles):
+  #
+  # Refinement cycles. The weight is the one of the search, found with
+  # shorter minimizations: a cycle that ends with the bond rmsd above
+  # refine.max_bond_rmsd scales the restraints weight up for the next one
+  # (bond_rmsd_weight_factor), and up to MAX_EXTRA_CYCLES cycles are added
+  # while the last cycle is above the limit.
+  #
+  max_bond_rmsd = params.refine.max_bond_rmsd
+  n_extra = 0
+  refine_cycle = 0
+  while(refine_cycle < params.refine.number_of_refine_cycles + n_extra):
     if(clustering):
       cluster_qm_update.re_clustering(calculator,
         sites_cart = calculator.sites_cart_nuclear)
@@ -212,6 +263,21 @@ def refine(fmodel,
     if(calculator.converged()):
       print("Refinement converged. Stopping now.", file=log)
       break
+    refine_cycle += 1
+    if(max_bond_rmsd is not None and monitor.b_rmsd > max_bond_rmsd):
+      rws = calculator.restraints_weight_scale
+      rws_new = rws * bond_rmsd_weight_factor(monitor.b_rmsd, max_bond_rmsd)
+      is_last = refine_cycle >= params.refine.number_of_refine_cycles + n_extra
+      if(is_last and n_extra >= MAX_EXTRA_CYCLES):
+        print("  bond rmsd %.4f is above max_bond_rmsd=%g after %d extra "
+          "cycles: stopping."%(monitor.b_rmsd, max_bond_rmsd, n_extra),
+          file=log)
+        break
+      calculator.setw(restraints_weight_scale = rws_new)
+      print("  bond rmsd %.4f > max_bond_rmsd=%g: restraints weight scale "
+        "%.3g -> %.3g%s"%(monitor.b_rmsd, max_bond_rmsd, rws, rws_new,
+        " (extra cycle)" if is_last else ""), file=log)
+      if(is_last): n_extra += 1
   print("At refinement end:", file = log)
   monitor.show(full=True)
   assert approx_equal(fmodel.r_work(), calculator.fmodel.r_work(), 1.e-4)

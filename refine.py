@@ -79,7 +79,7 @@ def create_fragment_manager(
     maxnum_residues_in_cluster = params.cluster.maxnum_residues_in_cluster,
     charge_embedding           = params.cluster.charge_embedding,
     two_buffers                = params.cluster.two_buffers,
-    distance_buffer            = params.cluster.distance_buffer,
+    distance_buffer            = params.cluster.distance_buffer is True,
     distance_buffer_radius     = params.cluster.distance_buffer_radius,
     pdb_hierarchy              = model.get_hierarchy(),
     qm_engine_name             = params.quantum.engine_name,
@@ -583,43 +583,6 @@ def run(model, fmodel, map_data, params, log, working_folder,
         print("  final: r_work=%6.4f r_free=%6.4f"%(
           fmodel.r_work(), fmodel.r_free()), file=log)
         monitor.update(fmodel = fmodel, model = model)
-      #
-      # PRE-OPTIMIZATION (CODITIONAL)
-      #
-      # d_min first: the statistics cost seconds
-      if(params.refine.refine_sites is True and
-         fmodel.f_obs().d_min()>3):
-        stats = monitor.get_stats()
-        rama_z = stats.rama_z_score().whole.value
-        preopt = rama_z is not None and (
-          rama_z < -2.5 or (monitor.clash_score() or 0) > 10)
-      else:
-        preopt = False
-      if(preopt):
-        if params.refine.exclude is not None:
-          print("Initial geometry regularization skipped because of exclude_selection.", file=log)
-        else:
-          print("Initial geometry regularization:", file=log)
-          print("  r_work: %6.4f r_free: %6.4f"%(
-            fmodel.r_work(), fmodel.r_free()), file=log)
-          calculator_sites_opt_pre = calculator.sites_opt(
-            restraints_manager      = restraints_manager,
-            model                   = model,
-            max_shift               = params.refine.stpmax,
-            shift_eval              = params.refine.shift_evaluation,
-            use_callback_after_step = True,
-            convergence_threshold   = 0.3)
-          driver.opt(
-            params              = params,
-            calculator          = calculator_sites_opt_pre,
-            monitor             = monitor,
-            log                 = log,
-            working_folder      = working_folder,
-            intermediate_folder = intermediate_folder)
-          calculator_manager.set_sites(monitor.model.get_sites_cart())
-          print("  r_work: %6.4f r_free: %6.4f"%(
-            fmodel.r_work(), fmodel.r_free()), file=log)
-        # PRE-OPTIMIZATION (CODITIONAL) END
       r = driver.refine(
         params                = params,
         fmodel                = fmodel,

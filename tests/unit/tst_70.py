@@ -30,7 +30,8 @@ def assert_unimodal(rf, tolerance=0.0003):
 
 def exercise_6uf7_series():
   """6uf7 with cctbx restraints (gradient-only path: A/B conformers): every
-  trial reports its stop reason and the R-free series is unimodal."""
+  trial reports its stop reason and R-free as a function of the scale is
+  unimodal."""
   r_qr = run_qrefine_in(folder="run_6uf7", prefix="w", args=[
     os.path.join(qr_unit_tests_data, "6uf7.mtz"),
     os.path.join(qr_unit_tests_data, "6uf7_qmready.pdb"),
@@ -38,7 +39,8 @@ def exercise_6uf7_series():
   trials = parse_trials(r_qr.std_out_text)
   assert len(trials) >= 3, trials
   assert all(t[3] == "cap" for t in trials), trials
-  assert_unimodal([t[1] for t in trials])
+  # the search goes both ways from the start scale: order by scale
+  assert_unimodal([t[1] for t in sorted(trials)])
 
 def run(prefix="qrefine_"+os.path.basename(__file__).replace(".py", "")):
   os.makedirs(prefix, exist_ok=True)
