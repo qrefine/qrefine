@@ -50,6 +50,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - tst_53: qr.refine refines a model capped by mmtbx.reduce2 capping=True
      (cctbx restraints and MOPAC); the caps keep occupancy 0 and
      phenix.pdbtools remove=capping_h strips exactly the caps.
+   - AIMNet2 (aimnet and aimnet2calc packages): the aimnet2-qr weights are
+     looked up in the aimnet cache ($AIMNET_CACHE_DIR, default
+     ~/.cache/aimnet), then in ${PREFIX}/share/aimnet of the conda
+     environment, where the Phenix package installs them on Linux and
+     macOS, before any download. The lookup no longer creates the cache
+     folder, so a read-only or missing home directory still finds the
+     installed copy (tst_75).
 ### Fixed
    - Fragments were keyed by atom serial numbers converted with int():
      serial numbers above 99999 are hybrid-36 strings, so a super sphere of

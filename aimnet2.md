@@ -7,6 +7,23 @@ Two AIMNet2 python packages are supported:
 
 If both are installed, `aimnet` is used.
 
+#### Model file
+
+The AQuaRef model `aimnet2-qr` is a legacy TorchScript model that is not in
+the `aimnet` model registry. With either package, Q|R looks for the file
+`aimnet2-qr_b97md4_qzvp_2.jpt` in
+
+1. the `aimnet` cache directory (`$AIMNET_CACHE_DIR`, default `~/.cache/aimnet`;
+   an empty `$AIMNET_CACHE_DIR` also means the default),
+2. `${PREFIX}/share/aimnet` of the conda environment, where the Phenix
+   installer puts it on Linux and macOS (on Windows Q|R looks in
+   `%PREFIX%\Library\share\aimnet`, but the installer puts nothing there).
+
+If neither has it, with `aimnet` Q|R downloads it from the original model zoo
+into the cache directory; with `aimnet2calc`, aimnet2calc looks in its own
+`assets` folder and downloads it there. To work offline, copy the file into
+either directory.
+
 #### Using the `aimnet` package
 
 ```
@@ -15,11 +32,6 @@ If both are installed, `aimnet` is used.
 
 Notes:
 
-* The AQuaRef model `aimnet2-qr` is a legacy TorchScript model that is not in
-  the `aimnet` model registry. Q|R looks for the file
-  `aimnet2-qr_b97md4_qzvp_2.jpt` in the `aimnet` cache directory
-  (`$AIMNET_CACHE_DIR`, default `~/.cache/aimnet`) and downloads it from the
-  original model zoo on first use. To work offline, copy the file there yourself.
 * On CUDA, the `aimnet` neighbour-list kernels are compiled with Triton, which
   needs the CUDA `ptxas` binary. Q|R sets `TRITON_PTXAS_PATH` to the `ptxas`
   shipped in the Phenix conda environment (from the `cuda-nvcc-tools` package)

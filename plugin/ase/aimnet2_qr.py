@@ -10,8 +10,12 @@ Two AIMNet2 python packages exist:
 Both are supported.  The AQuaRef model ``aimnet2-qr`` is a legacy TorchScript
 (.jpt) model that is not in the ``aimnet`` model registry, so this module
 resolves it itself: it looks for the weights in the ``aimnet`` cache directory
-(``$AIMNET_CACHE_DIR`` or ``~/.cache/aimnet``) and downloads them from the
-original model zoo if they are missing, exactly as ``aimnet2calc`` used to.
+(``$AIMNET_CACHE_DIR`` or ``~/.cache/aimnet``), then in
+``${PREFIX}/share/aimnet`` of the conda environment (where the Phenix package
+installs them on Linux and macOS).  If neither has them, with ``aimnet`` this
+module downloads them from the original model zoo into the cache directory;
+with ``aimnet2calc``, aimnet2calc looks in its own assets folder and downloads
+them there.
 """
 from __future__ import absolute_import, division, print_function
 import os
@@ -19,6 +23,7 @@ import sys
 import warnings
 import numpy as np
 import ase.units as ase_units
+from libtbx.env_config import get_conda_prefix
 from libtbx.utils import Sorry
 
 warnings.filterwarnings('ignore', module='aimnet')
@@ -27,14 +32,13 @@ warnings.filterwarnings('ignore', module='aimnet2calc')
 try:
   from aimnet.calculators import AIMNet2ASE
   from aimnet.calculators import AIMNet2Calculator as _AIMNet2Base
-  from aimnet.calculators.model_registry import get_cache_dir
   AIMNET_BACKEND = 'aimnet'
 except ModuleNotFoundError:
   from aimnet2calc import AIMNet2ASE  # legacy package
   AIMNET_BACKEND = 'aimnet2calc'
 
 # Legacy (.jpt) models that the ``aimnet`` package does not know about:
-#   name -> (file name in the aimnet cache directory, download URL)
+#   name -> (file name in cache_dir() or share_dir(), download URL)
 LEGACY_MODELS = {
   'aimnet2-qr': (
     'aimnet2-qr_b97md4_qzvp_2.jpt',
@@ -52,29 +56,58 @@ def _ensure_ptxas():
   if os.path.isfile(ptxas):
     os.environ['TRITON_PTXAS_PATH'] = ptxas
 
+def cache_dir():
+  """
+  The ``aimnet`` model cache: ``$AIMNET_CACHE_DIR``, else ``~/.cache/aimnet``
+  (the rule of aimnet's get_cache_dir, except that an empty value means the
+  default; aimnet fails on it).  Not created here, so that a read-only or
+  missing home directory does not stop the lookup in share_dir().
+  """
+  return (os.environ.get('AIMNET_CACHE_DIR') or
+          os.path.join(os.path.expanduser('~'), '.cache', 'aimnet'))
+
+def share_dir():
+  """
+  ``${PREFIX}/share/aimnet`` of the conda environment, where the Phenix
+  package installs the legacy model files on Linux and macOS;
+  ``Library\\share\\aimnet`` on Windows (no files installed there yet), as for
+  ``share/cctbx`` in libtbx.env_config.get_installed_path.
+  get_conda_prefix() also handles macOS python.app (the Phenix GUI).
+  """
+  if sys.platform == 'win32':
+    return os.path.join(sys.prefix, 'Library', 'share', 'aimnet')
+  return os.path.join(get_conda_prefix(), 'share', 'aimnet')
+
 def resolve_legacy_model(model):
   """
-  Map a legacy model name (e.g. ``aimnet2-qr``) to a local .jpt file,
-  downloading it into the ``aimnet`` cache directory on first use.
+  Map a legacy model name (e.g. ``aimnet2-qr``) to a local .jpt file:
+  cache_dir(), then share_dir(); if neither has it, the ``aimnet`` backend
+  downloads it into cache_dir() and the ``aimnet2calc`` backend gets the name
+  back (aimnet2calc then uses its own assets folder or downloads there).
   Anything else (registry names, Hugging Face ids, explicit paths) is passed
-  through to the ``aimnet`` resolver unchanged.
+  through unchanged.
   """
   if model not in LEGACY_MODELS: return model
   file_name, url = LEGACY_MODELS[model]
-  path = os.path.join(get_cache_dir(), file_name)
-  if os.path.isfile(path): return path
+  folders = [cache_dir(), share_dir()]
+  for folder in folders:
+    path = os.path.join(folder, file_name)
+    if os.path.isfile(path): return path
+  if AIMNET_BACKEND == 'aimnet2calc': return model
+  path = os.path.join(folders[0], file_name)
   print("AIMNet2 model '%s' not found in %s, downloading from %s" % (
-    model, get_cache_dir(), url))
+    model, " or ".join(folders), url))
   try:
     from urllib.request import urlretrieve
+    os.makedirs(folders[0], exist_ok=True)
     tmp = path + '.part'
     urlretrieve(url, tmp)
     os.replace(tmp, path)
   except Exception as e:
     raise Sorry(
       "Could not download the AIMNet2 model '%s' (%s).\n"
-      "Place the file %s in %s (or set AIMNET_CACHE_DIR) and try again." % (
-        model, str(e), file_name, get_cache_dir()))
+      "Place the file %s in %s (or set AIMNET_CACHE_DIR) or in %s and try "
+      "again." % (model, str(e), file_name, folders[0], folders[1]))
   return path
 
 
@@ -82,6 +115,7 @@ class AIMNet2Calculator(AIMNet2ASE):
     """ Modification of the AIMNet2ASE class to work with Q|R.
     """
     def __init__(self, model='aimnet2-qr', charge=0, mult=1):
+        model = resolve_legacy_model(model)
         if AIMNET_BACKEND == 'aimnet':
           _ensure_ptxas()
           # nb_threshold=0 forces the explicit neighbour-list code path for
@@ -89,7 +123,7 @@ class AIMNet2Calculator(AIMNet2ASE):
           # neighbour matrix, and with the default threshold the ``aimnet``
           # calculator does not build one for systems of <= 120 atoms (which
           # Q|R clusters routinely are).
-          base = _AIMNet2Base(resolve_legacy_model(model), nb_threshold=0)
+          base = _AIMNet2Base(model, nb_threshold=0)
           super(AIMNet2Calculator, self).__init__(base, charge=charge, mult=mult)
         else:
           super(AIMNet2Calculator, self).__init__(model, charge=charge, mult=mult)
