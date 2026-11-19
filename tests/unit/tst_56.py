@@ -17,10 +17,15 @@ def test_finalize_auto_cust():
     assert p.expansion and not p.cluster.clustering
     assert p.refine.minimizer == "lbfgs" and p.refine.gradient_only
     assert p.refine.number_of_weight_search_cycles == 10
-  p = qr.get_default_params(); p.quantum.engine_name = "aimnet2"
-  api.finalize_params(p, n_conformers=1, has_map=True, log=null_out())
-  assert p.refine.minimizer == "lbfgsb" and not p.expansion
-  assert p.refine.max_bond_rmsd == 0.009
+  # a map: no d_min (qr.py passes has_data=True with a map; phenix.aquaref
+  # model.pdb map.ccp4 used to stop on "d_min is required")
+  for has_data in [True, False]:
+    p = qr.get_default_params(); p.quantum.engine_name = "aimnet2"
+    api.finalize_params(p, n_conformers=1, has_map=True, has_data=has_data,
+      log=null_out())
+    assert p.refine.mode == "refine"
+    assert p.refine.minimizer == "lbfgsb" and not p.expansion
+    assert p.refine.max_bond_rmsd == 0.009
   # auto_cust=False skips the presets
   p = qr.get_default_params(); p.quantum.engine_name = "aimnet2"
   p.auto_cust = False

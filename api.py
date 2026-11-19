@@ -28,8 +28,10 @@ def _auto_cust(params, d_min, has_map, has_data, log):
   Data (d_min given) wins over a map, as it always did.
   """
   if(params.quantum.engine_name != "aimnet2"): return
-  if(has_data and d_min is None):
-    raise Sorry("d_min is required when has_data is True (aimnet2 presets "
+  # The reflection-data presets depend on resolution; the map presets do
+  # not (with a map d_min is None: it is the resolution of reflection data).
+  if(has_data and not has_map and d_min is None):
+    raise Sorry("d_min is required with reflection data (aimnet2 presets "
       "depend on resolution).")
   msg = """
 The following settings have been auto-set to match refine.mode=refine
