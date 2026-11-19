@@ -3,6 +3,8 @@ import mmtbx.monomer_library.server
 import mmtbx.monomer_library.pdb_interpretation
 import mmtbx.restraints
 from cctbx.crystal import super_cell as cctbx_super_cell
+from scitbx.array_family import flex
+from mmtbx.hydrogens import capping
 from qrefine.utils.hierarchy_utils import write_hierarchy, \
   peptide_closures, bond_edits_params
 
@@ -23,8 +25,70 @@ class expand(object):
       pdb_hierarchy        = self.pdb_hierarchy,
       crystal_symmetry     = self.crystal_symmetry,
       select_within_radius = self.select_within_radius)
+    self._add_bonded_copies()
     self.ph_super_sphere = self.SCM.super_sphere_hierarchy
     self.cs_box = self.SCM.cs_super_sphere
+
+  def _add_bonded_copies(self):
+    """
+    Add to the super cell the symmetry copies covalently bonded to a super
+    sphere atom. The cappers find the bonds cut at the sphere boundary in the
+    super cell (fragment.make_capper, restraints.from_expansion). A residue
+    of the sphere may reach beyond select_within_radius, and a copy bonded
+    to it across a symmetry operator (a macrocycle closed through a symmetry
+    mate) may then be farther than the copies the super cell holds: without
+    it the bond is neither kept nor cut. The super sphere does not change.
+    """
+    cutoff = capping.GUESS_BOND_CUTOFF
+    SCM = self.SCM
+    unit_cell = self.crystal_symmetry.unit_cell()
+    atoms = self.pdb_hierarchy.atoms()
+    n = atoms.size()
+    heavy = flex.bool([not a.element_is_hydrogen() for a in atoms])
+    if(heavy.count(True) == 0): return
+    sites_heavy = atoms.extract_xyz().select(heavy)
+    # {j: [s]}: operator s puts master heavy atom j next to a master heavy
+    # atom, so copy o*s is next to copy o
+    siiu, link_ops = cctbx_super_cell.get_siiu(
+      sites_cart           = sites_heavy,
+      crystal_symmetry     = self.crystal_symmetry,
+      select_within_radius = cutoff,
+      buffer               = 0)
+    if(len(link_ops) == 0): return
+    # the super cell is the master followed by one whole copy per operator
+    ops = [None] + list(SCM.chain_op_dict.keys())
+    assert SCM.super_cell_hierarchy.atoms_size() == n * len(ops)
+    sphere_ops = []
+    for k, op in enumerate(ops):
+      if(SCM.keep_selection[k*n:(k+1)*n].count(True) > 0):
+        sphere_ops.append(op)
+    # the atoms each candidate copy would put next to a copy in the sphere
+    candidates = {}
+    for op in sphere_ops:
+      for j, link_ops_j in siiu.items():
+        for link_op in link_ops_j:
+          new_op = link_op
+          if(op is not None): new_op = op.multiply(link_op)
+          new_op = new_op.new_denominators(1, 12)
+          if(new_op.is_unit_mx() or new_op in SCM.chain_op_dict): continue
+          candidates.setdefault(new_op, []).append(j)
+    if(len(candidates) == 0): return
+    # only the copies with such an atom next to a sphere atom
+    sphere_atoms = SCM.super_sphere_hierarchy.atoms()
+    sphere_sites = sphere_atoms.extract_xyz().select(
+      flex.bool([not a.element_is_hydrogen() for a in sphere_atoms]))
+    new_ops = []
+    for new_op, js in candidates.items():
+      sites = cctbx_super_cell.sym_equiv_sites_cart(
+        sites_cart = sites_heavy,
+        unit_cell  = unit_cell,
+        rt_mx      = new_op,
+        selection  = flex.size_t(sorted(set(js))))
+      for site in sites:
+        if(flex.min((sphere_sites - site).dot()) < cutoff**2):
+          new_ops.append(new_op)
+          break
+    SCM.add_copies(ops = new_ops)
 
   def update(self, sites_cart=None):
     if(sites_cart is not None):
