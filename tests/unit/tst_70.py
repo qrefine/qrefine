@@ -22,8 +22,11 @@ def parse_trials(text):
         m.group(4)))
   return trials
 
-def assert_unimodal(rf, tolerance=0.0003):
-  """Before the minimum no rise, after it no fall, beyond tolerance."""
+def assert_unimodal(rf, tolerance=0.0005):
+  """Before the minimum no rise, after it no fall, beyond tolerance.
+  The tolerance covers platform differences: the loosest trials (scales
+  0.0156, 0.0312) give R-free 0.0626, 0.0627 on Linux and 0.0627, 0.0631 on
+  macOS (2026-11-18), the same code."""
   k = rf.index(min(rf))
   assert all(rf[i] >= rf[i+1] - tolerance for i in range(k)), rf
   assert all(rf[i] <= rf[i+1] + tolerance for i in range(k, len(rf)-1)), rf

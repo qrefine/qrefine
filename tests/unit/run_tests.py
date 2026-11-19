@@ -100,7 +100,7 @@ def run(nproc=1,
       rc.show_stdout()
     if in_separate_directory:
       os.chdir('..')
-    print('%sTime (this test): %6.2f (s)' % (' '*7, time.time()-t00))
+    print('%sTime (this test): %6.2f (s) %s' % (' '*7, time.time()-t00, file_name))
     return rc.return_code
   # Collect test files
   tests = []
