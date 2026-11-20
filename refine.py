@@ -40,6 +40,10 @@ from libtbx import group_args
 from cctbx import maptbx
 from scitbx.array_family import flex
 
+# "Optimize H with d.o.f." (fit of rotatable H) is reverted if it increases
+# R-work by more than this.
+H_FIT_MAX_R_WORK_INCREASE = 1.e-4
+
 def show_cc(map_data, xray_structure, log=None):
   from mmtbx.maps.correlation import five_cc
   xrs = xray_structure
@@ -574,10 +578,29 @@ def run(model, fmodel, map_data, params, log, working_folder,
         print("Optimize H with d.o.f.", file=log)
         print("  start: r_work=%6.4f r_free=%6.4f"%(
           fmodel.r_work(), fmodel.r_free()), file=log)
+        r_work_start = fmodel.r_work()
+        sites_cart_start = model.get_sites_cart().deep_copy()
         mmtbx.hydrogens.fit_rotatable2(model=model, fmodel=fmodel,
           reset_h=False, mapper=mapper)
         print("  rotatable H fitted on the nuclear model (no X-H length "
           "reset, no riding idealization)", file=log)
+        if(fmodel.r_work() > r_work_start + H_FIT_MAX_R_WORK_INCREASE):
+          # The fit made R-work worse: back to the sites before it.
+          print("  fitted: r_work=%6.4f r_free=%6.4f"%(
+            fmodel.r_work(), fmodel.r_free()), file=log)
+          print("  R-work increased by more than %.4f: fit reverted"%
+            H_FIT_MAX_R_WORK_INCREASE, file=log)
+          model.set_sites_cart(sites_cart_start)
+          if(calculator.mapper_is_active(mapper)):
+            sites_for_fmodel = mapper.shrink(sites_cart_start)
+          else:
+            sites_for_fmodel = sites_cart_start
+          fmodel.xray_structure.set_sites_cart(sites_for_fmodel)
+          fmodel.update_xray_structure(
+            update_f_calc = True,
+            update_f_mask = True)
+          fmodel.update_all_scales(remove_outliers=False,
+            refine_hd_scattering=False, params=bulk_solvent_params)
         if(calculator_manager is not None):
           calculator_manager.set_sites(model.get_sites_cart())
         print("  final: r_work=%6.4f r_free=%6.4f"%(
